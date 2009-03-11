@@ -1,13 +1,17 @@
 <?xml version="1.0"?>
 <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/description/1.0">
-  <include href="relaxng-modular.rng">
-    <start>
-      <ref name="description"/>
-    </start>
-  </include>
+  <include href="relaxng-modular.rng"/>
+  <include href="datatypes-1_0.rng"/>
 
-  <define name="description">
+  <start>
+    <ref name="riddl-description"/>
+  </start>
+
+  <define name="riddl-description">
     <element name="description">
+      <attribute name="datatypeLibrary">
+        <data type="anyURI"/>
+      </attribute>
       <ref name="riddl-common-atts"/>
       <ref name="riddl-message"/>
       <ref name="riddl-resource"/>
@@ -71,9 +75,7 @@
   <define name="riddl-resource">
     <element name="resource">
       <attribute name="relative">
-        <data type="string">
-          <param name="pattern">/[\c/]+</param>
-        </data>
+        <ref name="riddl-datatype-relpath"/>
       </attribute>
       <ref name="riddl-resource-definition"/>
     </element>  
@@ -123,24 +125,6 @@
         <data type="string"/>
       </attribute>
     </optional>  
-  </define>
-
-  <define name="riddl-common-atts">
-    <optional>
-      <attribute name="datatypeLibrary">
-        <data type="anyURI"/>
-      </attribute>
-    </optional>
-    <zeroOrMore>
-      <attribute>
-        <anyName>
-          <except>
-            <nsName/>
-            <nsName ns=""/>
-          </except>
-        </anyName>
-      </attribute>
-    </zeroOrMore>
   </define>
 
 </grammar>

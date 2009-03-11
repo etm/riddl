@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/declaration/1.0">
+  <include href="description-1_0.rng">
+    <start>
+      <ref name="declaration"/>
+    </start>
+  </include>  
+
+  <define name="declaration">
+    <element name="declaration">
+      <attribute name="base">
+        <data type="anyURI"/>
+      </attribute>
+      <ref name="riddl-common-atts"/>
+      <oneOrMore>
+        <ref name="riddl-interface"/>
+      </oneOrMore>
+    </element>
+  </define>
+
+  <define name="riddl-interface">
+    <element name="interface">
+      <attribute name="relative">
+        <ref name="riddl-datatype-relpath"/>
+      </attribute>
+      <attribute name="path">
+        <data type="anyURI"/>
+      </attribute>
+      <zeroOrMore>
+        <ref name="riddl-filter"/>
+      </zeroOrMore>  
+      <ref name="riddl-description-include"/>
+      <zeroOrMore>
+        <ref name="riddl-filter"/>
+      </zeroOrMore>  
+    </element>
+  </define>  
+
+  <define name="riddl-filter">
+    <element name="filter">    
+      <attribute name="path">
+        <data type="anyURI"/>
+      </attribute>
+      <ref name="riddl-description-include"/>
+    </element>
+  </define>
+
+  <define name="riddl-description-include">
+    <choice>
+      <element name="include" ns="http://www.w3.org/2001/XInclude">
+        <attribute name="href">
+          <data type="anyURI"/>
+        </attribute>
+      </element>
+      <ref name="riddl-description"/>
+    </choice>   
+  </define>
+
+</grammar>

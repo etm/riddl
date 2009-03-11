@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/description/1.0">
+  <define name="riddl-common-atts">
+    <zeroOrMore>
+      <attribute>
+        <anyName>
+          <except>
+            <nsName/>
+            <nsName ns=""/>
+          </except>
+        </anyName>
+      </attribute>
+    </zeroOrMore>
+  </define>
+
+  <define name="riddl-datatype-relpath">
+    <data type="string">
+      <param name="pattern">/[\c/]+</param>
+    </data>
+  </define>
+
+</grammar>
