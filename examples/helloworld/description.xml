@@ -4,7 +4,8 @@
     <parameter name="email" type="string">
       <param name="pattern">[\w@.]+</param>
     </parameter>
-    <parameter name="age" type="positiveInteger"/>
+    <!-- check in rng -->
+    <parameter name="age" fixedValue="42"/>
   </message>
 
   <message name="helloworld-input-get-plain">
@@ -21,17 +22,17 @@
   </message>
 
   <message name="helloworld-ouput-plain">
-    <part type="text/plain"/>
+    <part type="text/plain" occurs="*"/>
   </message>
 
   <message name="helloworld-ouput">
-    <part type="text/plain"/>
+    <part type="text/plain" occurs="?"/>
     <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
       <xi:include href="helloworld.rng"/>
     </part>
   </message>  
 
-  <resource relative="/worlds" recursive="false">
+  <resource relative="/worlds">
     <get input="helloworld-input-get" output="helloworld-ouput"/>
     <get input="helloworld-input-get-a" output="helloworld-ouput-plain"/>
     <post input="helloworld-input-post" output="helloworld-ouput"/>

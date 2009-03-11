@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/description/1.0">
+  <include href="relaxng-modular.rng">
+    <start>
+      <ref name="description"/>
+    </start>
+  </include>
+
+  <define name="description">
+    <element name="description">
+      <ref name="riddl-common-atts"/>
+      <ref name="riddl-message"/>
+      <ref name="riddl-resource"/>
+    </element>
+  </define>
+
+  <define name="riddl-message">
+    <zeroOrMore>
+      <element name="message">
+        <attribute name="name">
+          <data type="NCName"/>
+        </attribute>
+        <zeroOrMore>
+          <choice>
+            <element name="parameter">
+              <attribute name="name">
+                <data type="NCName"/>
+              </attribute>
+              <attribute name="fixedValue">
+                <data type="string"/>
+              </attribute>
+            </element>
+            <element name="parameter">
+              <attribute name="name">
+                <data type="NCName"/>
+              </attribute>
+              <ref name="data"/>
+            </element>
+          </choice>  
+        </zeroOrMore>  
+        <zeroOrMore>
+          <element name="part">
+            <attribute name="type">
+              <data type="string">
+                <param name="pattern">[\c]+/[\c]+</param>
+              </data>
+            </attribute>  
+            <optional>
+              <attribute name="check">
+                <data type="anyURI"/>
+              </attribute>  
+            </optional>
+            <optional>
+              <attribute name="occurs">
+                <choice>
+                  <value>*</value>
+                  <value>?</value>
+                  <value>+</value>
+                </choice>  
+              </attribute>  
+            </optional>
+            <optional>
+              <ref name="any"/>
+            </optional>  
+          </element>
+        </zeroOrMore>  
+      </element>  
+    </zeroOrMore>  
+  </define>
+
+  <define name="riddl-resource">
+    <element name="resource">
+      <attribute name="relative">
+        <data type="string">
+          <param name="pattern">/[\c/]+</param>
+        </data>
+      </attribute>
+      <ref name="riddl-resource-definition"/>
+    </element>  
+  </define>
+      
+  <define name="riddl-resource-definition">
+    <optional>
+      <attribute name="recursive">
+        <data type="boolean"/>
+      </attribute>  
+    </optional>
+    <interleave>
+      <zeroOrMore>
+        <element name="get">
+          <ref name="riddl-methods"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="put">
+          <ref name="riddl-methods"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="post">
+          <ref name="riddl-methods"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="delete">
+          <ref name="riddl-methods"/>
+        </element>
+      </zeroOrMore>
+    </interleave>  
+    <optional>
+      <element name="resource">
+        <ref name="riddl-resource-definition"/>
+      </element>  
+    </optional> 
+  </define>  
+
+  <define name="riddl-methods">
+    <attribute name="input">
+      <data type="string"/>
+    </attribute>
+    <optional>
+      <attribute name="output">
+        <data type="string"/>
+      </attribute>
+    </optional>  
+  </define>
+
+  <define name="riddl-common-atts">
+    <optional>
+      <attribute name="datatypeLibrary">
+        <data type="anyURI"/>
+      </attribute>
+    </optional>
+    <zeroOrMore>
+      <attribute>
+        <anyName>
+          <except>
+            <nsName/>
+            <nsName ns=""/>
+          </except>
+        </anyName>
+      </attribute>
+    </zeroOrMore>
+  </define>
+
+</grammar>
