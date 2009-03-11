@@ -34,7 +34,7 @@
 
   <resource relative="/worlds">
     <get input="helloworld-input-get" output="helloworld-ouput"/>
-    <get input="helloworld-input-get-a" output="helloworld-ouput-plain"/>
+    <get input="helloworld-input-get-plain" output="helloworld-ouput-plain"/>
     <post input="helloworld-input-post" output="helloworld-ouput"/>
     <resource recursive="false">
       <get input="*" output="helloworld-ouput"/>
