@@ -24,12 +24,12 @@
   	<parameter name="type" type="string" fixedValue="html"/>
   </message>
 
-  <resource relative="/hellos">
+  <resource relative="hellos">
     <post in="hello"/>
     <post in="hello-form"/>
     <get in="*" out="hello-list"/>
     <get in="type-html" out="hello-list-html"/> 
-    <resource recursive="false">
+    <resource>
       <get in="*" out="hello"/>
       <put in="hello" out="hello"/>
       <delete in="*"/>
