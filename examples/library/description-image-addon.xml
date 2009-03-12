@@ -5,7 +5,7 @@
   </message>
 
   <resource>
-    <put input="image"/>
+    <put in="image"/>
   </resource>
 
 </description>

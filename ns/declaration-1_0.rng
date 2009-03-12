@@ -20,12 +20,16 @@
 
   <define name="riddl-interface">
     <element name="interface">
-      <attribute name="relative">
-        <ref name="riddl-datatype-relpath"/>
-      </attribute>
-      <attribute name="path">
-        <data type="anyURI"/>
-      </attribute>
+      <optional>
+        <attribute name="relative">
+          <ref name="riddl-datatype-relpathtemplate"/>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="path">
+          <data type="anyURI"/>
+        </attribute>
+      </optional>  
       <zeroOrMore>
         <ref name="riddl-filter"/>
       </zeroOrMore>  

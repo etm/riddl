@@ -48,24 +48,24 @@
   </message>
 
   <resource relative="library">
-    <get input="*" output="html-output"/>
+    <get in="*" out="html-output"/>
     <resource relative="books">
-      <get input="book-query" out="list-of-books"/>
-      <get input="*" output="list-of-books"/>
-      <post input="book-description-form" output="book-id"/>
-      <post input="book-description" output="book-id"/>
+      <post in="book-description-form" out="book-id"/>
+      <post in="book-description" out="book-id"/>
+      <get in="book-query" out="list-of-books"/>
+      <get in="*" out="list-of-books"/>
       <resource>
-        <get input="*" output="book-description"/>
-        <put input="book-description"/>
-        <delete input="*"/>
+        <get in="*" out="book-description"/>
+        <put in="book-description"/>
+        <delete in="*"/>
       </resource>
     </resource>
     <resource relative="customers">
-      <get input="book-query" out="list-of-customers"/>
+      <get in="book-query" out="list-of-customers"/>
       <resource>
-        <get input="*" output="customer-description"/>
+        <get in="*" out="customer-description"/>
         <resource relative="loans">
-          <get input="*" out="list-of-loans"/>
+          <get in="*" out="list-of-loans"/>
         </resource>
       </resource>
     </resource>

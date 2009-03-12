@@ -15,8 +15,23 @@
 
   <define name="riddl-datatype-relpath">
     <data type="string">
-      <param name="pattern">/[\c/]+</param>
+      <param name="pattern">\c+(/\c+)*</param>
     </data>
+  </define>
+  <define name="riddl-datatype-relpathtemplate">
+    <data type="string">
+      <param name="pattern">(\c+|\{\})(/(\c+|\{\}))*</param>
+    </data>
+  </define>
+
+  <define name="riddl-occurs">
+    <attribute name="occurs">
+      <choice>
+        <value>*</value>
+        <value>?</value>
+        <value>+</value>
+      </choice>  
+    </attribute>  
   </define>
 
 </grammar>

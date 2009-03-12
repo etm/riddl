@@ -2,7 +2,7 @@
   <interface path="http://tango.pri.lan:39512">
     <xi:include href="description-library.xml"/>
   </interface>
-  <interface relative="library/customers/{}" path="http://tango.pri.lan:39513">
+  <interface relative="library/customers/{}/a" path="http://tango.pri.lan:39513">
     <xi:include href="http://tango.pri.lan:39513/description-image-addon.xml"/>
   </interface>
 </declaration>  
