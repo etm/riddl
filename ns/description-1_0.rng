@@ -33,7 +33,7 @@
               <attribute name="fixedValue">
                 <data type="string"/>
               </attribute>
-            </optional  
+            </optional>  
             <ref name="data"/>
           </element>
         </zeroOrMore>  
@@ -68,15 +68,11 @@
   </define>
 
   <define name="riddl-resource">
-    <element name="resource">
+    <optional>
       <attribute name="relative">
         <ref name="riddl-datatype-relpath"/>
       </attribute>
-      <ref name="riddl-resource-definition"/>
-    </element>  
-  </define>
-      
-  <define name="riddl-resource-definition">
+    </optional>
     <optional>
       <attribute name="recursive">
         <data type="boolean"/>
@@ -106,7 +102,7 @@
     </interleave>  
     <optional>
       <element name="resource">
-        <ref name="riddl-resource-definition"/>
+        <ref name="riddl-resource"/>
       </element>  
     </optional> 
   </define>  
