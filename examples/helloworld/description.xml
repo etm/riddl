@@ -1,43 +1,48 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <message name="helloworld-input-get">
-    <parameter name="email" type="string">
-      <param name="pattern">[\w@.]+</param>
-    </parameter>
-    <!-- check in rng -->
-    <parameter name="age" fixedValue="42"/>
+  <message name="hello">
+	<part type="text/plain" check="http://riddl.org/ns/part-plugins/plain-type">
+		<plain type="string">
+       		<param name="pattern">hello .+</param>
+		</plain>
+	</part>
   </message>
 
-  <message name="helloworld-input-get-plain">
-    <parameter name="name" type="string"/>
-  </message>
-
-  <message name="helloworld-input-post">
-    <parameter name="age" type="positiveInteger"/>
+  <message name="hello-form">
     <part type="application/x-www-form-urlencoded" check="http://riddl.org/ns/part-plugins/x-www-form-urlencoded">
-      <parameter name="email" type="string">
-        <param name="pattern">[\w@.]+</param>
-      </parameter>
+      <parameter name="hello-xy" type="string"/>
     </part>
   </message>
+
+  <message name="hello-list">
+    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
+      <xi:include href="hello-list.rng"/>
+    </part>
+  </message>
+
+  <message name="hello-list-html">
+    <part type="text/html" />
+  </message>
+
+
 
   <message name="helloworld-ouput-plain">
     <part type="text/plain" occurs="*"/>
   </message>
 
-  <message name="helloworld-ouput">
-    <part type="text/plain" occurs="?"/>
-    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
-      <xi:include href="helloworld.rng"/>
-    </part>
-  </message>  
+  <message name="type-html">
+  	<parameter name="type" type="string" fixedValue="html"/>
+  </message>
 
-  <resource relative="/worlds">
-    <get input="helloworld-input-get" output="helloworld-ouput"/>
-    <get input="helloworld-input-get-plain" output="helloworld-ouput-plain"/>
-    <post input="helloworld-input-post" output="helloworld-ouput"/>
+  <resource relative="/hellos">
+    <get input="*" output="hello-list"/>
+    <get input="type-html" output="hello-list-html"/> 
+    <post input="hello"/>
+    <post input="hello-form"/>
     <resource recursive="false">
-      <get input="*" output="helloworld-ouput"/>
+      <get input="*" output="hello"/>
+      <put input="hello" output="hello"/>
+      <delete input="*"/>
     </resource>
   </resource>  
 
