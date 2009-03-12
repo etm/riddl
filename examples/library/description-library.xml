@@ -1,0 +1,74 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="book-query">
+    <parameter name="author" type="string" occurs="*"/>
+    <parameter name="title" type="string" occurs="?"/>
+  </message>
+  <message name="list-of-books">
+    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
+      <xi:include href="rngs/list-of-books.rng"/>
+    </part>
+  </message>
+  <message name="book-description-form">
+    <part type="application/x-www-form-urlencoded" check="http://riddl.org/ns/part-plugins/x-www-form-urlencoded">
+      <parameter name="author" type="string" occurs="+"/>
+      <parameter name="title" type="string"/>
+    </part>
+  </message>
+  <message name="book-description">
+    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
+      <xi:include href="rngs/book-description.rng"/>
+    </part>
+  </message>
+  <message name="book-id">
+    <part type="text/plain" check="http://riddl.org/ns/part-plugins/plain-type">
+      <plain type="positiveInteger"/>
+    </part>
+  </message>
+
+  <message name="list-of-customers">
+    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
+      <xi:include href="rngs/list-of-customers.rng"/>
+    </part>
+  </message>
+  <message name="customer-description">
+    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
+      <xi:include href="rngs/customer-description.rng"/>
+    </part>
+    <part type="image/png"/>
+  </message>
+  <message name="list-of-loans">
+    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
+      <xi:include href="rngs/list-of-loans.rng"/>
+    </part>
+  </message>
+
+  <message name="html-output">
+    <part type="text/html" occurs="*"/>
+  </message>
+
+  <resource relative="library">
+    <get input="*" output="html-output"/>
+    <resource relative="books">
+      <get input="book-query" out="list-of-books"/>
+      <get input="*" output="list-of-books"/>
+      <post input="book-description-form" output="book-id"/>
+      <post input="book-description" output="book-id"/>
+      <resource>
+        <get input="*" output="book-description"/>
+        <put input="book-description"/>
+        <delete input="*"/>
+      </resource>
+    </resource>
+    <resource relative="customers">
+      <get input="book-query" out="list-of-customers"/>
+      <resource>
+        <get input="*" output="customer-description"/>
+        <resource relative="loans">
+          <get input="*" out="list-of-loans"/>
+        </resource>
+      </resource>
+    </resource>
+  </resource>  
+
+</description>
