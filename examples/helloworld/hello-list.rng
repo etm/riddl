@@ -1,0 +1,9 @@
+<element name="hellos" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0">
+  <oneOrMore>
+    <element name="hello">
+      <data type="string">
+        <param name="pattern">hello .+</param>
+      </data>
+    </element>
+  </oneOrMore>  
+</element>
