@@ -24,6 +24,12 @@
     </data>
   </define>
 
+  <define name="riddl-datatype-messagename">
+    <data type="string">
+      <param name="pattern">[a-z]\c+|\*</param>
+    </data>
+  </define>
+
   <define name="riddl-occurs">
     <attribute name="occurs">
       <choice>

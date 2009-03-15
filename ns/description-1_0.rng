@@ -26,7 +26,7 @@
     <zeroOrMore>
       <element name="message">
         <attribute name="name">
-          <data type="NCName"/>
+          <ref name="riddl-datatype-messagename"/>
         </attribute>
         <zeroOrMore>
           <element name="parameter">
@@ -108,11 +108,11 @@
 
   <define name="riddl-methods">
     <attribute name="in">
-      <data type="string"/>
+      <ref name="riddl-datatype-messagename"/>
     </attribute>
     <optional>
       <attribute name="out">
-        <data type="string"/>
+        <ref name="riddl-datatype-messagename"/>
       </attribute>
     </optional>  
   </define>
