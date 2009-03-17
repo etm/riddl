@@ -8,9 +8,6 @@
 
   <define name="declaration">
     <element name="declaration">
-      <attribute name="base">
-        <data type="anyURI"/>
-      </attribute>
       <ref name="riddl-common-atts"/>
       <oneOrMore>
         <ref name="riddl-interface"/>

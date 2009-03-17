@@ -5,40 +5,40 @@
     <parameter name="title" type="string" occurs="?"/>
   </message>
   <message name="list-of-books">
-    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
+    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
       <xi:include href="rngs/list-of-books.rng"/>
     </part>
   </message>
   <message name="book-description-form">
-    <part type="application/x-www-form-urlencoded" check="http://riddl.org/ns/part-plugins/x-www-form-urlencoded">
+    <part type="application/x-www-form-urlencoded" handler="http://riddl.org/ns/part-plugins/x-www-form-urlencoded">
       <parameter name="author" type="string" occurs="+"/>
       <parameter name="title" type="string"/>
     </part>
   </message>
   <message name="book-description">
-    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
+    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
       <xi:include href="rngs/book-description.rng"/>
     </part>
   </message>
   <message name="book-id">
-    <part type="text/plain" check="http://riddl.org/ns/part-plugins/plain-type">
+    <part type="text/plain" handler="http://riddl.org/ns/part-plugins/plain-type">
       <plain type="positiveInteger"/>
     </part>
   </message>
 
   <message name="list-of-customers">
-    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
+    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
       <xi:include href="rngs/list-of-customers.rng"/>
     </part>
   </message>
   <message name="customer-description">
-    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
+    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
       <xi:include href="rngs/customer-description.rng"/>
     </part>
     <part type="image/png"/>
   </message>
   <message name="list-of-loans">
-    <part type="text/xml" check="http://riddl.org/ns/part-plugins/relaxng">
+    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
       <xi:include href="rngs/list-of-loans.rng"/>
     </part>
   </message>

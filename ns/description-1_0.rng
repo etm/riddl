@@ -52,7 +52,7 @@
               </data>
             </attribute>  
             <optional>
-              <attribute name="check">
+              <attribute name="handler">
                 <data type="anyURI"/>
               </attribute>  
             </optional>
