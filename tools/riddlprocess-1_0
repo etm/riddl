@@ -1,0 +1,56 @@
+#!/usr/bin/ruby 
+# gem install ruby-xml-smart
+require File.dirname($0) + '/../lib/ruby/check.rb'
+require 'optparse'
+require 'rubygems'
+require 'xml/smart'
+
+verbose = false
+ARGV.options { |opt|
+  opt.summary_indent = ' ' * 2
+  opt.banner = "Usage:\n#{opt.summary_indent}#{File.basename($0)} [options] [DECLARATION]\n"
+  opt.on("Options:")
+  opt.on("--help", "-h", "This text") { puts opt; exit }
+  opt.on("--verbose", "-v", "Write ouput to console") { verbose = true }
+  opt.on("The output is a description derived from the declaration.")
+  opt.parse!
+}
+if ARGV.length == 0 || !File.exists?(ARGV[0])
+  puts ARGV.options
+  exit
+end
+fname = ARGV[0]
+
+$stderr.close unless verbose
+doc = XML::Smart.open(fname)
+doc.xinclude!
+doc.namespaces = Riddl::namespaces
+
+{ 
+  'dec' => "http://riddl.org/ns/declaration/1.0",
+}
+
+if !(qname.namespace == "http://riddl.org/ns/description/1.0" && qname.name ==  "description")
+  puts "Not a RIDDL description."
+  exit
+end
+
+rng = XML::Smart.open(File.dirname($0) + "/../ns/" + description)
+if !doc.validate_against(rng)
+  puts "Does not conform to specification#{verbose ? '' : ', use -v for details'}."
+  exit
+end
+
+if rname == "description-1_0.rng"
+  messages = []
+  check_resources(doc.find("/des:description/des:resource"),doc,messages)
+  if messages.empty?
+    puts "RIDDL description looks valid."
+  else  
+    puts messages.join("\n")
+    puts "RIDDL description not valid."
+  end
+end 
+if rname == "declaration-1_0.rng"
+  puts "RIDDL declaration looks valid."
+end

@@ -1,0 +1,22 @@
+module A
+  class B
+    def self::open()
+      p "a" 
+    end
+
+    class C
+      def hello()
+      end
+    end
+
+  end
+end  
+
+class D < A::B
+  def self::open()
+    p super
+    p "b"
+  end
+end
+
+t = D.open
