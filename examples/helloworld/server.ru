@@ -2,7 +2,8 @@ require '../../lib/riddl'
 
 use Rack::ShowStatus
 
-run Rum.new do
+run Riddl.new do
+  description "description.xml"
   on resource 'hellos' do
     if post 'hello': run 'e' end
     if post 'hello-form': run 'e' end

@@ -39,6 +39,11 @@
 
   <define name="riddl-filter">
     <element name="filter">    
+      <optional>
+        <attribute name="relative">
+          <ref name="riddl-datatype-relpathtemplate"/>
+        </attribute>
+      </optional>
       <attribute name="path">
         <data type="anyURI"/>
       </attribute>
