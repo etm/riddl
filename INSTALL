@@ -1,0 +1,8 @@
+== Ubuntu & Debian
+
+apt-get install libxml2-dev zlib1g-dev ruby1.8-dev build-essential ruby ruby1.8 rubygems
+gem install ruby-xml-smart
+
+== Others
+
+find out yourself
