@@ -5,14 +5,14 @@ use Rack::ShowStatus
 run Riddl.new do
   description "description.xml"
   on resource 'hellos' do
-    if post 'hello': run 'e' end
-    if post 'hello-form': run 'e' end
-    if get '*': run 'e' end
-    if get 'type-html': run 'e' end
+    run 'e' if post 'hello'
+    run 'e' if post 'hello-form'
+    run 'e' if get '*'
+    run 'e' if get 'type-html'
     on resource do
-      if get '*': run 'd' end
-      if put 'hello': run 'd' end
-      if delete '*': run 'd' end
+      run 'd' if get '*'
+      run 'd' if put 'hello'
+      run 'd' if delete '*'
     end
   end
 end

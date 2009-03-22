@@ -14,11 +14,9 @@
       </attribute>
       <ref name="riddl-common-atts"/>
       <ref name="riddl-message"/>
-      <oneOrMore>
-        <element name="resource">
-          <ref name="riddl-resource"/>
-        </element>
-      </oneOrMore>  
+      <element name="resource">
+        <ref name="riddl-resource"/>
+      </element>
     </element>
   </define>
 
@@ -70,11 +68,6 @@
 
   <define name="riddl-resource">
     <optional>
-      <attribute name="relative">
-        <ref name="riddl-datatype-relpath"/>
-      </attribute>
-    </optional>
-    <optional>
       <attribute name="recursive">
         <data type="boolean"/>
       </attribute>  
@@ -101,6 +94,11 @@
     </zeroOrMore>
     <zeroOrMore>
       <element name="resource">
+        <optional>
+          <attribute name="relative">
+            <ref name="riddl-datatype-relpath"/>
+          </attribute>
+        </optional>
         <ref name="riddl-resource"/>
       </element>  
     </zeroOrMore> 

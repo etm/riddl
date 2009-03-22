@@ -12,9 +12,6 @@
   </message>
 
   <resource>
-  </resource>  
-  
-  <resource relative="hellos">
     <get in="hello-list" out="filter-hello-list"/>
     <get in="*" out="*"/>
     <resource>

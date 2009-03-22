@@ -24,7 +24,7 @@
   	<parameter name="type" type="string" fixedValue="html"/>
   </message>
 
-  <resource relative="hellos">
+  <resource>
     <post in="hello"/>
     <post in="hello-form"/>
     <get in="*" out="filter-hello-list"/>

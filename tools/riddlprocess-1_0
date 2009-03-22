@@ -26,12 +26,15 @@ unless riddl.declaration?
   puts 'Not a RIDDL declaration.'
   exit
 end
-
 unless riddl.validate!
   puts "Does not conform to specification#{verbose ? '' : ', use -v for details'}."
   exit
 end
+puts "RIDDL declaration looks valid."
 
-if riddl.declaration?
-  puts "RIDDL declaration looks valid."
+riddl.find("/dec:declaration/dec:interface").each do |is|
+  p is.attributes['path']
+  is.children.each do |fd|
+
+  end
 end

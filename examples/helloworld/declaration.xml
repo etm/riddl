@@ -1,7 +1,7 @@
 <declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <interface relative="helloworlds" path="http://tango.pri.lan:4277/helloworld">
+  <interface relative="hellos" path="http://tango.pri.lan:4277/helloworld">
     <xi:include href="description.xml"/>
-    <filter relative="hellos" path="http://tango.pri.lan:4278/harmless">
+    <filter path="http://tango.pri.lan:4278/harmless">
       <xi:include href="filter-description.xml"/>
     </filter>  
   </interface>

@@ -22,11 +22,9 @@
           <ref name="riddl-datatype-relpathtemplate"/>
         </attribute>
       </optional>
-      <optional>
-        <attribute name="path">
-          <data type="anyURI"/>
-        </attribute>
-      </optional>  
+      <attribute name="path">
+        <data type="anyURI"/>
+      </attribute>
       <zeroOrMore>
         <ref name="riddl-filter"/>
       </zeroOrMore>  
