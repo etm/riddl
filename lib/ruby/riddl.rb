@@ -9,26 +9,26 @@ class Riddl < XML::Smart
       'des' => "http://riddl.org/ns/description/1.0"
     }
     (class << doc; self; end).class_eval do
-      define_method 'validate!' do 
+      def validate!
         return self.validate_against(XML::Smart.open("#{File.dirname(__FILE__)}/../../ns/description-1_0.rng")) if @description
         return self.validate_against(XML::Smart.open("#{File.dirname(__FILE__)}/../../ns/declaration-1_0.rng")) if @declaration
         nil
       end
 
-      define_method '__riddl_init' do
+      def __riddl_init
         qname = self.root.name
         @description = qname.namespace == "http://riddl.org/ns/description/1.0" && qname.name ==  "description"
         @declaration = qname.namespace == "http://riddl.org/ns/declaration/1.0" && qname.name ==  "declaration"
       end
 
-      define_method 'declaration?' do
+      def declaration?
         @declaration 
       end
-      define_method 'description?' do
+      def description?
         @description 
       end
 
-      define_method 'valid_resources?' do
+      def valid_resources?
         @description ? check_rec_resources(self.find("/des:description/des:resource")) : []
       end
 
@@ -68,6 +68,7 @@ class Riddl < XML::Smart
         end
         messages
       end
+
       def check_fields(field, what, name)
         messages = []
         field.compact.each do |k|
@@ -77,6 +78,7 @@ class Riddl < XML::Smart
         end
         messages
       end
+
       def check_multi_fields(field, what, name)
         messages = []
         field.each do |k,v|
