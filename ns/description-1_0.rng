@@ -24,7 +24,7 @@
     <zeroOrMore>
       <element name="message">
         <attribute name="name">
-          <ref name="riddl-datatype-messagename"/>
+          <ref name="riddl-datatype-out-messagename"/>
         </attribute>
         <zeroOrMore>
           <element name="parameter">
@@ -105,14 +105,37 @@
   </define>  
 
   <define name="riddl-methods">
-    <attribute name="in">
-      <ref name="riddl-datatype-messagename"/>
-    </attribute>
-    <optional>
-      <attribute name="out">
-        <ref name="riddl-datatype-messagename"/>
+    <choice>
+      <attribute name="pass">
+        <ref name="riddl-datatype-in-messagename"/>
       </attribute>
-    </optional>  
+      <group>
+        <attribute name="in">
+          <ref name="riddl-datatype-in-messagename"/>
+        </attribute>
+        <optional>
+          <choice>
+            <attribute name="out">
+              <ref name="riddl-datatype-out-messagename"/>
+            </attribute>
+            <group>
+              <attribute name="add">
+                <ref name="riddl-datatype-out-messagename"/>
+              </attribute>
+              <attribute name="remove">
+                <ref name="riddl-datatype-out-messagename"/>
+              </attribute>
+            </group>
+            <attribute name="add">
+              <ref name="riddl-datatype-out-messagename"/>
+            </attribute>
+            <attribute name="remove">
+              <ref name="riddl-datatype-out-messagename"/>
+            </attribute>
+          </choice>  
+        </optional>
+      </group>  
+    </choice>  
   </define>
 
 </grammar>
