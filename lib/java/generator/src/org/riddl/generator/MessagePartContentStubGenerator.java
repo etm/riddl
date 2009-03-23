@@ -33,6 +33,7 @@ public abstract class MessagePartContentStubGenerator
 	public void setMessageOutputDirectory(File messageOutputDirectory) {
 		this.messageOutputDirectory = messageOutputDirectory;
 	}
+	public abstract String getURI();
 	public abstract String generate();
 	
 	

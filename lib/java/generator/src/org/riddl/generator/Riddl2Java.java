@@ -3,6 +3,7 @@ package org.riddl.generator;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -89,10 +90,27 @@ public class Riddl2Java
 		}
 		
 		
-		RiddlResource ressource2 = description.getResource();
-		for(Resource resource : ressource2.getResource())
+		RiddlResource rootResource = description.getResource();
+		List<Resource> resources = rootResource.getResource();
+		generateResourceStubs(resourcesPackage, resourcesDirectory, "", resources);
+	}
+
+	private static void generateResourceStubs(String resourcesPackage,
+			File resourcesDirectory, String resourceParentName, List<Resource> resources) 
+	{
+		for(Resource resource : resources)
 		{
-			String resourceClassName = createValidClassName(resource.getRelative());
+			String resourceClassName = "";
+			if(resource.getRelative() == null)
+			{
+				resourceClassName = resourceParentName + createValidClassName(resource.getRelative());
+			}
+			else
+			{
+				resourceClassName = resourceParentName + "Item";
+			}
+			generateResourceStubs(resourcesPackage, resourcesDirectory, resourceParentName, resource.getResource());
+
 			StringBuilder resourceClassContent = new StringBuilder();
 			resourceClassContent.append("// PREFACE \n");
 			resourceClassContent.append("package " + resourcesPackage + ";\n");
