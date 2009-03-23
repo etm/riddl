@@ -32,9 +32,8 @@ unless riddl.validate!
 end
 puts "RIDDL declaration looks valid."
 
-riddl.find("/dec:declaration/dec:interface").each do |is|
-  p is.attributes['path']
-  is.children.each do |fd|
-
-  end
+riddl.find("/dec:declaration/dec:interface").each do |ifa|
+  d = ifa.find("des:description").first
+  pre = d.find("preceding-sibling::dec:filter")
+  post = d.find("following-sibling::dec:filter")
 end
