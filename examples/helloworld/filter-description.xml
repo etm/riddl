@@ -12,10 +12,10 @@
   </message>
 
   <resource>
-    <get in="hello-list" out="filter-hello-lista"/>
+    <get in="hello-list" out="filter-hello-list"/>
     <get pass="*"/>
     <resource>
-      <get pass="as"/>
+      <get pass="*"/>
       <put pass="*"/> <!-- if put would be removed, put would not occur in final description -->
     </resource>
   </resource>  
