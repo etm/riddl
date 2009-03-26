@@ -1,0 +1,90 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <!-- Messages from pre.xml -->
+  <message name="security">
+    <parameter name="security" type="string"/>
+  </message>  
+  <message name="m">
+  	<parameter name="m" type="string"/>
+  </message>  
+  <message name="c">
+  	<parameter name="c" type="string"/>
+  </message>  
+
+  <!-- Messages from descritpion.xml -->
+  <message name="a">
+  	<parameter name="a" type="string">
+      <choice>
+        <value>bla</value>
+      </choice>  
+    </parameter>
+  </message>  
+  <message name="b">
+  	<parameter name="b" type="integer"/>
+  </message>  
+  <message name="c">
+  	<parameter name="c" type="integer"/>
+  </message>  
+  <message name="x">
+  	<parameter name="x" type="integer"/>
+  </message>  
+  <message name="y">
+  	<parameter name="y" type="integer"/>
+  </message>  
+  <message name="z">
+  	<parameter name="z" type="integer"/>
+  </message>  
+
+  <!-- Messages from post.xml -->
+  <message name="security">
+  	<parameter name="security" type="string"/>
+  </message>  
+
+
+  <!-- Generated Messages from path -->
+  <message name="a-secured">
+    <parameter name="a" type="string">
+      <choice>
+        <value>bla</value>
+      </choice>  
+    </parameter>
+    <parameter name="security" type="string"/>
+  </message>  
+  <message name="b-secured">
+    <parameter name="b" type="integer"/>
+    <parameter name="security" type="string"/>
+  </message>  
+  <message name="x-secured">
+    <parameter name="x" type="integer"/>
+    <parameter name="security" type="string"/>
+  </message>  
+  <message name="y-secured">
+    <parameter name="y" type="integer"/>
+    <parameter name="security" type="string"/>
+  </message>  
+  <message name="z-secured">
+    <parameter name="z" type="integer"/>
+    <parameter name="security" type="string"/>
+  </message>  
+
+  <resource>
+    <!-- <get in="m" out="c"/> -->
+    <get in="m" out="c"/>
+    <!-- <get in="*" remove="security"/> -->
+    <get in="a-secured" out="a"/>
+    <get in="b-secured" out="b"/>
+    <get in="security"/>
+    <!-- <get in="*" out="c"/> is not possible because c is allready used as an output -->
+
+    <!-- <get in="a" out="x"/> -->
+    <get in="a" out="x"/>
+    <!-- <get in="b" out="y"/> -->
+    <get in="b" out="y"/>
+    <!-- <get in="c" out="z"/> -->
+    <get in="c" out="z"/>
+
+    <!-- <get add="security"/> -->
+    <get in="x" out="x-secured"/>
+    <get in="y" out="y-secured"/>
+    <get in="z" out="z-secured"/>
+  </resource>  
+</description>
