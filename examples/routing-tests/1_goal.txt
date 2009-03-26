@@ -1,17 +1,20 @@
 Stufe 1 vorwärts:
 
+m -> c -> z -> z'
 * -> a -> x -> x'  
 * -> b -> y -> y'
-* -> security -> (empty)
-m -> c -> z -> z'
-
 
 (Variable)' ... security message included
-(Variable)'' ... security message excluded
+(Variable) ... security message excluded
 
 Stufe 1 rückwärts:
 
-x' -> x -> a -> a''
-y' -> y -> b -> b''
+x' -> x -> a -> a'
+y' -> y -> b -> b'
 z' -> z -> c -> m
 
+Ende:
+
+a' -> x'
+b' -> y'
+m  -> z'

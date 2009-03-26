@@ -1,0 +1,37 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <message name="m">
+  	<parameter name="m" type="string"/>
+  </message>  
+  <message name="z-secured">
+    <parameter name="z" type="integer"/>
+    <parameter name="security" type="string"/>
+  </message>  
+
+  <message name="a-secured">
+    <parameter name="a" type="string">
+      <choice>
+        <value>bla</value>
+      </choice>  
+    </parameter>
+    <parameter name="security" type="string"/>
+  </message>  
+  <message name="x-secured">
+    <parameter name="x" type="integer"/>
+    <parameter name="security" type="string"/>
+  </message>  
+
+  <message name="b-secured">
+    <parameter name="b" type="integer"/>
+    <parameter name="security" type="string"/>
+  </message>  
+  <message name="y-secured">
+    <parameter name="y" type="integer"/>
+    <parameter name="security" type="string"/>
+  </message>  
+
+  <resource>
+    <get in="a-secured" out="x-secured"/>
+    <get in="b-secured" out="y-secured"/>
+    <get in="m" out="z-secured"/>
+  </resource>  
+</description>
