@@ -1,0 +1,9 @@
+Stufe 1 vorwärts:
+
+* -> a -> ...
+* -> b ->
+
+
+Stufe 2 vorwärts:
+
+a' -> 

@@ -32,11 +32,6 @@
               <data type="NCName"/>
             </attribute>
             <optional>
-              <attribute name="fixedValue">
-                <data type="string"/>
-              </attribute>
-            </optional>  
-            <optional>
               <ref name="riddl-occurs"/>
             </optional>
             <ref name="data"/>
@@ -110,31 +105,29 @@
         <ref name="riddl-datatype-in-messagename"/>
       </attribute>
       <group>
+        <attribute name="add">
+          <ref name="riddl-datatype-out-messagename"/>
+        </attribute>
+        <attribute name="remove">
+          <ref name="riddl-datatype-out-messagename"/>
+        </attribute>
+      </group>
+      <attribute name="add">
+        <ref name="riddl-datatype-out-messagename"/>
+      </attribute>
+      <attribute name="remove">
+        <ref name="riddl-datatype-out-messagename"/>
+      </attribute>
+      <group>
         <attribute name="in">
           <ref name="riddl-datatype-in-messagename"/>
         </attribute>
         <optional>
-          <choice>
-            <attribute name="out">
-              <ref name="riddl-datatype-out-messagename"/>
-            </attribute>
-            <group>
-              <attribute name="add">
-                <ref name="riddl-datatype-out-messagename"/>
-              </attribute>
-              <attribute name="remove">
-                <ref name="riddl-datatype-out-messagename"/>
-              </attribute>
-            </group>
-            <attribute name="add">
-              <ref name="riddl-datatype-out-messagename"/>
-            </attribute>
-            <attribute name="remove">
-              <ref name="riddl-datatype-out-messagename"/>
-            </attribute>
-          </choice>  
-        </optional>
-      </group>  
+          <attribute name="out">
+            <ref name="riddl-datatype-out-messagename"/>
+          </attribute>
+        </optional>  
+      </group>
     </choice>  
   </define>
 

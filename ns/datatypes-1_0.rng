@@ -26,12 +26,12 @@
 
   <define name="riddl-datatype-in-messagename">
     <data type="string">
-      <param name="pattern">[a-z]\c+|\*</param>
+      <param name="pattern">[a-z]\c*|\*</param>
     </data>
   </define>
   <define name="riddl-datatype-out-messagename">
     <data type="string">
-      <param name="pattern">[a-z]\c+</param>
+      <param name="pattern">[a-z]\c*</param>
     </data>
   </define>
 

@@ -17,6 +17,7 @@
     <resource>
       <get pass="*"/>
       <put pass="*"/> <!-- if put would be removed, put would not occur in final description -->
+      <delete in="*"/>
     </resource>
   </resource>  
 

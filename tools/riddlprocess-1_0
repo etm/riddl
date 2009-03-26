@@ -2,6 +2,7 @@
 require 'rubygems'
 require File.dirname($0) + '/../lib/ruby/riddl'
 require 'optparse'
+require 'pp'
 
 verbose = false
 ARGV.options { |opt|
@@ -32,8 +33,33 @@ unless riddl.validate!
 end
 puts "RIDDL declaration looks valid."
 
+def message_signature(des,name)
+  puts "sig"  
+end
+
+def message_add_remove(des,ain,add,remove) 
+  puts "add_rem_sig"  
+end
+
 riddl.find("/dec:declaration/dec:interface").each do |ifa|
-  d = ifa.find("des:description").first
-  pre = d.find("preceding-sibling::dec:filter")
-  post = d.find("following-sibling::dec:filter")
+  routes = {}
+  #ifa.find("des:description|dec:filter/des:description").each do |d|
+  ifa.find("des:description").each do |d|
+    d.find("des:resource/des:*[@in and @out and not(@in='*')]").each do |m|
+      routes[m.name.name] ||= {}
+      routes[m.name.name][m.attributes['in']] ||= []
+      routes[m.name.name][m.attributes['in']] << m.attributes['out']
+    end
+    d.find("des:resource/des:*[@pass]").each do |m|
+      routes[m.name.name] ||= {}
+      routes[m.name.name][m.attributes['pass']] ||= []
+      routes[m.name.name][m.attributes['pass']] < m.attributes['pass']
+    end
+    d.find("des:resource/des:*[@in and (@add or @remove)]").each do |m|
+      routes[m.name.name] ||= {}
+      routes[m.name.name][m.attributes['in']] ||= []
+      routes[m.name.name][m.attributes['in']] << message_add_remove(d,m.attributes['in'],m.attributes['add'],m.attributes['remove'])
+    end
+  end
+  pp routes
 end

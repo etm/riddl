@@ -1,0 +1,32 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="a">
+  	<parameter name="a" type="string">
+      <choice>
+        <value>bla</value>
+      </choice>  
+    </parameter>
+  </message>  
+  <message name="b">
+  	<parameter name="b" type="integer"/>
+  </message>  
+  <message name="c">
+  	<parameter name="c" type="integer"/>
+  </message>  
+  <message name="x">
+  	<parameter name="x" type="integer"/>
+  </message>  
+  <message name="y">
+  	<parameter name="y" type="integer"/>
+  </message>  
+  <message name="z">
+  	<parameter name="z" type="integer"/>
+  </message>  
+
+  <resource>
+    <get in="a" out="x"/>
+    <get in="b" out="y"/>
+    <get in="c" out="z"/>
+  </resource>  
+
+</description>
