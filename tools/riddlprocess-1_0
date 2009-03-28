@@ -34,11 +34,6 @@ end
 puts "RIDDL declaration looks valid."
 
 def get_path(d,routes,first=false)
-  d.find("des:resource/des:*[@in and @out and not(@in='*')]").each do |m|
-    if first
-      routes[m.name.name] ||= {}
-      routes[m.name.name][m.attributes['in']] ||= []
-      routes[m.name.name][m.attributes['in']] << m.attributes['out']
     else  
       routes[m.name.name].each do |k,v|
         v << m.attributes['out'] if v.last == m.attributes['in']  
@@ -50,9 +45,20 @@ end
 
 riddl.find("/dec:declaration/dec:interface").each do |ifa|
   routes = {}
-  first = true
-  ifa.find("des:description|dec:filter/des:description").each do |d|
-    first = get_path(d,routes,first)
-  end
+  ifa.find("des:description|dec:filter/des:description").each_with_index
+  description.find("des:resource/des:*[@in and @out and not(@in='*')]").each do |m|
+    routes[m.name.name] ||= {}
+    routes[m.name.name][m.attributes['in']] ||= get_path(m.attributes['out'],ifa.find(')
+  end unless description.nil?
   pp routes
 end
+
+#1 in "a" out "b": in "a" out "b"   -> suchen b nächste stufe
+#2 pass "a":       in "a" out "a"   -> suchen a nächste stufe
+#3 in "*" out "a": in "*" out "a"
+#4 remove "a":     in "*" out "*-a" -> nächste stufe alle die durch 1,2,3 nicht tangiert wurde
+#5 add "a":        in "*" out "*+a" -> nächste stufe alle die durch 1,2,3 nicht tangiert wurde
+#6 pass "*"        in "*" out "*"
+
+# mehr als ein add/remove nicht erlaubt
+# wenn add/remove kein pass erlaubt
