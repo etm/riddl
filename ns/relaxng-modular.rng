@@ -9,31 +9,6 @@
 
   <define name="pattern">
     <choice>
-      <element name="element">
-        <choice>
-          <attribute name="name">
-            <data type="QName"/>
-          </attribute>
-          <ref name="open-name-class"/>
-        </choice>
-        <ref name="common-atts"/>
-        <ref name="open-patterns"/>
-      </element>
-      <element name="attribute">
-        <ref name="common-atts"/>
-        <choice>
-          <attribute name="name">
-            <data type="QName"/>
-          </attribute>
-          <ref name="open-name-class"/>
-        </choice>
-        <interleave>
-          <ref name="other"/>
-          <optional>
-            <ref name="pattern"/>
-          </optional>
-        </interleave>
-      </element>
       <element name="group">
         <ref name="common-atts"/>
         <ref name="open-patterns"/>
