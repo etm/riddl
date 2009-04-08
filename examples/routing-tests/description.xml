@@ -11,7 +11,7 @@
   	<parameter name="b" type="integer"/>
   </message>  
   <message name="c">
-  	<parameter name="c" type="integer"/>
+  	<parameter name="c" type="string"/>
   </message>  
   <message name="x">
   	<parameter name="x" type="integer"/>

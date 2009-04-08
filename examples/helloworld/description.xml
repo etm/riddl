@@ -21,7 +21,11 @@
     <part type="text/html" />
   </message>
   <message name="type-html">
-  	<parameter name="type" type="string" fixedValue="html"/>
+  	<parameter name="type" type="string">
+      <choice>
+        <value>html</value>
+      </choice>  
+    </parameter>  
   </message>
 
   <resource>

@@ -12,20 +12,24 @@
       <parameter name="hello-xy" type="string"/>
     </part>
   </message>
-  <message name="hello-list">
+  <message name="filter-hello-list">
     <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
-      <xi:include href="hello-list.rng"/>
+      <xi:include href="filter-hello-list.rng"/>
     </part>
   </message>
   <message name="hello-list-html">
     <part type="text/html" />
   </message>
   <message name="type-html">
-  	<parameter name="type" type="string" fixedValue="html"/>
+  	<parameter name="type" type="string">
+      <choice>
+        <value>html</value>
+      </choice>  
+    </parameter>  
   </message>
 
   <resource>
-    <get in="*" out="hello-list"/>
+    <get in="*" out="filter-hello-list"/>
     <get in="type-html" out="hello-list-html"/> 
     <resource>
       <get in="*" out="hello"/>
