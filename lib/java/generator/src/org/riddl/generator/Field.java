@@ -2,18 +2,28 @@ package org.riddl.generator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+
+import javax.lang.model.element.Modifier;
 
 public class Field 
 {
-	private List<String> prefixes = new ArrayList<String>();
+	private List<Modifier> modifiers = new ArrayList<Modifier>();
 	private String type = "String";
-	private String name = "string";
+	private String name = null;
 	private int indentation = 1;
 	private String initializationValue = null;
 	private boolean quoteInitializationValue = false;
 	
-	
+	private static boolean hasMoreThanOneProtectionModifier(
+			Collection<Modifier> modifiers) 
+	{
+		//Modifier.
+		ArrayList<Modifier> modifiersCopy = new ArrayList<Modifier>(modifiers);
+		//modifiersCopy.retainAll(PROTECTION_MODIFIERS);
+		return modifiersCopy.size() > 1;
+	}
 	
 	public boolean isQuoteInitializationValue() {
 		return quoteInitializationValue;
@@ -21,11 +31,11 @@ public class Field
 	public void setQuoteInitializationValue(boolean quoteInitializationValue) {
 		this.quoteInitializationValue = quoteInitializationValue;
 	}
-	public List<String> getPrefixes() {
-		return prefixes;
+	public Collection<Modifier> getModifiers() {
+		return modifiers;
 	}
-	public void setPrefixes(String... prefixes) {
-		this.prefixes = new ArrayList<String>(Arrays.asList(prefixes));
+	public void setModifiers(Modifier... prefixes) {
+		this.modifiers = new ArrayList<Modifier>(Arrays.asList(prefixes));
 	}
 	public String getType() {
 		return type;
@@ -60,9 +70,9 @@ public class Field
 			declarationBuilder.append("\t");
 		}
 		
-		for(String prefix : prefixes)
+		for(Modifier modifier : modifiers)
 		{
-			declarationBuilder.append(prefix + " ");
+			declarationBuilder.append(modifier + " ");
 		}
 		
 		declarationBuilder.append(type + " ");
@@ -84,5 +94,17 @@ public class Field
 		
 		return declarationBuilder.toString();
 	}
+	
+	private boolean isModifierListValid(Collection<Modifier> modifiers)
+	{
+		if(hasMoreThanOneProtectionModifier(modifiers))
+		{
+			return false;
+		}
+		
+		
+		return true;
+	}
+
 
 }

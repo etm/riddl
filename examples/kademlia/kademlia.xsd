@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.vanuatu.org/kademlia" xmlns:tns="http://www.vanuatu.org/kademlia" elementFormDefault="qualified">
+	<simpleType name="valueType">
+		<restriction base="anyURI"/>
+	</simpleType>
+	<complexType name="nodeListType">
+		<sequence>
+			<element name="nodeEndpoint" minOccurs="0" maxOccurs="unbounded">
+				<simpleType>
+					<restriction base="anyURI">
+						<pattern value=".*"></pattern>
+					</restriction>
+				</simpleType>
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="testType">
+		<sequence>
+			<element name="testField" type="string"></element>
+		</sequence>
+	</complexType>
+</schema>

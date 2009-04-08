@@ -15,8 +15,8 @@
   	<d:parameter name="queryType" type="string" fixedValue="value"/>
   </d:message>
   <d:message name="find-value-response">
-  	<d:part type="text/xml" handler="" occurs="?">
-  	  <xi:include href="value.xsd"/>
+  	<d:part type="text/plain" handler="http://riddl.org/ns/part-plugins/plain">
+      <plain type="string"/>
   	</d:part>
 	<d:part type="text/xml" handler="http://riddl.org/ns/part-plugins/xsd" occurs="?">
 	  <xi:include href="node-list.xsd"/>
@@ -27,25 +27,25 @@
   	<d:parameter name="queryType" type="string" fixedValue="node"/>
   </d:message>
   <d:message name="find-node-response">
-	<d:part type="text/xml" handler="">
+	<d:part type="text/xml" handler="http://riddl.org/ns/part-plugins/xsd">
 	  <xi:include href="node-list.xsd"/>
 	</d:part>
   </d:message>
   
   <d:message name="store-value">
-  	<d:part type="text/xml" handler="">
-  	  <xi:include href="value.xsd"/>
+  	<d:part type="text/plain" handler="http://riddl.org/ns/part-plugins/plain">
+      <plain type="string"/>
   	</d:part>
   </d:message>
   
   <d:message name="key">
-  	<d:part type="text/plain">
+  	<d:part type="text/plain" handler="http://riddl.org/ns/part-plugins/plain">
       <plain type="string"/>
   	</d:part>
   </d:message>
   
   <d:message name="integer">
-  	<d:part type="text/plain">
+  	<d:part type="text/plain" handler="http://riddl.org/ns/part-plugins/plain">
       <plain type="integer"/>
   	</d:part>
   </d:message>
