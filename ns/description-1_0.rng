@@ -4,102 +4,110 @@
   <include href="datatypes-1_0.rng"/>
 
   <start>
-    <ref name="riddl-description"/>
+    <element name="description">
+      <ref name="riddl-description"/>
+   	</element>
   </start>
 
   <define name="riddl-description">
-    <element name="description">
-      <attribute name="datatypeLibrary">
-        <data type="anyURI"/>
-      </attribute>
-      <ref name="riddl-common-atts"/>
-      <ref name="riddl-message"/>
-      <element name="resource">
-        <ref name="riddl-resource"/>
+    <attribute name="datatypeLibrary">
+      <data type="anyURI"/>
+    </attribute>
+    <ref name="riddl-common-atts"/>
+    <zeroOrMore>
+      <element name="message">
+        <ref name="riddl-message"/>
       </element>
+    </zeroOrMore>
+    <element name="resource">  
+      <ref name="root-resource"/>
     </element>
   </define>
 
   <define name="riddl-message">
-    <zeroOrMore>
-      <element name="message">
-        <attribute name="name">
-          <ref name="riddl-datatype-out-messagename"/>
-        </attribute>
-        <zeroOrMore>
-          <element name="parameter">
-            <attribute name="name">
-              <data type="NCName"/>
-            </attribute>
-            <optional>
-              <ref name="riddl-occurs"/>
-            </optional>
-            <ref name="data"/>
-          </element>
-        </zeroOrMore>  
-        <zeroOrMore>
-          <element name="part">
-            <attribute name="type">
-              <data type="string">
-                <param name="pattern">[\c]+/[\c]+</param>
-              </data>
+      <attribute name="name">
+        <ref name="riddl-datatype-out-messagename"/>
+      </attribute>
+      <zeroOrMore>
+        <element name="parameter">
+          <attribute name="name">
+            <data type="NCName"/>
+          </attribute>
+          <optional>
+            <ref name="riddl-occurs"/>
+          </optional>
+          <ref name="data"/>
+        </element>
+      </zeroOrMore>  
+      <zeroOrMore>
+        <element name="part">
+          <attribute name="type">
+            <data type="string">
+              <param name="pattern">[\c]+/[\c]+</param>
+            </data>
+          </attribute>  
+          <optional>
+            <attribute name="handler">
+              <data type="anyURI"/>
             </attribute>  
-            <optional>
-              <attribute name="handler">
-                <data type="anyURI"/>
-              </attribute>  
-            </optional>
-            <optional>
-              <ref name="riddl-occurs"/>
-            </optional>
-            <zeroOrMore>
-              <ref name="any"/>
-            </zeroOrMore>  
-          </element>
-        </zeroOrMore>  
-      </element>  
-    </zeroOrMore>  
+          </optional>
+          <optional>
+            <ref name="riddl-occurs"/>
+          </optional>
+          <zeroOrMore>
+            <ref name="any"/>
+          </zeroOrMore>  
+        </element>
+      </zeroOrMore>  
   </define>
 
-  <define name="riddl-resource">
+  <define name="root-resource">
+    <ref name="riddl-resource-content"/>
+  </define>
+
+  <define name="resource">
+    <optional>
+      <attribute name="relative">
+        <ref name="riddl-datatype-relpath"/>
+      </attribute>
+    </optional>
     <optional>
       <attribute name="recursive">
         <data type="boolean"/>
       </attribute>  
     </optional>
+    <ref name="riddl-resource-content"/>
+  </define>
+
+  <define name="riddl-resource-content">
     <zeroOrMore>
       <element name="post">
-        <ref name="riddl-methods"/>
+      	<ref name="riddl-method"/>
       </element>
     </zeroOrMore>
     <zeroOrMore>
       <element name="get">
-        <ref name="riddl-methods"/>
+        <ref name="riddl-method"/>
       </element>
     </zeroOrMore>
     <zeroOrMore>
       <element name="put">
-        <ref name="riddl-methods"/>
+        <ref name="riddl-method"/>
       </element>
     </zeroOrMore>
     <zeroOrMore>
       <element name="delete">
-        <ref name="riddl-methods"/>
+        <ref name="riddl-method"/>
       </element>
     </zeroOrMore>
     <zeroOrMore>
       <element name="resource">
-        <optional>
-          <attribute name="relative">
-            <ref name="riddl-datatype-relpath"/>
-          </attribute>
-        </optional>
-        <ref name="riddl-resource"/>
-      </element>  
+    	<ref name="resource"/>
+      </element>
     </zeroOrMore> 
-  </define>  
-
-  <define name="riddl-methods">
+  </define>
+   
+  <define name="riddl-method">
     <choice>
       <attribute name="pass">
         <ref name="riddl-datatype-in-messagename"/>
