@@ -1,18 +1,32 @@
-require '../../lib/riddl'
+require 'rack'
+require '../../lib/ruby/riddl'
+require 'pp'
 
 use Rack::ShowStatus
 
-run Riddl.new do
-  description "description.xml"
-  on resource 'hellos' do
-    run 'e' if post 'hello'
-    run 'e' if post 'hello-form'
-    run 'e' if get '*'
-    run 'e' if get 'type-html'
+class Bar < Riddl::Implementation
+  def content  
+    "hello world"
+  end  
+end
+
+run(
+  Riddl::Server.new("description.xml") do
     on resource do
-      run 'd' if get '*'
-      run 'd' if put 'hello'
-      run 'd' if delete '*'
+      run Bar if post 'hello'
+      run Bar if post 'hello-form'
+      run Bar if get '*'
+      run Bar if get 'type-html'
+      on resource do
+        run Bar if get '*'
+        run Bar if put 'hello'
+        run Bar if delete '*'
+      end
+      on resource 'hello' do
+        run Bar if get '*'
+        run Bar if put 'hello'
+        run Bar if delete '*'
+      end
     end
   end
-end
+)
