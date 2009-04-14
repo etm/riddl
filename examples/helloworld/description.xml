@@ -38,6 +38,7 @@
       <put in="hello" out="hello"/>
       <delete in="*"/>
     </resource>
-  </resource>  
+  </resource>
+  
 
 </description>
