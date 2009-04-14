@@ -56,7 +56,9 @@
           <data type="anyURI"/>
         </attribute>
       </element>
-      <ref name="riddl-description"/>
+      <element name="description" ns="http://riddl.org/ns/description/1.0">
+        <ref name="riddl-description"/>
+      </element>
     </choice>   
   </define>
 

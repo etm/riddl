@@ -29,35 +29,40 @@
         <ref name="riddl-datatype-out-messagename"/>
       </attribute>
       <zeroOrMore>
-        <element name="parameter">
-          <attribute name="name">
-            <data type="NCName"/>
-          </attribute>
-          <optional>
-            <ref name="riddl-occurs"/>
-          </optional>
-          <ref name="data"/>
-        </element>
-      </zeroOrMore>  
-      <zeroOrMore>
-        <element name="part">
-          <attribute name="type">
-            <data type="string">
-              <param name="pattern">[\c]+/[\c]+</param>
-            </data>
-          </attribute>  
-          <optional>
-            <attribute name="handler">
-              <data type="anyURI"/>
+        <choice>
+          <element name="parameter">
+            <attribute name="name">
+              <data type="NCName"/>
+            </attribute>
+            <optional>
+              <ref name="riddl-occurs"/>
+            </optional>
+            <ref name="data"/>
+          </element>
+          <element name="part">
+            <optional>
+              <attribute name="name">
+                <data type="NCName"/>
+              </attribute>
+            </optional>  
+            <attribute name="type">
+              <data type="string">
+                <param name="pattern">[\c]+/[\c]+</param>
+              </data>
             </attribute>  
-          </optional>
-          <optional>
-            <ref name="riddl-occurs"/>
-          </optional>
-          <zeroOrMore>
-            <ref name="any"/>
-          </zeroOrMore>  
-        </element>
+            <optional>
+              <attribute name="handler">
+                <data type="anyURI"/>
+              </attribute>  
+            </optional>
+            <optional>
+              <ref name="riddl-occurs"/>
+            </optional>
+            <zeroOrMore>
+              <ref name="any"/>
+            </zeroOrMore>  
+          </element>
+        </choice>  
       </zeroOrMore>  
   </define>
 

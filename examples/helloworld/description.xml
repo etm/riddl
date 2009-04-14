@@ -1,24 +1,22 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="hello">
-    <part type="text/plain" handler="http://riddl.org/ns/part-plugins/plain-type">
+    <part name="return" type="text/plain" handler="http://riddl.org/ns/part-plugins/plain-type">
       <plain type="string">
         <param name="pattern">hello .+</param>
       </plain>
     </part>
   </message>
   <message name="hello-form">
-    <part type="application/x-www-form-urlencoded" handler="http://riddl.org/ns/part-plugins/x-www-form-urlencoded">
-      <parameter name="hello-xy" type="string"/>
-    </part>
+    <parameter name="hello-xy" type="string"/>
   </message>
   <message name="hello-list">
-    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
+    <part name="hello-list" type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
       <xi:include href="hello-list.rng"/>
     </part>
   </message>
   <message name="hello-list-html">
-    <part type="text/html" />
+    <part name="html" type="text/html" />
   </message>
   <message name="type-html">
   	<parameter name="type" type="string">
@@ -37,6 +35,12 @@
       <get in="*" out="hello"/>
       <put in="hello" out="hello"/>
       <delete in="*"/>
+      <resource relative="hello">
+        <post in="hello"/>
+      </resource>
+    </resource>
+    <resource relative="hello">
+      <post in="hello"/>
     </resource>
   </resource>
   

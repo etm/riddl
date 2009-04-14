@@ -35,6 +35,6 @@ end
 #}}}
 
 r = Riddl::Routes.new(riddl)
-# pp r.routes
-# puts "-------------------"
+pp r.routes
+puts "-------------------"
 puts r.description.to_s
