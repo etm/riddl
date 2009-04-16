@@ -12,7 +12,7 @@ public class FieldTest {
 	public void testSetModifiers() 
 	{
 		Field testField = new Field();
-		testField.setModifiers(Modifier.PRIVATE)
+		testField.setModifiers(Modifier.PRIVATE);
 	}
 
 	@Test
