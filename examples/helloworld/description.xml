@@ -1,22 +1,22 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="hello">
-    <part name="return" type="text/plain" handler="http://riddl.org/ns/part-plugins/plain-type">
+    <parameter name="return" mimetype="text/plain" handler="http://riddl.org/ns/handlers/plain-type">
       <plain type="string">
         <param name="pattern">hello .+</param>
       </plain>
-    </part>
+    </parameter>
   </message>
   <message name="hello-form">
     <parameter name="hello-xy" type="string"/>
   </message>
   <message name="hello-list">
-    <part name="hello-list" type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
+    <parameter name="hello-list" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="hello-list.rng"/>
-    </part>
+    </parameter>
   </message>
   <message name="hello-list-html">
-    <part name="html" type="text/html" />
+    <parameter name="html" mimetype="text/html"/>
   </message>
   <message name="type-html">
   	<parameter name="type" type="string">

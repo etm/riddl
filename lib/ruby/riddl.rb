@@ -16,7 +16,6 @@ module Riddl
           if description?
             tpath = path == "/" ? "/des:resource/" : path.gsub(/\/([^{}\/]+)/,"/des:resource[@relative=\"\\1\"]").gsub(/\/\{\}/,"des:resource[not(@relative)]")
             tpath = "/des:description" + tpath + "des:" + operation
-            p tpath
             self.find(tpath + "[@in and not(@in='*')]").each do |o|
               return o.attributes['in'] if check_message(o.attributes['in'],params)
             end
@@ -37,14 +36,30 @@ module Riddl
           #}}}
         end
 
-        def check_message(name,params)
-          self.find("/des:description/des:message[@name='#{name}']").each do |m|
-            m.children.each_with_index do |p,i|
-              pp p.attributes['name']
-              pp params[i]
-              p "-------"
-            end
-          end
+        def check_message(name,mparas)
+          #self.find("/des:description/des:message[@name='#{name}']").each do |m|
+          #  mparts = m.children
+          #  cparts = 0
+          #  cparas = 0
+          #  loop do
+          #    part = mparts[cparts]
+          #    para = mparas[cparas]
+
+          #    #case mparts.attributes['occurs']
+          #    #  when '+'
+          #    #    if 
+          #    #  when '*'
+          #    #  when '?'
+          #    #end  
+
+          #  params.each do |param|
+          #    if param.name == mparts[0].attributes['name']
+          #    pp p.attributes['name']
+          #    pp params[i]
+          #    p "-------"
+          #  end
+          #  end
+          #end
         end
 
         def validate!
@@ -700,9 +715,7 @@ module Riddl
 
     def run(what)
       if what.class == Class and what.superclass == Riddl::Implementation
-        w = what.new
-        res.write
-
+        # w = what.new
         # check w.message
         # @res.status = w.status 
         # if w.status == 200

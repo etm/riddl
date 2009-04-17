@@ -1,14 +1,14 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="hello-list">
-    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
+    <parameter name="hello-list" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="hello-list.rng"/>
-    </part>
+    </parameter>
   </message>
   <message name="filter-hello-list">
-    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
+    <parameter name="filter-hello-list" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="filter-hello-list.rng"/>
-    </part>
+    </parameter>
   </message>
 
   <resource>

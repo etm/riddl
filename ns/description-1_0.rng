@@ -25,27 +25,21 @@
   </define>
 
   <define name="riddl-message">
-      <attribute name="name">
-        <ref name="riddl-datatype-out-messagename"/>
-      </attribute>
-      <zeroOrMore>
+    <attribute name="name">
+      <ref name="riddl-datatype-out-messagename"/>
+    </attribute>
+    <zeroOrMore>
+      <element name="parameter">
+        <attribute name="name">
+          <data type="NCName"/>
+        </attribute>
+        <optional>
+          <ref name="riddl-occurs"/>
+        </optional>
         <choice>
-          <element name="parameter">
-            <attribute name="name">
-              <data type="NCName"/>
-            </attribute>
-            <optional>
-              <ref name="riddl-occurs"/>
-            </optional>
-            <ref name="data"/>
-          </element>
-          <element name="part">
-            <optional>
-              <attribute name="name">
-                <data type="NCName"/>
-              </attribute>
-            </optional>  
-            <attribute name="type">
+          <ref name="data"/>
+          <group>
+            <attribute name="mimetype">
               <data type="string">
                 <param name="pattern">[\c]+/[\c]+</param>
               </data>
@@ -56,14 +50,12 @@
               </attribute>  
             </optional>
             <optional>
-              <ref name="riddl-occurs"/>
-            </optional>
-            <zeroOrMore>
               <ref name="any"/>
-            </zeroOrMore>  
-          </element>
-        </choice>  
-      </zeroOrMore>  
+            </optional>  
+          </group>  
+        </choice>
+      </element>
+    </zeroOrMore>
   </define>
 
   <define name="root-resource">
