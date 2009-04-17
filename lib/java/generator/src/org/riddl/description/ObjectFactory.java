@@ -48,7 +48,7 @@ public class ObjectFactory {
      * Create an instance of {@link Delete }
      * 
      */
-    public Delete createDelete() {
+    public Method createDelete() {
         return new Delete();
     }
 

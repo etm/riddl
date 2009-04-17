@@ -3,7 +3,6 @@ package org.riddl.generator;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.riddl.handlers.plain.PlainStubGenerator;
 import org.riddl.handlers.xml.XSDStubGenerator;
 
 public class MessagePartContentStubGeneratorFactory 
@@ -15,7 +14,7 @@ public class MessagePartContentStubGeneratorFactory
 	
 	private Map<String, MessagePartContentStubGenerator> defaultMimeTypeStubGenerators = new HashMap<String, MessagePartContentStubGenerator>();
 	
-	private MessagePartContentStubGeneratorFactory()
+	protected MessagePartContentStubGeneratorFactory()
 	{}
 	
 	public static MessagePartContentStubGeneratorFactory getInstance()
@@ -24,7 +23,6 @@ public class MessagePartContentStubGeneratorFactory
 		{
 			instance = new MessagePartContentStubGeneratorFactory();
 			instance.stubGenerators.put("http://riddl.org/ns/part-plugins/xsd", new XSDStubGenerator());
-			instance.stubGenerators.put("http://riddl.org/ns/part-plugins/plain", new PlainStubGenerator());
 
 		}
 		return instance;

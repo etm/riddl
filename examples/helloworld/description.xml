@@ -42,6 +42,7 @@
     <resource relative="hello">
       <post in="hello"/>
     </resource>
-  </resource>  
+  </resource>
+  
 
 </description>

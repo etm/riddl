@@ -10,7 +10,6 @@ package org.riddl.description;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -35,12 +34,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "")
 @XmlRootElement(name = "post")
-public class Post {
-
-    @XmlAttribute(required = true)
-    protected String in;
-    @XmlAttribute
-    protected String out;
+public class Post extends Method {
 
     /**
      * Gets the value of the in property.
