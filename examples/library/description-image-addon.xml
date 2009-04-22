@@ -1,11 +1,9 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-
   <message name="image">
-    <part type="image/png"/>
+    <parameter name="image" mimetype="image/png"/>
   </message>
 
   <resource>
     <put in="image"/>
   </resource>
-
 </description>

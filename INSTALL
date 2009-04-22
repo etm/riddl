@@ -1,8 +1,8 @@
 == Ubuntu & Debian
 
-apt-get install libxml2-dev zlib1g-dev ruby1.8-dev build-essential ruby ruby1.8 rubygems
-gem install ruby-xml-smart --source http://www.pri.univie.ac.at/~mangler/ruby-xml-smart/trunk/
-gem install rack mongrel
+sudo apt-get install libxml2-dev zlib1g-dev ruby1.8-dev build-essential ruby ruby1.8 rubygems
+sudo gem install ruby-xml-smart --source http://www.pri.univie.ac.at/~mangler/ruby-xml-smart/trunk/
+sudo gem install rack mongrel
 
 == Others
 

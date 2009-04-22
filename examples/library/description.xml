@@ -5,49 +5,47 @@
     <parameter name="title" type="string" occurs="?"/>
   </message>
   <message name="list-of-books">
-    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
+    <parameter name="list-of-books" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/list-of-books.rng"/>
-    </part>
+    </parameter>
   </message>
   <message name="book-description-form">
-    <part type="application/x-www-form-urlencoded" handler="http://riddl.org/ns/part-plugins/x-www-form-urlencoded">
-      <parameter name="author" type="string" occurs="+"/>
-      <parameter name="title" type="string"/>
-    </part>
+    <parameter name="author" type="string" occurs="+"/>
+    <parameter name="title" type="string"/>
   </message>
   <message name="book-description">
-    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
+    <parameter name="book-description" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/book-description.rng"/>
-    </part>
+    </parameter>
   </message>
   <message name="book-id">
-    <part type="text/plain" handler="http://riddl.org/ns/part-plugins/plain-type">
+    <parameter name="book-id" mimetype="text/plain" handler="http://riddl.org/ns/handlers/plain-type">
       <plain type="positiveInteger"/>
-    </part>
+    </parameter>
   </message>
 
   <message name="list-of-customers">
-    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
+    <parameter name="list-of-customers" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/list-of-customers.rng"/>
-    </part>
+    </parameter>
   </message>
   <message name="customer-description">
-    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
+    <parameter name="customer-description" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/customer-description.rng"/>
-    </part>
-    <part type="image/png"/>
+    </parameter>
+    <parameter name="customer-image" mimetype="image/png"/>
   </message>
   <message name="list-of-loans">
-    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
+    <parameter name="list-of-loans" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/list-of-loans.rng"/>
-    </part>
+    </parameter>
   </message>
 
   <message name="html-output">
-    <part type="text/html" occurs="*"/>
+    <parameter name="html" mimetype="text/html"/>
   </message>
 
-  <resource relative="library">
+  <resource>
     <get in="*" out="html-output"/>
     <resource relative="books">
       <post in="book-description-form" out="book-id"/>
