@@ -1,77 +1,13 @@
 --paranguaricutirimirruaru0xdeadbeef
-content-disposition: form-data; name="agent"
+content-disposition: form-data; name="author"
 
-eTM
+Jürgen Mangler
 --paranguaricutirimirruaru0xdeadbeef
-content-disposition: form-data"
-Content-ID: description
-Content-Transfer-Encoding: binary
-Content-Type: text/xml
+content-disposition: form-data; name="author"
 
-<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-
-  <message name="hello">
-    <part type="text/plain" handler="http://riddl.org/ns/part-plugins/plain-type">
-      <plain type="string">
-        <param name="pattern">hello .+</param>
-      </plain>
-    </part>
-  </message>
-  <message name="hello-form">
-    <part type="application/x-www-form-urlencoded" handler="http://riddl.org/ns/part-plugins/x-www-form-urlencoded">
-      <parameter name="hello-xy" type="string"/>
-    </part>
-  </message>
-  <message name="hello-list">
-    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
-      <xi:include href="hello-list.rng"/>
-    </part>
-  </message>
-  <message name="hello-list-html">
-    <part type="text/html" />
-  </message>
-  <message name="type-html">
-  	<parameter name="type" type="string">
-      <choice>
-        <value>html</value>
-      </choice>  
-    </parameter>  
-  </message>
-
-  <resource>
-    <post in="hello"/>
-    <post in="hello-form"/>
-    <get in="*" out="hello-list"/>
-    <get in="type-html" out="hello-list-html"/> 
-    <resource>
-      <get in="*" out="hello"/>
-      <put in="hello" out="hello"/>
-      <delete in="*"/>
-      <resource relative="hello">
-        <post in="hello"/>
-      </resource>
-    </resource>
-    <resource relative="hello">
-      <post in="hello"/>
-    </resource>
-  </resource>  
-
-</description>
+Christoph Witzany
 --paranguaricutirimirruaru0xdeadbeef
-content-disposition: form-data; name="manbo"
+content-disposition: form-data; name="title"
 
-riddler
---paranguaricutirimirruaru0xdeadbeef
-content-disposition: form-data; name="declaration"; filename="declaration.xml"
-Content-Type: text/xml
-Content-Transfer-Encoding: binary
-
-<declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <interface relative="hellos" path="http://tango.pri.lan:4277/helloworld">
-    <xi:include href="description.xml"/>
-    <filter path="http://tango.pri.lan:4278/harmless">
-      <xi:include href="filter-description.xml"/>
-    </filter>
-  </interface>
-</declaration>  
+RIDDL Rul0rs The World Soon
 --paranguaricutirimirruaru0xdeadbeef--

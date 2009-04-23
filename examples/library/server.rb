@@ -15,6 +15,6 @@ until up
   end  
 end
 
-`php test/test.php get "/books/1/" test/book-query.txt`
+`php test/test.php get "/books" test/book-query.txt`
 `pkill rackup`
 t.join

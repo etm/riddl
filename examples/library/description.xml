@@ -1,8 +1,8 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="book-query">
-    <parameter name="author" type="string" occurs="*"/>
-    <parameter name="title" type="string" occurs="?"/>
+    <parameter name="author" type="string" occurs="+"/>
+    <parameter name="title" type="string"/>
   </message>
   <message name="list-of-books">
     <parameter name="list-of-books" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
