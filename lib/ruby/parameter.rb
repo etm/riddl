@@ -1,12 +1,12 @@
 module Riddl
-  class Parameter
+  class SimpleParameter
     attr_reader :name, :value
     def initialize(name,value)
       @name = name
       @value = value
     end
   end
-  class ParameterIO
+  class ComplexParameter
     attr_reader :name, :mimetype, :filename, :file
     def initialize(name,mimetype,filename=nil,file=nil)
       @name = name

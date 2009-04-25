@@ -1,5 +1,6 @@
 require ::File.dirname(__FILE__) + "/implementation.rb"
 require ::File.dirname(__FILE__) + "/httpparser.rb"
+require ::File.dirname(__FILE__) + "/generator.rb"
 require ::File.dirname(__FILE__) + "/parameter.rb"
 require ::File.dirname(__FILE__) + "/file.rb"
 
@@ -64,27 +65,6 @@ module Riddl
         w = what.new
         @res.status = w.status
         if w.status == 200
-          if w.response.length == 1
-            r = w.response[0]
-            case r.class
-              when Parameter
-                @res.write r.value
-                @res['Content-Type'] = "text/riddl-data"
-                @res['Content-Disposition'] = "riddl-data; name=\"#{r.name}\""
-              when ParameterIO
-                @res.write w.value.read
-                @res['Content-Type'] = r.mimetype
-                @res['Content-Disposition'] = "riddl-data; name=\"#{r.name}\""
-                @res['Content-Disposition'] += "; filename=\"#{r.filename}\"" unless r.filename.nil?
-            end   
-          end
-          if w.response.length > 1
-            @res['Content-Type'] = "multipart/mixed; boundary=\"#{BOUNDARY}\"#{EOL}"
-            w.response.each do
-
-            end
-
-          end  
         end  
       end
     end
