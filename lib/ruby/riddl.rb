@@ -15,7 +15,7 @@ module Riddl
           #{{{
           if description?
             tpath = path == "/" ? '' : path.gsub(/\/([^{}\/]+)/,"/des:resource[@relative=\"\\1\"]").gsub(/\/\{\}/,"des:resource[not(@relative)]").gsub(/\/+/,'/')
-            tpath = "/des:description/des:resource/" + tpath + "des:" + operation
+            tpath = "/des:description/des:resource" + tpath + "des:" + operation
             self.find(tpath + "[@in and not(@in='*')]").each do |o|
               return o.attributes['in'] if check_message(o.attributes['in'],params)
             end
@@ -37,14 +37,26 @@ module Riddl
         end
 
         def check_message(name,mist)
+          #{{{
           self.find("/des:description/des:message[@name='#{name}']").each do |m|
             msol = m.children
             cist = 0
             csol = 0
+            pcounter = nil
             loop do
               sol = msol[csol]
               ist = mist[cist]
-              case msoll.attributes['occurs']
+              break if ist.nil? and sol.nil?
+              raise "ERROR sol zuende, ist nicht" if sol.nil? and !ist.nil?
+              if ist.nil? and !sol.nil?
+                until sol.nil?
+                  csol += 1
+                  sol = msol[csol]
+                  raise "ERROR ist zuende, sol nicht" if sol.attributes['occurs'].nil? || sol.attributes['occurs'] == '+'
+                end
+                break
+              end  
+              case sol.attributes['occurs']
                 when '?'
                   cist += 1 if identical(sol,ist)
                   csol += 1
@@ -63,7 +75,7 @@ module Riddl
                     pcounter += 1
                   else
                     if pcounter.nil?
-                      raise "ERROR"
+                      raise "ERROR nicht genug plus"
                     else  
                       pcounter = nil
                       csol += 1
@@ -74,15 +86,19 @@ module Riddl
                     csol += 1
                     cist += 1
                   else
-                    raise "ERROR"
+                    raise "ERROR nicht gefunden"
                   end  
               end  
             end
           end
+          #}}}
         end
 
         def identical(a,b)
-          #if a.attributes['name']
+          b.name == a.attributes['name']
+          #TODO
+          #wenn mimetype check handler
+          #wenn type relaxng bauen un checken
         end
         private :identical
 
@@ -703,7 +719,7 @@ module Riddl
     end
 
     def _call(env)
-      pinfo = env["PATH_INFO"].sub(/\/*$/,'/').gsub(/\/+/,'')
+      pinfo = env["PATH_INFO"].sub(/\/*$/,'/').gsub(/\/+/,'/')
       @env = env
       @req = Rack::Request.new(env)
       @res = Rack::Response.new
