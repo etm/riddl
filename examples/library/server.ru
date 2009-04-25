@@ -1,14 +1,31 @@
 require 'rack'
 require 'socket'
-require '../../lib/ruby/riddl'
+require '../../lib/ruby/server'
 require 'pp'
 
 use Rack::ShowStatus
 
 class BookQuery < Riddl::Implementation
-  def content  
-    "hello world"
-  end  
+  def response  
+    [
+      Riddl::ParameterIO.new("list-of-books","text/xml") do |struct|
+        <<-END
+          <books>
+            <book id="1">
+              <author>Agador</author>
+              <title>Mu</title>
+            </book>  
+          </books>"
+        END
+      end
+    ]
+  end
+  def headers
+    []
+  end
+  def status
+    200
+  end
 end
 
 run(
