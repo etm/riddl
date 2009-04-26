@@ -8,7 +8,7 @@ use Rack::ShowStatus
 class BookQuery < Riddl::Implementation
   def response  
     [
-      Riddl::ParameterIO.new("list-of-books","text/xml") do |struct|
+      Riddl::Parameter::Complex.new("list-of-books","text/xml") do
         <<-END
           <books>
             <book id="1">
