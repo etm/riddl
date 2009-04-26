@@ -169,7 +169,7 @@ module Riddl
         parse_multipart(input,content_type,content_length.to_i)
       elsif FORM_CONTENT_TYPES.include?(media_type)
         # sub is a fix for Safari Ajax postings that always append \0
-        parse_nested_query(input.sub(/\0\z/, ''),:parameter)
+        parse_nested_query(input.read.sub(/\0\z/, ''),:parameter)
       else 
         parse_content(input,content_type,content_length.to_i,content_disposition||'',content_id||'')
       end

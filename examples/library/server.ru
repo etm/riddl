@@ -7,18 +7,16 @@ use Rack::ShowStatus
 
 class BookQuery < Riddl::Implementation
   def response  
-    [
-      Riddl::Parameter::Complex.new("list-of-books","text/xml") do
-        <<-END
-          <books>
-            <book id="1">
-              <author>Agador</author>
-              <title>Mu</title>
-            </book>  
-          </books>"
-        END
-      end
-    ]
+    Riddl::Parameter::Complex.new("list-of-books","text/xml") do
+      <<-END
+        <books>
+          <book id="1">
+            <author>Agador</author>
+            <title>Mu</title>
+          </book>  
+        </books>
+      END
+    end
   end
   def headers
     []

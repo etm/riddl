@@ -1,6 +1,6 @@
 require ::File.dirname(__FILE__) + "/implementation.rb"
 require ::File.dirname(__FILE__) + "/httpparser.rb"
-require ::File.dirname(__FILE__) + "/generator.rb"
+require ::File.dirname(__FILE__) + "/httpgenerator.rb"
 require ::File.dirname(__FILE__) + "/parameter.rb"
 require ::File.dirname(__FILE__) + "/file.rb"
 
@@ -50,7 +50,6 @@ module Riddl
       else
         @res.status = 404
       end
-      p "---"
       @res.finish
     end
   
@@ -65,6 +64,12 @@ module Riddl
         w = what.new
         @res.status = w.status
         if w.status == 200
+          begin
+            HttpGenerator.new(w.response,@res).generate
+          rescue => e
+            puts e 
+            puts e.backtrace 
+          end
         end  
       end
     end

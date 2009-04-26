@@ -9,9 +9,11 @@
          'content' => $fileContents
      )
   );
-  $url = "http://localhost:9292/" . $argv[2];
+  $url = "http://localhost:9292" . $argv[2];
   $ctx = stream_context_create($params);
   $fp = fopen($url, 'rb', false, $ctx);
-  
+
   $response = stream_get_contents($fp);
+  print "======>\n";
+  print $response;
 ?>
