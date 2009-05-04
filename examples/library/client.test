@@ -1,0 +1,6 @@
+require 'pp'
+require '../../lib/ruby/client'
+
+library = Riddl::Client.new("http://localhost:9292")
+books = library.resource("books")
+pp books.get()

@@ -3,63 +3,67 @@ module Riddl
     BOUNDARY = "Time_is_an_illusion._Lunchtime_doubly_so.0xriddldata"
     EOL = "\r\n"
 
-    def initialize(params,res)
+    def initialize(params,headers)
       @params = params
-      @res = res
+      @headers = headers
     end
 
     def generate
       if @params.class == Array && @params.length == 1
         body(@params[0])
-      end
-      if @params.class == Riddl::Parameter::Simple || @params.class == Riddl::Parameter::Complex
+      elsif @params.class == Riddl::Parameter::Simple || @params.class == Riddl::Parameter::Complex
         body(@params)
-      end
-      if @params.class == Array && @params.length > 1
+      elsif @params.class == Array && @params.length > 1
         multipart
+      else
+        nil
       end  
     end
 
     def body(r)
+      tmp = StringIO.new('r+b')
       case r
         when Riddl::Parameter::Simple
-          @res.write r.value
-          @res['Content-Type'] = "text/riddl-data"
-          @res['Content-Disposition'] = "riddl-data; name=\"#{r.name}\""
+          tmp.write r.value
+          @headers['Content-Type'] = "text/riddl-data"
+          @headers['Content-Disposition'] = "riddl-data; name=\"#{r.name}\""
         when Riddl::Parameter::Complex
-          @res.write(r.value.class == IO ? r.value.read : r.value)
-          @res['Content-Type'] = r.mimetype
+          tmp.write(r.value.class == IO ? r.value.read : r.value)
+          @headers['Content-Type'] = r.mimetype
           if r.filename.nil?
-            @res['Content-ID'] = r.name
+            @headers['Content-ID'] = r.name
           else
-            @res['Content-Disposition'] = "riddl-data; name=\"#{r.name}\"; filename=\"#{r.filename}\""
+            @headers['Content-Disposition'] = "riddl-data; name=\"#{r.name}\"; filename=\"#{r.filename}\""
           end  
-      end   
+      end
+      tmp.flush
     end
     private :body
 
     def multipart
-      @res['Content-Type'] = "multipart/mixed; boundary=\"#{BOUNDARY}\"#{EOL}"
+      tmp = StringIO.new('r+b')
+      @headers['Content-Type'] = "multipart/mixed; boundary=\"#{BOUNDARY}\"#{EOL}"
       @params.each do |r|
         case r.class
           when SimpleParameter
-            @res.write "--" + BOUNDARY + EOL
-            @res.write "Content-Disposition: riddl-data; name=\"#{r.name}\"" + EOL
-            @res.write EOL
-            @res.write r.value
-            @res.write EOL
+            tmp.write "--" + BOUNDARY + EOL
+            tmp.write "Content-Disposition: riddl-data; name=\"#{r.name}\"" + EOL
+            tmp.write EOL
+            tmp.write r.value
+            tmp.write EOL
           when ComplexParameter
-            @res.write "--" +  BOUNDARY + EOL
-            @res.write "Content-Disposition: riddl-data; name=\"#{r.name}\""
-            @res.write r.filename.nil? ? EOL : "; filename=\"#{r.filename}\"" + EOL
-            @res.write "Content-Transfer-Encoding: binary" + EOL
-            @res.write "Content-Type: " + r.mimetype + EOL
-            @res.write EOL
-            @res.write r.value.read
-            @res.write EOL
+            tmp.write "--" +  BOUNDARY + EOL
+            tmp.write "Content-Disposition: riddl-data; name=\"#{r.name}\""
+            tmp.write r.filename.nil? ? EOL : "; filename=\"#{r.filename}\"" + EOL
+            tmp.write "Content-Transfer-Encoding: binary" + EOL
+            tmp.write "Content-Type: " + r.mimetype + EOL
+            tmp.write EOL
+            tmp.write r.value.read
+            tmp.write EOL
         end   
       end
-      @res.write "--" + BOUNDARY + EOL
+      tmp.write "--" + BOUNDARY + EOL
+      tmp.flush
     end
     private :multipart
   

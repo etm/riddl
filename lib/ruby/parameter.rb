@@ -1,18 +1,20 @@
 module Riddl
   module Parameter
     class Simple
-      attr_reader :name, :value
-      def initialize(name,value)
+      attr_reader :name, :value, :type
+      def initialize(name,value,type=:body)
         @name = name
         @value = value
+        @type = (type == :query ? :query : :body)
       end
     end
     class Complex
-      attr_reader :name, :mimetype, :filename, :value
+      attr_reader :name, :mimetype, :filename, :value, :type
       def initialize(name,mimetype,filename=nil,file=nil)
         @name = name
         @mimetype = mimetype
         @filename = filename
+        @type = :body
         if file && file.class == IO
           @value = file
         else

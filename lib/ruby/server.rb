@@ -65,7 +65,7 @@ module Riddl
         @res.status = w.status
         if w.status == 200
           begin
-            HttpGenerator.new(w.response,@res).generate
+            @res.write HttpGenerator.new(w.response,@res).generate.read
           rescue => e
             puts e 
             puts e.backtrace 
