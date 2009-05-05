@@ -1,3 +1,5 @@
+require 'stringio'
+
 module Riddl
   class HttpGenerator
     BOUNDARY = "Time_is_an_illusion._Lunchtime_doubly_so.0xriddldata"
@@ -44,16 +46,16 @@ module Riddl
 
     def multipart
       tmp = StringIO.new('r+b')
-      @headers['Content-Type'] = "multipart/mixed; boundary=\"#{BOUNDARY}\"#{EOL}"
+      @headers['Content-Type'] = "multipart/mixed; boundary=\"#{BOUNDARY}\""
       @params.each do |r|
-        case r.class
-          when SimpleParameter
+        case r
+          when Riddl::Parameter::Simple
             tmp.write "--" + BOUNDARY + EOL
             tmp.write "Content-Disposition: riddl-data; name=\"#{r.name}\"" + EOL
             tmp.write EOL
             tmp.write r.value
             tmp.write EOL
-          when ComplexParameter
+          when Riddl::Parameter::Complex
             tmp.write "--" +  BOUNDARY + EOL
             tmp.write "Content-Disposition: riddl-data; name=\"#{r.name}\""
             tmp.write r.filename.nil? ? EOL : "; filename=\"#{r.filename}\"" + EOL

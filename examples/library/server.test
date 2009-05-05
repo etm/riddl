@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+require '../../lib/ruby/client'
 require 'socket'
 
 t = Thread.new do
@@ -15,8 +16,16 @@ until up
   end  
 end
 
-sleep 0.1
+library = Riddl::Client.new("http://localhost:9292")
+books = library.resource("books")
+puts books.get [
+  Riddl::Parameter::Simple.new("author","mangler"),
+  Riddl::Parameter::Simple.new("title","12")
+]
+puts books.get [
+  Riddl::Parameter::Simple.new("author","mangler"),
+  Riddl::Parameter::Simple.new("title","12")
+]
 
-puts `php test/test.php get "/books" test/book-query.txt`
 `pkill rackup`
 t.join

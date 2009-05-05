@@ -19,27 +19,25 @@ module Riddl
       end  
 
       def get(parameters = [])
-        p "hallo"
-        request(:GET,parameters)
+        request('GET',parameters)
       end
-      def pos(parameters = [])
-        request(:POST,parameters)
+      def post(parameters = [])
+        request('POST',parameters)
       end
       def put(parameters = [])
-        request(:PUT,parameters)
+        request('PUT',parameters)
       end
       def delete(parameters = [])
-        request(:DELETE,parameters)
+        request('DELETE',parameters)
       end
       
       def request(method,parameters)
         url = URI.parse(@url)
-        pp url
         req = Riddl::Client::Request.new(method,url.path,parameters)
         res = Net::HTTP.start(url.host, url.port) do |http|
           http.request(req)
         end
-        puts res.body
+        res.body
       end
       private :request
     end  
@@ -47,7 +45,9 @@ module Riddl
     class Request < Net::HTTPGenericRequest
       def initialize(method, path, parameters)
         super method, true, true, path, nil
-        self.body = HttpGenerator.new(parameters,self).generate
+        tmp = HttpGenerator.new(parameters,self).generate
+        self.content_length = tmp.size
+        self.body_stream = tmp
       end
     end
 
