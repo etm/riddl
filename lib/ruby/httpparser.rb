@@ -1,17 +1,5 @@
 module Riddl
   class HttpParser
-    class Param
-      #{{{
-      def initialize(type,name,data)
-        name =~ %r([\[\]]*([^\[\]]+)\]*)
-        @name = $1 || ''
-        @data = data
-        @type = type
-      end
-      attr_reader :name, :data, :type
-      #}}}
-    end
-
     MULTIPART_CONTENT_TYPES = [
       #{{{
       'multipart/form-data',
@@ -137,14 +125,14 @@ module Riddl
         filename =~ /^(?:.*[:\\\/])?(.*)/m
         filename = $1
 
-        @params << Param.new(:part, name, :filename => filename, :type => ctype, :tempfile => body, :head => head)
+        @params << Parameter::Complex.new(name, ctype, filename, body, head)
       elsif !filename && ctype
         body.rewind
         
         # Generic multipart cases, not coming from a form
-        @params << Param.new(:part, name, :type => ctype, :tempfile => body, :head => head)
+        @params << Parameter::Complex.new(name, ctype, nil, body, head)
       else
-        @params << Param.new(:parameter, name, body)
+        @params << Parameter::Simple.new(name, body, :body)
       end
       #}}}
     end
@@ -154,7 +142,7 @@ module Riddl
       #{{{
       (qs || '').split(/[#{D}] */n).each do |p|
         k, v = unescape(p).split('=', 2)
-        @params << Param.new(type,k,v)
+        @params << Parameter::Simple.new(k,v,type)
       end
       #}}}
     end
@@ -169,7 +157,7 @@ module Riddl
         parse_multipart(input,content_type,content_length.to_i)
       elsif FORM_CONTENT_TYPES.include?(media_type)
         # sub is a fix for Safari Ajax postings that always append \0
-        parse_nested_query(input.read.sub(/\0\z/, ''),:parameter)
+        parse_nested_query(input.read.sub(/\0\z/, ''),:body)
       else 
         parse_content(input,content_type,content_length.to_i,content_disposition||'',content_id||'')
       end

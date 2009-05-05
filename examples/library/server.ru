@@ -6,7 +6,7 @@ require 'pp'
 use Rack::ShowStatus
 
 class BookQuery < Riddl::Implementation
-  def response  
+  def response
     Riddl::Parameter::Complex.new("list-of-books","text/xml") do
       <<-END
         <books>

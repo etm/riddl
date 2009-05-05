@@ -16,7 +16,7 @@ module Riddl
       elsif @params.class == Array && @params.length > 1
         multipart
       else
-        nil
+        StringIO.new('r+b')
       end  
     end
 
@@ -37,6 +37,8 @@ module Riddl
           end  
       end
       tmp.flush
+      tmp.rewind
+      tmp
     end
     private :body
 
@@ -64,6 +66,8 @@ module Riddl
       end
       tmp.write "--" + BOUNDARY + EOL
       tmp.flush
+      tmp.rewind
+      tmp
     end
     private :multipart
   

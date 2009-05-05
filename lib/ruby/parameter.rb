@@ -9,12 +9,13 @@ module Riddl
       end
     end
     class Complex
-      attr_reader :name, :mimetype, :filename, :value, :type
-      def initialize(name,mimetype,filename=nil,file=nil)
+      attr_reader :name, :mimetype, :filename, :value, :type, :additional
+      def initialize(name,mimetype,filename=nil,file=nil,additional=[])
         @name = name
         @mimetype = mimetype
         @filename = filename
         @type = :body
+        @additional = additional
         if file && file.class == IO
           @value = file
         else
