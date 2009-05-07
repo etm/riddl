@@ -1,8 +1,8 @@
-require ::File.dirname(__FILE__) + "/implementation.rb"
-require ::File.dirname(__FILE__) + "/httpparser.rb"
-require ::File.dirname(__FILE__) + "/httpgenerator.rb"
-require ::File.dirname(__FILE__) + "/parameter.rb"
-require ::File.dirname(__FILE__) + "/file.rb"
+require ::File.dirname(__FILE__) + "/implementation"
+require ::File.dirname(__FILE__) + "/httpparser"
+require ::File.dirname(__FILE__) + "/httpgenerator"
+require ::File.dirname(__FILE__) + "/parameter"
+require ::File.dirname(__FILE__) + "/file"
 
 module Riddl
   class Server
@@ -13,9 +13,9 @@ module Riddl
 
     def initialize(description,&blk)
       @description = Riddl::File::open(description)
-      raise 'No RIDDL description found.' unless @description.description?
-      raise 'RIDDL description does not conform to specification' unless @description.validate!
-      raise 'RIDDL description contains invalid resources' unless @description.valid_resources?
+      raise SpecificationError, 'No RIDDL description found.' unless @description.description?
+      raise SpecificationError, 'RIDDL description does not conform to specification' unless @description.validate!
+      raise SpecificationError, 'RIDDL description contains invalid resources' unless @description.valid_resources?
       @paths = @description.paths
       @blk = blk
     end
@@ -39,7 +39,7 @@ module Riddl
           @env['HTTP_CONTENT_DISPOSITION'],
           @env['HTTP_CONTENT_ID']
         ).params
-        @riddl_operation = @req.env['REQUEST_METHOD'].downcase
+        @riddl_operation = @env['REQUEST_METHOD'].downcase
         begin
           @path = ''
           @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_operation,params)
@@ -74,6 +74,14 @@ module Riddl
       end
     end
 
+    def method(what)
+      if what.class == Hash
+        what.each do |met,min|
+          return true if check(min) && @riddl_operation == met.to_s.downcase
+        end  
+      end
+      false
+    end  
     def post(min); check(min) && @riddl_operation == 'post' end
     def get(min); check(min) && @riddl_operation == 'get' end
     def delete(min); check(min) && @riddl_operation == 'delete' end

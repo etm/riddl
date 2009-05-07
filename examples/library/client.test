@@ -2,7 +2,7 @@ require '../../lib/ruby/client'
 
 library = Riddl::Client.new("http://localhost:9292")
 books = library.resource("books")
-puts books.get [
+puts books.request :get => [
   Riddl::Parameter::Simple.new("author","mangler"),
   Riddl::Parameter::Simple.new("title","12")
 ]

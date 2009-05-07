@@ -27,7 +27,7 @@ module Riddl
       case r
         when Riddl::Parameter::Simple
           tmp.write r.value
-          @headers['Content-Type'] = "text/riddl-data"
+          @headers['Content-Type'] = "text/plain"
           @headers['Content-Disposition'] = "riddl-data; name=\"#{r.name}\""
         when Riddl::Parameter::Complex
           tmp.write(r.value.class == IO ? r.value.read : r.value)

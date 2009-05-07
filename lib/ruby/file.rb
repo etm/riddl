@@ -31,7 +31,7 @@ module Riddl
             self.find(tpath + "[@pass and @pass='*']").each do
               return "*", "*"
             end
-            raise "Error wrong path"
+            raise PathError
           end
           nil
           #}}}
@@ -48,12 +48,12 @@ module Riddl
               sol = msol[csol]
               ist = mist[cist]
               break if ist.nil? and sol.nil?
-              raise "ERROR sol zuende, ist nicht" if sol.nil? and !ist.nil?
+              raise OccursError, "input is parsed, description still has necessary elements" if sol.nil? and !ist.nil?
               if ist.nil? and !sol.nil?
                 until sol.nil?
                   csol += 1
                   sol = msol[csol]
-                  raise "ERROR ist zuende, sol nicht" if sol.attributes['occurs'].nil? || sol.attributes['occurs'] == '+'
+                  raise OccursError, "ERROR description is parsed, input still has elements" if sol.attributes['occurs'].nil? || sol.attributes['occurs'] == '+'
                 end
                 break
               end  
@@ -76,7 +76,7 @@ module Riddl
                     pcounter += 1
                   else
                     if pcounter.nil?
-                      raise "ERROR nicht genug plus"
+                      raise OccursError, "input has not enough parameters #{sol.name}"
                     else  
                       pcounter = nil
                       csol += 1
@@ -87,7 +87,7 @@ module Riddl
                     csol += 1
                     cist += 1
                   else
-                    raise "ERROR nicht gefunden"
+                    raise OccursError, "#{sol.attributes['name']} is not a desired input"
                   end  
               end  
             end

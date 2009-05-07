@@ -22,10 +22,6 @@ puts books.get [
   Riddl::Parameter::Simple.new("author","mangler"),
   Riddl::Parameter::Simple.new("title","12")
 ]
-puts books.get [
-  Riddl::Parameter::Simple.new("author","mangler"),
-  Riddl::Parameter::Simple.new("title","12")
-]
 
 `pkill rackup`
 t.join
