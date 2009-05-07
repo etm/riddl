@@ -1,6 +1,6 @@
 require 'net/http'
-require ::File.dirname(__FILE__) + "/httpgenerator.rb"
-require ::File.dirname(__FILE__) + "/parameter.rb"
+require ::File.dirname(__FILE__) + "/httpgenerator"
+require ::File.dirname(__FILE__) + "/parameter"
 
 module Riddl
 
@@ -19,19 +19,25 @@ module Riddl
       end  
 
       def get(parameters = [])
-        request('GET',parameters)
+        exec_request('GET',parameters)
       end
       def post(parameters = [])
-        request('POST',parameters)
+        exec_request('POST',parameters)
       end
       def put(parameters = [])
-        request('PUT',parameters)
+        exec_request('PUT',parameters)
       end
       def delete(parameters = [])
-        request('DELETE',parameters)
+        exec_request('DELETE',parameters)
       end
+      def request(what)
+        if what.class == Hash && what.length == 1
+          what.each { |method,parameters| return exec_request(method.to_s.upcase,parameters) }
+        end
+        raise ArgumentError, "Hash with ONE method => parameters pair required"
+      end  
       
-      def request(method,parameters)
+      def exec_request(method,parameters)
         url = URI.parse(@url)
         req = Riddl::Client::Request.new(method,url.path,parameters)
         res = Net::HTTP.start(url.host, url.port) do |http|
@@ -39,7 +45,7 @@ module Riddl
         end
         res.body
       end
-      private :request
+      private :exec_request
     end  
 
     class Request < Net::HTTPGenericRequest

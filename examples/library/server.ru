@@ -30,7 +30,7 @@ run(
   Riddl::Server.new("description.xml") do
     on resource do
       on resource "books" do
-        run BookQuery if get 'book-query'
+        run BookQuery if method :get => 'book-query'
       end
     end
   end

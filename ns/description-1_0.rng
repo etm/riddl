@@ -20,7 +20,7 @@
       </element>
     </zeroOrMore>
     <element name="resource">  
-      <ref name="root-resource"/>
+      <ref name="riddl-root-resource"/>
     </element>
   </define>
 
@@ -28,6 +28,15 @@
     <attribute name="name">
       <ref name="riddl-datatype-out-messagename"/>
     </attribute>
+    <zeroOrMore>
+      <element name="header">
+        <attribute name="name">
+          <data type="NCName"/>
+        </attribute>
+        <ref name="riddl-fixed"/>
+        <ref name="data"/>
+      </element>  
+    </zeroOrMore>
     <zeroOrMore>
       <element name="parameter">
         <attribute name="name">
@@ -37,7 +46,10 @@
           <ref name="riddl-occurs"/>
         </optional>
         <choice>
-          <ref name="data"/>
+          <group>
+            <ref name="riddl-fixed"/>
+            <ref name="data"/>
+          </group>  
           <group>
             <attribute name="mimetype">
               <data type="string">
@@ -58,11 +70,18 @@
     </zeroOrMore>
   </define>
 
-  <define name="root-resource">
+  <define name="riddl-root-resource">
     <ref name="riddl-resource-content"/>
   </define>
 
-  <define name="resource">
+  <define name="riddl-fixed">
+    <optional>
+      <attribute name="fixed">
+        <data type="string"/>
+      </attribute>
+    </optional>  
+  </define>
+  <define name="riddl-resource">
     <optional>
       <attribute name="relative">
         <ref name="riddl-datatype-relpath"/>
@@ -78,30 +97,34 @@
 
   <define name="riddl-resource-content">
     <zeroOrMore>
-      <element name="post">
-      	<ref name="riddl-method"/>
-      </element>
-    </zeroOrMore>
-    <zeroOrMore>
-      <element name="get">
-        <ref name="riddl-method"/>
-      </element>
-    </zeroOrMore>
-    <zeroOrMore>
-      <element name="put">
-        <ref name="riddl-method"/>
-      </element>
-    </zeroOrMore>
-    <zeroOrMore>
-      <element name="delete">
-        <ref name="riddl-method"/>
-      </element>
+      <choice>
+        <element name="post">
+          <ref name="riddl-method"/>
+        </element>
+        <element name="get">
+          <ref name="riddl-method"/>
+        </element>
+        <element name="put">
+          <ref name="riddl-method"/>
+        </element>
+        <element name="delete">
+          <ref name="riddl-method"/>
+        </element>
+        <element name="request">
+          <attribute name="type">
+            <data type="string">
+              <param name="pattern">[a-z]+</param>
+            </data>  
+          </attribute>
+          <ref name="riddl-method"/>
+        </element>  
+      </choice>  
     </zeroOrMore>
     <zeroOrMore>
       <element name="resource">
-    	<ref name="resource"/>
+        <ref name="riddl-resource"/>
       </element>
-    </zeroOrMore> 
+    </zeroOrMore>
   </define>
    
   <define name="riddl-method">
