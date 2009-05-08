@@ -14,8 +14,9 @@ module Riddl
         def get_message(path,operation,params)
           #{{{
           if description?
-            tpath = path == "/" ? '/' : path.gsub(/\/([^{}\/]+)/,"/des:resource[@relative=\"\\1\"]").gsub(/\/\{\}/,"des:resource[not(@relative)]").gsub(/\/+/,'/')
-            tpath = "/des:description/des:resource" + tpath + "des:" + operation
+            tpath = path == "/" ? '/' : path.gsub(/\/([^{}\/]+)/,"/des:resource[@relative=\"\\1\"]").gsub(/\/\{\}/,"des:resource[not(@relative)]").gsub(/\/\/+/,'/')
+            tpath = "/des:description/des:resource" + tpath + "des:" + operation + "|/des:description/des:resource" + tpath + "des:request[@type='#{operation}']"
+            tpath
             self.find(tpath + "[@in and not(@in='*')]").each do |o|
               return o.attributes['in'], o.attributes['out'] if check_message(o.attributes['in'],params)
             end
