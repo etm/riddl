@@ -27,17 +27,17 @@ module Riddl
       #}}}
     end
 
-    def get_message(path,operation,params)
+    def get_message(path,operation,params,headers)
       #{{{
       if description?
         tpath = path == "/" ? '/' : path.gsub(/\/([^{}\/]+)/,"/des:resource[@relative=\"\\1\"]").gsub(/\/\{\}/,"des:resource[not(@relative)]").gsub(/\/\/+/,'/')
         tpath = "/des:description/des:resource" + tpath + "des:" + operation + "|/des:description/des:resource" + tpath + "des:request[@type='#{operation}']"
         tpath
         @doc.find(tpath + "[@in and not(@in='*')]").each do |o|
-          return o.attributes['in'], o.attributes['out'] if check_message(o.attributes['in'],params)
+          return o.attributes['in'], o.attributes['out'] if check_message(o.attributes['in'],params,headers)
         end
         @doc.find(tpath + "[@pass and not(@pass='*')]").each do |o|
-          return o.attributes['pass'], o.attributes['pass'] if check_message(o.attributes['pass'],params)
+          return o.attributes['pass'], o.attributes['pass'] if check_message(o.attributes['pass'],params,headers)
         end
         @doc.find(tpath + "[@in and @in='*']").each do
           return "*", o.attributes['out']
@@ -54,10 +54,16 @@ module Riddl
       #}}}
     end
 
-    def check_message(name,mist)
+    def check_message(name,mist,headers)
       #{{{
       @doc.find("/des:description/des:message[@name='#{name}']").each do |m|
-        msol = m.children
+        m.find("des:header").each do |h|
+          unless header_match(h,headers)
+            raise OccursError, "header #{h.attributes['name']} not found"
+          end
+        end  
+
+        msol = m.find("des:parameter")
         cist = 0
         csol = 0
         pcounter = nil
@@ -76,18 +82,18 @@ module Riddl
           end  
           case sol.attributes['occurs']
             when '?'
-              cist += 1 if identical(sol,ist)
+              cist += 1 if parameter_match(sol,ist)
               csol += 1
               next
             when '*'
-              if identical(sol,ist)
+              if parameter_match(sol,ist)
                 cist += 1
               else  
                 csol += 1
               end  
               next
             when '+'
-              if identical(sol,ist)
+              if parameter_match(sol,ist)
                 cist += 1
                 pcounter ||= 0
                 pcounter += 1
@@ -100,7 +106,7 @@ module Riddl
                 end  
               end  
             else
-              if identical(sol,ist)
+              if parameter_match(sol,ist)
                 csol += 1
                 cist += 1
               else
@@ -112,13 +118,23 @@ module Riddl
       #}}}
     end
 
-    def identical(a,b)
+    def parameter_match(a,b)
       b.name == a.attributes['name']
       #TODO
       #wenn mimetype check handler
-      #wenn type relaxng bauen un checken
+      #wenn type relaxng bauen und checken
+      #fixed
     end
-    private :identical
+    private :parameter_match
+    
+    def header_match(a,b)
+      name = a.attributes['name'].upcase.sub(/\-/,'_')
+      b.has_key?(name)
+      #TODO
+      #type relaxng bauen und checken
+      #fixed
+    end
+    private :header_match
 
     def validate!
       #{{{

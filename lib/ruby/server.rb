@@ -4,6 +4,7 @@ require ::File.dirname(__FILE__) + "/httpgenerator"
 require ::File.dirname(__FILE__) + "/parameter"
 require ::File.dirname(__FILE__) + "/error"
 require ::File.dirname(__FILE__) + "/file"
+require 'pp'
 
 module Riddl
   class Server
@@ -43,7 +44,7 @@ module Riddl
         @riddl_operation = @env['REQUEST_METHOD'].downcase
         begin
           @path = ''
-          @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_operation,params)
+          @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_operation,params,@env)
           instance_eval(&@blk)
         rescue  
           @res.status = 404
