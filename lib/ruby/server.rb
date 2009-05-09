@@ -2,6 +2,7 @@ require ::File.dirname(__FILE__) + "/implementation"
 require ::File.dirname(__FILE__) + "/httpparser"
 require ::File.dirname(__FILE__) + "/httpgenerator"
 require ::File.dirname(__FILE__) + "/parameter"
+require ::File.dirname(__FILE__) + "/error"
 require ::File.dirname(__FILE__) + "/file"
 
 module Riddl
@@ -12,7 +13,7 @@ module Riddl
     attr_reader :env, :req, :res
 
     def initialize(description,&blk)
-      @description = Riddl::File::open(description)
+      @description = Riddl::File::new(description)
       raise SpecificationError, 'No RIDDL description found.' unless @description.description?
       raise SpecificationError, 'RIDDL description does not conform to specification' unless @description.validate!
       raise SpecificationError, 'RIDDL description contains invalid resources' unless @description.valid_resources?
