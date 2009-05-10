@@ -19,8 +19,9 @@ end
 library = Riddl::Client.new("http://localhost:9292")
 books = library.resource("books")
 puts books.get [
-  Riddl::Parameter::Simple.new("author","mangler"),
-  Riddl::Parameter::Simple.new("title","12")
+  Riddl::Header.new("Library",7),
+  Riddl::Parameter::Simple.new("author","Mangler"),
+  Riddl::Parameter::Simple.new("title","12 bottles of beer on the wall")
 ]
 
 `pkill rackup`

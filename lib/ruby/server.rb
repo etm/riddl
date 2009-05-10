@@ -1,9 +1,10 @@
-require ::File.dirname(__FILE__) + "/implementation"
-require ::File.dirname(__FILE__) + "/httpparser"
-require ::File.dirname(__FILE__) + "/httpgenerator"
-require ::File.dirname(__FILE__) + "/parameter"
-require ::File.dirname(__FILE__) + "/error"
-require ::File.dirname(__FILE__) + "/file"
+require ::File.dirname(__FILE__) + '/implementation'
+require ::File.dirname(__FILE__) + '/httpparser'
+require ::File.dirname(__FILE__) + '/httpgenerator'
+require ::File.dirname(__FILE__) + '/header'
+require ::File.dirname(__FILE__) + '/parameter'
+require ::File.dirname(__FILE__) + '/error'
+require ::File.dirname(__FILE__) + '/file'
 require 'pp'
 
 module Riddl
@@ -33,7 +34,13 @@ module Riddl
       @res = Rack::Response.new
       @riddl_path = @paths.find{ |e| e[1] =~ pinfo }
       if @riddl_path
-        params = Riddl::HttpParser.new(
+        @headers = {}
+        @env.each do |h,v|
+          if h =~ /^HTTP_(.*)$/
+            @headers[$1] = v
+          end  
+        end
+        @parameters = Riddl::HttpParser.new(
           @env['QUERY_STRING'],
           @env['rack.input'],
           @env['CONTENT_TYPE'],
@@ -44,7 +51,7 @@ module Riddl
         @riddl_operation = @env['REQUEST_METHOD'].downcase
         begin
           @path = ''
-          @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_operation,params,@env)
+          @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_operation,@parameters,@headers)
           instance_eval(&@blk)
         rescue  
           @res.status = 404
@@ -63,10 +70,11 @@ module Riddl
 
     def run(what)
       if what.class == Class and what.superclass == Riddl::Implementation
-        w = what.new
+        w = what.new(@headers,@parameters)
         @res.status = w.status
         if w.status == 200
           begin
+            # TODO check outgoing message
             @res.write HttpGenerator.new(w.response,@res).generate.read
           rescue => e
             puts e 
