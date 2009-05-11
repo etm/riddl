@@ -19,12 +19,12 @@ module Riddl
         @remove_name = remove
         @hash = 0
         unless add.nil?
-          @add = XML::Smart::string(layer.find("des:message[@name='#{add}']").first.dump)
+          @add = layer.find("des:message[@name='#{add}']").first.to_doc
           @add.find("/message/@name").delete_all!
           @hash += @add.to_s.hash
         end
         unless remove.nil?
-          @remove = XML::Smart::string(layer.find("des:message[@name='#{remove}']").first.dump)
+          @remove = layer.find("des:message[@name='#{remove}']").first.to_doc
           @remove.find("/message/@name").delete_all!
           @hash += @remove.to_s.hash
         end
@@ -39,7 +39,7 @@ module Riddl
     class Message
       #{{{
       def initialize(layer,name)
-        @message = XML::Smart::string(layer.find("des:message[@name='#{name}']").first.dump)
+        @message = layer.find("des:message[@name='#{name}']").first.to_doc
         @message.find("/message/@name").delete_all!
         @hash = @message.to_s.hash
         @name = name

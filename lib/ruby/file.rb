@@ -1,4 +1,4 @@
-gem 'ruby-xml-smart', '>= 0.1.14'
+gem 'ruby-xml-smart', '>= 0.2.0'
 require 'xml/smart'
 
 module Riddl
