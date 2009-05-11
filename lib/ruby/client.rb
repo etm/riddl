@@ -1,5 +1,6 @@
 require 'net/http'
 require ::File.dirname(__FILE__) + "/httpgenerator"
+require ::File.dirname(__FILE__) + "/header"
 require ::File.dirname(__FILE__) + "/parameter"
 
 module Riddl
@@ -50,7 +51,16 @@ module Riddl
 
     class Request < Net::HTTPGenericRequest
       def initialize(method, path, parameters)
-        super method, true, true, path, nil
+        headers = {}
+        parameters.delete_if do |p|
+          if p.class == Riddl::Header
+            headers[p.name] = "#{p.value}"
+            true
+          else
+            false
+          end  
+        end
+        super method, true, true, path, headers
         tmp = HttpGenerator.new(parameters,self).generate
         self.content_length = tmp.size
         self.body_stream = tmp
