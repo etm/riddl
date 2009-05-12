@@ -11,6 +11,7 @@ module Riddl
     DECLARATION = "http://riddl.org/ns/declaration/#{VERSION}"
     DESCRIPTION_FILE = "#{::File.dirname(__FILE__)}/ns/description-#{VERSION_MAJOR}_#{VERSION_MINOR}.rng"
     DECLARATION_FILE = "#{::File.dirname(__FILE__)}/ns/declaration-#{VERSION_MAJOR}_#{VERSION_MINOR}.rng"
+    CHECK = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"><data/></element>"
     #}}}
 
     def initialize(name)
@@ -119,22 +120,42 @@ module Riddl
     end
 
     def parameter_match(a,b)
-      b.name == a.attributes['name']
-      #TODO
-      #wenn mimetype check handler
-      #wenn type relaxng bauen und checken
-      #fixed
+      if b.class == Riddl::Parameter::Simple && (a.attributes['fixed'] || a.attributes['type'])
+        if b.name == a.attributes['name']
+          return match_simple(a,b.value)
+        end
+      end
+      if b.class == Riddl::Parameter::Complex && a.attributes['mimetype']
+        #TODO
+        #wenn mimetype check handler
+      end  
+      false
     end
     private :parameter_match
     
     def header_match(a,b)
       name = a.attributes['name'].upcase.sub(/\-/,'_')
-      b.has_key?(name)
-      #TODO
-      #type relaxng bauen und checken
-      #fixed
+      if b.has_key?(name)
+        return match_simple(a,b[name])
+      end
+      false
     end
     private :header_match
+
+    def match_simple(a,b)
+      if a.attributes['fixed']
+        a.attributes['fixed'] == b
+      else  
+        value = XML::Smart::string("<check/>")
+        value.root.text = b
+        type = XML::Smart::string(CHECK)
+        data = type.root.children[0]
+        data.attributes['type'] = a.attributes['type']
+        a.children.each { |e| data.add(e) }
+        value.validate_against type
+      end  
+    end
+    private :match_simple
 
     def validate!
       #{{{

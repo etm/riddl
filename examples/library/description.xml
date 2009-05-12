@@ -2,7 +2,7 @@
 
   <message name="book-query">
     <header name="Library" type="integer"/>
-    <parameter name="author" type="string" occurs="+"/>
+    <parameter name="author" occurs="+" type="string"/>
     <parameter name="title" type="string"/>
   </message>
   <message name="list-of-books">

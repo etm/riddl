@@ -33,8 +33,10 @@
         <attribute name="name">
           <data type="NCName"/>
         </attribute>
-        <ref name="riddl-fixed"/>
-        <ref name="data"/>
+        <choice>
+          <ref name="riddl-fixed"/>
+          <ref name="data"/>
+        </choice>  
       </element>  
     </zeroOrMore>
     <zeroOrMore>
@@ -46,10 +48,8 @@
           <ref name="riddl-occurs"/>
         </optional>
         <choice>
-          <group>
-            <ref name="riddl-fixed"/>
-            <ref name="data"/>
-          </group>  
+          <ref name="riddl-fixed"/>
+          <ref name="data"/>
           <group>
             <attribute name="mimetype">
               <data type="string">
