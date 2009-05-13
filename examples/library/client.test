@@ -1,8 +1,16 @@
+#!/usr/bin/ruby
 require '../../lib/ruby/client'
 
 library = Riddl::Client.new("http://localhost:9292")
 books = library.resource("books")
-puts books.request :get => [
-  Riddl::Parameter::Simple.new("author","mangler"),
-  Riddl::Parameter::Simple.new("title","12")
-]
+stime = Time.now.to_f
+nums = 170
+# Watch the power
+nums.times do
+  books.request :get => [
+    Riddl::Header.new("Library",7),
+    Riddl::Parameter::Simple.new("author","mangler"),
+    Riddl::Parameter::Simple.new("title","12")
+  ]
+end  
+puts "#{nums} requests done: #{Time.now.to_f - stime} seconds"
