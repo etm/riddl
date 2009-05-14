@@ -24,38 +24,26 @@
     </data>
   </define>
 
-  <define name="riddl-datatype-in-messagename">
+  <define name="riddl-datatype-name-star">
     <data type="string">
-      <param name="pattern">[a-z]\c*|\*</param>
+      <param name="pattern">\i\c*|\*</param>
     </data>
   </define>
-  <define name="riddl-datatype-out-messagename">
+  <define name="riddl-datatype-name">
     <data type="string">
-      <param name="pattern">[a-z]\c*</param>
+      <param name="pattern">\i\c*</param>
     </data>
   </define>
   
-  <define name="riddl-datatype-rname">
-    <data type="string">
-      <param name="pattern">[a-z]\c*</param>
-    </data>
-  </define>
-
-  <define name="riddl-occurs">
-    <choice>
-      <attribute name="occurs">
-        <choice>
-          <value>*</value>
-          <value>?</value>
-          <value>+</value>
-          <value>first</value>
-          <value>last</value>
-        </choice>  
-      </attribute>  
-      <attribute name="occurs">
-        <param name="pattern">(before|after)(_each)?\s+(\*|\?|\+|[a-z]\c+)</param>
-      </attribute>
-    </choice>
-  </define>
+  <define name="riddl-att-name">
+    <attribute name="name">
+      <ref name="riddl-datatype-name"/>
+    </attribute>
+  </define>  
+  <define name="riddl-att-name-star">
+    <attribute name="name">
+      <ref name="riddl-datatype-name-star"/>
+    </attribute>
+  </define>  
 
 </grammar>

@@ -15,9 +15,17 @@
     </attribute>
     <ref name="riddl-common-atts"/>
     <zeroOrMore>
-      <element name="message">
-        <ref name="riddl-message"/>
-      </element>
+      <choice>
+        <element name="message">
+          <ref name="riddl-message"/>
+        </element>
+        <element name="add">
+          <ref name="riddl-add"/>
+        </element>
+        <element name="remove">
+          <ref name="riddl-remove"/>
+        </element>
+      </choice>  
     </zeroOrMore>
     <element name="resource">  
       <ref name="riddl-root-resource"/>
@@ -25,14 +33,10 @@
   </define>
 
   <define name="riddl-message">
-    <attribute name="name">
-      <ref name="riddl-datatype-out-messagename"/>
-    </attribute>
+    <ref name="riddl-att-name"/>
     <zeroOrMore>
       <element name="header">
-        <attribute name="name">
-          <data type="NCName"/>
-        </attribute>
+        <ref name="riddl-att-name"/>
         <choice>
           <ref name="riddl-fixed"/>
           <ref name="data"/>
@@ -40,39 +44,130 @@
       </element>  
     </zeroOrMore>
     <zeroOrMore>
-      <element name="parameter">
-        <attribute name="name">
-          <data type="NCName"/>
-        </attribute>
-        <optional>
-          <ref name="riddl-occurs"/>
-        </optional>
-        <choice>
-          <ref name="riddl-fixed"/>
-          <ref name="data"/>
-          <group>
-            <attribute name="mimetype">
-              <data type="string">
-                <param name="pattern">[\c]+/[\c]+</param>
-              </data>
-            </attribute>  
-            <optional>
-              <attribute name="handler">
-                <data type="anyURI"/>
-              </attribute>  
-            </optional>
-            <optional>
-              <ref name="any"/>
-            </optional>  
-          </group>  
-        </choice>
-      </element>
+      <ref name="riddl-message-other"/>
     </zeroOrMore>
   </define>
 
-  <define name="riddl-root-resource">
-    <ref name="riddl-resource-content"/>
+  <define name="riddl-add">
+    <ref name="riddl-att-name"/>
+    <zeroOrMore>
+      <choice>
+        <element name="after_each">
+          <ref name="riddl-att-name-star"/>
+          <ref name="riddl-parameter"/>
+        </element>
+        <element name="before_each">
+          <ref name="riddl-att-name-star"/>
+          <ref name="riddl-parameter"/>
+        </element>
+        <element name="before_first">
+          <ref name="riddl-att-name-star"/>
+          <ref name="riddl-parameter"/>
+        </element>
+        <element name="after_last">
+          <ref name="riddl-att-name-star"/>
+          <ref name="riddl-parameter"/>
+        </element>
+        <element name="as_first">
+          <ref name="riddl-parameter"/>
+        </element>
+        <element name="as_last">
+          <ref name="riddl-parameter"/>
+        </element>
+      </choice>
+    </zeroOrMore>
   </define>
+  <define name="riddl-remove">
+    <ref name="riddl-att-name"/>
+    <zeroOrMore>
+      <choice>
+        <element name="each">
+          <ref name="riddl-att-name-star"/>
+        </element>
+        <element name="first">
+          <optional>
+            <ref name="riddl-att-name-star"/>
+          </optional>  
+        </element>
+        <element name="last">
+          <optional>
+            <ref name="riddl-att-name-star"/>
+          </optional>  
+        </element>
+      </choice>
+    </zeroOrMore>
+  </define>
+
+  <define name="riddl-message-other">
+    <choice>
+      <ref name="riddl-zeroOrMore"/>
+      <ref name="riddl-oneOrMore"/>
+      <ref name="riddl-optional"/>
+      <ref name="riddl-choice"/>
+      <ref name="riddl-group"/>
+      <ref name="riddl-parameter"/>
+    </choice>  
+  </define>
+
+  <define name="riddl-zeroOrMore">
+    <element name="zeroOrMore">
+      <oneOrMore>
+        <ref name="riddl-message-other"/>
+      </oneOrMore>  
+    </element>  
+  </define>
+  <define name="riddl-oneOrMore">
+    <element name="oneOrMore">
+      <oneOrMore>
+        <ref name="riddl-message-other"/>
+      </oneOrMore>
+    </element>  
+  </define>
+  <define name="riddl-optional">
+    <element name="optional">
+      <oneOrMore>
+        <ref name="riddl-message-other"/>
+      </oneOrMore>  
+    </element>  
+  </define>
+  <define name="riddl-choice">
+    <element name="choice">
+      <oneOrMore>
+        <ref name="riddl-message-other"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="riddl-group">
+    <element name="group">
+      <oneOrMore>
+        <ref name="riddl-message-other"/>
+      </oneOrMore>
+    </element>  
+  </define>
+  <define name="riddl-parameter">
+    <element name="parameter">
+      <ref name="riddl-att-name"/>
+      <choice>
+        <ref name="riddl-fixed"/>
+        <ref name="data"/>
+        <group>
+          <attribute name="mimetype">
+            <data type="string">
+              <param name="pattern">[\c]+/[\c]+</param>
+            </data>
+          </attribute>  
+          <optional>
+            <attribute name="handler">
+              <data type="anyURI"/>
+            </attribute>  
+          </optional>
+          <optional>
+            <ref name="any"/>
+          </optional>  
+        </group>  
+      </choice>
+    </element>
+  </define>   
 
   <define name="riddl-fixed">
     <optional>
@@ -80,6 +175,10 @@
         <data type="string"/>
       </attribute>
     </optional>  
+  </define>
+
+  <define name="riddl-root-resource">
+    <ref name="riddl-resource-content"/>
   </define>
   <define name="riddl-resource">
     <optional>
@@ -130,29 +229,29 @@
   <define name="riddl-method">
     <choice>
       <attribute name="pass">
-        <ref name="riddl-datatype-in-messagename"/>
+        <ref name="riddl-datatype-name-star"/>
       </attribute>
       <group>
         <attribute name="add">
-          <ref name="riddl-datatype-out-messagename"/>
+          <ref name="riddl-datatype-name"/>
         </attribute>
         <attribute name="remove">
-          <ref name="riddl-datatype-out-messagename"/>
+          <ref name="riddl-datatype-name"/>
         </attribute>
       </group>
       <attribute name="add">
-        <ref name="riddl-datatype-out-messagename"/>
+        <ref name="riddl-datatype-name"/>
       </attribute>
       <attribute name="remove">
-        <ref name="riddl-datatype-out-messagename"/>
+        <ref name="riddl-datatype-name"/>
       </attribute>
       <group>
         <attribute name="in">
-          <ref name="riddl-datatype-in-messagename"/>
+          <ref name="riddl-datatype-name-star"/>
         </attribute>
         <optional>
           <attribute name="out">
-            <ref name="riddl-datatype-out-messagename"/>
+            <ref name="riddl-datatype-name"/>
           </attribute>
         </optional>  
       </group>

@@ -253,13 +253,13 @@ module Riddl
           messages += check_multi_fields(pfield,"#{tpath} -> #{mn}","pass")
         end
         h_ofield.each do |mn,ofield|
-          messages += check_fields(ofield,"#{tpath} -> #{mn}","out")
+          messages += check_fields(ofield,"#{tpath} -> #{mn}","out","message")
         end  
         h_afield.each do |mn,afield|
-          messages += check_fields(afield,"#{tpath} -> #{mn}","add")
+          messages += check_fields(afield,"#{tpath} -> #{mn}","add","add")
         end  
         h_rfield.each do |mn,rfield|
-          messages += check_fields(rfield,"#{tpath} -> #{mn}","remove")
+          messages += check_fields(rfield,"#{tpath} -> #{mn}","remove","remove")
         end  
         h_cfield.each do |mn,cfield|
           puts "#{tpath} -> #{mn}: more than one catchall (*) operation is not allowed." if cfield > 1
@@ -271,11 +271,11 @@ module Riddl
     end
     private :check_rec_resources
 
-    def check_fields(field, what, name)
+    def check_fields(field, what, name, sname)
       #{{{
       messages = []
       field.compact.each do |k|
-        if @doc.find("/des:description/des:message[@name='#{k}']").empty?
+        if @doc.find("/des:description/des:#{sname}[@name='#{k}']").empty?
           messages << "#{what}: #{name} message '#{k}' not found."
         end unless k == '*'
       end
