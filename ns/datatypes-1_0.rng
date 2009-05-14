@@ -34,15 +34,28 @@
       <param name="pattern">[a-z]\c*</param>
     </data>
   </define>
+  
+  <define name="riddl-datatype-rname">
+    <data type="string">
+      <param name="pattern">[a-z]\c*</param>
+    </data>
+  </define>
 
   <define name="riddl-occurs">
-    <attribute name="occurs">
-      <choice>
-        <value>*</value>
-        <value>?</value>
-        <value>+</value>
-      </choice>  
-    </attribute>  
+    <choice>
+      <attribute name="occurs">
+        <choice>
+          <value>*</value>
+          <value>?</value>
+          <value>+</value>
+          <value>first</value>
+          <value>last</value>
+        </choice>  
+      </attribute>  
+      <attribute name="occurs">
+        <param name="pattern">(before|after)(_each)?\s+(\*|\?|\+|[a-z]\c+)</param>
+      </attribute>
+    </choice>
   </define>
 
 </grammar>

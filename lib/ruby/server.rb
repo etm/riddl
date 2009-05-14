@@ -29,6 +29,7 @@ module Riddl
 
     def _call(env)
       pinfo = env["PATH_INFO"].sub(/\/*$/,'/').gsub(/\/+/,'/')
+      @process_out = true
       @env = env
       @req = Rack::Request.new(env)
       @res = Rack::Response.new
@@ -36,9 +37,7 @@ module Riddl
       if @riddl_path
         @headers = {}
         @env.each do |h,v|
-          if h =~ /^HTTP_(.*)$/
-            @headers[$1] = v
-          end  
+          @headers[$1] = v if h =~ /^HTTP_(.*)$/
         end
         @parameters = Riddl::HttpParser.new(
           @env['QUERY_STRING'],
@@ -68,17 +67,29 @@ module Riddl
       @path = ::File.dirname(@path)
     end
 
+    def process_out(pout)
+      @process_out = pout
+    end
+
     def run(what)
       if what.class == Class and what.superclass == Riddl::Implementation
         w = what.new(@headers,@parameters)
         @res.status = w.status
+        response = headers = nil
+        if @process_out && w.status == 200
+          # TODO check outgoing message
+          response = (w.response.class == Array ? w.response : [w.response])
+          headers = (w.headers.class == Array ? w.headers : [w.headers])
+          @description.check_message(@riddl_message_out, response, headers) 
+        end
         if w.status == 200
-          begin
-            # TODO check outgoing message
-            @res.write HttpGenerator.new(w.response,@res).generate.read
-          rescue => e
-            puts e 
-            puts e.backtrace 
+          response = (w.response.class == Array ? w.response : [w.response]) unless response
+          headers = (w.headers.class == Array ? w.headers : [w.headers]) unless headers
+          @res.write HttpGenerator.new(response.response,@res).generate.read
+          headers.each do |h|
+            if h.class == Riddl::Header
+              @res[h.name] = h.value
+            end  
           end
         end  
       end

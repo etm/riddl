@@ -3,7 +3,7 @@
   <message name="book-query">
     <header name="Library" type="integer"/>
     <parameter name="author" occurs="+" type="string"/>
-    <parameter name="title" type="string"/>
+    <parameter name="title" type="string" asoccurs="f"/>
   </message>
   <message name="list-of-books">
     <parameter name="list-of-books" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">

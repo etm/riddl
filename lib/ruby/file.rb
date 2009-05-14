@@ -134,15 +134,18 @@ module Riddl
     private :parameter_match
     
     def header_match(a,b)
+      #{{{
       name = a.attributes['name'].upcase.sub(/\-/,'_')
       if b.has_key?(name)
         return match_simple(a,b[name])
       end
       false
+      #}}}
     end
     private :header_match
 
     def match_simple(a,b)
+      #{{{
       if a.attributes['fixed']
         a.attributes['fixed'] == b
       else  
@@ -154,6 +157,7 @@ module Riddl
         a.children.each { |e| data.add(e) }
         value.validate_against type
       end  
+      #}}}
     end
     private :match_simple
 
