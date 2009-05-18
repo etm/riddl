@@ -108,6 +108,15 @@
       <ref name="riddl-parameter"/>
     </choice>  
   </define>
+  <define name="riddl-message-other-without-optional">
+    <choice>
+      <ref name="riddl-zeroOrMore"/>
+      <ref name="riddl-oneOrMore"/>
+      <ref name="riddl-choice"/>
+      <ref name="riddl-group"/>
+      <ref name="riddl-parameter"/>
+    </choice>  
+  </define>
 
   <define name="riddl-zeroOrMore">
     <element name="zeroOrMore">
@@ -133,7 +142,7 @@
   <define name="riddl-choice">
     <element name="choice">
       <oneOrMore>
-        <ref name="riddl-message-other"/>
+        <ref name="riddl-message-other-without-optional"/>
       </oneOrMore>
     </element>
   </define>

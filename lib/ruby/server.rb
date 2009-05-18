@@ -48,13 +48,14 @@ module Riddl
           @env['HTTP_CONTENT_ID']
         ).params
         @riddl_operation = @env['REQUEST_METHOD'].downcase
-        begin
-          @path = ''
-          @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_operation,@parameters,@headers)
-          instance_eval(&@blk)
-        rescue  
+
+        @path = ''
+        @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_operation,@parameters,@headers)
+        if @riddl_message_in.nil? && riddl_message_out.nil?
           @res.status = 404
-        end
+        else  
+          instance_eval(&@blk)
+        end  
       else
         @res.status = 404
       end
@@ -80,12 +81,13 @@ module Riddl
           # TODO check outgoing message
           response = (w.response.class == Array ? w.response : [w.response])
           headers = (w.headers.class == Array ? w.headers : [w.headers])
-          @description.check_message(@riddl_message_out, response, headers) 
+          # TODO
+          # @description.check_message(@riddl_message_out, response, headers) 
         end
         if w.status == 200
           response = (w.response.class == Array ? w.response : [w.response]) unless response
           headers = (w.headers.class == Array ? w.headers : [w.headers]) unless headers
-          @res.write HttpGenerator.new(response.response,@res).generate.read
+          @res.write HttpGenerator.new(response,@res).generate.read
           headers.each do |h|
             if h.class == Riddl::Header
               @res[h.name] = h.value

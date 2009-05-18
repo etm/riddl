@@ -1,5 +1,6 @@
 gem 'ruby-xml-smart', '>= 0.2.0'
 require 'xml/smart'
+require ::File.dirname(__FILE__) + '/file/messageparser'
 
 module Riddl
   class File
@@ -33,12 +34,13 @@ module Riddl
       if description?
         tpath = path == "/" ? '/' : path.gsub(/\/([^{}\/]+)/,"/des:resource[@relative=\"\\1\"]").gsub(/\/\{\}/,"des:resource[not(@relative)]").gsub(/\/\/+/,'/')
         tpath = "/des:description/des:resource" + tpath + "des:" + operation + "|/des:description/des:resource" + tpath + "des:request[@type='#{operation}']"
-        tpath
         @doc.find(tpath + "[@in and not(@in='*')]").each do |o|
-          return o.attributes['in'], o.attributes['out'] if check_message(o.attributes['in'],params,headers)
+          mp = MessageParser.new(@doc,params,headers)
+          return o.attributes['in'], o.attributes['out'] if mp.check(o.attributes['in'])
         end
         @doc.find(tpath + "[@pass and not(@pass='*')]").each do |o|
-          return o.attributes['pass'], o.attributes['pass'] if check_message(o.attributes['pass'],params,headers)
+          mp = MessageParser.new(@doc,params,headers)
+          return o.attributes['pass'], o.attributes['pass'] if mp.check(o.attributes['pass'])
         end
         @doc.find(tpath + "[@in and @in='*']").each do
           return "*", o.attributes['out']
@@ -49,117 +51,11 @@ module Riddl
         @doc.find(tpath + "[@pass and @pass='*']").each do
           return "*", "*"
         end
-        raise PathError
+        [nil,nil]
       end
       nil
       #}}}
     end
-
-    def check_message(name,mist,headers)
-      #{{{
-      @doc.find("/des:description/des:message[@name='#{name}']").each do |m|
-        m.find("des:header").each do |h|
-          unless header_match(h,headers)
-            raise OccursError, "header #{h.attributes['name']} not found"
-          end
-        end  
-
-        msol = m.find("des:parameter")
-        cist = 0
-        csol = 0
-        pcounter = nil
-        loop do
-          sol = msol[csol]
-          ist = mist[cist]
-          break if ist.nil? and sol.nil?
-          raise OccursError, "input is parsed, description still has necessary elements" if sol.nil? and !ist.nil?
-          if ist.nil? and !sol.nil?
-            until sol.nil?
-              csol += 1
-              sol = msol[csol]
-              raise OccursError, "ERROR description is parsed, input still has elements" if sol.attributes['occurs'].nil? || sol.attributes['occurs'] == '+'
-            end
-            break
-          end  
-          case sol.attributes['occurs']
-            when '?'
-              cist += 1 if parameter_match(sol,ist)
-              csol += 1
-              next
-            when '*'
-              if parameter_match(sol,ist)
-                cist += 1
-              else  
-                csol += 1
-              end  
-              next
-            when '+'
-              if parameter_match(sol,ist)
-                cist += 1
-                pcounter ||= 0
-                pcounter += 1
-              else
-                if pcounter.nil?
-                  raise OccursError, "input has not enough parameters #{sol.name}"
-                else  
-                  pcounter = nil
-                  csol += 1
-                end  
-              end  
-            else
-              if parameter_match(sol,ist)
-                csol += 1
-                cist += 1
-              else
-                raise OccursError, "#{sol.attributes['name']} is not a desired input"
-              end  
-          end  
-        end
-      end
-      #}}}
-    end
-
-    def parameter_match(a,b)
-      if b.class == Riddl::Parameter::Simple && (a.attributes['fixed'] || a.attributes['type'])
-        if b.name == a.attributes['name']
-          return match_simple(a,b.value)
-        end
-      end
-      if b.class == Riddl::Parameter::Complex && a.attributes['mimetype']
-        #TODO
-        #wenn mimetype check handler
-      end  
-      false
-    end
-    private :parameter_match
-    
-    def header_match(a,b)
-      #{{{
-      name = a.attributes['name'].upcase.sub(/\-/,'_')
-      if b.has_key?(name)
-        return match_simple(a,b[name])
-      end
-      false
-      #}}}
-    end
-    private :header_match
-
-    def match_simple(a,b)
-      #{{{
-      if a.attributes['fixed']
-        a.attributes['fixed'] == b
-      else  
-        value = XML::Smart::string("<check/>")
-        value.root.text = b
-        type = XML::Smart::string(CHECK)
-        data = type.root.children[0]
-        data.attributes['type'] = a.attributes['type']
-        a.children.each { |e| data.add(e) }
-        value.validate_against type
-      end  
-      #}}}
-    end
-    private :match_simple
 
     def validate!
       #{{{

@@ -10,7 +10,7 @@ module Riddl
       @base = base
     end
 
-    def resource(path)
+    def resource(path="")
       Resource.new(@base + '/' + path)
     end
 

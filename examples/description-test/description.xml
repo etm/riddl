@@ -3,15 +3,9 @@
   <message name="book-query">
     <header name="Library" type="integer"/>
     <zeroOrMore>
-      <choice>
-        <group>
-          <parameter name="author" type="string"/>
-        </group>  
-        <optional>
-          <parameter name="title" type="string"/>
-        </optional>  
-      </choice>
-    </zeroOrMore>
+      <parameter name="author" type="string"/>
+    </zeroOrMore>  
+    <parameter name="title" type="string"/>
   </message>
 
   <add name="add-to-book-query">
@@ -35,7 +29,7 @@
     </as_last>
   </add>
 
-  <remove name="remove-from-book-quer">
+  <remove name="remove-from-book-query">
     <each name="*"/>
     <first name="*"/>
     <last name="*"/>
@@ -48,8 +42,8 @@
   </message>
 
   <resource>
-    <request type="test" in="book-query" out="list-of-books"/>
-    <request type="albert" add="add-to-book-query" remove="remove-from-book-query"/>
+    <request type="testa" in="book-query" out="list-of-books"/>
+    <request type="testb" add="add-to-book-query" remove="remove-from-book-query"/>
   </resource>  
 
 </description>
