@@ -62,6 +62,7 @@ module Riddl
         end
         super method, true, true, path, headers
         tmp = HttpGenerator.new(parameters,self).generate
+
         self.content_length = tmp.size
         self.body_stream = tmp
       end

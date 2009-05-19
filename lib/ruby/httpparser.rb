@@ -159,6 +159,10 @@ module Riddl
         # sub is a fix for Safari Ajax postings that always append \0
         parse_nested_query(input.read.sub(/\0\z/, ''),:body)
       else 
+        p content_type
+        p content_length.to_i
+        p content_disposition||''
+        p content_id||''
         parse_content(input,content_type,content_length.to_i,content_disposition||'',content_id||'')
       end
 
