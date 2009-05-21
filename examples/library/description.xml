@@ -2,9 +2,9 @@
 
   <message name="book-query">
     <header name="Library" type="integer"/>
-    <oneOrMore> 
+    <zeroOrMore> 
       <parameter name="author" type="string"/>
-    </oneOrMore>  
+    </zeroOrMore>  
     <parameter name="title" type="string"/>
   </message>
   <message name="list-of-books">

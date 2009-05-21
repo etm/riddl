@@ -38,10 +38,8 @@ module Riddl
       end
 
       def zeroOrMore(a)
-        ncounter = 0
         begin
           counter,length = traverse_simple(a,true)
-          ncounter += 1 if counter == length
         end while counter == length && @mistp < @mist.length 
         true
       end

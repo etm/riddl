@@ -27,12 +27,15 @@ module Riddl
 
     def parse_content(input,ctype,content_length,content_disposition,content_id)
       #{{{
+      ctype = nil if ctype == 'text/riddl-data'
       filename = content_disposition[/ filename="?([^\";]*)"?/ni, 1]
       name = content_disposition[/ name="?([^\";]*)"?/ni, 1] || content_id
 
       if ctype || filename
         body = Tempfile.new("RackMultipart")
         body.binmode if body.respond_to?(:binmode)
+      else
+        body = ''
       end
       
       bufsize = 16384
@@ -43,7 +46,7 @@ module Riddl
         body << c
         content_length -= c.size
       end  
-      
+
       add_to_params(name,body,filename,ctype,nil)
       #}}}
     end
@@ -159,10 +162,6 @@ module Riddl
         # sub is a fix for Safari Ajax postings that always append \0
         parse_nested_query(input.read.sub(/\0\z/, ''),:body)
       else 
-        p content_type
-        p content_length.to_i
-        p content_disposition||''
-        p content_id||''
         parse_content(input,content_type,content_length.to_i,content_disposition||'',content_id||'')
       end
 
