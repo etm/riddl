@@ -8,10 +8,7 @@ module Riddl
       @@handlers
     end
     class Implementation
-      def in(content,arguments)
-      end
-      def out(content,arguments)
-      end
+      def self::handle(content,arguments); end
     end
   end
 end  

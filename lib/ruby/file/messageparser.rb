@@ -2,10 +2,12 @@ module Riddl
   class File
     class MessageParser
       def initialize(doc,params,headers)
+        #{{{
         @doc = doc
         @mist = params
         @mistp = 0
         @headers = headers
+        #}}}
       end
 
       def check(name)
@@ -22,7 +24,35 @@ module Riddl
         #}}}
       end
 
+      def parameter(a)
+        return false if @mistp >= @mist.length
+        b = @mist[@mistp]
+        if b.class == Riddl::Parameter::Simple && (a.attributes['fixed'] || a.attributes['type'])
+          if b.name == a.attributes['name']
+            @mistp += 1
+            return match_simple(a,b.value)
+          end
+        end
+        if b.class == Riddl::Parameter::Complex && a.attributes['mimetype']
+          if b.name == a.attributes['name'] && b.mimetype == a.attributes['mimetype']
+            if a.attributes['handler']
+              if Riddl::Handlers::handlers[a.attributes['handler']]
+                return Riddl::Handlers::handlers[a.attributes['handler']].handle(b.value,a.children.map{|e|e.dump}.join)
+              else
+                # handler not found leads to an error
+                return false
+              end  
+            else
+              return true
+            end  
+          end
+        end  
+        false
+      end
+      private :parameter
+      
       def oneOrMore(a)
+        #{{{
         tistp = @mistp
         ncounter = 0
         begin
@@ -35,23 +65,29 @@ module Riddl
           @mistp = tistp
           false
         end  
+        #}}}
       end
 
       def zeroOrMore(a)
+        #{{{
         begin
           counter,length = traverse_simple(a,true)
         end while counter == length && @mistp < @mist.length 
         true
+        #}}}
       end
 
       def choice(a)
+        #{{{
         a.find("des:*").each do |p|
           return true if send p.name.to_s, p
         end
         false
+        #}}}
       end  
       
       def group(a)
+        #{{{
         tistp = @mistp
         success = true
         a.find("des:*").each do |p|
@@ -66,9 +102,11 @@ module Riddl
           @mistp = tistp
           false
         end  
+        #}}}
       end  
 
       def optional(a)
+        #{{{
         tistp = @mistp
         counter, length = traverse_simple(a)
         if counter == 0 || counter == length
@@ -76,28 +114,10 @@ module Riddl
         else  
           @mistp = tistp
           false
-        end  
-      end
-
-      def parameter(a)
-        #{{{
-        return false if @mistp >= @mist.length
-        b = @mist[@mistp]
-        if b.class == Riddl::Parameter::Simple && (a.attributes['fixed'] || a.attributes['type'])
-          if b.name == a.attributes['name']
-            @mistp += 1
-            return match_simple(a,b.value)
-          end
         end
-        if b.class == Riddl::Parameter::Complex && a.attributes['mimetype']
-          #TODO
-          #wenn mimetype check handler
-        end  
-        false
         #}}}
       end
-      private :parameter
-      
+
       def header(a)
         #{{{
         name = a.attributes['name'].upcase.sub(/\-/,'_')
@@ -110,6 +130,7 @@ module Riddl
       private :header
 
       def traverse_simple(a,single_optional_protection=false)
+        #{{{
         tistp = @mistp
         nodes = a.find("des:*")
         counter = 0
@@ -123,6 +144,7 @@ module Riddl
         else  
           [counter,nodes.length]
         end 
+        #}}}
       end
       
       def match_simple(a,b)

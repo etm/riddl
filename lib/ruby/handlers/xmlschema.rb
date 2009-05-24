@@ -1,11 +1,8 @@
 module Riddl
   module Handlers
     class XMLSchema < Riddl::Handlers::Implementation
-      def in(what,hinfo)
-        XML::Smart.open(what).validate_against(XML::Smart.open(hinfo)) rescue false
-      end
-      def out(what,hinfo)
-        in(what,hinfo)
+      def self::handle(what,hinfo)
+        XML::Smart.string(what).validate_against(XML::Smart.string(hinfo)) rescue false
       end
     end
   end  

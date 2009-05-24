@@ -2,7 +2,7 @@ gem 'ruby-xml-smart', '>= 0.2.0.1'
 require 'xml/smart'
 require ::File.dirname(__FILE__) + '/file/messageparser'
 require ::File.dirname(__FILE__) + '/file/resourcechecker'
-require ::File.dirname(__FILE__) + '/handlers/handlers'
+require ::File.dirname(__FILE__) + '/handlers'
 
 module Riddl
   class File
@@ -59,6 +59,11 @@ module Riddl
       #}}}
     end
 
+    def check_message(params,headers,name)
+      mp = MessageParser.new(@doc,params,headers)
+      mp.check(name)
+    end  
+
     def validate!
       #{{{
       return @doc.validate_against(XML::Smart.open(DESCRIPTION_FILE)) if @description
@@ -68,12 +73,13 @@ module Riddl
     end
 
     def load_necessary_handlers!
+      #{{{
       @doc.find("//des:parameter/@handler").map{|h|h.to_s}.uniq.each do |h|
         if ::File.exists?(::File.dirname(__FILE__) + '/handlers/' + ::File.basename(h) + ".rb")
           require ::File.dirname(__FILE__) + '/handlers/' + ::File.basename(h)
         end
       end
-      p Riddl::Handlers::handlers
+      #}}}
     end
 
     def paths

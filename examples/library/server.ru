@@ -13,9 +13,9 @@ class BookQuery < Riddl::Implementation
       <<-END
         <books>
           <book id="1">
+            <title>#{title}</title>
             <author>Agador</author>
             #{authors.join}
-            <title>#{title}</title>
           </book>  
         </books>
       END

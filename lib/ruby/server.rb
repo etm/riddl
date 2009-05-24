@@ -79,11 +79,12 @@ module Riddl
         @res.status = w.status
         response = headers = nil
         if @process_out && w.status == 200
-          # TODO check outgoing message
           response = (w.response.class == Array ? w.response : [w.response])
           headers = (w.headers.class == Array ? w.headers : [w.headers])
-          # TODO
-          # @description.check_message(@riddl_message_out, response, headers) 
+          unless @description.check_message(response,headers,@riddl_message_out)
+            @res.status = 404
+            return
+          end  
         end
         if w.status == 200
           response = (w.response.class == Array ? w.response : [w.response]) unless response

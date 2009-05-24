@@ -1,7 +1,7 @@
 module Riddl
   module Handlers
     class PlainType
-      def in(what,hinfo)
+      def self::handle(what,hinfo)
         begin
           re = Regexp.new(hinfo)
         rescue  
@@ -9,11 +9,8 @@ module Riddl
         end
         what =~ re
       end
-      def out(what,hinfo)
-        in(what,hinfo)
-      end
     end
   end  
 end  
 
-Riddl::Handlers::handler("http://riddl.org/ns/handlers/plain-type",Riddl::Handlers::PlainType)
+Riddl::Handlers::add("http://riddl.org/ns/handlers/plain-type",Riddl::Handlers::PlainType)
