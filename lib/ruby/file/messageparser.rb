@@ -25,6 +25,7 @@ module Riddl
       end
 
       def parameter(a)
+        #{{{
         return false if @mistp >= @mist.length
         b = @mist[@mistp]
         if b.class == Riddl::Parameter::Simple && (a.attributes['fixed'] || a.attributes['type'])
@@ -48,6 +49,7 @@ module Riddl
           end
         end  
         false
+        #}}}
       end
       private :parameter
       

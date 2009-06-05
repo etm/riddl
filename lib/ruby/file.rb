@@ -1,8 +1,11 @@
+require 'rubygems'
 gem 'ruby-xml-smart', '>= 0.2.0.1'
 require 'xml/smart'
 require ::File.dirname(__FILE__) + '/file/messageparser'
 require ::File.dirname(__FILE__) + '/file/resourcechecker'
 require ::File.dirname(__FILE__) + '/handlers'
+
+$iii = 0
 
 module Riddl
   class File
@@ -36,12 +39,11 @@ module Riddl
       if description?
         tpath = path == "/" ? '/' : path.gsub(/\/([^{}\/]+)/,"/des:resource[@relative=\"\\1\"]").gsub(/\/\{\}/,"des:resource[not(@relative)]").gsub(/\/\/+/,'/')
         tpath = "/des:description/des:resource" + tpath + "des:" + operation + "|/des:description/des:resource" + tpath + "des:request[@type='#{operation}']"
+        mp = MessageParser.new(@doc,params,headers)
         @doc.find(tpath + "[@in and not(@in='*')]").each do |o|
-          mp = MessageParser.new(@doc,params,headers)
           return o.attributes['in'], o.attributes['out'] if mp.check(o.attributes['in'])
         end
         @doc.find(tpath + "[@pass and not(@pass='*')]").each do |o|
-          mp = MessageParser.new(@doc,params,headers)
           return o.attributes['pass'], o.attributes['pass'] if mp.check(o.attributes['pass'])
         end
         @doc.find(tpath + "[@in and @in='*']").each do

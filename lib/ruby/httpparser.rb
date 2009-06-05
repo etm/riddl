@@ -1,3 +1,5 @@
+require ::File.dirname(__FILE__) + "/parameter"
+
 module Riddl
   class HttpParser
     MULTIPART_CONTENT_TYPES = [
@@ -32,7 +34,7 @@ module Riddl
       name = content_disposition[/ name="?([^\";]*)"?/ni, 1] || content_id
 
       if ctype || filename
-        body = Tempfile.new("RackMultipart")
+        body = Parameter::Tempfile.new("RiddlMultipart")
         body.binmode if body.respond_to?(:binmode)
       else
         body = ''
@@ -81,7 +83,7 @@ module Riddl
             name = head[/Content-Disposition:.*\s+name="?([^\";]*)"?/ni, 1] || head[/Content-ID:\s*([^#{EOL}]*)/ni, 1]
 
             if ctype || filename
-              body = Tempfile.new("RackMultipart")
+              body = Parameter::Tempfile.new("RiddlMultipart")
               body.binmode  if body.respond_to?(:binmode)
             end
 

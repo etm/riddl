@@ -16,13 +16,19 @@ until up
   end  
 end
 
-library = Riddl::Client.new("http://localhost:9292")
+library = Riddl::Client.new("http://localhost:9292/","description.xml")
 books = library.resource("books")
-puts books.get [
+status, res = books.get [
   Riddl::Header.new("Library",7),
-#  Riddl::Parameter::Simple.new("author","Mangler"),
+  Riddl::Parameter::Simple.new("author","Mangler"),
   Riddl::Parameter::Simple.new("title","12 bottles of beer on the wall")
 ]
+p status
+p res
+res.each do |r|
+  r.value.read
+end  
+
 
 `pkill rackup`
 t.join

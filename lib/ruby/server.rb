@@ -29,7 +29,7 @@ module Riddl
     end
 
     def _call(env)
-      pinfo = env["PATH_INFO"].sub(/\/*$/,'/').gsub(/\/+/,'/')
+      pinfo = env["PATH_INFO"].gsub(/\/+/,'/')
       @process_out = true
       @env = env
       @req = Rack::Request.new(env)
@@ -48,10 +48,10 @@ module Riddl
           @env['HTTP_CONTENT_DISPOSITION'],
           @env['HTTP_CONTENT_ID']
         ).params
-        @riddl_operation = @env['REQUEST_METHOD'].downcase
+        @riddl_method = @env['REQUEST_METHOD'].downcase
 
         @path = ''
-        @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_operation,@parameters,@headers)
+        @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_method,@parameters,@headers)
         if @riddl_message_in.nil? && riddl_message_out.nil?
           @res.status = 404
         else  
@@ -102,15 +102,15 @@ module Riddl
     def method(what)
       if what.class == Hash
         what.each do |met,min|
-          return true if check(min) && @riddl_operation == met.to_s.downcase
+          return true if check(min) && @riddl_method == met.to_s.downcase
         end  
       end
       false
     end  
-    def post(min); check(min) && @riddl_operation == 'post' end
-    def get(min); check(min) && @riddl_operation == 'get' end
-    def delete(min); check(min) && @riddl_operation == 'delete' end
-    def put(min); check(min) && @riddl_operation == 'put' end
+    def post(min); check(min) && @riddl_method == 'post' end
+    def get(min); check(min) && @riddl_method == 'get' end
+    def delete(min); check(min) && @riddl_method == 'delete' end
+    def put(min); check(min) && @riddl_method == 'put' end
     def check(min)
        @path == @riddl_path[0] && min == @riddl_message_in
     end

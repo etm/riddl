@@ -1,3 +1,5 @@
+require 'tempfile'
+
 module Riddl
   module Parameter
     class Simple
@@ -16,12 +18,19 @@ module Riddl
         @filename = filename
         @type = :body
         @additional = additional
-        if file && file.class == IO
+        if file && file.class == Tempfile
           @value = file
         else
           raise "ERROR not a file" unless file.nil?
         end
         @value = yield if block_given?
+      end
+    end
+    class Tempfile < ::Tempfile
+      def _close
+        @tmpfile.close if @tmpfile
+        @data[1] = nil if @data
+        @tmpfile = nil
       end
     end
   end  
