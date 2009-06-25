@@ -29,12 +29,13 @@ module Riddl
     end
 
     def _call(env)
-      pinfo = env["PATH_INFO"].gsub(/\/+/,'/')
+      pinfo = (env["PATH_INFO"] + '/').gsub(/\/+/,'/')
       @process_out = true
       @env = env
       @req = Rack::Request.new(env)
       @res = Rack::Response.new
       @riddl_path = @paths.find{ |e| e[1] =~ pinfo }
+
       if @riddl_path
         @headers = {}
         @env.each do |h,v|
@@ -52,7 +53,7 @@ module Riddl
 
         @path = ''
         @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_method,@parameters,@headers)
-        if @riddl_message_in.nil? && riddl_message_out.nil?
+        if @riddl_message_in.nil? && @riddl_message_out.nil?
           @res.status = 404
         else  
           instance_eval(&@blk)

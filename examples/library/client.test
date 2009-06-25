@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 require '../../lib/ruby/client'
 
-library = Riddl::Client.new("http://localhost:9292/","description.xml")
+library = Riddl::Client.new("http://localhost:9292/")
 books = library.resource("/books/")
 stime = Time.now.to_f
 nums = 1
@@ -9,7 +9,7 @@ nums = 1
 nums.times do
   status, res = books.request :get => [
     Riddl::Header.new("Library",7),
-    Riddl::Parameter::Simple.new("author","mangler"),
+    Riddl::Parameter::Simple.new("auther","mangler"),
     Riddl::Parameter::Simple.new("title","12")
   ]
   p status, res

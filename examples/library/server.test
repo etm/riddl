@@ -16,7 +16,7 @@ until up
   end  
 end
 
-library = Riddl::Client.new("http://localhost:9292/","description.xml")
+library = Riddl::Client.new("http://localhost:9292/")
 books = library.resource("books")
 status, res = books.get [
   Riddl::Header.new("Library",7),
