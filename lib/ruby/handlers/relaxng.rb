@@ -2,7 +2,14 @@ module Riddl
   module Handlers
     class RelaxNG < Riddl::Handlers::Implementation
       def self::handle(what,hinfo)
-        XML::Smart.string(what).validate_against(XML::Smart.string(hinfo)) rescue false
+        # TODO XML Smart should understand ruby filehandles
+        if what.class == Riddl::Parameter::Tempfile
+          w = what.read
+          what.rewind
+        else  
+          w = what
+        end  
+        XML::Smart.string(w).validate_against(XML::Smart.string(hinfo)) rescue false
       end
     end
   end  

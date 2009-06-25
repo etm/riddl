@@ -11,6 +11,8 @@ module Riddl
   class Client
     def initialize(base, riddl=nil)
       @base = base.gsub(/\/+$/,'')
+      @paths = nil
+      @description = nil
       unless riddl.nil?
         @description = Riddl::File::new(riddl)
         @description.load_necessary_handlers!
@@ -29,7 +31,7 @@ module Riddl
       def initialize(base,path,description)
         pinfo = path.gsub(/\/+/,'/')
         @description = description
-        @riddl_path = description.paths.find{ |e| e[1] =~ pinfo }
+        @riddl_path = @description.nil? ? pinfo : description.paths.find{ |e| e[1] =~ pinfo }
         if @riddl_path.nil?
           raise PathError, 'Path not found.'
         end  
@@ -67,10 +69,12 @@ module Riddl
             false
           end  
         end
-        riddl_message_in, riddl_message_out = @description.get_message(@riddl_path[0],riddl_method.downcase,parameters,headers)
-        if riddl_message_in.nil? && riddl_message_out.nil?
-          raise InputError, "Not a valid input to service."
-        end
+        unless @description.nil?
+          riddl_message_in, riddl_message_out = @description.get_message(@riddl_path[0],riddl_method.downcase,parameters,headers)
+          if riddl_message_in.nil? && riddl_message_out.nil?
+            raise InputError, "Not a valid input to service."
+          end
+        end  
         url = URI.parse(@url)
         req = Riddl::Client::Request.new(riddl_method,url.path,parameters,headers)
         res = response = nil
@@ -84,12 +88,14 @@ module Riddl
               bs,
               res['CONTENT-TYPE'],
               res['CONTENT-LENGTH'],
-              res['HTTP_CONTENT-DISPOSITION'],
-              res['HTTP-CONTENT-ID']
+              res['CONTENT-DISPOSITION'],
+              res['CONTENT-ID']
             ).params
-            p @description.check_message(response,res,riddl_message_out)
-            #  raise RuntimeError
-            #end 
+            unless @description.nil?
+              unless @description.check_message(response,res,riddl_message_out)
+                raise OutputError, "Not a valid output from service."
+              end 
+            end  
           end  
         end
         return res.code, response

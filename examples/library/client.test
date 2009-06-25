@@ -12,8 +12,6 @@ nums.times do
     Riddl::Parameter::Simple.new("author","mangler"),
     Riddl::Parameter::Simple.new("title","12")
   ]
-  res.each do |r|
-    puts r.value.read
-  end
+  p status, res
 end  
 puts "#{nums} requests done: #{Time.now.to_f - stime} seconds"
