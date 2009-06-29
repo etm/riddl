@@ -1,8 +1,9 @@
 module Riddl
   class Implementation
-    def initialize(headers,parameters)
-      @h = headers
-      @p = parameters
+    def initialize(headers,parameters,relative)
+      @h = @headers = headers
+      @p = @parameters = parameters
+      @r = @relative = relative
     end
     def response
       @response || []

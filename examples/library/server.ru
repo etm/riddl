@@ -7,6 +7,7 @@ use Rack::ShowStatus
 
 class BookQuery < Riddl::Implementation
   def response
+    p @r
     authors = @p.map{|e|e.name == "author" ?  "<author>" + e.value + "</author>" : nil }.compact
     title = @p.map{|e|e.name == "title" ?  e.value : nil }.compact
     Riddl::Parameter::Complex.new("list-of-books","text/xml") do

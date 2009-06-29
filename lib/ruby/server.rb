@@ -29,12 +29,12 @@ module Riddl
     end
 
     def _call(env)
-      pinfo = (env["PATH_INFO"] + '/').gsub(/\/+/,'/')
+      @pinfo = (env["PATH_INFO"] + '/').gsub(/\/+/,'/')
       @process_out = true
       @env = env
       @req = Rack::Request.new(env)
       @res = Rack::Response.new
-      @riddl_path = @paths.find{ |e| e[1] =~ pinfo }
+      @riddl_path = @paths.find{ |e| e[1] =~ @pinfo }
 
       if @riddl_path
         @headers = {}
@@ -76,7 +76,7 @@ module Riddl
 
     def run(what)
       if what.class == Class and what.superclass == Riddl::Implementation
-        w = what.new(@headers,@parameters)
+        w = what.new(@headers,@parameters,@pinfo.sub(/\//,'').split('/'))
         @res.status = w.status
         response = headers = nil
         if @process_out && w.status == 200
