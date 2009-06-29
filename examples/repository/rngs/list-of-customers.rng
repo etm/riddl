@@ -1,0 +1,15 @@
+<element name="customers" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0">
+  <zeroOrMore>
+    <element name="customer">
+      <attribute name="id">
+        <data type="positiveInteger"/>
+      </attribute>
+      <element name="name">
+        <data type="string"/>
+      </element>
+      <element name="age">
+        <data type="positiveInteger"/>
+      </element>
+    </element>
+  </zeroOrMore>  
+</element>

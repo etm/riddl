@@ -1,0 +1,13 @@
+<element name="book" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0">
+  <attribute name="id">
+    <data type="positiveInteger"/>
+  </attribute>
+  <element name="title">
+    <data type="string"/>
+  </element>
+  <zeroOrMore>
+    <element name="author">
+      <data type="string"/>
+    </element>  
+  </zeroOrMore>  
+</element>

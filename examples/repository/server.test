@@ -1,0 +1,34 @@
+#!/usr/bin/ruby
+require '../../lib/ruby/client'
+require 'socket'
+
+t = Thread.new do
+  puts `rackup server.ru`
+end  
+
+up = false
+until up
+  begin
+    TCPSocket.new('localhost', 9292)
+    up = true
+  rescue => e
+    sleep 0.1
+  end  
+end
+
+library = Riddl::Client.new("http://localhost:9292/")
+books = library.resource("books")
+status, res = books.get [
+  Riddl::Header.new("Library",7),
+  Riddl::Parameter::Simple.new("author","Mangler"),
+  Riddl::Parameter::Simple.new("title","12 bottles of beer on the wall")
+]
+p status
+p res
+res.each do |r|
+  r.value.read
+end  
+
+
+`pkill rackup`
+t.join

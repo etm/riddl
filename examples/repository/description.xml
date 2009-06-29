@@ -1,0 +1,21 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="list-of-groups">
+    <!--header name="Library" type="positiveInteger"/-->
+    <zeroOrMore>
+      <parameter name="author" type="string"/>
+    </zeroOrMore>  
+  </message>
+  <message name="list-of-subgroups">
+  </message>
+
+  <resource>
+    <resource relative="groups">
+      <request type="get" in="*" out="list-of-groups"/>
+      <resource>
+        <get in="*" out="list-of-subgroups"/>
+      </resource>
+    </resource>
+  </resource>  
+
+</description>
