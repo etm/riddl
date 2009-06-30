@@ -1,11 +1,7 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="a">
-  	<parameter name="a" type="string">
-      <choice>
-        <value>bla</value>
-      </choice>  
-    </parameter>
+  	<parameter name="a" type="string"/>
   </message>  
   <message name="b">
   	<parameter name="b" type="integer"/>
@@ -27,6 +23,7 @@
     <get in="a" out="x"/>
     <get in="b" out="y"/>
     <get in="c" out="z"/>
+    <get pass="*"/>
   </resource>  
 
 </description>

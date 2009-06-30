@@ -34,6 +34,10 @@ module Riddl
       #}}}
     end
 
+    def declaration_router
+      Riddl::File::Routes.new(@doc) rescue nil
+    end
+
     def get_message(path,operation,params,headers)
       #{{{
       if description?

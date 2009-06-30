@@ -1,8 +1,10 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <message name="security">
-    <parameter name="security" type="string"/>
-  </message>  
+  <add name="security">
+    <as_last>
+      <parameter name="security" type="string"/>
+    </as_last>  
+  </add>  
 
   <resource>
     <get add="security"/>
