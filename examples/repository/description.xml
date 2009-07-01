@@ -1,16 +1,20 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="list-of-groups">
-    <!--header name="Library" type="positiveInteger"/-->
-    <zeroOrMore>
-      <parameter name="author" type="string"/>
-    </zeroOrMore>  
-  </message>
-  <message name="list-of-subgroups">
+    <parameter name="list-of-books" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rngs/atom.rng"/>
+    </parameter>
   </message>
 
+  <message name="list-of-subgroups">
+    <parameter name="list-of-books" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rngs/atom.rng"/>
+    </parameter>
+  </message>
+
+
   <resource>
-    <resource relative="groups">
+    <resource>
       <request type="get" in="*" out="list-of-groups"/>
       <resource>
         <get in="*" out="list-of-subgroups"/>

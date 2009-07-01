@@ -3,39 +3,90 @@ require 'socket'
 require '../../lib/ruby/server'
 require 'pp'
 
+require 'mysql'
+
 use Rack::ShowStatus
 
-class BookQuery < Riddl::Implementation
+
+
+class Root < Riddl::Implementation
   def response
-    authors = @p.map{|e|e.name == "author" ?  "<author>" + e.value + "</author>" : nil }.compact
-    title = @p.map{|e|e.name == "title" ?  e.value : nil }.compact
-    Riddl::Parameter::Complex.new("list-of-books","text/xml") do
-      <<-END
-        <books>
-          <book id="1">
-            <title>#{title}</title>
-            <author>Agador</author>
-            #{authors.join}
-          </book>  
-        </books>
-      END
+    # puts "Processing request on root resource (List of groups)"
+    m = Mysql.new('localhost', 'root', 'thesis')
+    m.select_db('thesis')
+    result = m.query("SELECT * FROM SERVICE_GROUP")
+
+    feed = <<-HERE_DOC
+      <feed>
+        <title>List of groups</title>
+        <updated>No date at the monent</updated>
+        <generator>My Repositorxy at local host</generator>
+        <id>localhost/</id>
+        <link href="localhost" rel="self" type="application/atom+xml"/>
+        <schema>
+          <properties>URI to properties</properties>
+          <queryInput>N.A.</queryInput>
+          <queryOutput>N.A.</queryOutput>
+          <invokeInput>N.A.</invokeInput>
+          <invokeOutput>N.A.</invokeOutput>
+        </schema>
+HERE_DOC
+
+    results.each do |row|
+      feed = feed + "  <entry lang="">\”"
+      feed = feed + "    <id>" + row['ID'] + "</id>\n"
+      feed = feed + "    <link>localhost/" + row['NAME'] + "</link>\n"
+      feed = feed + "    <updated>N.A.</updated>\n"
+      feed = feed + "    <category term="/"/>\n"
+      feed = feed + "    <properties>N.A.</properties>\n"
+      feed = feed + "  </entry>\n"
     end
+    feed = feed + "</feed>\n"
+ 
+    Riddl::Parameter::Complex.new("list-of-groups","text/xml", feed)
   end
-  def headers
-    []
-  end
+
   def status
     200
   end
 end
 
+
+class Category < Riddl::Implementation
+  def response
+    p @r.last                                        # e.g. cinemas for /cinemas
+  end
+end
+
+class SubCategory < Riddl::Implementation
+  def response
+    p @r.last                                        # e.g. arthouse for /cinemas/arthouse
+  end
+end
+
+class Item < Riddl::Implementation
+  def response
+    p @r.last                                        # e.g. 1 for /cinemas/arthouse/1
+    p @r[0]                                          # e.g. cinemas
+    p @r[1]                                          # e.g. arthouse
+  end
+end
+
 run(
   Riddl::Server.new("description.xml") do
-    process_out false
-    on resource do
-      on resource "books" do
-        run BookQuery if method :get => 'book-query'
+    process_out true
+    on resource do                                    # "/"
+      run Root if get '*'
+      on resource do                                  # "/cinemas"
+        run Category if get '*'
+        on resource do "/cinemas/arthouse"
+          run SubCatgory if get '*'
+          on resource do "/cinemas/arthouse/1"
+            run Item if get '*'
+          end
+        end
       end
     end
   end
 )
+
