@@ -1,0 +1,37 @@
+<element name="feed">
+  <element name="title"><text/></element>
+  <element name="updated"><text/></element>
+  <element name="generator">
+    <attribute name="uri"><text/></attribute>
+    <text/>
+  </element>
+  <element name="id"><text/></element>
+  <element name="link">
+    <attribute name="href"><text/></attribute>
+    <attribute name="rel"><text/></attribute>
+    <attribute name="type"><text/></attribute>
+    <text/>
+  </element>
+  <element name="schema">
+    <element name="properties"><text/></element>
+    <element name="queryInput"><text/></element>
+    <element name="queryOutput"><text/></element>
+    <element name="invokeInput"><text/></element>
+    <element name="invokeOutput"><text/></element>
+  </element>
+  <zeroOrMore>
+    <element name="entry">
+      <attribute name="lang"><text/></attribute>
+      <element name="id"><text/></element>
+      <element name="link"><text/></element>
+      <element name="updated"><text/></element>
+      <oneOrMore>
+        <element name="category">
+          <attribute name="term"><text/></attribute>
+          <text/>
+        </element>
+      </oneOrMore>
+      <element name="propeties"><text/></element>
+    </element>
+  </zeroOrMore>
+</element>
