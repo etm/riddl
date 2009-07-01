@@ -3,6 +3,7 @@ gem 'ruby-xml-smart', '>= 0.2.0.1'
 require 'xml/smart'
 require ::File.dirname(__FILE__) + '/file/messageparser'
 require ::File.dirname(__FILE__) + '/file/resourcechecker'
+require ::File.dirname(__FILE__) + '/file/layerchecker'
 require ::File.dirname(__FILE__) + '/handlers'
 
 $iii = 0
@@ -34,8 +35,8 @@ module Riddl
       #}}}
     end
 
-    def declaration_router
-      Riddl::File::Routes.new(@doc) rescue nil
+    def declaration
+      Riddl::File::Declaration.new(@doc) rescue nil
     end
 
     def get_message(path,operation,params,headers)
@@ -117,6 +118,9 @@ module Riddl
     def description?; @description; end
     def valid_resources?
       @description ? ResourceChecker.new(@doc).check : []
+    end
+    def valid_layers?
+      @declaration ? LayerChecker.new(@doc).check : []
     end
   end
 end

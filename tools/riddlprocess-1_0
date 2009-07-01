@@ -1,7 +1,11 @@
 #!/usr/bin/ruby 
+curpath = __FILE__
+while ::File::symlink?(curpath)
+  curpath = ::File::dirname(curpath) + '/' + ::File::readlink(curpath)
+end  
 require 'rubygems'
-require ::File.dirname(__FILE__) + "/../lib/ruby/file"
-require ::File.dirname(__FILE__) + "/../lib/ruby/file/routes"
+require ::File::dirname(curpath) + "/../lib/ruby/file"
+require ::File::dirname(curpath) + "/../lib/ruby/file/declaration"
 require 'optparse'
 require 'pp'
 
@@ -34,7 +38,7 @@ unless riddl.validate!
 end
 #}}}
 
-r = riddl.declaration_router
-pp r.routes
+d = riddl.declaration
+pp d.routes
 puts "-------------------"
-puts r.description.to_s
+puts d.description.to_s
