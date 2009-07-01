@@ -1,11 +1,25 @@
 <declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <interface relative="hellos" path="http://tango.pri.lan:4277/helloworld">
-    <filter path="http://tango.pri.lan:4278/harmless">
-      <xi:include href="pre1.xml"/>
-    </filter>  
+  <interface name="pre" path="http://tango.pri.lan:4278/">
+    <xi:include href="pre1.xml"/>
+  </interface>  
+  <interface name="main" path="http://tango.pri.lan:4277/">
     <xi:include href="description.xml"/>
-    <filter path="http://tango.pri.lan:4278/harmless">
-      <xi:include href="post1.xml"/>
-    </filter>  
-  </interface>
+  </interface>  
+  <interface name="post" path="http://tango.pri.lan:4279/">
+    <xi:include href="post1.xml"/>
+  </interface>  
+
+  <facade>
+    <part relative="hellos">
+      <layer name="pre">
+        <apply-to>/</apply-to>
+        <apply-to>/foo</apply-to>
+        <apply-to>/foo/bar</apply-to>
+      </layer>  
+      <layer name="main">
+        <block method="post" in="a">/foo</block>
+      </layer>
+      <layer name="post"/>
+    </part>
+  </facade>   
 </declaration>  

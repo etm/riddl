@@ -12,36 +12,61 @@
       <oneOrMore>
         <ref name="riddl-interface"/>
       </oneOrMore>
+      <element name="facade">
+        <ref name="riddl-facade"/>
+      </element>
     </element>
   </define>
 
   <define name="riddl-interface">
     <element name="interface">
-      <optional>
-        <attribute name="relative">
-          <ref name="riddl-datatype-relpathtemplate"/>
-        </attribute>
-      </optional>
       <attribute name="path">
         <data type="anyURI"/>
       </attribute>
-      <zeroOrMore>
-        <ref name="riddl-filter"/>
-      </zeroOrMore>  
+      <attribute name="name">
+        <ref name="riddl-datatype-name"/>
+      </attribute>
       <ref name="riddl-description-include"/>
-      <zeroOrMore>
-        <ref name="riddl-filter"/>
-      </zeroOrMore>  
     </element>
   </define>  
 
-  <define name="riddl-filter">
-    <element name="filter">    
-      <attribute name="path">
-        <data type="anyURI"/>
-      </attribute>
-      <ref name="riddl-description-include"/>
-    </element>
+  <define name="riddl-facade">
+    <oneOrMore>
+      <element name="part">
+        <optional>
+          <attribute name="relative">
+            <ref name="riddl-datatype-relpathtemplate"/>
+          </attribute>
+        </optional>
+        <oneOrMore>
+          <element name="layer">
+            <ref name="riddl-layer"/>
+          </element>
+        </oneOrMore>  
+      </element>
+    </oneOrMore>
+  </define>  
+
+  <define name="riddl-layer">
+    <attribute name="name">
+      <ref name="riddl-datatype-name"/>
+    </attribute>
+    <zeroOrMore>
+      <element name="apply-to">
+        <ref name="riddl-datatype-pathtemplate"/>
+      </element>
+    </zeroOrMore>  
+    <zeroOrMore>
+      <element name="block">
+        <optional>
+          <ref name="riddl-att-method"/>
+        </optional>
+        <optional>
+          <ref name="riddl-atts-request"/>
+        </optional>
+        <ref name="riddl-datatype-pathtemplate"/>
+      </element>  
+    </zeroOrMore>  
   </define>
 
   <define name="riddl-description-include">

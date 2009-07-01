@@ -207,24 +207,20 @@
     <zeroOrMore>
       <choice>
         <element name="post">
-          <ref name="riddl-method"/>
+          <ref name="riddl-atts-request"/>
         </element>
         <element name="get">
-          <ref name="riddl-method"/>
+          <ref name="riddl-atts-request"/>
         </element>
         <element name="put">
-          <ref name="riddl-method"/>
+          <ref name="riddl-atts-request"/>
         </element>
         <element name="delete">
-          <ref name="riddl-method"/>
+          <ref name="riddl-atts-request"/>
         </element>
         <element name="request">
-          <attribute name="type">
-            <data type="string">
-              <param name="pattern">[a-z]+</param>
-            </data>  
-          </attribute>
-          <ref name="riddl-method"/>
+          <ref name="riddl-att-method"/>
+          <ref name="riddl-atts-request"/>
         </element>  
       </choice>  
     </zeroOrMore>
@@ -235,36 +231,4 @@
     </zeroOrMore>
   </define>
    
-  <define name="riddl-method">
-    <choice>
-      <attribute name="pass">
-        <ref name="riddl-datatype-name-star"/>
-      </attribute>
-      <group>
-        <attribute name="add">
-          <ref name="riddl-datatype-name"/>
-        </attribute>
-        <attribute name="remove">
-          <ref name="riddl-datatype-name"/>
-        </attribute>
-      </group>
-      <attribute name="add">
-        <ref name="riddl-datatype-name"/>
-      </attribute>
-      <attribute name="remove">
-        <ref name="riddl-datatype-name"/>
-      </attribute>
-      <group>
-        <attribute name="in">
-          <ref name="riddl-datatype-name-star"/>
-        </attribute>
-        <optional>
-          <attribute name="out">
-            <ref name="riddl-datatype-name"/>
-          </attribute>
-        </optional>  
-      </group>
-    </choice>  
-  </define>
-
 </grammar>

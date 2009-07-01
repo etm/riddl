@@ -23,6 +23,11 @@
       <param name="pattern">(\c+|\{\})(/(\c+|\{\}))*</param>
     </data>
   </define>
+  <define name="riddl-datatype-pathtemplate">
+    <data type="string">
+      <param name="pattern">/|(/(\c+|\{\}))*</param>
+    </data>
+  </define>
 
   <define name="riddl-datatype-name-star">
     <data type="string">
@@ -45,5 +50,43 @@
       <ref name="riddl-datatype-name-star"/>
     </attribute>
   </define>  
+  <define name="riddl-att-method">
+    <attribute name="method">
+      <data type="string">
+        <param name="pattern">[a-z]+</param>
+      </data>  
+    </attribute>  
+  </define>  
+  <define name="riddl-atts-request">
+    <choice>
+      <attribute name="pass">
+        <ref name="riddl-datatype-name-star"/>
+      </attribute>
+      <group>
+        <attribute name="add">
+          <ref name="riddl-datatype-name"/>
+        </attribute>
+        <attribute name="remove">
+          <ref name="riddl-datatype-name"/>
+        </attribute>
+      </group>
+      <attribute name="add">
+        <ref name="riddl-datatype-name"/>
+      </attribute>
+      <attribute name="remove">
+        <ref name="riddl-datatype-name"/>
+      </attribute>
+      <group>
+        <attribute name="in">
+          <ref name="riddl-datatype-name-star"/>
+        </attribute>
+        <optional>
+          <attribute name="out">
+            <ref name="riddl-datatype-name"/>
+          </attribute>
+        </optional>  
+      </group>
+    </choice>  
+  </define>
 
 </grammar>
