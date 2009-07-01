@@ -10,7 +10,7 @@
   </interface>  
 
   <facade>
-    <part relative="hellos">
+    <tile relative="hellos">
       <layer name="pre">
         <apply-to>/</apply-to>
         <apply-to>/foo</apply-to>
@@ -20,6 +20,6 @@
         <block method="post" in="a">/foo</block>
       </layer>
       <layer name="post"/>
-    </part>
+    </tile>
   </facade>   
 </declaration>  

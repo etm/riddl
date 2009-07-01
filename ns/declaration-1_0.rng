@@ -32,7 +32,7 @@
 
   <define name="riddl-facade">
     <oneOrMore>
-      <element name="part">
+      <element name="tile">
         <optional>
           <attribute name="relative">
             <ref name="riddl-datatype-relpathtemplate"/>
