@@ -42,7 +42,7 @@ module Riddl
     def get_message(path,operation,params,headers)
       #{{{
       if description?
-        tpath = path == "/" ? '/' : path.gsub(/\/([^{}\/]+)/,"/des:resource[@relative=\"\\1\"]").gsub(/\/\{\}/,"des:resource[not(@relative)]").gsub(/\/\/+/,'/')
+        tpath = path == "/" ? '/' : path.gsub(/\/([^{}\/]+)/,"/des:resource[@relative=\"\\1\"]").gsub(/\/\{\}/,"/des:resource[not(@relative)]").gsub(/\/+/,'/')
         tpath = "/des:description/des:resource" + tpath + "des:" + operation + "|/des:description/des:resource" + tpath + "des:request[@type='#{operation}']"
         mp = MessageParser.new(@doc,params,headers)
         @doc.find(tpath + "[@in and not(@in='*')]").each do |o|
