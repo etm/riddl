@@ -19,7 +19,9 @@
   </message>
 
   <message name="details-of-service">
-    <parameter name="author" type="string"/>
+    <parameter name="details-of-services" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rngs/details.rng"/>
+    </parameter>
   </message>
 
   <resource>
