@@ -1,7 +1,9 @@
 require 'rack'
 require 'socket'
 require '../../lib/ruby/server'
-require 'pp'
+require 'MarkUS_V3.0'
+require 'xml/smart'
+
 
 require 'mysql'
 
@@ -10,13 +12,26 @@ use Rack::ShowStatus
 
 
 class Root < Riddl::Implementation
+  include MarkUS
+
   def response
     # puts "Processing request on root resource (List of groups)"
-    m = Mysql.new('localhost', 'root', 'thesis')
-    m.select_db('thesis')
-    result = m.query("SELECT * FROM SERVICE_GROUP")
+    #m = Mysql.new('localhost', 'root', 'thesis')
+    #m.select_db('thesis')
+    #result = m.query("SELECT * FROM SERVICE_GROUP")
 
-    feed = <<-HERE_DOC
+    Dir['repository'].each do |f|
+      if f.directory?
+      feed = feed_ do 
+        title_ "list of groups"
+        updated_ ""
+        link_ :href => 'http://bla' do 
+          text_! test
+        end
+        XML::Smart.open("test.xml
+      end  
+
+    #feed = <<-HERE_DOC
       <feed>
         <title>List of groups</title>
         <updated>No date at the monent</updated>
