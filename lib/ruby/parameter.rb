@@ -12,13 +12,13 @@ module Riddl
     end
     class Complex
       attr_reader :name, :mimetype, :filename, :value, :type, :additional
-      def initialize(name,mimetype,filename=nil,file=nil,additional=[])
+      def initialize(name,mimetype,file=nil,filename=nil,additional=[])
         @name = name
         @mimetype = mimetype
         @filename = filename
         @type = :body
         @additional = additional
-        if file && file.class == Tempfile
+        if file && file.kind_of?(IO)
           @value = file
         else
           raise "ERROR not a file" unless file.nil?
