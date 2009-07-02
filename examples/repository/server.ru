@@ -6,6 +6,8 @@ require 'xml/smart'
 
 require 'libs/impl_groups'
 require 'libs/impl_subgroups'
+require 'libs/impl_services'
+require 'libs/impl_details'
 
 use Rack::ShowStatus
 
@@ -14,11 +16,19 @@ run(
     process_out false
     on resource do
       on resource 'groups' do
-        p 'Processing groups ....'
-        run Groups if get '*'
+        p 'Processing groups ....' if get '*'
+        run GroupsGET if get '*'
          on resource do
-           p "Processing subgroups of ..." 
-           # run Subgroups if get '*'
+           p 'Processing subgroups ...' if get '*' 
+           run SubgroupsGET if get '*'
+           on resource do
+             p 'Processing services .... ' if get '*'
+             run ServicesGET if get '*'
+             on resource do
+               p 'Processing service details ....' if get '*'
+               run DetailsGET if get '*'
+             end
+           end
          end
       end
     end
