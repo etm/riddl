@@ -1,107 +1,48 @@
 require 'rack'
 require 'socket'
 require '../../lib/ruby/server'
-require 'MarkUS_V3.0'
+require 'libs/MarkUS_V3.0'
 require 'xml/smart'
-
-
-require 'mysql'
 
 use Rack::ShowStatus
 
-
-
-class Root < Riddl::Implementation
-  include MarkUS
+class Groups < Riddl::Implementation
+  include MarkUSModule
 
   def response
-    # puts "Processing request on root resource (List of groups)"
-    #m = Mysql.new('localhost', 'root', 'thesis')
-    #m.select_db('thesis')
-    #result = m.query("SELECT * FROM SERVICE_GROUP")
-
-    Dir['repository'].each do |f|
-      if f.directory?
-      feed = feed_ do 
-        title_ "list of groups"
-        updated_ ""
-        link_ :href => 'http://bla' do 
-          text_! test
-        end
-        XML::Smart.open("test.xml
+    groups = []
+    Dir['repository/groups/*'].each do |f|
+      if File::directory? f
+        groups << File::basename(f) 
       end  
+    end  
 
-    #feed = <<-HERE_DOC
-      <feed>
-        <title>List of groups</title>
-        <updated>No date at the monent</updated>
-        <generator>My Repositorxy at local host</generator>
-        <id>localhost/</id>
-        <link href="localhost" rel="self" type="application/atom+xml"/>
-        <schema>
-          <properties>URI to properties</properties>
-          <queryInput>N.A.</queryInput>
-          <queryOutput>N.A.</queryOutput>
-          <invokeInput>N.A.</invokeInput>
-          <invokeOutput>N.A.</invokeOutput>
-        </schema>
-HERE_DOC
-
-    results.each do |row|
-      feed = feed + "  <entry lang="">\”"
-      feed = feed + "    <id>" + row['ID'] + "</id>\n"
-      feed = feed + "    <link>localhost/" + row['NAME'] + "</link>\n"
-      feed = feed + "    <updated>N.A.</updated>\n"
-      feed = feed + "    <category term="/"/>\n"
-      feed = feed + "    <properties>N.A.</properties>\n"
-      feed = feed + "  </entry>\n"
-    end
-    feed = feed + "</feed>\n"
- 
-    Riddl::Parameter::Complex.new("list-of-groups","text/xml", feed)
-  end
-
-  def status
-    200
-  end
-end
-
-
-class Category < Riddl::Implementation
-  def response
-    p @r.last                                        # e.g. cinemas for /cinemas
-  end
-end
-
-class SubCategory < Riddl::Implementation
-  def response
-    p @r.last                                        # e.g. arthouse for /cinemas/arthouse
-  end
-end
-
-class Item < Riddl::Implementation
-  def response
-    p @r.last                                        # e.g. 1 for /cinemas/arthouse/1
-    p @r[0]                                          # e.g. cinemas
-    p @r[1]                                          # e.g. arthouse
+    Riddl::Parameter::Complex.new("list-of-groups","text/xml") do
+      feed__ :xmlns => 'http://www.w3.org/2005/atom' do
+        title_ 'List of groups'
+        updated_ 'No date at the monent'
+        generator_ 'My Repository at local host'
+        id_ "#{$url}groups/"
+        link_ :rel => 'self', :type => 'application/atom+xml', :href => "#{$url}groups/"
+        groups.each do |g|
+          entry_ do
+            id_ "#{$url}groups/#{g}/"
+            link_ "#{$url}groups/#{g}/"
+            updated_ File.mtime("repository/groups/#{g}").xmlschema
+          end
+        end  
+      end
+    end  
   end
 end
 
 run(
   Riddl::Server.new("description.xml") do
-    process_out true
+    process_out false
     on resource do                                    # "/"
-      run Root if get '*'
-      on resource do                                  # "/cinemas"
-        run Category if get '*'
-        on resource do "/cinemas/arthouse"
-          run SubCatgory if get '*'
-          on resource do "/cinemas/arthouse/1"
-            run Item if get '*'
-          end
-        end
+      on resource 'groups' do
+        run Groups if get '*'
       end
     end
   end
 )
-

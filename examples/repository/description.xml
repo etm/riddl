@@ -1,25 +1,25 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="list-of-groups">
-    <parameter name="list-of-books" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="list-of-groups" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/atom.rng"/>
     </parameter>
   </message>
 
   <message name="list-of-subgroups">
-    <parameter name="list-of-books" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="list-of-subgroups" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/atom.rng"/>
     </parameter>
   </message>
 
   <message name="list-of-services">
-    <parameter name="list-of-books" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="list-of-services" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/atom.rng"/>
     </parameter>
   </message>
 
   <message name="description-of-service">
-    <parameter name="list-of-books" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="description-of-service" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/atom.rng"/>
     </parameter>
   </message>
