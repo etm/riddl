@@ -25,12 +25,12 @@
       <element name="id"><text/></element>
       <element name="link"><text/></element>
       <element name="updated"><text/></element>
-      <oneOrMore>
+      <zeroorMore>
         <element name="category">
           <attribute name="term"><text/></attribute>
           <text/>
         </element>
-      </oneOrMore>
+      </zeroOrMore>
       <element name="propeties"><text/></element>
     </element>
   </zeroOrMore>
