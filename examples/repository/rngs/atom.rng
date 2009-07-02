@@ -25,7 +25,7 @@
       <element name="id"><text/></element>
       <element name="link"><text/></element>
       <element name="updated"><text/></element>
-      <zeroorMore>
+      <zeroOrMore>
         <element name="category">
           <attribute name="term"><text/></attribute>
           <text/>
