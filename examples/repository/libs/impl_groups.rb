@@ -1,6 +1,7 @@
 class Groups < Riddl::Implementation
   include MarkUSModule
-
+  $url = 'http://localhost:9292/'
+  
   def response
     groups = []
     Dir['repository/groups/*'].each do |f|

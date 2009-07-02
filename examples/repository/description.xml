@@ -29,15 +29,7 @@
       <get in="*" out="list-of-groups"/>
       <resource> <!-- Dynamically: name of the group -->
         <get in="*" out="list-of-subgroups"/>
-        <resource> <!-- Dynamically: name of the subgroup -->
-          <get in="*" out="list-of-services"/>
-          <resource> <!-- Dynamicall: name of the service -->
-            <get in="*" out="description-of-service"/>
-          </resource>
-        </resource>
       </resource>
-    </resource>
-    <resource relative="user">
     </resource>
   </resource>  
 
