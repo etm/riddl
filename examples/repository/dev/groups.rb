@@ -1,5 +1,4 @@
 #!/usr/bin/ruby
-
 require 'libs/MarkUS_V3.0'
 require 'time'
 require 'rubygems'
