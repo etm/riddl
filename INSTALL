@@ -1,7 +1,7 @@
 == Ubuntu & Debian
 
-sudo apt-get install libxml2-dev zlib1g-dev ruby1.8-dev build-essential ruby ruby1.8 rubygems
-sudo gem install ruby-xml-smart (>= 0.2.0 needed)
+sudo apt-get install libxml2-dev libxslt1-dev zlib1g-dev ruby1.8-dev build-essential ruby ruby1.8 rubygems
+sudo gem install ruby-xml-smart (>= 0.2.0.1 needed)
 sudo gem install rack mongrel
 
 == Others
