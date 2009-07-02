@@ -48,7 +48,12 @@ module MarkUS__
         case a
           when Hash
             attrs << " " + a.collect { |key,value|
-              value.nil? ? nil : "#{key}=\"#{value.to_s.gsub(/"/,"&#34;")}\""
+              if key.to_s == 'prefix_!'
+                tname = "#{value}:#{tname}"
+                nil
+              else  
+                value.nil? ? nil : "#{key}=\"#{value.to_s.gsub(/"/,"&#34;")}\""
+              end  
             }.compact.join(" ")
           when String,Integer
             content = a
