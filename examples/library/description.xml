@@ -55,7 +55,7 @@
     <resource relative="books">
       <post in="book-description-form" out="book-id"/>
       <post in="book-description" out="book-id"/>
-      <request type="get" in="book-query" out="list-of-books"/>
+      <get in="book-query" out="list-of-books"/>
       <!--get in="*" out="list-of-books"/-->
       <resource>
         <get in="*" out="book-description"/>
