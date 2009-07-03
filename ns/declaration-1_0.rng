@@ -34,8 +34,8 @@
     <oneOrMore>
       <element name="tile">
         <optional>
-          <attribute name="relative">
-            <ref name="riddl-datatype-relpathtemplate"/>
+          <attribute name="path">
+            <ref name="riddl-datatype-pathtemplate"/>
           </attribute>
         </optional>
         <oneOrMore>

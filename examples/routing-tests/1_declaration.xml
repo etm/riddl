@@ -10,7 +10,7 @@
   </interface>  
 
   <facade>
-    <tile relative="hellos">
+    <tile path="/hellos">
       <layer name="pre">
         <apply-to>/</apply-to>
         <apply-to>/foo</apply-to>

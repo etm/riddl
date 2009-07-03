@@ -18,11 +18,6 @@
       <param name="pattern">\c+(/\c+)*</param>
     </data>
   </define>
-  <define name="riddl-datatype-relpathtemplate">
-    <data type="string">
-      <param name="pattern">(\c+|\{\})(/(\c+|\{\}))*</param>
-    </data>
-  </define>
   <define name="riddl-datatype-pathtemplate">
     <data type="string">
       <param name="pattern">/|(/(\c+|\{\}))*</param>

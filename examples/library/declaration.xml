@@ -1,8 +1,17 @@
 <declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <interface path="http://tango.pri.lan:39512">
+  <interface name="main" path="http://tango.pri.lan:39512">
     <xi:include href="description.xml"/>
   </interface>
-  <interface relative="/customers/{}" path="http://tango.pri.lan:39513">
-    <xi:include href="http://tango.pri.lan:39513/description-image-addon.xml"/>
+  <interface name="addon" path="http://tango.pri.lan:39513">
+    <xi:include href="description-image-addon.xml"/>
   </interface>
-</declaration>  
+
+  <facade>
+    <tile>
+      <layer name="main"/>
+    </tile>
+    <tile path="/customers/{}">
+      <layer name="addon"/>
+    </tile>
+  </facade>  
+</declaration>
