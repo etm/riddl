@@ -44,8 +44,8 @@
   </message>
 
   <resource>
-    <request type="testa" in="book-query" out="list-of-books"/>
-    <request type="testb" add="add-to-book-query" remove="remove-from-book-query"/>
+    <request method="testa" in="book-query" out="list-of-books"/>
+    <request method="testb" add="add-to-book-query" remove="remove-from-book-query"/>
   </resource>  
 
 </description>
