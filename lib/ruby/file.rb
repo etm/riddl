@@ -43,7 +43,7 @@ module Riddl
       #{{{
       if description?
         tpath = path == "/" ? '/' : path.gsub(/\/([^{}\/]+)/,"/des:resource[@relative=\"\\1\"]").gsub(/\/\{\}/,"/des:resource[not(@relative)]").gsub(/\/+/,'/')
-        tpath = "/des:description/des:resource" + tpath + "des:" + operation + "|/des:description/des:resource" + tpath + "des:request[@type='#{operation}']"
+        tpath = "/des:description/des:resource" + tpath + "des:" + operation + "|/des:description/des:resource" + tpath + "des:request[@method='#{operation}']"
         mp = MessageParser.new(@doc,params,headers)
         @doc.find(tpath + "[@in and not(@in='*')]").each do |o|
           return o.attributes['in'], o.attributes['out'] if mp.check(o.attributes['in'])

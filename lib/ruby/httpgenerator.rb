@@ -30,7 +30,7 @@ module Riddl
           @headers['Content-Type'] = 'text/riddl-data'
           @headers['Content-Disposition'] = "riddl-data; name=\"#{r.name}\""
         when Riddl::Parameter::Complex
-          tmp.write(r.value.class == IO ? r.value.read : r.value)
+          tmp.write(r.value.kind_of?(IO) ? r.value.read : r.value)
           @headers['Content-Type'] = r.mimetype
           if r.filename.nil?
             @headers['Content-ID'] = r.name

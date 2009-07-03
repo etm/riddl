@@ -18,9 +18,9 @@
     </parameter>
   </message>
 
-  <message name="description-of-service">
-    <parameter name="description-of-service" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <xi:include href="rngs/atom.rng"/>
+  <message name="details-of-service">
+    <parameter name="details-of-services" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rngs/details.rng"/>
     </parameter>
   </message>
 
@@ -29,6 +29,12 @@
       <get in="*" out="list-of-groups"/>
       <resource> <!-- Dynamically: name of the group -->
         <get in="*" out="list-of-subgroups"/>
+        <resource> <!-- Dynamically: name of subgroup -->
+          <get in="*" out="list-of-services"/>
+          <resource>
+            <get in="*" out="details-of-service"/>
+          </resource>
+        </resource>
       </resource>
     </resource>
   </resource>  
