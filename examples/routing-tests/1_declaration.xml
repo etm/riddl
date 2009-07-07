@@ -10,7 +10,14 @@
   </interface>  
 
   <facade>
-    <tile path="/hellos">
+    <tile>
+      <layer name="pre"/>
+      <layer name="main">
+        <block method="post" in="a">/foo</block>
+      </layer>
+      <layer name="post"/>
+    </tile>
+    <tile path="/muelloe/{}/foo">
       <layer name="pre">
         <apply-to>/</apply-to>
         <apply-to>/foo</apply-to>
