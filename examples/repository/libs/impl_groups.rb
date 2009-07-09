@@ -36,13 +36,13 @@ end
 class GroupsPOST < Riddl::Implementation
   def response
     begin
-      p "Generating group named '#{@p[0].value}' ...."
+      puts "Generating group named '#{@p[0].value}' ...."
       Dir.mkdir("repository/groups/#{@p[0].value}")
       @staus = 200
-      p 'OK (200)'
+      puts 'OK (200)'
     rescue
       @status = 409 # http ERROR named 'Conflict'
-      p $ERROR_INFO
+      puts $ERROR_INFO
     end
   end
 end

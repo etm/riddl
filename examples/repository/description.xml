@@ -10,6 +10,10 @@
     <parameter name="name-of-group" type="string"/>
   </message>
 
+  <message name="create-group">
+    <parameter name="name-of-group" type="string"/>
+  </message>
+
 <!-- Messages at subgroup level -->
   <message name="list-of-subgroups">
     <parameter name="list-of-subgroups" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">

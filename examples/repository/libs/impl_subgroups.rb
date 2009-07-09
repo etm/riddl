@@ -5,11 +5,17 @@ class SubgroupsGET < Riddl::Implementation
 
   def response
     groups = []
-    Dir["repository/#{@r[0]}/#{@r.last}/*"].each do |f|
+    dirs = Dir["repository/#{@r[0]}/#{@r.last}/*"]
+    dirs.each do |f|
       if File::directory? f
         groups << File::basename(f) 
       end  
-    end  
+    end
+    if dirs.size == 0
+      @status = 404 # Error 404: Resource not found
+      puts "Error: Subgroup not found\n"
+      return
+    end
 
     Riddl::Parameter::Complex.new("list-of-subgroups","text/xml") do
       feed__ :xmlns => 'http://www.w3.org/2005/atom' do
@@ -35,12 +41,18 @@ class SubgroupsPOST < Riddl::Implementation
   def response
     begin
       p "Generating subgroup in '#{@r[1]}' named '#{@p[0].value}' ...."
-      Dir.mkdir("repository/groups/#{@r[1]}/#{@p[0].value}")
-      @staus = 200
-      p 'OK (200)'
+      begin
+        Dir.mkdir("repository/groups/#{@r[1]}/#{@p[0].value}")
+      rescue
+        @status = 404
+        puts 'Creating subgroup failed because of\n#' + $ERROR_INFO 
+        return
+      end
+      @status = 200
+      puts 'OK (200)'
     rescue
       @status = 409 # http ERROR named 'Conflict'
-      p $ERROR_INFO
+      puts $ERROR_INFO
     end
   end
 end
