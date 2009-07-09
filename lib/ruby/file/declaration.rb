@@ -73,7 +73,6 @@ module Riddl
           end unless add.nil?
           remove.root.children.each do |e|
             # TODO
-            p e.dump
           end unless remove.nil?
           Message.virtual(temp,@name + "_" + suffix)
         end
@@ -82,201 +81,179 @@ module Riddl
         #}}}
       end
 
-      class Item
-        def initialize(props)
-          props.each do |p|
-            
-          @layer = layer
-          @item = item
-        end
-        attr_reader :layer, :item
-      end
-
-      class Route
+      class Resource
         #{{
-        def initialize(items)
-          @route = []
-          @layer = 0
-          items.each do |i|
-            @route << RouteItem.new layer, i
+        def initialize(path=nil)
+          @path = path
+          @resources = {}
+          @requests = {}
+          @composition = {}
+        end
+        def compose!
+          
+        end
+        def add(path)
+          pres = self
+          path.split('/').each do |p|
+            next if p == ""
+            unless pres.resources.has_key?(p) 
+              pres.resources[p] = Resource.new(p)
+            end
+            pres = pres.resources[p]
           end
-          @layer += 1
+          pres
         end
-        def initialize_copy(from)
-          @rtype = from.rtype
-          @route = from.route.dup
+        def clean!
+          @resouces = {}
         end
-        attr_accessor :route, :rtype
+        def add_request_in_out(index,method,min,mout)
+          @requests[method] ||= []
+          @requests[method][index] ||= []
+          @requests[method][index] << RequestInOut.new(min,mout)
+        end
+        def add_request_transform(index,method,madd,mremove)
+          @requests[method] ||= []
+          @requests[method][index] ||= []
+          @requests[method][index] << RequestTransform.new(madd,mremove)
+        end
+        def add_request_star_out(index,method,mout)
+          @requests[method] ||= []
+          @requests[method][index] ||= []
+          @requests[method][index] << RequestStarOut.new(mout)
+        end
+        def add_request_pass(index,method)
+          @requests[method] ||= []
+          @requests[method][index] ||= []
+          @requests[method][index] << RequestPass.new
+        end
+        attr_reader :resources,:path,:requests
         #}}}
-      end
-
-      class Routes
+      end  
+          
+      class Facade
+        #{{{
         def initialize
-          @routes = []
+          @resource = Resource.new("/")
         end
-        def add(a)
-          @routes << Route.new(a)
-          @routes.last
+        def add(path)
+          if path.nil? || path == '/'
+            @resource
+          else
+            @resource.add(path)
+          end
         end
+        def visualize(res=@resource,what='')
+          what += res.path
+          puts what
+          res.requests.each do |k,v|
+            puts "  #{k.upcase}:"
+            v.each_with_index do |l,i|
+              puts "    Layer #{i}:"
+              l.each do |r|
+                 puts "      #{r.class.name}"
+              end
+            end
+          end
+          res.resources.each do |key,r|
+            visualize(r,what + (what == '/' ? ''  : '/'))
+          end
+        end
+        def compose!(res=@resource)
+          res.compose!
+          res.resources.each do |key,r|
+            self.compose!(r)
+          end
+        end
+        #}}}
       end  
 
-      def initialize(riddl)
-        #{{
-        ### Forward
-        @routes = Routes.new
-        riddl.find("/dec:declaration/dec:interface").each do |ifa|
-          layers = ifa.find("des:description|dec:filter/des:description")
-          layers.first.find("des:resource/des:*[@in and @out and not(@in='*')]").each do |m|
-            ri = Message.new(layers[0],m.attributes['in'])
-            ro = Message.new(layers[0],m.attributes['out'])
-            r = @routes.add [ri,ro]
-            traverse m, ro, 
-            
-            unroll [ri,ro] + get_path(m.name.name,ro,layers,1), Route.new(m.name.name)
-          end
-          layers[0].find("des:resource/des:*[@pass and not(@pass='*')]").each do |m|
-            rp = Message.new(layers[0],m.attributes['pass'])
-            unroll [rp] + get_path(m.name.name,rp,layers,1), Route.new(m.name.name)
-          end
-          layers[0].find("des:resource/des:*[@in and @out and @in='*']").each do |m|
-            ro = Message.new(layers[0],m.attributes['out'])
-            unroll [Star.new,ro] + get_path(m.name.name,ro,layers,1), Route.new(m.name.name)
-          end
-          layers[0].find("des:resource/des:*[@add or @remove]").each do |m|
-            ar = Modify.new(layers[0],m.attributes['add'],m.attributes['remove'])
-            unroll [Star.new] + get_path(m.name.name,ar,layers,1), Route.new(m.name.name)
-          end
-          layers[0].find("des:resource/des:*[@pass and @pass='*']").each do |m|
-            rs = Star.new
-            unroll [Star.new] + get_path(m.name.name,rs,layers,1), Route.new(m.name.name)
-          end
+      # Request* helper classes
+      #{{{
+      class RequestInOut
+        def initialize(min,mout)
+          @in = min
+          @out = mout
         end
+      end  
+      class RequestTransform
+        def initialize(madd,mremove)
+          @add = madd
+          @remove = mremove
+        end
+      end  
+      class RequestStarOut
+        def initialize(mout)
+          @out = mout
+        end
+      end  
+      class RequestPass; end
+      #}}}
+
+      def apply_to(res,des,desres,path,index)
+        #{{{
+        res = res.add(path)
+        add_requests(res,desres,index)
+        desres.find("des:resource").each do |desres|
+          apply_to(res,des,desres,desres.attributes['relative'] || "{}",index)
+        end
+        #}}}
       end
+      private :apply_to
+
+      def add_requests(res,desres,index)
+        #{{{
+        desres.find("des:*[@in and not(@in='*')]").each do |m|
+          method = m.attributes['method'] || m.name.name
+          res.add_request_in_out(index,method,m.attributes['in'],m.attributes['out'])
+        end
+        desres.find("des:*[@pass and not(@pass='*')]").each do |m|
+          method = m.attributes['method'] || m.name.name
+          res.add_request_in_out(index,method,m.attributes['pass'],m.attributes['pass'])
+        end
+        desres.find("des:*[@add or @remove]").each do |m|
+          method = m.attributes['method'] || m.name.name
+          res.add_request_transform(index,method,m.attributes['add'],m.attributes['remove'])
+        end
+        desres.find("des:*[@in and @in='*']").each do |m|
+          method = m.attributes['method'] || m.name.name
+          res.add_request_star_out(index,method,m.attributes['out'])
+        end
+        desres.find("des:*[@pass and @pass='*']").each do |m|
+          method = m.attributes['method'] || m.name.name
+          res.add_request_pass(index,method)
+        end
+        #}}}
+      end
+      private :add_requests
 
       def description
-        #{{{
-        doc = XML::Smart.string("<description datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://riddl.org/ns/description/1.0\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"><resource/></description>")
-        res = doc.root.children[0]
-        @routes.each do |r|
-          fmess = r.route.first
-          lmess = r.route.last
-          res.add_before(fmess.message.root).attributes['name'] = fmess.name unless fmess.class == Star
-          res.add_before(lmess.message.root).attributes['name'] = lmess.name
-          res.add(r.rtype, :in=>fmess.name, :out=>lmess.name)
-        end
-        doc
-        #}}}
       end
 
-      def unroll(tree,route,add=true)
+      def initialize(riddl)
         #{{{
-        @routes << route if add
-        first = true
-        before_branch = nil
-        tree.each do |e|
-          if e.class == Array
-            if first
-              unroll(e,route,false)
-              first = false
-            else
-              unroll(e,before_branch.dup,true)
-            end
-          else
-            route.route << e
-            before_branch = route.dup
-          end
-        end
-        #}}}
-      end
-
-      def get_path(rtype,mess,layers,layer)
-        #{{{
-        lay = layers[layer]
-
-        if mess.class == Message
-          lay.find("des:resource/des:#{rtype}[@in and @out and not(@in='*')]").each do |m|
-            cmp = Message.new(lay,m.attributes['in'])
-            if cmp.hash == mess.hash
-              rm = Message.new(lay,m.attributes['out'])
-              if layers.length > layer+1
-                return path_unroll(rm, get_path(rtype,rm,layers,layer+1))
-              else
-                return [rm]
+        fac = Facade.new
+        ### Forward
+        riddl.find("/dec:declaration/dec:facade/dec:tile").each do |tile|
+          res = fac.add(tile.attributes['path'] || '/')
+          res.clean! # for overlapping tiles, each tile gets an empty path
+          tile.find("dec:layer").each_with_index do |layer,index|
+            apply_to = layer.find("dec:apply-to")
+            lname = layer.attributes['name']
+            des = riddl.find("/dec:declaration/dec:interface[@name=\"#{lname}\"]/des:description").first
+            desres = des.find("des:resource").first
+            if apply_to.empty?
+              apply_to(res,des,desres,"/",index)
+            else  
+              apply_to.each do |at|
+                apply_to(res,des,desres,at.to_s,index)
               end
             end
           end
-
-          lay.find("des:resource/des:#{rtype}[@pass and not(@pass='*')]").each do |m|
-            cmp = Message.new(lay,m.attributes['pass'])
-            if rm.hash == mess.hash
-              if layers.length > layer+1
-                return path_unroll(cmp, get_path(rtype,cmp,layers,layer+1))
-              else
-                return [rm]
-              end
-            end
-          end
-
-          lay.find("des:resource/des:*[@in and @out and @in='*']").each do |m|
-            out = Message.new(lay,m.attributes['out'])
-            if layers.length > layer+1
-              return path_unroll(mess, get_path(rtype,out,layers,layer+1))
-            else
-              return [out]
-            end
-          end
-
-          lay.find("des:resource/des:*[@add or @remove]").each do |m|
-            ar = mess.modify(Modify.new(lay,m.attributes['add'],m.attributes['remove']))
-            if layers.length > layer+1
-              return path_unroll(ar, get_path(rtype,ar,layers,layer+1))
-            else
-              return [ar]
-            end
-          end
         end
-
-        if mess.class == Modify || mess.class == Star
-          matchmess = @routes.map do |r|
-            r.rtype == rtype ? r.route[layer] : nil
-          end.compact
-          mapping = {}
-          availmess = lay.find("des:resource/des:#{rtype}").map do |m|
-            if !m.attributes['in'].nil? && m.attributes['in'] != "*"
-              mm = Message.new(lay,m.attributes['in'])
-              mapping[mm] = Message.new(lay,m.attributes['out'])
-              mm
-            elsif !m.attributes['pass'].nil? && m.attributes['pass'] != "*"
-              pp = Message.new(lay,m.attributes['pass'])
-              mapping[pp] = pp
-              pp
-            else
-              mapping['*'] = Star
-              Star
-            end
-          end.compact
-          mdiff = availmess - matchmess
-          return path_unroll(mdiff, mdiff.map{|m| get_path(rtype,mapping[m],layers,layer+1)})
-        end
-
-        []
+        fac.visualize
+        fac.compose!
         #}}}
       end
-
-      def path_unroll(parent,sub)
-        #{{{
-        if parent.class == Array
-          parent.each_with_index.map do |e,i|
-            [e] + sub[i]
-          end
-        else
-          [parent] + sub
-        end
-        #}}}
-      end
-
-      attr_reader :routes
-      private :get_path, :path_unroll, :unroll
     end
   end  
 end
