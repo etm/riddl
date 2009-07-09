@@ -1,23 +1,38 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-
+<!-- Messages at group level -->
   <message name="list-of-groups">
     <parameter name="list-of-groups" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/atom.rng"/>
     </parameter>
   </message>
 
+  <message name="create-group-form">
+    <parameter name="name-of-group" type="string"/>
+  </message>
+
+<!-- Messages at subgroup level -->
   <message name="list-of-subgroups">
     <parameter name="list-of-subgroups" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/atom.rng"/>
     </parameter>
   </message>
 
+  <message name="create-subgroup-form">
+    <parameter name="name-of-subgroup" type="string"/>
+  </message>
+
+<!-- Messages at service level -->
   <message name="list-of-services">
     <parameter name="list-of-services" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/atom.rng"/>
     </parameter>
   </message>
 
+  <message name="create-service-form">
+    <parameter name="name-of-service" type="string"/>
+  </message>
+
+<!--- Messages at service-detail level -->
   <message name="details-of-service">
     <parameter name="details-of-services" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/details.rng"/>
@@ -27,10 +42,13 @@
   <resource>
     <resource relative="groups">
       <get in="*" out="list-of-groups"/>
+      <post in="create-group-form"/>
       <resource> <!-- Dynamically: name of the group -->
         <get in="*" out="list-of-subgroups"/>
+        <post in="create-subgroup-form"/>
         <resource> <!-- Dynamically: name of subgroup -->
           <get in="*" out="list-of-services"/>
+          <post in="create-service-form"/>
           <resource>
             <get in="*" out="details-of-service"/>
           </resource>

@@ -29,3 +29,19 @@ class SubgroupsGET < Riddl::Implementation
     end  
   end
 end
+
+# Creates a new Subgroup in the repository
+class SubgroupsPOST < Riddl::Implementation
+  def response
+    begin
+      p "Generating subgroup in '#{@r[1]}' named '#{@p[0].value}' ...."
+      Dir.mkdir("repository/groups/#{@r[1]}/#{@p[0].value}")
+      @staus = 200
+      p 'OK (200)'
+    rescue
+      @status = 409 # http ERROR named 'Conflict'
+      p $ERROR_INFO
+    end
+  end
+end
+

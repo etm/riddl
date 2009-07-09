@@ -18,18 +18,24 @@ run(
       on resource 'groups' do
         p 'Processing groups ....' if get '*'
         run GroupsGET if get '*'
-         on resource do
-           p 'Processing subgroups ...' if get '*' 
-           run SubgroupsGET if get '*'
-           on resource do
-             p 'Processing services .... ' if get '*'
-             run ServicesGET if get '*'
-             on resource do
-               p 'Processing service details ....' if get '*'
-               run DetailsGET if get '*'
-             end
-           end
-         end
+        p 'Creating group ...' if method :post => 'create-group-form'
+        run GroupsPOST if method :post => 'create-group-form'
+        on resource do
+          p 'Processing subgroups ...' if get '*' 
+          run SubgroupsGET if get '*'
+          p 'Creating subgroup ...' if method :post => 'create-subgroup-form'
+          run SubgroupsPOST if method :post => 'create-subgroup-form'
+          on resource do
+            p 'Processing services .... ' if get '*'
+            run ServicesGET if get '*'
+            p 'Creating service ...' if method :post => 'create-service-form'
+            run ServicesPOST if method :post => 'create-service-form'
+            on resource do
+              p 'Processing service details ....' if get '*'
+              run DetailsGET if get '*'
+            end
+          end
+        end
       end
     end
   end
