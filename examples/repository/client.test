@@ -2,7 +2,7 @@
 require '../../lib/ruby/client'
 
 
-if ARGV[0] == '-h'
+if ((ARGV[0] == '-h') || (ARGV.size == 0))
   puts <<-END
 Help for the repository administration
 
@@ -52,6 +52,7 @@ else
   
   repos =  Riddl::Client.new("http://localhost:9292/")
   uri = repos.resource('/groups/' + resource)
+p resource
   status, res = uri.request method => [
     params.each do |param|
       Riddl::Parameter::Simple.new(param[0], param[1])

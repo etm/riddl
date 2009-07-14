@@ -16,15 +16,15 @@ run(
     process_out false
     on resource do
       on resource 'groups' do
+        p 'Creating group ...' if method(method :POST => 'create-group')
+        run GroupsPOST if method(method :POST => 'create-group')
         p 'Processing groups ....' if get '*'
         run GroupsGET if get '*'
-        p 'Creating group ...' if method(:POST => 'create-group-form') || method(method :POST => 'create-group')
-        run GroupsPOST if method(:POST => 'create-group-form') || method(method :POST => 'create-group')
         on resource do
           p 'Processing subgroups ...' if get '*' 
           run SubgroupsGET if get '*'
-          p 'Creating subgroup ...' if method(:POST => 'create-subgroup-form') || method(method :POST => 'create-subgroup') 
-          run SubgroupsPOST if method(:post => 'create-subgroup-form') || method(:POST => 'create-subgroup')
+          p 'Creating subgroup ...' if method(method :POST => 'create-subgroup') 
+          run SubgroupsPOST if method(:POST => 'create-subgroup')
           on resource do
             p 'Processing services .... ' if get '*'
             run ServicesGET if get '*'

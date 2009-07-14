@@ -6,10 +6,6 @@
     </parameter>
   </message>
 
-  <message name="create-group-form">
-    <parameter name="name-of-group" type="string"/>
-  </message>
-
   <message name="create-group">
     <parameter name="name-of-group" type="string"/>
   </message>
@@ -21,7 +17,7 @@
     </parameter>
   </message>
 
-  <message name="create-subgroup-form">
+  <message name="create-subgroup">
     <parameter name="name-of-subgroup" type="string"/>
   </message>
 
@@ -32,7 +28,7 @@
     </parameter>
   </message>
 
-  <message name="create-service-form">
+  <message name="create-service">
     <parameter name="name-of-service" type="string"/>
   </message>
 
@@ -46,13 +42,13 @@
   <resource>
     <resource relative="groups">
       <get in="*" out="list-of-groups"/>
-      <post in="create-group-form"/>
+      <post in="create-group"/>
       <resource> <!-- Dynamically: name of the group -->
         <get in="*" out="list-of-subgroups"/>
-        <post in="create-subgroup-form"/>
+        <post in="create-subgroup"/>
         <resource> <!-- Dynamically: name of subgroup -->
           <get in="*" out="list-of-services"/>
-          <post in="create-service-form"/>
+          <post in="create-service"/>
           <resource>
             <get in="*" out="details-of-service"/>
           </resource>
