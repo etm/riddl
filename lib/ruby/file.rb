@@ -36,7 +36,7 @@ module Riddl
     end
 
     def declaration
-      Riddl::File::Declaration.new(@doc) rescue nil
+      Riddl::File::Declaration.new(@doc)
     end
 
     def get_message(path,operation,params,headers)
