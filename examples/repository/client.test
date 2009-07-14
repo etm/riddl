@@ -1,17 +1,67 @@
 #!/usr/bin/ruby
 require '../../lib/ruby/client'
 
-library = Riddl::Client.new("http://localhost:9292/")
-books = library.resource("/books/")
-stime = Time.now.to_f
-nums = 1
-# Watch the power
-nums.times do
-  status, res = books.request :get => [
-    Riddl::Header.new("Library",7),
-    Riddl::Parameter::Simple.new("auther","mangler"),
-    Riddl::Parameter::Simple.new("title","12")
+
+if ((ARGV[0] == '-h') || (ARGV.size == 0))
+  puts <<-END
+Help for the repository administration
+
+Use: client.test -m method -r resource [-p parameter] [-f file]
+  -m The method which scould be used for the request: GET, POST, PUT, DELETE, RIDDL
+  -r The resource the request schould be sent to (Starting after groups in the URI), e.g. /cinemas/arthouse/
+  -p The parameter which schould be appended to the request as key-value pairs, e.g. -p name:ralph
+  -f The file where the value of the parameter is stored as key-value pair, e.g. -f properties:/something/prosp.xml
+END
+else
+  argType = 'none'
+  method = ''
+  resource = ''
+  files = Array.new
+  params = Array.new
+
+  ARGV.each do |arg|
+   case argType
+      when 'method'
+        method = arg
+        argType = 'none'
+      when 'resource'
+        resource = arg
+        argType = 'none'
+      when 'param'
+        params << arg.split(':')
+        argType = 'none'
+      when 'file'
+        files << arg.split(':')
+        argType = 'none'
+      when 'none'
+        case arg
+          when '-f' 
+            argType = 'file'
+          when '-m' 
+            argType = 'method'
+          when '-p' 
+            argType = 'param'
+          when '-r' 
+            argType = 'resource'
+        end
+    end  
+  end
+  puts "Sending: #{method} at #{resource}"
+  puts "  Using params: #{params.inspect}"
+  puts "  Using files: #{files.inspect}" 
+  
+  repos =  Riddl::Client.new("http://localhost:9292/")
+  uri = repos.resource('/groups/' + resource)
+p resource
+  status, res = uri.request method => [
+    params.each do |param|
+      Riddl::Parameter::Simple.new(param[0], param[1])
+      puts "Creating parameter '#{param[0]}' with value '#{param[1]}'"
+    end
   ]
-  p status, res
-end  
-puts "#{nums} requests done: #{Time.now.to_f - stime} seconds"
+
+  puts "Finished with status code: #{status}"
+  puts "Result: #{res.inspect}"
+
+end
+

@@ -30,3 +30,19 @@ class ServicesGET < Riddl::Implementation
     end  
   end
 end
+
+# Creates a new Subgroup in the repository
+class ServicesPOST < Riddl::Implementation
+  def response
+    begin
+      p "Generating service in '#{@r[1]}/#{@r[2]}' named '#{@p[0].value}' ...."
+      Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
+      @staus = 200
+      p 'OK (200)'
+    rescue
+      @status = 409 # http ERROR named 'Conflict'
+      p $ERROR_INFO
+    end
+  end
+end
+

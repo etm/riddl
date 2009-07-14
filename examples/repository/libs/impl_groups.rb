@@ -1,3 +1,5 @@
+# Responds a list of all avaliable groups as an ATOM feed
+
 class GroupsGET < Riddl::Implementation
   include MarkUSModule
 
@@ -27,5 +29,20 @@ class GroupsGET < Riddl::Implementation
         end  
       end
     end  
+  end
+end
+
+# Creates a new Group in the repository
+class GroupsPOST < Riddl::Implementation
+  def response
+    begin
+      puts "Generating group named '#{@p[0].value}' ...."
+      Dir.mkdir("repository/groups/#{@p[0].value}")
+      @staus = 200
+      puts 'OK (200)'
+    rescue
+      @status = 409 # http ERROR named 'Conflict'
+      puts $ERROR_INFO
+    end
   end
 end
