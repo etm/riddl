@@ -3,6 +3,7 @@ require 'socket'
 require '../../lib/ruby/server'
 require 'libs/MarkUS_V3.0'
 require 'xml/smart'
+require 'fileutils'
 
 require 'libs/impl_groups'
 require 'libs/impl_subgroups'
@@ -16,9 +17,9 @@ run(
     process_out false
     on resource do
       on resource 'groups' do
-        p 'Creating group ...' if method(method :POST => 'create-group')
-        run GroupsPOST if method(method :POST => 'create-group')
-        p 'Processing groups ....' if get '*'
+        p 'Creating group ...' if  method :post => 'create-group'
+        run GroupsPOST if method :post => 'create-group'
+        p 'Processing groups ....' if method :get => '*'
         run GroupsGET if get '*'
         on resource do
           p 'Processing subgroups ...' if get '*' 

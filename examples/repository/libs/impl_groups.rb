@@ -1,5 +1,4 @@
 # Responds a list of all avaliable groups as an ATOM feed
-
 class GroupsGET < Riddl::Implementation
   include MarkUSModule
 
@@ -46,3 +45,46 @@ class GroupsPOST < Riddl::Implementation
     end
   end
 end
+
+# PUT updates the RIDDL description of the group
+class GroupsPUT < Riddl::Implementation
+  def response
+      @staus = 501 # HTTP-Error 'Not supported' ... must be to update the description of the group
+  end
+end
+
+# DELETE deltes a group and subgroups and services included
+class GroupsDELETE < Riddl::Implementation
+  def response
+    begin
+      puts "Deleting group named '#{@p[0].value}' ...."
+      FileUtils.rm_rf 'repository/groups/#{@p[0].value}'
+      # Dir.mkdir("repository/groups/#{@p[0].value}")
+      @staus = 200
+      puts 'OK (200)'
+    rescue
+      @status = 404 # http ERROR named 'Not found'
+      puts $ERROR_INFO
+    end
+  end
+end
+
+
+# Rsepond is the XML-Schema of the supported messegas of the group
+class GroupsRIDDL < Riddl::Implementation
+  def response
+    begin
+      puts "RIDDL description of group '#{@p[0].value}' ...."
+      ret = Riddl::Parameter::Complex.new("list-of-services","text/xml") do
+        File.open("repository/#{@r[0]}.xml")
+      end
+      @staus = 200
+      puts 'OK (200)'
+      return ret
+    rescue
+      @status = 404 # http ERROR named 'REsource not found'
+      puts $ERROR_INFO
+    end
+  end
+end
+
