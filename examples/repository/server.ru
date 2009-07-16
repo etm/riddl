@@ -17,7 +17,7 @@ run(
     process_out false
     on resource do
       on resource 'groups' do
-        p 'Creating group ...' if  method :post => 'create-group'
+        p 'Creating group ...' if method :post => 'create-group'
         run GroupsPOST if method :post => 'create-group'
         p 'Processing groups ....' if method :get => '*'
         run GroupsGET if get '*'

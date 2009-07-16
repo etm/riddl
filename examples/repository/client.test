@@ -6,27 +6,21 @@ if ((ARGV[0] == '-h') || (ARGV.size == 0))
   puts <<-END
 Help for the repository administration
 
-Use: client.test -m method -r resource [-p parameter] [-f file]
-  -m The method which scould be used for the request: GET, POST, PUT, DELETE, RIDDL
-  -r The resource the request schould be sent to (Starting after groups in the URI), e.g. /cinemas/arthouse/
+Use: client.test METHOD RES [-p parameter] [-f file]
+  METHOD The method which scould be used for the request: GET, POST, PUT, DELETE, RIDDL
+  RES The resource the request schould be sent to (Starting after groups in the URI), e.g. /cinemas/arthouse/
   -p The parameter which schould be appended to the request as key-value pairs, e.g. -p name:ralph
   -f The file where the value of the parameter is stored as key-value pair, e.g. -f properties:/something/prosp.xml
 END
 else
   argType = 'none'
-  method = ''
-  resource = ''
+  method = ARGV[0]
+  resource = ARGV[1]
   files = Array.new
   params = Array.new
 
   ARGV.each do |arg|
    case argType
-      when 'method'
-        method = arg
-        argType = 'none'
-      when 'resource'
-        resource = arg
-        argType = 'none'
       when 'param'
         params << arg.split(':')
         argType = 'none'
@@ -37,12 +31,8 @@ else
         case arg
           when '-f' 
             argType = 'file'
-          when '-m' 
-            argType = 'method'
           when '-p' 
             argType = 'param'
-          when '-r' 
-            argType = 'resource'
         end
     end  
   end
@@ -52,13 +42,12 @@ else
   
   repos =  Riddl::Client.new("http://localhost:9292/")
   uri = repos.resource('/groups/' + resource)
-p resource
-  status, res = uri.request method => [
-    params.each do |param|
+  status, res = uri.request(
+    method => params.each { |param|
       Riddl::Parameter::Simple.new(param[0], param[1])
       puts "Creating parameter '#{param[0]}' with value '#{param[1]}'"
-    end
-  ]
+    }
+  )
 
   puts "Finished with status code: #{status}"
   puts "Result: #{res.inspect}"
