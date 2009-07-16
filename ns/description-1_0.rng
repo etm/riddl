@@ -52,19 +52,11 @@
     <ref name="riddl-att-name"/>
     <zeroOrMore>
       <choice>
-        <element name="after_each">
+        <element name="before">
           <ref name="riddl-att-name-star"/>
           <ref name="riddl-parameter"/>
         </element>
-        <element name="before_each">
-          <ref name="riddl-att-name-star"/>
-          <ref name="riddl-parameter"/>
-        </element>
-        <element name="before_first">
-          <ref name="riddl-att-name-star"/>
-          <ref name="riddl-parameter"/>
-        </element>
-        <element name="after_last">
+        <element name="after">
           <ref name="riddl-att-name-star"/>
           <ref name="riddl-parameter"/>
         </element>
@@ -104,11 +96,10 @@
       <ref name="riddl-oneOrMore"/>
       <ref name="riddl-optional"/>
       <ref name="riddl-choice"/>
-      <ref name="riddl-group"/>
       <ref name="riddl-parameter"/>
     </choice>  
   </define>
-  <define name="riddl-message-other-without-optional">
+  <define name="riddl-message-other-trimmed">
     <choice>
       <ref name="riddl-zeroOrMore"/>
       <ref name="riddl-oneOrMore"/>
@@ -142,7 +133,7 @@
   <define name="riddl-choice">
     <element name="choice">
       <oneOrMore>
-        <ref name="riddl-message-other-without-optional"/>
+        <ref name="riddl-message-other-trimmed"/>
       </oneOrMore>
     </element>
   </define>

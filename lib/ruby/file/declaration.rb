@@ -1,135 +1,138 @@
+require ::File.dirname(__FILE__) + '/description'
+
 module Riddl
   class File
     class Declaration
-      class Star
-        #{{{
-        def name
-          "*"
-        end
-        def eql?(other)
-          other.class == self.class
-        end
-        #}}}
-      end
-
-      class Modify
-        #{{{
-        def initialize(layer,add,remove)
-          @add = @remove = nil
-          @add_name = add
-          @remove_name = remove
-          @hash = 0
-          unless add.nil?
-            @add = layer.find("des:add[@name='#{add}']").first.to_doc
-            @add.find("/message/@name").delete_all!
-            @hash += @add.to_s.hash
-          end
-          unless remove.nil?
-            @remove = layer.find("des:remove[@name='#{remove}']").first.to_doc
-            @remove.find("/message/@name").delete_all!
-            @hash += @remove.to_s.hash
-          end
-        end
-        def eql?(other)
-          other.class == self.class && (self === other || self.hash == other.hash)
-        end
-        attr_reader :add, :remove, :hash
-        #}}}
-      end
-
-      class Message
-        #{{{
-        def initialize(layer,name)
-          @message = layer.find("des:message[@name='#{name}']").first.to_doc
-          @message.find("/message/@name").delete_all!
-          @hash = @message.to_s.hash
-          @name = name
-        end
-        def self::virtual(message,name)
-          o = allocate
-          o.instance_variable_set(:@message,message)
-          o.instance_variable_set(:@hash,message.to_s.hash)
-          o.instance_variable_set(:@name,name)
-          o
-        end
-        def eql?(other)
-          other.class == self.class && (self === other || self.hash == other.hash)
-        end
-        def modify(ar)
-          ar.class == Modify ? modify_base(ar.add,ar.remove,"f") : nil
-        end
-        def modify_back(ar)
-          ar.class == Modify ? modify_base(ar.remove,ar.add,"b") : nil
-        end
-        def modify_base(add,remove,suffix)
-          temp = @message.dup
-          add.root.children.each do |e|
-            if e.name.name == "parameter"
-              pos = temp.find("/message/part[0]")
-              pos.empty? ? temp.root.add(e) : pos.first.add_before(e)
-            else
-              temp.root.add(e)
-            end
-          end unless add.nil?
-          remove.root.children.each do |e|
-            # TODO
-          end unless remove.nil?
-          Message.virtual(temp,@name + "_" + suffix)
-        end
-        private :modify_base
-        attr_reader :hash, :message, :name
-        #}}}
-      end
-
       class Resource
-        #{{
         def initialize(path=nil)
+          #{{{
           @path = path
           @resources = {}
           @requests = {}
           @composition = {}
+          #}}}
         end
+
         def compose!
-          
+          #{{{
+          @requests.each do |k,v|
+            case v.size
+              when 0:
+              when 1:
+                @composition[k] = v[0]
+              else
+                @composition[k] = compose(v)
+            end
+          end  
+          #}}}
         end
+
+        def compose(layers)
+          routes = []
+          layers.each_with_index do |lay,index|
+            lay.find_all{|l|l.class==RequestInOut}.each do |r|
+              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
+            end
+            lay.find_all{|l|l.class==RequestTransform}.each do |r|
+              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
+            end
+            lay.find_all{|l|l.class==RequestStarOut}.each do |r|
+              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
+            end
+            lay.find_all{|l|l.class==RequestPass}.each do |r|
+              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
+            end
+          end
+          []
+        end
+        def traverse_layers(container,path,layers,layer)
+          return if layers.count <= layer
+          current =  path.last
+          if current.class == RequestInOut || 
+            (current.class == RequestTransform && !current.out.nil?) || 
+             current.class == RequestStarOut
+            layers[layer].find_all{|l| l.class == RequestInOut && l.in.traverse?(current.out) && !l.used? }.each do |r|
+              path << r
+              path.last.used = true
+              traverse_layers(container,path,layers,layer+1)
+              return
+            end
+          end  
+          if (current.class == RequestTransform && current.out.nil?) ||
+              current.class == RequestPass
+            num = 0
+            layers[layer].find_all{|l| l.class == RequestInOut && !l.used?}.each do |r|
+              path = path.dup if num > 0
+              path << r
+              path.last.used = true
+              traverse_layers(container,path,layers,layer+1)
+              num += 1
+            end
+            return if num > 0
+          end  
+          layers[layer].find_all{|l| l.class == RequestTransform }.each do |r|
+            path << r.transform(current)
+            path.last.used = true
+            traverse_layers(container,path,layers,layer+1)
+            return
+          end
+          layers[layer].find_all{|l| l.class == RequestStarOut }.each do |r|
+            path << r
+            path.last.used = true
+            traverse_layers(container,path,layers,layer+1)
+            return
+          end
+          layers[layer].find_all{|l| l.class == RequestPass }.each do |r|
+            # no extension of path, just move on to next level
+            r.used = true
+            traverse_layers(container,path,layers,layer+1)
+            return
+          end
+        end
+        private :compose, :traverse_layers
+
         def add(path)
+          #{{{
           pres = self
           path.split('/').each do |p|
             next if p == ""
-            unless pres.resources.has_key?(p) 
+            unless pres.resources.has_key?(p)
               pres.resources[p] = Resource.new(p)
             end
             pres = pres.resources[p]
           end
           pres
+          #}}}
         end
-        def clean!
-          @resouces = {}
-        end
-        def add_request_in_out(index,method,min,mout)
+
+        def clean!; @resouces = {}; end
+
+        # add requests helper methods
+        #{{{
+        def add_request_in_out(index,des,method,min,mout)
           @requests[method] ||= []
           @requests[method][index] ||= []
-          @requests[method][index] << RequestInOut.new(min,mout)
+          @requests[method][index] << RequestInOut.new(des,min,mout)
         end
-        def add_request_transform(index,method,madd,mremove)
+        def add_request_transform(index,des,method,madd,mremove)
           @requests[method] ||= []
           @requests[method][index] ||= []
-          @requests[method][index] << RequestTransform.new(madd,mremove)
+          @requests[method][index] << RequestTransform.new(des,madd,mremove)
         end
-        def add_request_star_out(index,method,mout)
+        def add_request_star_out(index,des,method,mout)
           @requests[method] ||= []
           @requests[method][index] ||= []
-          @requests[method][index] << RequestStarOut.new(mout)
+          @requests[method][index] << RequestStarOut.new(des,mout)
         end
-        def add_request_pass(index,method)
+        def add_request_pass(index,des,method)
           @requests[method] ||= []
           @requests[method][index] ||= []
           @requests[method][index] << RequestPass.new
         end
-        attr_reader :resources,:path,:requests
+        attr_reader :resources,:path,:requests,:composition
         #}}}
-      end  
-          
+      end
+
       class Facade
         #{{{
         def initialize
@@ -142,22 +145,40 @@ module Riddl
             @resource.add(path)
           end
         end
-        def visualize(res=@resource,what='')
+
+        def visualize_tree_and_layers
+          visualize :layers
+        end
+        def visualize_tree_and_composition
+          visualize :composition
+        end
+        def visualize(mode,res=@resource,what='')
           what += res.path
           puts what
-          res.requests.each do |k,v|
-            puts "  #{k.upcase}:"
-            v.each_with_index do |l,i|
-              puts "    Layer #{i}:"
-              l.each do |r|
-                 puts "      #{r.class.name}"
+          if mode == :layers
+            res.requests.each do |k,v|
+              puts "  #{k.upcase}:"
+              v.each_with_index do |l,i|
+                puts "    Layer #{i}:"
+                l.each do |r|
+                  puts "      #{r.class.name.gsub(/[^\:]+::/,'')}: #{r.visualize}"
+                end
+              end
+            end
+          end
+          if mode == :composition
+            res.composition.each do |k,v|
+              puts "  #{k.upcase}:"
+              v.each do |r|
+                puts "      #{r.class.name.gsub(/[^\:]+::/,'')}: #{r.visualize}"
               end
             end
           end
           res.resources.each do |key,r|
-            visualize(r,what + (what == '/' ? ''  : '/'))
+            visualize(mode,r,what + (what == '/' ? ''  : '/'))
           end
         end
+
         def compose!(res=@resource)
           res.compose!
           res.resources.each do |key,r|
@@ -165,34 +186,57 @@ module Riddl
           end
         end
         #}}}
-      end  
+      end
 
       # Request* helper classes
       #{{{
-      class RequestInOut
-        def initialize(min,mout)
-          @in = min
-          @out = mout
+      class RequestBase
+        def used=(value)
+          @used = value
         end
-      end  
-      class RequestTransform
-        def initialize(madd,mremove)
-          @add = madd
-          @remove = mremove
+        def used?
+          @used || false
         end
-      end  
-      class RequestStarOut
-        def initialize(mout)
-          @out = mout
+      end
+      class RequestInOut < RequestBase
+        def initialize(des,min,mout)
+          @in = Riddl::File::Description::Message.new(des,min)
+          @out = Riddl::File::Description::Message.new(des,mout)
         end
-      end  
-      class RequestPass; end
+        attr_reader :in, :out
+        def visualize; "in #{@in.name.inspect} out #{@out.name.inspect}"; end
+      end
+      class RequestTransform < RequestBase
+        def initialize(des,madd,mremove)
+          @add = Riddl::File::Description::Add.new(des,madd)
+          @remove = Riddl::File::Description::Remove.new(des,mremove)
+          @out = nil
+        end
+        def transform(min)
+          if min.class == RequestInOut && !min.out.nil?
+            @out = min.out.transform(@add,@remove)
+          end
+          self
+        end
+        attr_reader :add, :remove, :out
+        def visualize; "add #{@add.name.inspect} remove #{@remove.name.inspect}"; end
+      end
+      class RequestStarOut < RequestBase
+        def initialize(des,mout)
+          @out = Riddl::File::Description::Message.new(des,mout)
+        end
+        attr_reader :out
+        def visualize; "out #{@out.name.inspect}"; end
+      end
+      class RequestPass < RequestBase
+        def visualize; ""; end
+      end
       #}}}
 
       def apply_to(res,des,desres,path,index)
         #{{{
         res = res.add(path)
-        add_requests(res,desres,index)
+        add_requests(res,des,desres,index)
         desres.find("des:resource").each do |desres|
           apply_to(res,des,desres,desres.attributes['relative'] || "{}",index)
         end
@@ -200,27 +244,27 @@ module Riddl
       end
       private :apply_to
 
-      def add_requests(res,desres,index)
+      def add_requests(res,des,desres,index)
         #{{{
         desres.find("des:*[@in and not(@in='*')]").each do |m|
           method = m.attributes['method'] || m.name.name
-          res.add_request_in_out(index,method,m.attributes['in'],m.attributes['out'])
+          res.add_request_in_out(index,des,method,m.attributes['in'],m.attributes['out'])
         end
         desres.find("des:*[@pass and not(@pass='*')]").each do |m|
           method = m.attributes['method'] || m.name.name
-          res.add_request_in_out(index,method,m.attributes['pass'],m.attributes['pass'])
+          res.add_request_in_out(index,des,method,m.attributes['pass'],m.attributes['pass'])
         end
         desres.find("des:*[@add or @remove]").each do |m|
           method = m.attributes['method'] || m.name.name
-          res.add_request_transform(index,method,m.attributes['add'],m.attributes['remove'])
+          res.add_request_transform(index,des,method,m.attributes['add'],m.attributes['remove'])
         end
         desres.find("des:*[@in and @in='*']").each do |m|
           method = m.attributes['method'] || m.name.name
-          res.add_request_star_out(index,method,m.attributes['out'])
+          res.add_request_star_out(index,des,method,m.attributes['out'])
         end
         desres.find("des:*[@pass and @pass='*']").each do |m|
           method = m.attributes['method'] || m.name.name
-          res.add_request_pass(index,method)
+          res.add_request_pass(index,des,method)
         end
         #}}}
       end
@@ -243,17 +287,17 @@ module Riddl
             desres = des.find("des:resource").first
             if apply_to.empty?
               apply_to(res,des,desres,"/",index)
-            else  
+            else
               apply_to.each do |at|
                 apply_to(res,des,desres,at.to_s,index)
               end
             end
           end
         end
-        fac.visualize
         fac.compose!
+        fac.visualize_tree_and_composition
         #}}}
       end
     end
-  end  
+  end
 end
