@@ -117,7 +117,7 @@ module Riddl
     private :parse_multipart
 
     def add_to_params(name,body,filename,ctype,head)
-      #{{{
+      #{{
       if filename == ""
         # filename is blank which means no file has been selected
       elsif filename && ctype
@@ -130,12 +130,12 @@ module Riddl
         filename =~ /^(?:.*[:\\\/])?(.*)/m
         filename = $1
 
-        @params << Parameter::Complex.new(name, ctype, filename, body, head)
+        @params << Parameter::Complex.new(name, ctype, body, filename, head)
       elsif !filename && ctype
         body.rewind
         
         # Generic multipart cases, not coming from a form
-        @params << Parameter::Complex.new(name, ctype, nil, body, head)
+        @params << Parameter::Complex.new(name, ctype, body, nil, head)
       else
         @params << Parameter::Simple.new(name, body, :body)
       end
