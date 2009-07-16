@@ -50,6 +50,12 @@ else
   status, res = uri.request method => ps
 
   puts "Finished with status code: #{status}"
-  puts "Result: #{res.inspect}"
+  res.each do |param|
+    puts "-" * 50
+    puts "Parameter: #{param.name}"
+    puts "-" * 50
+    pp param
+    puts "Result: #{param.value.inspect}"
+  end  
 end
 

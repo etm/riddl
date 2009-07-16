@@ -32,7 +32,7 @@ class GroupsGET < Riddl::Implementation
 end
 
 # Creates a new Group in the repository
-class GroupsPOST < Riddl::Implementation
+class GroupPOST < Riddl::Implementation
   def response
     begin
       puts "Generating group named '#{@p[0].value}' ...."
@@ -47,14 +47,14 @@ class GroupsPOST < Riddl::Implementation
 end
 
 # PUT updates the RIDDL description of the group
-class GroupsPUT < Riddl::Implementation
+class GroupPUT < Riddl::Implementation
   def response
       @staus = 501 # HTTP-Error 'Not supported' ... must be to update the description of the group
   end
 end
 
 # DELETE deltes a group and subgroups and services included
-class GroupsDELETE < Riddl::Implementation
+class GroupDELETE < Riddl::Implementation
   def response
     begin
       puts "Deleting group named '#{@p[0].value}' ...."
@@ -71,7 +71,7 @@ end
 
 
 # Rsepond is the XML-Schema of the supported messegas of the group
-class GroupsRIDDL < Riddl::Implementation
+class GroupRIDDL < Riddl::Implementation
   def response
     begin
       puts "RIDDL description of group '#{@p[0].value}' ...."
