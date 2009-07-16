@@ -51,6 +51,5 @@ else
 
   puts "Finished with status code: #{status}"
   puts "Result: #{res.inspect}"
-
 end
 
