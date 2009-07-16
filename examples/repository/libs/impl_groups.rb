@@ -36,7 +36,7 @@ class GroupPOST < Riddl::Implementation
   def response
     begin
       puts "Generating group named '#{@p[0].value}' ...."
-      Dir.mkdir("repository/groups/#{@p[0].value}")
+      FileUtils.mkdir "repository/groups/#{@p[0].value}"
       @staus = 200
       puts 'OK (200)'
     rescue
@@ -57,9 +57,8 @@ end
 class GroupDELETE < Riddl::Implementation
   def response
     begin
-      puts "Deleting group named '#{@p[0].value}' ...."
-      FileUtils.rm_rf 'repository/groups/#{@p[0].value}'
-      # Dir.mkdir("repository/groups/#{@p[0].value}")
+      puts "Deleting group named '#{@r[1]}' ...."
+      FileUtils.rm_r "repository/groups/#{@r[1]}"
       @staus = 200
       puts 'OK (200)'
     rescue
