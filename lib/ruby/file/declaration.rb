@@ -32,17 +32,22 @@ module Riddl
           layers.each_with_index do |lay,index|
             lay.find_all{|l|l.class==RequestInOut}.each do |r|
               traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
+              routes << container
             end
             lay.find_all{|l|l.class==RequestTransform}.each do |r|
               traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
+              routes << container
             end
             lay.find_all{|l|l.class==RequestStarOut}.each do |r|
               traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
+              routes << container
             end
             lay.find_all{|l|l.class==RequestPass}.each do |r|
               traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
+              routes << container
             end
           end
+          pp routes.compact
           []
         end
         def traverse_layers(container,path,layers,layer)
@@ -61,8 +66,12 @@ module Riddl
           if (current.class == RequestTransform && current.out.nil?) ||
               current.class == RequestPass
             num = 0
+            tpath = path.dup
             layers[layer].find_all{|l| l.class == RequestInOut && !l.used?}.each do |r|
-              path = path.dup if num > 0
+              if num > 0
+                path = tpath.dup
+                container << path
+              end  
               path << r
               path.last.used = true
               traverse_layers(container,path,layers,layer+1)
@@ -72,7 +81,7 @@ module Riddl
           end  
           layers[layer].find_all{|l| l.class == RequestTransform }.each do |r|
             path << r.transform(current)
-            path.last.used = true
+            r.used = true # because r is dupped, we need to set the original
             traverse_layers(container,path,layers,layer+1)
             return
           end
@@ -213,12 +222,14 @@ module Riddl
           @out = nil
         end
         def transform(min)
+          tmp = self.dup
           if min.class == RequestInOut && !min.out.nil?
-            @out = min.out.transform(@add,@remove)
+            tmp.out = min.out.transform(@add,@remove)
           end
-          self
+          tmp
         end
-        attr_reader :add, :remove, :out
+        attr_reader :add, :remove
+        attr_accessor :out
         def visualize; "add #{@add.name.inspect} remove #{@remove.name.inspect}"; end
       end
       class RequestStarOut < RequestBase
