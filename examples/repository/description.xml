@@ -43,12 +43,16 @@
     <resource relative="groups">
       <get in="*" out="list-of-groups"/>
       <post in="create-group"/>
+
       <resource> <!-- Dynamically: name of the group -->
         <get in="*" out="list-of-subgroups"/>
         <post in="create-subgroup"/>
+        <delete in="*"/> <!-- Deleteing the actual group -->
+
         <resource> <!-- Dynamically: name of subgroup -->
           <get in="*" out="list-of-services"/>
           <post in="create-service"/>
+
           <resource>
             <get in="*" out="details-of-service"/>
           </resource>

@@ -54,12 +54,12 @@ module Riddl
         @path = ''
         @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_method,@parameters,@headers)
         if @riddl_message_in.nil? && @riddl_message_out.nil?
-          @res.status = 404
+          @res.status = 501 # not implemented?!
         else  
           instance_eval(&@blk)
         end  
       else
-        @res.status = 404
+        @res.status = 404 # client requests wrong path
       end
       @res.finish
     end
@@ -77,19 +77,19 @@ module Riddl
     def run(what)
       if what.class == Class and what.superclass == Riddl::Implementation
         w = what.new(@headers,@parameters,@pinfo.sub(/\//,'').split('/'))
+        response    = w.response
+        headers     = w.headers
         @res.status = w.status
-        response = headers = nil
-        if @process_out && w.status == 200
-          response = (w.response.class == Array ? w.response : [w.response])
-          headers = (w.headers.class == Array ? w.headers : [w.headers])
+
+        response = (response.class == Array ? response : [response])
+        headers  = (headers.class == Array ? headers : [headers])
+        if @process_out && @res.status == 200
           unless @description.check_message(response,headers,@riddl_message_out)
-            @res.status = 404
+            @res.status = 500
             return
           end  
         end
-        if w.status == 200
-          response = (w.response.class == Array ? w.response : [w.response]) unless response
-          headers = (w.headers.class == Array ? w.headers : [w.headers]) unless headers
+        if @res.status == 200
           @res.write HttpGenerator.new(response,@res).generate.read
           headers.each do |h|
             if h.class == Riddl::Header

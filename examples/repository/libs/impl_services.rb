@@ -31,12 +31,35 @@ class ServicesGET < Riddl::Implementation
   end
 end
 
-# Creates a new Subgroup in the repository
+# Creates a new Sevice in the repository
 class ServicesPOST < Riddl::Implementation
   def response
     begin
       p "Generating service in '#{@r[1]}/#{@r[2]}' named '#{@p[0].value}' ...."
       Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
+      @staus = 200
+      p 'OK (200)'
+    rescue
+      @status = 409 # http ERROR named 'Conflict'
+      p $ERROR_INFO
+    end
+  end
+end
+
+# Updates a Sevice in the repository
+class ServicesPUT < Riddl::Implementation
+  def response
+    @staus = 501 # Not supported
+  end
+end
+
+# Creates a new Sevice in the repository
+class ServicesDELETE < Riddl::Implementation
+  def response
+    begin
+      p "Generating service in '#{@r[1]}/#{@r[2]}' named '#{@p[0].value}' ...."
+      # Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
+      FileUtils.rm_rf 'repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}'
       @staus = 200
       p 'OK (200)'
     rescue

@@ -1,3 +1,4 @@
+
 class SubgroupsGET < Riddl::Implementation
   include MarkUSModule
 
@@ -52,6 +53,35 @@ class SubgroupsPOST < Riddl::Implementation
       puts 'OK (200)'
     rescue
       @status = 409 # http ERROR named 'Conflict'
+      puts $ERROR_INFO
+    end
+  end
+end
+
+# Creates a new Subgroup in the repository
+class SubgroupsPUT < Riddl::Implementation
+  def response
+    @staus = 501 # HTTP-Error 'Not supported'
+  end
+end
+
+# Creates a new Subgroup in the repository
+class SubgroupsDELETE < Riddl::Implementation
+  def response
+    begin
+      p "Deleting subgroup in '#{@r[1]}' named '#{@p[0].value}' ...."
+      begin
+        # Dir.mkdir("repository/groups/#{@r[1]}/#{@p[0].value}")
+        FileUtils.rm_rf 'repository/groups/#{@r[1]}/#{@p[0].value}'
+      rescue
+        @status = 404
+        puts 'Deleting subgroup failed because of\n#' + $ERROR_INFO 
+        return
+      end
+      @status = 200
+      puts 'OK (200)'
+    rescue
+      @status = 404 # http ERROR named 'Not found'
       puts $ERROR_INFO
     end
   end

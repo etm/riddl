@@ -18,7 +18,8 @@ module Riddl
         @filename = filename
         @type = :body
         @additional = additional
-        if file && file.kind_of?(IO)
+
+        if file && file.respond_to?(:read) && file.respond_to?(:rewind)
           @value = file
         else
           raise "ERROR not a file" unless file.nil?
