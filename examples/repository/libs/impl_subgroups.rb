@@ -38,7 +38,7 @@ class SubgroupsGET < Riddl::Implementation
 end
 
 # Creates a new Subgroup in the repository
-class SubgroupsPOST < Riddl::Implementation
+class SubgroupPOST < Riddl::Implementation
   def response
     begin
       p "Generating subgroup in '#{@r[1]}' named '#{@p[0].value}' ...."
@@ -59,20 +59,19 @@ class SubgroupsPOST < Riddl::Implementation
 end
 
 # Creates a new Subgroup in the repository
-class SubgroupsPUT < Riddl::Implementation
+class SubgroupPUT < Riddl::Implementation
   def response
     @staus = 501 # HTTP-Error 'Not supported'
   end
 end
 
 # Creates a new Subgroup in the repository
-class SubgroupsDELETE < Riddl::Implementation
+class SubgroupDELETE < Riddl::Implementation
   def response
     begin
-      p "Deleting subgroup in '#{@r[1]}' named '#{@p[0].value}' ...."
+      p "Deleting subgroup in '#{@r[1]}' named '#{@r[2]}' ...."
       begin
-        # Dir.mkdir("repository/groups/#{@r[1]}/#{@p[0].value}")
-        FileUtils.rm_rf 'repository/groups/#{@r[1]}/#{@p[0].value}'
+        FileUtils.rm_r "repository/groups/#{@r[1]}/#{@r[2]}"
       rescue
         @status = 404
         puts 'Deleting subgroup failed because of\n#' + $ERROR_INFO 

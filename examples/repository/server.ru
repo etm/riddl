@@ -27,14 +27,14 @@ run(
         p 'Create group ...' if method :post => 'create-group'
         run GroupPOST if method :post => 'create-group'
         
-        on resource do
+        on resource do # Group
           # Generating the ATOM feed with subgroups
           p 'Processing subgroups ...' if get '*' 
           run SubgroupsGET if get '*'
         
           # Creating a new subgroup 
           p 'Creating subgroup ...' if method :post => 'create-subgroup' 
-          run SubgroupsPOST if method :post => 'create-subgroup'
+          run SubgroupPOST if method :post => 'create-subgroup'
           
           # Deleting a group from the repository 
           p 'Deleting groups ...' if method :delete => '*'
@@ -44,7 +44,7 @@ run(
           p 'Updating group decription ....' if method :put => 'update-group'
           run GroupPUT if method :put => 'update-group'
           
-          on resource do
+          on resource do  # Subgrouop
             # Generating the ATOM feed with the services
             p 'Processing services .... ' if get '*'
             run ServicesGET if get '*'
@@ -54,10 +54,10 @@ run(
             run ServicesPOST if method :post => 'create-service-form'
             
             # Deleting an existing subgroup
-            # .....
-            # .....
+            p 'Deleting subgroup ...' if method :delete => '*'
+            run SubgroupDELETE if method :delete => '*'
             
-            on resource do
+            on resource do  # Service
               # Responding the service details
               p 'Processing service details ....' if get '*'
               run DetailsGET if get '*'
