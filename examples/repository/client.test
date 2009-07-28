@@ -47,7 +47,22 @@ else
     Riddl::Parameter::Simple.new(param[0], param[1])
   end
 
-  status, res = uri.request method => ps
+  fs = files.map do |file|
+    fileHandler = File.new(file[1])
+    x = fileHandler.read
+    fileHandler.close()
+    y = Riddl::Parameter::Complex.new(file[0], x)
+    puts "Complex"
+    pp y
+    y
+  end
+
+  ps += fs
+
+p "TOGETHER"
+pp ps
+
+  status, res = uri.request method => ps 
 
   puts "Finished with status code: #{status}"
   res.each do |param|

@@ -37,6 +37,11 @@ class ServicesPOST < Riddl::Implementation
     begin
       p "Generating service in '#{@r[1]}/#{@r[2]}' named '#{@p[0].value}' ...."
       Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
+      # Saving the details of the service into the acording XMl file
+      detailsFile = File.new("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}/details.xml", "w")
+      #detailsFile.write(@p[1].value)
+pp @p[1].value
+      detailsFile.close()
       @staus = 200
       p 'OK (200)'
     rescue

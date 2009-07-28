@@ -29,13 +29,17 @@
   </message>
 
   <message name="create-service">
-    <parameter name="name-of-service" type="string"/>
+    <parameter name="name-of-service" type="string">
+      <part name="details-of-service" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+        <xi:include href="rngs/details-of-service.rng"/>
+      </part>
+    </parameter>
   </message>
 
 <!--- Messages at service-detail level -->
   <message name="details-of-service">
     <parameter name="details-of-services" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <xi:include href="rngs/details.rng"/>
+      <xi:include href="rngs/details-of-service.rng"/>
     </parameter>
   </message>
 
