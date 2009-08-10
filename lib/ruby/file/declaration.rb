@@ -47,10 +47,19 @@ module Riddl
               routes += container unless container.nil?
             end
           end
+          pp routes
           routes.each do |r|
-            #1: responds first in + last out -> new InOut
-            #2: first transform + last transform -> merge transforms
-            #3: last pass -> remove last until #1 or #2 
+            if r.first.respond_to?(:in) && r.last.respond_to?(:out)
+              #1: responds first in + last out -> new InOut
+              p RequestInOut.new_from_message(r.first.in,r.last.out)
+            elsif r.last.respond_to?(:out)
+              #2: responds last out only -> new StarOut
+              p RequestStarOut.new_from_message(r.last.out)
+            elsif r.first.class == RequestTransform && r.last.class == RequestTransform
+              #3: first transform + last transform -> merge transforms
+              
+            end
+            #4: last pass -> remove last until #1 or #2 
           end 
           []
         end
@@ -195,8 +204,16 @@ module Riddl
       end
       class RequestInOut < RequestBase
         def initialize(des,min,mout)
-          @in = Riddl::File::Description::Message.new(des,min)
-          @out = Riddl::File::Description::Message.new(des,mout)
+          if des.nil?
+            @in = min
+            @out = mout
+          else
+            @in = Riddl::File::Description::Message.new(des,min)
+            @out = Riddl::File::Description::Message.new(des,mout)
+          end
+        end
+        def self.new_from_message(min,mout)
+          RequestInOut.new(nil,min,mout)
         end
         attr_reader :in, :out
         def visualize; "in #{@in.name.inspect} out #{@out.name.inspect}"; end
@@ -220,7 +237,14 @@ module Riddl
       end
       class RequestStarOut < RequestBase
         def initialize(des,mout)
-          @out = Riddl::File::Description::Message.new(des,mout)
+          if des.nil?
+            @out = mout
+          else
+            @out = Riddl::File::Description::Message.new(des,mout)
+          end  
+        end
+        def self.new_from_message(mout)
+          RequestStarOut.new(nil,mout)
         end
         attr_reader :out
         def visualize; "out #{@out.name.inspect}"; end
