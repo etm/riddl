@@ -48,10 +48,7 @@ else
   end
 
   fs = files.map do |file|
-    pp file
-    y = Riddl::Parameter::Complex.new(file[0], file[1]) do
-      File.read(file[2])
-    end
+    y = Riddl::Parameter::Complex.new(file[0], file[1], File.new(file[2]))
     puts "Complex"
     pp y
     y
