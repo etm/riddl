@@ -32,22 +32,26 @@ module Riddl
           layers.each_with_index do |lay,index|
             lay.find_all{|l|l.class==RequestInOut}.each do |r|
               traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes << container
+              routes += container unless container.nil?
             end
             lay.find_all{|l|l.class==RequestTransform}.each do |r|
               traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes << container
+              routes += container unless container.nil?
             end
             lay.find_all{|l|l.class==RequestStarOut}.each do |r|
               traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes << container
+              routes += container unless container.nil?
             end
             lay.find_all{|l|l.class==RequestPass}.each do |r|
               traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes << container
+              routes += container unless container.nil?
             end
           end
-          pp routes.compact
+          routes.each do |r|
+            #1: responds first in + last out -> new InOut
+            #2: first transform + last transform -> merge transforms
+            #3: last pass -> remove last until #1 or #2 
+          end 
           []
         end
         def traverse_layers(container,path,layers,layer)
@@ -67,7 +71,7 @@ module Riddl
               current.class == RequestPass
             num = 0
             tpath = path.dup
-            layers[layer].find_all{|l| l.class == RequestInOut && !l.used?}.each do |r|
+            layers[layer].find_all{|l| !l.used?}.each do |r|
               if num > 0
                 path = tpath.dup
                 container << path
@@ -79,24 +83,6 @@ module Riddl
             end
             return if num > 0
           end  
-          layers[layer].find_all{|l| l.class == RequestTransform }.each do |r|
-            path << r.transform(current)
-            r.used = true # because r is dupped, we need to set the original
-            traverse_layers(container,path,layers,layer+1)
-            return
-          end
-          layers[layer].find_all{|l| l.class == RequestStarOut }.each do |r|
-            path << r
-            path.last.used = true
-            traverse_layers(container,path,layers,layer+1)
-            return
-          end
-          layers[layer].find_all{|l| l.class == RequestPass }.each do |r|
-            # no extension of path, just move on to next level
-            r.used = true
-            traverse_layers(container,path,layers,layer+1)
-            return
-          end
         end
         private :compose, :traverse_layers
 
