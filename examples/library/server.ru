@@ -21,12 +21,6 @@ class BookQuery < Riddl::Implementation
       END
     end
   end
-  def headers
-    []
-  end
-  def status
-    200
-  end
 end
 
 run(
