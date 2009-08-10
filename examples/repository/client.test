@@ -48,20 +48,16 @@ else
   end
 
   fs = files.map do |file|
-    fileHandler = File.new(file[1])
-    x = fileHandler.read
-    fileHandler.close()
-    y = Riddl::Parameter::Complex.new(file[0], x)
+    pp file
+    y = Riddl::Parameter::Complex.new(file[0], file[1]) do
+      File.read(file[2])
+    end
     puts "Complex"
     pp y
     y
   end
 
   ps += fs
-
-p "TOGETHER"
-pp ps
-
   status, res = uri.request method => ps 
 
   puts "Finished with status code: #{status}"
@@ -73,4 +69,3 @@ pp ps
     puts "Result: #{param.value.inspect}"
   end  
 end
-

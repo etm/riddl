@@ -19,12 +19,10 @@ module Riddl
         @type = :body
         @additional = additional
 
-        if file && file.respond_to?(:read) && file.respond_to?(:rewind)
-          @value = file
-        else
-          raise "ERROR not a file" unless file.nil?
+        @value = block_given? ? yield : file
+        unless (@value && (@value.class == String || (file.respond_to?(:read) && file.respond_to?(:rewind))))
+          raise "ERROR input is not a stream or string"
         end
-        @value = yield if block_given?
       end
     end
     class Tempfile < ::Tempfile

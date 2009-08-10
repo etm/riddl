@@ -62,7 +62,7 @@ module Riddl
             tmp.write "Content-Transfer-Encoding: binary" + EOL
             tmp.write "Content-Type: " + r.mimetype + EOL
             tmp.write EOL
-            tmp.write r.value.read
+            tmp.write(r.value.respond_to?(:read) ? r.value.read : r.value)
             tmp.write EOL
         end   
       end
