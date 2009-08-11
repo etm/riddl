@@ -53,6 +53,11 @@ run(
             # Creating a new service
             p 'Creating service ...' if method :post => 'create-service'
             run ServicesPOST if method :post => 'create-service'
+
+            # Creating a new subgroup 
+            p 'Updating subgroup ...' if method :put => 'create-subgroup' 
+            run SubgroupPUT if method :put => 'create-subgroup'
+
             
             # Deleting an existing subgroup
             p 'Deleting subgroup ...' if method :delete => '*'

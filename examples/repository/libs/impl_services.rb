@@ -15,11 +15,11 @@ class ServicesGET < Riddl::Implementation
       feed__ :xmlns => 'http://www.w3.org/2005/atom' do
         title_ 'List of services in subgroup " ' + @r.last + '"'
         updated_ File.mtime("repository/#{@r[0]}/#{@r[1]}/#{@r.last}").xmlschema
-        generator_ 'My Repository at local host'
+        generator_ 'My Repository at local host', :uri => "#{$url}"
         id_ "#{$url}#{@r[0]}/#{@r[1]}/#{@r.last}/"
         link_ :rel => 'self', :type => 'application/atom+xml', :href => "#{$url}#{@r[0]}/#{@r[1]}/#{@r.last}/"
         groups.each do |g|
-          entry_ do
+          entry_ :lang => 'EN' do
             id_ "#{$url}#{@r[0]}/#{@r[1]}/#{@r.last}/#{g}"
             detailFile = XML::Smart::open("repository/#{@r[0]}/#{@r[1]}/#{@r.last}/#{g}/details.xml")
             link_ detailFile.find("string(/details/URI)")
@@ -39,16 +39,18 @@ class ServicesPOST < Riddl::Implementation
       xmlString = @p[1].value.read
       p xmlString
       x = XML::Smart.string(xmlString)
-      y =  x.validate_against(XML::Smart::open("rngs/details-of-service.rng")) 
-      p y
-      #Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
-      # Saving the details of the service into the acording XMl file
-      #detailsFile = File.new("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}/details.xml", "w")
-      #detailsFile.write(xmlString)
-      #detailsFile.close()
-
-      @staus = 200
-      p 'OK (200)'
+      if x.validate_against(XML::Smart::open("rngs/details-of-service.rng"))
+        Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
+        # Saving the details of the service into the acording XMl file
+        detailsFile = File.new("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}/details.xml", "w")
+        detailsFile.write(xmlString)
+        detailsFile.close()
+        @staus = 200
+        p 'OK (200)'
+      else
+        @status = 409
+        p "XML doesn't match the RNG schema (details-of-service.rng)"
+      end
     rescue
       @status = 409 # http ERROR named 'Conflict'
       p $ERROR_INFO

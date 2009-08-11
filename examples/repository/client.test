@@ -61,7 +61,6 @@ else
     puts "-" * 50
     pp param
     puts "Value:\n"
-    #param.value.each { |line| pp line}
-    pp param.value.read
+    #pp param.value.read
   end  
 end

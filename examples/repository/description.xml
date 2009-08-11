@@ -56,6 +56,7 @@
         <resource> <!-- Dynamically: name of subgroup -->
           <get in="*" out="list-of-services"/>
           <post in="create-service"/>
+          <put in="create-subgroup"/>
           <delete in="*"/>
 
           <resource>
