@@ -36,12 +36,17 @@ class ServicesPOST < Riddl::Implementation
   def response
     begin
       p "Generating service in '#{@r[1]}/#{@r[2]}' named '#{@p[0].value}' ...."
-      Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
+      xmlString = @p[1].value.read
+      p xmlString
+      x = XML::Smart.string(xmlString)
+      y =  x.validate_against(XML::Smart::open("rngs/details-of-service.rng")) 
+      p y
+      #Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
       # Saving the details of the service into the acording XMl file
-      detailsFile = File.new("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}/details.xml", "w")
-      #detailsFile.write(@p[1].value)
-pp @p[1].value
-      detailsFile.close()
+      #detailsFile = File.new("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}/details.xml", "w")
+      #detailsFile.write(xmlString)
+      #detailsFile.close()
+
       @staus = 200
       p 'OK (200)'
     rescue
@@ -62,13 +67,13 @@ end
 class ServicesDELETE < Riddl::Implementation
   def response
     begin
-      p "Generating service in '#{@r[1]}/#{@r[2]}' named '#{@p[0].value}' ...."
+      p "Deleting service in '#{@r[1]}/#{@r[2]}' named '#{@r[3]}' ...."
       # Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
-      FileUtils.rm_rf 'repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}'
+      FileUtils.rm_r "repository/groups/#{@r[1]}/#{@r[2]}/#{@r[3]}"
       @staus = 200
       p 'OK (200)'
     rescue
-      @status = 409 # http ERROR named 'Conflict'
+      @status = 404 # http ERROR named 'Conflict'
       p $ERROR_INFO
     end
   end

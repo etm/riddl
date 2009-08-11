@@ -1,3 +1,4 @@
+#!/usr/bin/ruby
 require 'rack'
 require 'socket'
 require '../../lib/ruby/server'
@@ -21,7 +22,7 @@ run(
       on resource 'groups' do
         # Generating the ATOM feed with groups
         p 'Processing groups ....' if method :get => '*'
-        run GroupsGET if get '*'
+        run GroupsGET if method :get => '*'
 
         # Creating a new group
         p 'Create group ...' if method :post => 'create-group'
@@ -29,8 +30,8 @@ run(
         
         on resource do # Group
           # Generating the ATOM feed with subgroups
-          p 'Processing subgroups ...' if get '*' 
-          run SubgroupsGET if get '*'
+          p 'Processing subgroups ...' if method :get => '*'
+          run SubgroupsGET if method :get => '*'
         
           # Creating a new subgroup 
           p 'Creating subgroup ...' if method :post => 'create-subgroup' 
@@ -46,12 +47,12 @@ run(
           
           on resource do  # Subgrouop
             # Generating the ATOM feed with the services
-            p 'Processing services .... ' if get '*'
-            run ServicesGET if get '*'
+            p 'Processing services .... ' if method :get => '*'
+            run ServicesGET if method :get => '*'
             
             # Creating a new service
-            p 'Creating service ...' if method :POST => 'create-service-form'
-            run ServicesPOST if method :post => 'create-service-form'
+            p 'Creating service ...' if method :post => 'create-service'
+            run ServicesPOST if method :post => 'create-service'
             
             # Deleting an existing subgroup
             p 'Deleting subgroup ...' if method :delete => '*'
@@ -59,12 +60,12 @@ run(
             
             on resource do  # Service
               # Responding the service details
-              p 'Processing service details ....' if get '*'
-              run DetailsGET if get '*'
+              p 'Processing service details ....' if method :get => '*'
+              run DetailsGET if method :get => '*'
               
               # Delete an existing service
-              # .....
-              # .....
+              p 'Deleting service ....' if method :delete => '*'
+              run ServicesDELETE if method :delete => '*'
               
               # Updating an existing service
               # .....

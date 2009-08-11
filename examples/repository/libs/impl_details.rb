@@ -2,8 +2,14 @@ class DetailsGET < Riddl::Implementation
   include MarkUSModule
 
   def response
+    p "Responding file: repository/#{@r[0]}/#{@r[1]}/#{@r[2]}/#{@r.last}/details.xml"
+
     Riddl::Parameter::Complex.new("list-of-services","text/xml") do
-      File.open("repository/#{@r[0]}/#{@r[1]}/#{@r[2]}/#{@r.last}/details.xml")
+      mystring = ''
+      File.open("repository/#{@r[0]}/#{@r[1]}/#{@r[2]}/#{@r.last}/details.xml", "r") { |f|
+        mystring = f.read
+      }
+      mystring
     end
   end
 end

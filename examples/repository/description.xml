@@ -60,6 +60,7 @@
 
           <resource>
             <get in="*" out="details-of-service"/>
+            <delete in="*"/>
           </resource>
         </resource>
       </resource>

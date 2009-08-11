@@ -10,7 +10,7 @@ Use: client.test METHOD RES [-p parameter] [-f file]
   METHOD The method which scould be used for the request: GET, POST, PUT, DELETE, RIDDL
   RES The resource the request schould be sent to (Starting after groups in the URI), e.g. /cinemas/arthouse/
   -p The parameter which schould be appended to the request as key-value pairs, e.g. -p name:ralph
-  -f The file where the value of the parameter is stored as key-value pair, e.g. -f properties:/something/prosp.xml
+  -f The mimetype and the file where the value of the parameter is stored as key-value pair, e.g. -f properties:text/xml:/something/prosp.xml
 END
 else
   argType = 'none'
@@ -48,10 +48,7 @@ else
   end
 
   fs = files.map do |file|
-    y = Riddl::Parameter::Complex.new(file[0], file[1], File.new(file[2]))
-    puts "Complex"
-    pp y
-    y
+    Riddl::Parameter::Complex.new(file[0], file[1], File.new(file[2]))
   end
 
   ps += fs
@@ -63,6 +60,8 @@ else
     puts "Parameter: #{param.name}"
     puts "-" * 50
     pp param
-    puts "Result: #{param.value.inspect}"
+    puts "Value:\n"
+    #param.value.each { |line| pp line}
+    pp param.value.read
   end  
 end
