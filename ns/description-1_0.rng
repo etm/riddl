@@ -19,11 +19,8 @@
         <element name="message">
           <ref name="riddl-message"/>
         </element>
-        <element name="add">
-          <ref name="riddl-add"/>
-        </element>
-        <element name="remove">
-          <ref name="riddl-remove"/>
+        <element name="transformation">
+          <ref name="riddl-transformation"/>
         </element>
       </choice>  
     </zeroOrMore>
@@ -35,59 +32,55 @@
   <define name="riddl-message">
     <ref name="riddl-att-name"/>
     <zeroOrMore>
-      <element name="header">
-        <ref name="riddl-att-name"/>
-        <choice>
-          <ref name="riddl-fixed"/>
-          <ref name="data"/>
-        </choice>  
-      </element>  
+      <ref name="riddl-header"/>
     </zeroOrMore>
     <zeroOrMore>
       <ref name="riddl-message-other"/>
     </zeroOrMore>
   </define>
 
-  <define name="riddl-add">
+  <define name="riddl-transformation">
     <ref name="riddl-att-name"/>
-    <zeroOrMore>
+    <oneOrMore>
       <choice>
-        <element name="before">
+        <element name="add_header">
+          <ref name="riddl-header"/>
+        </element>  
+        <element name="add_as_first">
+          <ref name="riddl-parameter"/>
+        </element>  
+        <element name="add_as_last">
+          <ref name="riddl-parameter"/>
+        </element>  
+        <element name="add_before">
           <ref name="riddl-att-name-star"/>
           <ref name="riddl-parameter"/>
         </element>
-        <element name="after">
+        <element name="add_after">
           <ref name="riddl-att-name-star"/>
           <ref name="riddl-parameter"/>
         </element>
-        <element name="as_first">
-          <ref name="riddl-parameter"/>
+        <element name="remove_each">
+          <ref name="riddl-att-col-remove"/>
         </element>
-        <element name="as_last">
-          <ref name="riddl-parameter"/>
+        <element name="remove_first">
+          <ref name="riddl-att-col-remove"/>
+        </element>
+        <element name="remove_last">
+          <ref name="riddl-att-col-remove"/>
         </element>
       </choice>
-    </zeroOrMore>
+    </oneOrMore>
   </define>
-  <define name="riddl-remove">
-    <ref name="riddl-att-name"/>
-    <zeroOrMore>
+      
+  <define name="riddl-header">
+    <element name="header">
+      <ref name="riddl-att-name"/>
       <choice>
-        <element name="each">
-          <ref name="riddl-att-name-star"/>
-        </element>
-        <element name="first">
-          <optional>
-            <ref name="riddl-att-name-star"/>
-          </optional>  
-        </element>
-        <element name="last">
-          <optional>
-            <ref name="riddl-att-name-star"/>
-          </optional>  
-        </element>
-      </choice>
-    </zeroOrMore>
+        <ref name="riddl-fixed"/>
+        <ref name="data"/>
+      </choice>  
+    </element>  
   </define>
 
   <define name="riddl-message-other">

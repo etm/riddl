@@ -36,3 +36,4 @@ end
 #}}}
 
 d = riddl.declaration
+puts d.description

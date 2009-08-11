@@ -40,6 +40,19 @@
       <ref name="riddl-datatype-name"/>
     </attribute>
   </define>  
+  <define name="riddl-att-col-remove">
+    <optional>
+      <ref name="riddl-att-name-star"/>
+    </optional>  
+    <optional>
+      <attribute name="type">
+        <choice>
+          <value>header</value>
+          <value>parameter</value>
+        </choice>  
+      </attribute>
+    </optional>
+  </define>  
   <define name="riddl-att-name-star">
     <attribute name="name">
       <ref name="riddl-datatype-name-star"/>
@@ -57,18 +70,7 @@
       <attribute name="pass">
         <ref name="riddl-datatype-name-star"/>
       </attribute>
-      <group>
-        <attribute name="add">
-          <ref name="riddl-datatype-name"/>
-        </attribute>
-        <attribute name="remove">
-          <ref name="riddl-datatype-name"/>
-        </attribute>
-      </group>
-      <attribute name="add">
-        <ref name="riddl-datatype-name"/>
-      </attribute>
-      <attribute name="remove">
+      <attribute name="transformation">
         <ref name="riddl-datatype-name"/>
       </attribute>
       <group>

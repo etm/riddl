@@ -1,8 +1,8 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <remove name="security">
-    <each name="security"/>
-  </remove>  
+  <transformation name="security">
+    <remove_each name="security"/>
+  </transformation>  
   <message name="m">
   	<parameter name="m" type="string"/>
   </message>  
@@ -12,7 +12,7 @@
 
   <resource>
     <get in="m" out="c"/>
-    <get remove="security"/>
+    <get transformation="security"/>
   </resource>  
 
 </description>

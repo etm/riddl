@@ -34,7 +34,7 @@ module Riddl
               traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
               routes += container unless container.nil?
             end
-            lay.find_all{|l|l.class==RequestTransform}.each do |r|
+            lay.find_all{|l|l.class==RequestTransformation}.each do |r|
               traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
               routes += container unless container.nil?
             end
@@ -47,27 +47,27 @@ module Riddl
               routes += container unless container.nil?
             end
           end
-          pp routes
-          routes.each do |r|
+          routes.map do |r|
             if r.first.respond_to?(:in) && r.last.respond_to?(:out)
               #1: responds first in + last out -> new InOut
-              p RequestInOut.new_from_message(r.first.in,r.last.out)
-            elsif r.last.respond_to?(:out)
+              RequestInOut.new_from_message(r.first.in,r.last.out)
+            elsif r.last.respond_to?(:out) && !r.last.out.nil?
               #2: responds last out only -> new StarOut
-              p RequestStarOut.new_from_message(r.last.out)
-            elsif r.first.class == RequestTransform && r.last.class == RequestTransform
-              #3: first transform + last transform -> merge transforms
-              
+              RequestStarOut.new_from_message(r.last.out)
+            elsif r.first.class == RequestTransformation && r.last.class == RequestTransformation
+              #3: first transform + last transform -> merge transformations
+              RequestTransformation.new_from_transformation(r.first.trans,r.last.trans)
+            elsif r.last.class == RequestPass
+              #4: last pass -> remove last until #1 or #2 
+              raise "TODO"
             end
-            #4: last pass -> remove last until #1 or #2 
           end 
-          []
         end
         def traverse_layers(container,path,layers,layer)
           return if layers.count <= layer
           current =  path.last
           if current.class == RequestInOut || 
-            (current.class == RequestTransform && !current.out.nil?) || 
+            (current.class == RequestTransformation && !current.out.nil?) || 
              current.class == RequestStarOut
             layers[layer].find_all{|l| l.class == RequestInOut && l.in.traverse?(current.out) && !l.used? }.each do |r|
               path << r
@@ -76,7 +76,7 @@ module Riddl
               return
             end
           end  
-          if (current.class == RequestTransform && current.out.nil?) ||
+          if (current.class == RequestTransformation && current.out.nil?) ||
               current.class == RequestPass
             num = 0
             tpath = path.dup
@@ -118,10 +118,10 @@ module Riddl
           @requests[method][index] ||= []
           @requests[method][index] << RequestInOut.new(des,min,mout)
         end
-        def add_request_transform(index,des,method,madd,mremove)
+        def add_request_transform(index,des,method,mtrans)
           @requests[method] ||= []
           @requests[method][index] ||= []
-          @requests[method][index] << RequestTransform.new(des,madd,mremove)
+          @requests[method][index] << RequestTransformation.new(des,mtrans)
         end
         def add_request_star_out(index,des,method,mout)
           @requests[method] ||= []
@@ -155,6 +155,9 @@ module Riddl
         end
         def visualize_tree_and_composition
           visualize :composition
+        end
+        def generate_description
+
         end
         def visualize(mode,res=@resource,what='')
           what += res.path
@@ -218,22 +221,31 @@ module Riddl
         attr_reader :in, :out
         def visualize; "in #{@in.name.inspect} out #{@out.name.inspect}"; end
       end
-      class RequestTransform < RequestBase
-        def initialize(des,madd,mremove)
-          @add = Riddl::File::Description::Add.new(des,madd)
-          @remove = Riddl::File::Description::Remove.new(des,mremove)
+      class RequestTransformation < RequestBase
+        def initialize(des,mtrans)
+          if des.nil?
+            @trans = mtrans
+          else  
+            @trans = Riddl::File::Description::Transformation.new(des,mtrans)
+          end  
           @out = nil
+        end
+        def self.new_from_transformation(mtrans1,mtrans2)
+          tmp = XML::Smart::string("<transformation/>")
+          tmp.root.add mtrans1.content.root.children
+          tmp.root.add mtrans2.content.root.children
+          RequestTransformation.new(nil,Riddl::File::Description::Transformation.new_from_xml("#{mtrans1.name}_#{mtrans2.name}_merged",tmp))
         end
         def transform(min)
           tmp = self.dup
           if min.class == RequestInOut && !min.out.nil?
-            tmp.out = min.out.transform(@add,@remove)
+            tmp.out = min.out.transform(@trans)
           end
           tmp
         end
-        attr_reader :add, :remove
+        attr_reader :trans
         attr_accessor :out
-        def visualize; "add #{@add.name.inspect} remove #{@remove.name.inspect}"; end
+        def visualize; "transformation #{@trans.name.inspect}"; end
       end
       class RequestStarOut < RequestBase
         def initialize(des,mout)
@@ -275,9 +287,9 @@ module Riddl
           method = m.attributes['method'] || m.name.name
           res.add_request_in_out(index,des,method,m.attributes['pass'],m.attributes['pass'])
         end
-        desres.find("des:*[@add or @remove]").each do |m|
+        desres.find("des:*[@transformation]").each do |m|
           method = m.attributes['method'] || m.name.name
-          res.add_request_transform(index,des,method,m.attributes['add'],m.attributes['remove'])
+          res.add_request_transform(index,des,method,m.attributes['transformation'])
         end
         desres.find("des:*[@in and @in='*']").each do |m|
           method = m.attributes['method'] || m.name.name
@@ -292,14 +304,15 @@ module Riddl
       private :add_requests
 
       def description
+        @fac.generate_description
       end
 
       def initialize(riddl)
         #{{{
-        fac = Facade.new
+        @fac = Facade.new
         ### Forward
         riddl.find("/dec:declaration/dec:facade/dec:tile").each do |tile|
-          res = fac.add(tile.attributes['path'] || '/')
+          res = @fac.add(tile.attributes['path'] || '/')
           res.clean! # for overlapping tiles, each tile gets an empty path
           tile.find("dec:layer").each_with_index do |layer,index|
             apply_to = layer.find("dec:apply-to")
@@ -315,8 +328,7 @@ module Riddl
             end
           end
         end
-        fac.compose!
-        fac.visualize_tree_and_composition
+        @fac.compose!
         #}}}
       end
     end

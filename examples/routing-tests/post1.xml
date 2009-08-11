@@ -1,13 +1,13 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <add name="security">
-    <as_last>
+  <transformation name="security">
+    <add_as_first>
       <parameter name="security" type="string"/>
-    </as_last>  
-  </add>  
+    </add_as_first>
+  </transformation>  
 
   <resource>
-    <get add="security"/>
+    <get transformation="security"/>
   </resource>  
 
 </description>

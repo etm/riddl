@@ -20,13 +20,13 @@ module Riddl
           end
 
           h_ifield = {}; h_pfield = {}
-          h_ofield = {}; h_afield = {}; h_rfield = {}
+          h_ofield = {}; h_tfield = {}
           h_cfield = {}
           res.find("des:get|des:put|des:delete|des:post|des:request").each do |mt|
             mn = (mt.attributes['type'].nil? ? mt.name.to_s : mt.attributes['type'])
 
             h_ifield[mn] ||= {}; h_pfield[mn] ||= {}
-            h_ofield[mn] ||= []; h_afield[mn] ||= []; h_rfield[mn] ||= []
+            h_ofield[mn] ||= []; h_tfield[mn] ||= []
             h_cfield[mn] ||= 0
 
             a = mt.attributes
@@ -39,9 +39,8 @@ module Riddl
               h_pfield[mn][a['pass']] += 1
             end
             h_ofield[mn] << a['out'] unless a['out'].nil?
-            h_afield[mn] << a['add'] unless a['add'].nil?
-            h_rfield[mn] << a['remove'] unless a['remove'].nil?
-            h_cfield[mn] += 1 if !a['remove'].nil? || !a['add'].nil? || a['in'] == '*' || a['pass'] == '*'
+            h_tfield[mn] << a['transformation'] unless a['transformation'].nil?
+            h_cfield[mn] += 1 if !a['transformation'].nil? || a['in'] == '*' || a['pass'] == '*'
           end
 
           h_ifield.each do |mn,ifield|
@@ -53,11 +52,8 @@ module Riddl
           h_ofield.each do |mn,ofield|
             messages += check_fields(ofield,"#{tpath} -> #{mn}","out","message")
           end  
-          h_afield.each do |mn,afield|
-            messages += check_fields(afield,"#{tpath} -> #{mn}","add","add")
-          end  
-          h_rfield.each do |mn,rfield|
-            messages += check_fields(rfield,"#{tpath} -> #{mn}","remove","remove")
+          h_tfield.each do |mn,tfield|
+            messages += check_fields(tfield,"#{tpath} -> #{mn}","transformation","transformation")
           end  
           h_cfield.each do |mn,cfield|
             puts "#{tpath} -> #{mn}: more than one catchall (*) operation is not allowed." if cfield > 1
