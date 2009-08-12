@@ -7,7 +7,11 @@
   </message>
 
   <message name="create-group">
-    <parameter name="name-of-group" type="string"/>
+    <parameter name="name-of-group" type="string">
+      <part name="details-of-group" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+        <xi:include href="rngs/details-of-group.rng"/>
+      </part>
+    </parameter>
   </message>
 
 <!-- Messages at subgroup level -->
@@ -51,7 +55,8 @@
       <resource> <!-- Dynamically: name of the group -->
         <get in="*" out="list-of-subgroups"/>
         <post in="create-subgroup"/>
-        <delete in="*"/> <!-- Deleteing the actual group -->
+        <put in="create-group"/>
+        <delete in="*"/> 
 
         <resource> <!-- Dynamically: name of subgroup -->
           <get in="*" out="list-of-services"/>
@@ -59,8 +64,9 @@
           <put in="create-subgroup"/>
           <delete in="*"/>
 
-          <resource>
+          <resource> <!-- Dynamically: name of service -->
             <get in="*" out="details-of-service"/>
+            <put in="create-service"/>
             <delete in="*"/>
           </resource>
         </resource>

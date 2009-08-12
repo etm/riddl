@@ -4,6 +4,11 @@ class ServicesGET < Riddl::Implementation
   $url = 'http://localhost:9292/'
 
   def response
+    if File.exist?("repository/#{@r[0]}/#{@r[1]}/#{@r.last}") == false
+      @status = 410 # 410: Gone
+      puts "Subgroup not found"
+      return
+    end
     groups = []
     Dir["repository/#{@r[0]}/#{@r[1]}/#{@r.last}/*"].each do |f|
       if File::directory? f
@@ -13,7 +18,7 @@ class ServicesGET < Riddl::Implementation
 
     Riddl::Parameter::Complex.new("list-of-services","text/xml") do
       feed__ :xmlns => 'http://www.w3.org/2005/atom' do
-        title_ 'List of services in subgroup " ' + @r.last + '"'
+        title_ 'List of services in subgrouputs " ' + @r.last + '"'
         updated_ File.mtime("repository/#{@r[0]}/#{@r[1]}/#{@r.last}").xmlschema
         generator_ 'My Repository at local host', :uri => "#{$url}"
         id_ "#{$url}#{@r[0]}/#{@r[1]}/#{@r.last}/"
@@ -35,9 +40,7 @@ end
 class ServicesPOST < Riddl::Implementation
   def response
     begin
-      p "Generating service in '#{@r[1]}/#{@r[2]}' named '#{@p[0].value}' ...."
       xmlString = @p[1].value.read
-      p xmlString
       x = XML::Smart.string(xmlString)
       if x.validate_against(XML::Smart::open("rngs/details-of-service.rng"))
         Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
@@ -45,15 +48,14 @@ class ServicesPOST < Riddl::Implementation
         detailsFile = File.new("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}/details.xml", "w")
         detailsFile.write(xmlString)
         detailsFile.close()
-        @staus = 200
-        p 'OK (200)'
+        @status = 201   # 201: Created
       else
-        @status = 409
-        p "XML doesn't match the RNG schema (details-of-service.rng)"
+        @status = 415 # 415: Unsupported Media Type
+        puts "XML doesn't match the RNG schema (details-of-service.rng)"
       end
     rescue
       @status = 409 # http ERROR named 'Conflict'
-      p $ERROR_INFO
+      puts $ERROR_INFO
     end
   end
 end
@@ -61,7 +63,29 @@ end
 # Updates a Sevice in the repository
 class ServicesPUT < Riddl::Implementation
   def response
-    @staus = 501 # Not supported
+    if File.exist?("repository/groups/#{@r[1]}/#{@r[2]}/#{@r[3]}") == false
+      @status = 410 # 410: Gone
+      puts 'Updating service failed because service does not exists.'
+      return
+    end
+    begin
+      xmlString = @p[1].value.read
+      x = XML::Smart.string(xmlString)
+      if x.validate_against(XML::Smart::open("rngs/details-of-service.rng"))
+        File.rename("repository/groups/#{@r[1]}/#{@r[2]}/#{@r[3]}","repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
+        # Saving the details of the service into the acording XMl file
+        detailsFile = File.new("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}/details.xml", "w")
+        detailsFile.write(xmlString)
+        detailsFile.close()
+        @staus = 200   # 200: OK
+      else
+        @status = 415 # 415: Unsupported Media Type
+        puts "XML doesn't match the RNG schema (details-of-service.rng)"
+      end
+    rescue
+      @status = 409 # http ERROR named 'Conflict'
+      puts $ERROR_INFO
+    end
   end
 end
 
@@ -69,14 +93,11 @@ end
 class ServicesDELETE < Riddl::Implementation
   def response
     begin
-      p "Deleting service in '#{@r[1]}/#{@r[2]}' named '#{@r[3]}' ...."
-      # Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
       FileUtils.rm_r "repository/groups/#{@r[1]}/#{@r[2]}/#{@r[3]}"
       @staus = 200
-      p 'OK (200)'
     rescue
-      @status = 404 # http ERROR named 'Conflict'
-      p $ERROR_INFO
+      @status = 410 # 410: Gone
+      puts $ERROR_INFO
     end
   end
 end

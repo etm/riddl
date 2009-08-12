@@ -7,7 +7,7 @@ class SubgroupsGET < Riddl::Implementation
   def response
     if File.exist?("repository/#{@r[0]}/#{@r.last}") == false
       @status = 410 # 410: Gone
-      p "Subgroup not found"
+      p "Group not found"
       return
     end
 

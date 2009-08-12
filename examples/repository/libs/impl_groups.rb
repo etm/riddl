@@ -35,11 +35,19 @@ end
 class GroupPOST < Riddl::Implementation
   def response
     begin
-      puts "Generating group named '#{@p[0].value}' ...."
-      FileUtils.mkdir "repository/groups/#{@p[0].value}"
-      @staus = 200
-      puts 'OK (200)'
-    rescue
+      xmlString = @p[1].value.read
+      x = XML::Smart.string(xmlString)
+      if x.validate_against(XML::Smart::open("rngs/details-of-group.rng"))
+        FileUtils.mkdir "repository/#{@r[0]}/#{@p[0].value}"
+        detailsFile = File.new("repository/#{@r[0]}/#{@p[0].value}/details.xml", "w")
+        detailsFile.write(xmlString)
+        detailsFile.close()
+        @status = 201  # 201: Created
+       else 
+        @status = 415 # 415: Unsupported Media Type
+        puts "XML doesn't match the RNG schema (details-of-group.rng)"
+      end 
+   rescue
       @status = 409 # http ERROR named 'Conflict'
       puts $ERROR_INFO
     end
@@ -49,7 +57,28 @@ end
 # PUT updates the RIDDL description of the group
 class GroupPUT < Riddl::Implementation
   def response
-      @staus = 501 # HTTP-Error 'Not supported' ... must be to update the description of the group
+    if File.exist?("repository/#{@r[0]}/#{@r[1]}") == false
+      puts "Updating group failed becaus group does not exist"
+      @status = 410 # 410: Gone
+      return
+    end
+    begin
+      xmlString = @p[1].value.read
+      x = XML::Smart.string(xmlString)
+      if x.validate_against(XML::Smart::open("rngs/details-of-group.rng"))
+        File.rename("repository/#{@r[0]}/#{@r[1]}","repository/#{@r[0]}/#{@p[0].value}")
+        detailsFile = File.new("repository/#{@r[0]}/#{@p[0].value}/details.xml", "w")
+        detailsFile.write(xmlString)
+        detailsFile.close()
+        @staus = 201  # 201: Created
+      else 
+        @status = 415 # 415: Unsupported Media Type
+        puts "XML doesn't match the RNG schema (details-of-group.rng)"
+      end 
+    rescue
+      @status = 409 # http ERROR named 'Conflict'
+      puts $ERROR_INFO
+    end
   end
 end
 
@@ -58,7 +87,7 @@ class GroupDELETE < Riddl::Implementation
   def response
     begin
       puts "Deleting group named '#{@r[1]}' ...."
-      FileUtils.rm_r "repository/groups/#{@r[1]}"
+      FileUtils.rm_r "repository/#{@r[0]}/#{@r[1]}"
       @staus = 200
       puts 'OK (200)'
     rescue
@@ -75,10 +104,9 @@ class GroupRIDDL < Riddl::Implementation
     begin
       puts "RIDDL description of group '#{@p[0].value}' ...."
       ret = Riddl::Parameter::Complex.new("list-of-services","text/xml") do
-        File.open("repository/#{@r[0]}.xml")
+        File.open("repository/#{@r[0]}/detauíls.xml")
       end
       @staus = 200
-      puts 'OK (200)'
       return ret
     rescue
       @status = 404 # http ERROR named 'REsource not found'

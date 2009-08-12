@@ -2,8 +2,11 @@ class DetailsGET < Riddl::Implementation
   include MarkUSModule
 
   def response
-    p "Responding file: repository/#{@r[0]}/#{@r[1]}/#{@r[2]}/#{@r.last}/details.xml"
-
+    if File.exist?("repository/#{@r[0]}/#{@r[1]}/#{@r[2]}/#{@r.last}/details.xml") == false
+      puts "Can not read detials.xml from repository/#{@r[0]}/#{@r[1]}/#{@r[2]}/#{@r.last}"
+      @status = 410 # 410: Gone
+      return
+    end
     Riddl::Parameter::Complex.new("list-of-services","text/xml") do
       mystring = ''
       File.open("repository/#{@r[0]}/#{@r[1]}/#{@r[2]}/#{@r.last}/details.xml", "r") { |f|
@@ -11,31 +14,5 @@ class DetailsGET < Riddl::Implementation
       }
       mystring
     end
-  end
-end
-
-class DetailsPOST < Riddl::Implementation
-  include MarkUSModule
-
-  def response
-    @staus = 501 # HTTP-Error 'Not supported'
-  end
-end
-
-class DetailsPUT < Riddl::Implementation
-  include MarkUSModule
-
-  def response
-    Riddl::Parameter::Complex.new("list-of-services","text/xml") do
-      File.open("repository/#{@r[0]}/#{@r[1]}/#{@r[2]}/#{@r.last}/details.xml")
-    end
-  end
-end
-
-class DetailsDELETE < Riddl::Implementation
-  include MarkUSModule
-
-  def response
-    @staus = 501 # HTTP-Error 'Not supported'
   end
 end
