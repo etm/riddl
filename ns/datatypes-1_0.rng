@@ -12,7 +12,7 @@
       </attribute>
     </zeroOrMore>
   </define>
-
+  
   <define name="riddl-datatype-relpath">
     <data type="string">
       <param name="pattern">\c+(/\c+)*</param>
@@ -85,5 +85,32 @@
       </group>
     </choice>  
   </define>
+
+  <define name="riddl-others">
+    <ref name="other"/>
+    <zeroOrMore>
+      <attribute>
+        <anyName>
+          <except>
+            <nsName/>
+            <nsName ns=""/>
+          </except>
+        </anyName>
+      </attribute>
+    </zeroOrMore>
+  </define>  
+
+  <define name="riddl-other-atts">
+    <zeroOrMore>
+      <attribute>
+        <anyName>
+          <except>
+            <nsName/>
+            <nsName ns=""/>
+          </except>
+        </anyName>
+      </attribute>
+    </zeroOrMore>
+  </define>  
 
 </grammar>

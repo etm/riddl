@@ -98,6 +98,7 @@
         <text/>
       </element>
       <element name="data">
+        <ref name="common-atts"/>
         <ref name="data"/>
       </element>
       <element name="notAllowed">
@@ -144,7 +145,6 @@
     <attribute name="type">
       <data type="NCName"/>
     </attribute>
-    <ref name="common-atts"/>
     <interleave>
       <ref name="other"/>
       <group>
