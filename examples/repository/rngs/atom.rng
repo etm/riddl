@@ -17,7 +17,7 @@
     <attribute name="type"><text/></attribute>
     <text/>
   </element>
-  <optional>
+  <!-- optional -->
     <element name="schema">
       <element name="properties"><text/></element>
       <element name="queryInput"><text/></element>
@@ -25,7 +25,7 @@
       <element name="invokeInput"><text/></element>
       <element name="invokeOutput"><text/></element>
     </element>
-  </optional>
+  <!-- /optional -->
   <zeroOrMore>
     <element name="entry">
       <attribute name="lang"><text/></attribute>

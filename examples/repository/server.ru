@@ -33,6 +33,14 @@ run(
           p 'Processing subgroups ...' if method :get => '*'
           run SubgroupsGET if method :get => '*'
         
+          # Processing group-properties
+          p 'Processing group-properties ...' if method :get => 'properties-of-group-request'
+          run GroupProperties if method :get => 'properties-of-group-request'
+
+          # Processing query-input
+          p 'Processing query-input ...' if method :get => 'query-input-of-group-request'
+          run GroupQueryInput if method :get => 'query-input-of-group-request'
+
           # Creating a new subgroup 
           p 'Creating subgroup ...' if method :post => 'create-subgroup' 
           run SubgroupPOST if method :post => 'create-subgroup'

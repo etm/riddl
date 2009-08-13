@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<queryInputMessage>
+  <input name="title" type="string"/>
+  <input name="numberOfSeats" type="positiveInteger"/>
+</queryInputMessage>

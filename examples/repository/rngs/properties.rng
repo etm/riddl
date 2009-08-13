@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" 
+          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+<include href="relaxng-modular.rng"/>
+
+<start>
+  <element name="properties">
+    <optional>  <!-- Is a group without static properties imaginable? -->
+      <element name="static">
+        <oneOrMore>
+          <element name="element">
+            <attribute name="name"><text/></attribute>
+            <oneOrMore>
+              <element name="caption"><text/>
+                <attribute name="lang"><data type="language"/></attribute>
+              </element>
+            </oneOrMore>
+            <element name="data">
+              <ref name="data"/>
+            </element>
+          </element>
+        </oneOrMore>
+      </element>
+    </optional>
+    <optional>  <!-- Is a group without static properties imaginable? -->
+      <element name="dynamic">
+        <oneOrMore>
+          <element name="element">
+            <attribute name="name"><text/></attribute>
+            <oneOrMore>
+              <element name="caption"><text/>
+                <attribute name="lang"><data type="language"/></attribute>
+              </element>
+            </oneOrMore>
+            <element name="data">
+              <ref name="data"/>
+            </element>
+          </element>
+        </oneOrMore>
+      </element>
+    </optional>
+  </element>
+</start>
+</grammar>

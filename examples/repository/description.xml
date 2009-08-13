@@ -1,4 +1,8 @@
-<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" 
+             xmlns="http://riddl.org/ns/description/1.0" 
+             xmlns:xi="http://www.w3.org/2001/XInclude">
+
+
 <!-- Messages at group level -->
   <message name="list-of-groups">
     <parameter name="list-of-groups" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
@@ -8,11 +12,40 @@
 
   <message name="create-group">
     <parameter name="name-of-group" type="string">
-      <part name="details-of-group" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-        <xi:include href="rngs/details-of-group.rng"/>
+      <part name="properties" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+        <xi:include href="rngs/properties.rng"/>
+      </part>
+      <part name="query-input" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+        <xi:include href="rngs/query-input.rng"/>
+      </part>
+      <part name="query-output" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+        <xi:include href="rngs/query-output.rng"/>
+      </part>
+      <part name="invoke-input" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+        <xi:include href="rngs/invoke-input.rng"/>
+      </part>
+      <part name="invoke-output" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+        <xi:include href="rngs/invoke-output.rng"/>
       </part>
     </parameter>
   </message>
+
+  <message name="properties-of-group-request">
+    <parameter name="properties.schema" type="string"/>
+  </message>
+
+  <message name="properties-of-group-response">
+    <parameter name="properties" mimetype="text/xml"/>
+  </message>
+
+  <message name="query-input-of-group-request">
+    <parameter name="queryInput.schema" type="string"/>
+  </message>
+
+  <message name="query-input-of-group-response">
+    <parameter name="query-input" mimetype="text/xml"/>
+  </message>
+
 
 <!-- Messages at subgroup level -->
   <message name="list-of-subgroups">
@@ -53,6 +86,8 @@
       <post in="create-group"/>
 
       <resource> <!-- Dynamically: name of the group -->
+        <get in="properties-of-group-request" out="properties-of-group-response"/>
+        <get in="query-input-of-group-request" out="query-input-of-group-response"/>
         <get in="*" out="list-of-subgroups"/>
         <post in="create-subgroup"/>
         <put in="create-group"/>
