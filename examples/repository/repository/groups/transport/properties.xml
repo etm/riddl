@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<properties>
+  <static>
+    <element name="longlat">
+      <caption lang="en">Geo-position (long/lat)</caption>
+      <caption lang="de">Ge-Position (Laenge/breite)</caption>
+      <data type="string">
+        <param name="pattern">\d+\.\d+:\d+\.\d+</param>
+      </data>
+    </element>
+  </static>
+  <dynamic>
+    <element name="Title">
+      <caption lang="en">Title</caption>
+      <caption lang="de">Titel</caption>
+      <data type="string"/>
+    </element>
+    <element name="numberOfSeats">
+      <caption lang="en">Number of seats</caption>
+      <caption lang="de">Anzahl Sitzplaetze</caption>
+      <data type="positiveInteger"/>
+    </element>
+  </dynamic>
+</properties>

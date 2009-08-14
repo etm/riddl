@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<queryOutputMessage>
+  <output name="title" type="string"/>
+  <output name="numberOfSeats" type="positiveInteger"/>
+</queryOutputMessage>

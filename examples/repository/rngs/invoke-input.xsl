@@ -15,7 +15,7 @@
 
   <xsl:template match="invokeInputMessage">
     <xsl:element name="element">
-      <xsl:attribute name="name">queryInputMessage</xsl:attribute>
+      <xsl:attribute name="name">invokeInputMessage</xsl:attribute>
       <xsl:apply-templates select="input"/>
     </xsl:element>
   </xsl:template>

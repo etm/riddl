@@ -46,6 +46,29 @@
     <parameter name="query-input" mimetype="text/xml"/>
   </message>
 
+  <message name="query-output-of-group-request">
+    <parameter name="queryOutput.schema" type="string"/>
+  </message>
+
+  <message name="query-output-of-group-response">
+    <parameter name="query-output" mimetype="text/xml"/>
+  </message>
+
+  <message name="invoke-input-of-group-request">
+    <parameter name="invokeInput.schema" type="string"/>
+  </message>
+
+  <message name="invoke-input-of-group-response">
+    <parameter name="invoke-input" mimetype="text/xml"/>
+  </message>
+
+  <message name="invoke-output-of-group-request">
+    <parameter name="invokeOutput.schema" type="string"/>
+  </message>
+
+  <message name="invoke-output-of-group-response">
+    <parameter name="invoke-output" mimetype="text/xml"/>
+  </message>
 
 <!-- Messages at subgroup level -->
   <message name="list-of-subgroups">
@@ -88,6 +111,9 @@
       <resource> <!-- Dynamically: name of the group -->
         <get in="properties-of-group-request" out="properties-of-group-response"/>
         <get in="query-input-of-group-request" out="query-input-of-group-response"/>
+        <get in="query-output-of-group-request" out="query-output-of-group-response"/>
+        <get in="invoke-input-of-group-request" out="invoke-input-of-group-response"/>
+        <get in="invoke-output-of-group-request" out="invoke-output-of-group-response"/>
         <get in="*" out="list-of-subgroups"/>
         <post in="create-subgroup"/>
         <put in="create-group"/>
