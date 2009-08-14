@@ -27,6 +27,13 @@ class SubgroupsGET < Riddl::Implementation
         generator_ 'My Repository at local host', :uri => "#{$url}"
         id_ "#{$url}#{@r[0]}/#{@r.last}/"
         link_ :rel => 'self', :type => 'application/atom+xml', :href => "#{$url}#{@r[0]}/#{@r.last}/"
+       schema_ do
+          properties_ "#{$url}#{@r[0]}/#{@r[1]}?properties.schema"
+          queryInput_ "#{$url}#{@r[0]}/#{@r[1]}?queryInput.schema"
+          queryOutput_ "#{$url}#{@r[0]}/#{@r[1]}?queryOutput.schema"
+          invokeInput_ "#{$url}#{@r[0]}/#{@r[1]}?invokeInput.schema"
+          invokeOutput_ "#{$url}#{@r[0]}/#{@r[1]}?invokeOutput.schema"
+        end
         groups.each do |g|
           entry_ :lang => 'EN' do
             id_ "#{$url}#{@r[0]}/#{@r.last}/#{g}/"
