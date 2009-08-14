@@ -17,15 +17,18 @@
     <zeroOrMore>
       <choice>
         <element name="message">
+          <ref name="riddl-other-atts"/>
           <ref name="riddl-message"/>
         </element>
         <element name="transformation">
+          <ref name="riddl-other-atts"/>
           <ref name="riddl-transformation"/>
         </element>
       </choice>  
     </zeroOrMore>
     <element name="resource">  
       <ref name="riddl-root-resource"/>
+      <ref name="riddl-others"/>
     </element>
   </define>
 
@@ -140,10 +143,11 @@
   <define name="riddl-parameter">
     <element name="parameter">
       <ref name="riddl-att-name"/>
+      <ref name="riddl-other-atts"/>
       <choice>
         <ref name="riddl-fixed"/>
         <ref name="data"/>
-        <group>
+        <!--group>
           <attribute name="mimetype">
             <data type="string">
               <param name="pattern">[\c]+/[\c]+</param>
@@ -157,7 +161,7 @@
           <optional>
             <ref name="any"/>
           </optional>  
-        </group>  
+        </group-->  
       </choice>
     </element>
   </define>   
@@ -192,25 +196,31 @@
       <choice>
         <element name="post">
           <ref name="riddl-atts-request"/>
+          <ref name="riddl-others"/>
         </element>
         <element name="get">
           <ref name="riddl-atts-request"/>
+          <ref name="riddl-others"/>
         </element>
         <element name="put">
           <ref name="riddl-atts-request"/>
+          <ref name="riddl-others"/>
         </element>
         <element name="delete">
           <ref name="riddl-atts-request"/>
+          <ref name="riddl-others"/>
         </element>
         <element name="request">
           <ref name="riddl-att-method"/>
           <ref name="riddl-atts-request"/>
+          <ref name="riddl-others"/>
         </element>  
       </choice>  
     </zeroOrMore>
     <zeroOrMore>
       <element name="resource">
         <ref name="riddl-resource"/>
+        <ref name="riddl-others"/>
       </element>
     </zeroOrMore>
   </define>
