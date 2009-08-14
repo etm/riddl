@@ -41,6 +41,18 @@ run(
           p 'Processing query-input ...' if method :get => 'query-input-of-group-request'
           run GroupQueryInput if method :get => 'query-input-of-group-request'
 
+          # Processing query-output
+          p 'Processing query-output ...' if method :get => 'query-output-of-group-request'
+          run GroupQueryOutput if method :get => 'query-output-of-group-request'
+
+          # Processing invoke-intput
+          p 'Processing invoke-intput ...' if method :get => 'invoke-input-of-group-request'
+          run GroupInvokeInput if method :get => 'invoke-input-of-group-request'
+
+          # Processing invoke-output
+          p 'Processing invoke-output ...' if method :get => 'invoke-output-of-group-request'
+          run GroupInvokeOutput if method :get => 'invoke-output-of-group-request'
+
           # Creating a new subgroup 
           p 'Creating subgroup ...' if method :post => 'create-subgroup' 
           run SubgroupPOST if method :post => 'create-subgroup'
@@ -49,7 +61,7 @@ run(
           p 'Deleting groups ...' if method :delete => '*'
           run GroupDELETE if method :delete => '*'
           
-          # Updating a new group
+          # Updating an existing group
           p 'Updating group ...' if method :put => 'create-group'
           run GroupPUT if method :put => 'create-group'
           

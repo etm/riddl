@@ -110,28 +110,81 @@ end
 # PUT updates the RIDDL description of the group
 class GroupPUT < Riddl::Implementation
   def response
-    if File.exist?("repository/#{@r[0]}/#{@r[1]}") == false
-      puts "Updating group failed becaus group does not exist"
-      @status = 410 # 410: Gone
-      return
-    end
     begin
-      xmlString = @p[1].value.read
-      x = XML::Smart.string(xmlString)
-      if x.validate_against(XML::Smart::open("rngs/details-of-group.rng"))
-        File.rename("repository/#{@r[0]}/#{@r[1]}","repository/#{@r[0]}/#{@p[0].value}")
-        detailsFile = File.new("repository/#{@r[0]}/#{@p[0].value}/details.xml", "w")
-        detailsFile.write(xmlString)
-        detailsFile.close()
-        @staus = 201  # 201: Created
-      else 
+      if File.exist?("repository/#{@r[0]}/#{@r[1]}") == false
+        @status = 410 # 410: Gone
+        puts 'Updating service failed because service does not exists.'
+        return
+      end
+     # Checking properties
+      properties = @p[1].value.read
+      x = XML::Smart.string(properties)
+      if x.validate_against(XML::Smart::open("rngs/properties.rng")) == false
         @status = 415 # 415: Unsupported Media Type
-        puts "XML doesn't match the RNG schema (details-of-group.rng)"
+        puts "File doesn't match the RNG schema (properties.rng)"
       end 
-    rescue
-      @status = 409 # http ERROR named 'Conflict'
-      puts $ERROR_INFO
-    end
+      # Checking queryInput
+      queryInput = @p[2].value.read
+      x = XML::Smart.string(queryInput)
+      if x.validate_against(XML::Smart::open("rngs/query-input.rng")) == false
+        @status = 415 # 415: Unsupported Media Type
+        puts "File doesn't match the RNG schema (query-input.rng)"
+      end 
+      # Chekcing queryOutput
+      queryOutput = @p[3].value.read
+      x = XML::Smart.string(queryOutput)
+      if x.validate_against(XML::Smart::open("rngs/query-output.rng")) == false
+        @status = 415 # 415: Unsupported Media Type
+        puts "File doesn't match the RNG schema (query-output.rng)"
+      end 
+      # Checking invokeInput
+      invokeInput = @p[4].value.read
+      x = XML::Smart.string(invokeInput)
+      if x.validate_against(XML::Smart::open("rngs/invoke-input.rng")) == false
+        @status = 415 # 415: Unsupported Media Type
+        puts "File doesn't match the RNG schema (invoke-input.rng)"
+      end 
+      # Chekcing invokeOutput
+      invokeOutput = @p[5].value.read
+      x = XML::Smart.string(invokeOutput)
+      if x.validate_against(XML::Smart::open("rngs/invoke-output.rng")) == false
+        @status = 415 # 415: Unsupported Media Type
+        puts "File doesn't match the RNG schema (invoke-output.rng)"
+      end 
+      if @status == nil
+        begin
+          File.rename("repository/#{@r[0]}/#{@r[1]}", "repository/#{@r[0]}/#{@p[0].value}")
+          # Writing properties into file
+          detailsFile = File.new("repository/#{@r[0]}/#{@p[0].value}/properties.xml", "w")
+          detailsFile.write(properties)
+          detailsFile.close()
+
+          # Writing queryInput into file
+          detailsFile = File.new("repository/#{@r[0]}/#{@p[0].value}/query-input.xml", "w")
+          detailsFile.write(queryInput)
+          detailsFile.close()
+
+          # Writing queryOutput into file
+          detailsFile = File.new("repository/#{@r[0]}/#{@p[0].value}/query-output.xml", "w")
+          detailsFile.write(queryOutput)
+          detailsFile.close()
+
+          # Writing invokeInput into file
+          detailsFile = File.new("repository/#{@r[0]}/#{@p[0].value}/invoke-input.xml", "w")
+          detailsFile.write(invokeInput)
+          detailsFile.close()
+
+          # Writing invokeOutput into file
+          detailsFile = File.new("repository/#{@r[0]}/#{@p[0].value}/invoke-output.xml", "w")
+          detailsFile.write(invokeOutput)
+          detailsFile.close()
+          @status = 200  # 200: OK
+        rescue
+          @status = 409 # http ERROR named 'Conflict'
+          puts $ERROR_INFO
+        end
+      end
+    end 
   end
 end
 
@@ -151,24 +204,6 @@ class GroupDELETE < Riddl::Implementation
 end
 
 
-# Rsepond is the XML-Schema of the supported messegas of the group
-class GroupRIDDL < Riddl::Implementation
-  def response
-    begin
-      puts "RIDDL description of group '#{@p[0].value}' ...."
-      ret = Riddl::Parameter::Complex.new("list-of-services","text/xml") do
-        File.open("repository/#{@r[0]}/detauíls.xml")
-      end
-      @staus = 200
-      return ret
-    rescue
-      @status = 404 # http ERROR named 'REsource not found'
-      puts $ERROR_INFO
-    end
-  end
-end
-
-
 class GroupProperties < Riddl::Implementation
   include MarkUSModule
 
@@ -177,7 +212,7 @@ class GroupProperties < Riddl::Implementation
   def response
     fileName = "repository/#{@r[0]}/#{@r[1]}/properties.xml"
     if File.exist?(fileName) == false
-      puts "Can not read #{filename}"
+      puts "Can not read #{fileName}"
       @status = 410 # 410: Gone
       return
     end
@@ -200,13 +235,74 @@ class GroupQueryInput < Riddl::Implementation
   def response
     fileName = "repository/#{@r[0]}/#{@r[1]}/query-input.xml"
     if File.exist?(fileName) == false
-      puts "Can not read #{filename}"
+      puts "Can not read #{fileName}"
       @status = 410 # 410: Gone
       return
     end
     Riddl::Parameter::Complex.new("query-input","text/xml") do
       xmlFile = XML::Smart::open(fileName)
       xslt = XML::Smart::open("rngs/query-input.xsl")
+      xmlFile.transform_with(xslt)
+    end
+  end
+end
+
+class GroupQueryOutput < Riddl::Implementation
+  include MarkUSModule
+
+  $url = 'http://localhost:9292/'
+  
+  def response
+    fileName = "repository/#{@r[0]}/#{@r[1]}/query-output.xml"
+    if File.exist?(fileName) == false
+      puts "Can not read #{fileName}"
+      @status = 410 # 410: Gone
+      return
+    end
+    Riddl::Parameter::Complex.new("query-output","text/xml") do
+      xmlFile = XML::Smart::open(fileName)
+      xslt = XML::Smart::open("rngs/query-output.xsl")
+      xmlFile.transform_with(xslt)
+    end
+  end
+end
+
+class GroupInvokeInput < Riddl::Implementation
+  include MarkUSModule
+
+  $url = 'http://localhost:9292/'
+  
+  def response
+    fileName = "repository/#{@r[0]}/#{@r[1]}/invoke-input.xml"
+    if File.exist?(fileName) == false
+      puts "Can not read #{fileName}"
+      @status = 410 # 410: Gone
+      return
+    end
+    Riddl::Parameter::Complex.new("invoke-input","text/xml") do
+      xmlFile = XML::Smart::open(fileName)
+      xslt = XML::Smart::open("rngs/invoke-input.xsl")
+      xmlFile.transform_with(xslt)
+    end
+  end
+end
+
+
+class GroupInvokeOutput < Riddl::Implementation
+  include MarkUSModule
+
+  $url = 'http://localhost:9292/'
+  
+  def response
+    fileName = "repository/#{@r[0]}/#{@r[1]}/invoke-output.xml"
+    if File.exist?(fileName) == false
+      puts "Can not read #{fileName}"
+      @status = 410 # 410: Gone
+      return
+    end
+    Riddl::Parameter::Complex.new("invoke-output","text/xml") do
+      xmlFile = XML::Smart::open(fileName)
+      xslt = XML::Smart::open("rngs/invoke-output.xsl")
       xmlFile.transform_with(xslt)
     end
   end
