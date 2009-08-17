@@ -1,4 +1,0 @@
-# Vorher
-./client.test /cinema/arthouse/ -p name-of-service:Kesselhaus-Krems -f details-of-service:details_master.xml
-# Nachher
-./client.test POST /cinema/arthouse/ -p name-of-service:Kesselhaus-Krems -f details-of-service:text/xml:details_master.xml
