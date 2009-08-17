@@ -1,0 +1,126 @@
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Administration-Frontend for RESTful Repository</title>
+
+<script language="javascript">
+  param_no=1;
+  file_no=1;
+
+
+  function addParam(){
+   var textbox='<table><tr><td>Name:</td><td><input type="text" name="param_name_' + param_no + '"></td></tr>'
+              +'<tr><td>Value:</td><td><input type="text" name="param_value_' + param_no + '"></td></tr></table>';//for text box
+   var remove= '<a href="#" onclick="removeParam(\'' + param_no + '\')"/>Remove It</a>'; //for the text which is used to remove the current row by using the function removeRow(..,..)
+       
+   text="<div class='label' align=right>" + param_no + ". Parameter:</div>";
+
+   var tbl = document.getElementById('parameter');//to identify the table in which the row will get insert
+   try {
+     var newRow = tbl.insertRow(param_no);//creation of new row
+     var newCell = newRow.insertCell(0);//first  cell in the row
+     newCell.innerHTML = text;//insertion of the 'text' variable in first cell
+     var newCell = newRow.insertCell(1);//second cell in the row
+     newCell.innerHTML = textbox + " " + remove;//insertion of the text box and the remove text using their variable
+     param_no++;
+   } catch (ex) {
+     alert(ex); //if exception occurs
+   }
+  }
+
+  function removeParam(num) {
+    var table = document.getElementById('parameter');//adentification of table
+    try {
+      param_no--;
+      table.deleteRow(num);//deletion of the clicked row
+    } catch (ex) {
+      alert(ex);
+    }
+  }
+
+  function addFile(){
+   var textbox='<table><tr><td>Name:</td><td><input type="text" name="file_name_' + file_no + '"></td></tr>'
+              +'<tr><td>File:</td><td><input type="file" name="file_value_' + file_no + '"></td></tr></table>';//for text box
+   var remove= '<a href="#" onclick="removeParam(\'' + file_no + '\')"/>Remove It</a>'; //for the text which is used to remove the current row by using the function removeRow(..,..)
+       
+   text="<div class='label' align=right>" + file_no + ". File:</div>";
+
+   var tbl = document.getElementById('file');//to identify the table in which the row will get insert
+   try {
+     var newRow = tbl.insertRow(file_no);//creation of new row
+     var newCell = newRow.insertCell(0);//first  cell in the row
+     newCell.innerHTML = text;//insertion of the 'text' variable in first cell
+     var newCell = newRow.insertCell(1);//second cell in the row
+     newCell.innerHTML = textbox + " " + remove;//insertion of the text box and the remove text using their variable
+     file_no++;
+   } catch (ex) {
+     alert(ex); //if exception occurs
+   }
+  }
+
+  function removeFile(num) {
+    var table = document.getElementById('file');//adentification of table
+    try {
+      file_no--;
+      table.deleteRow(num);//deletion of the clicked row
+    } catch (ex) {
+      alert(ex);
+    }
+  }
+
+</script>
+</head>
+
+<body>
+<h1>Administration-Frontend for RESTful Repository</h1>
+
+<form enctype="multipart/form-data" name="request-form" method="post" action="http://localhost/repository-admin">
+  <input type="hidden" name="MAX_FILE_SIZE" value="30000">
+  <table  border="1">
+    <tr>
+      <td>Method:</td>
+      <td>
+        <select name="method" size="1">
+          <option>POST</option>
+          <option>GET</option>
+          <option>PUT</option>
+          <option>DELETE</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>URI</td>
+      <td><input name="uri" type="text" size="50"></td>
+    </tr>
+    <tr ID="add">
+      <td width="177"> </td>
+      <td width="273" align="right"> </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <table id="parameter" border="1">
+          <tr>
+            <td>Parameter</td>
+            <td><input type="button" name="add_param" value="Add Parameter" onClick="addParam()"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <table id="file" border="1">
+          <tr>
+            <td>File</td>
+            <td><input type="button" name="add_file" value="Add File" onClick="addFile()"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+  <input type="submit" value=" Submit ">
+</form>
+</body>
+</html>
+
+
+
