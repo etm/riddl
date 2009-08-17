@@ -12,7 +12,7 @@
 // echo '<br />';
 //}
 
-$boundary = "OneRingtobringthemallandinthedarknessbindthemIntheLandofMordorwheretheShadowslie0xdeadbeef"
+$boundary = "OneRingtobringthemallandinthedarknessbindthemIntheLandofMordorwheretheShadowslie0xdeadbeef";
 
 $params = array();
 $files = array();
@@ -33,7 +33,7 @@ while($element = each($_POST)) {
     $name = $element['value'];
     $number = substr(strrchr($element['key'], "_"), 1);
     $value = file_get_contents($_FILES["file_value_$number"]['tmp_name']);
-    $files[$name] = $value + $boundary;
+    $files[$name] = $value;
   }
 }
 echo "<br/>Method: {$request['method']}";
@@ -41,35 +41,42 @@ echo "<br/>URI: {$request['uri']}";
 $request['parameters'] = $params;
 $request['files'] = $files;
 
-$body = $boundary
+$body = "--" . $boundary . "\n";
 
 
 echo "<br/>Parameters";
 foreach($request['parameters'] as $key=>$value) {
   echo "<br/>$key : $value";
-  $body += "content-disposition: form-data; name=\"$key\"\n$value\n$boundary"
+  $body .= "content-disposition: form-data; name=\"$key\"\n\n$value\n--$boundary\n";
 }
 echo "<br/>Files";
 foreach($request['files'] as $key => $value) {
   echo "<br/>$key : $value";
-  $mime = substr(strstr($element['key'], ":"), 1)
-  $body += "content-disposition: form-data; name=\"$key\"\n$value\n$boundary"
+  $name = substr($key, 0, strpos($key, ":"));
+  $mime = substr(strrchr($key, ":"), 1);
+  $body .= "content-disposition: $mime; name=\"$name\"\n\n$value--$boundary\n";
 }
 
 
-
-//content-disposition: form-data; name="author"
+echo "\n\n\n\n\n<h1>Message body</h1>\n\n\n";
+echo $body;
 
   $req = array(
      'http' => array
      (
-         'method' => $request['method']
+         'method' => $request['method'],
          'header'=> "Content-Type: multipart/related; boundary=\"$boundary\"\r\n",
          'content' => $body
      )
   );
 
-  $ctx = stream_context_create($params);
+  $url = "http://localhost:9292" . $argv[2];
+  $ctx = stream_context_create($req);
+  $fp = fopen($url, 'rb', false, $ctx);
+
+  $response = stream_get_contents($fp);
+  echo "<h1>Response</h1>\n";
+  echo $response;
 ?>
 
 
