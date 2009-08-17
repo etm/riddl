@@ -147,7 +147,7 @@
       <choice>
         <ref name="riddl-fixed"/>
         <ref name="data"/>
-        <!--group>
+        <group>
           <attribute name="mimetype">
             <data type="string">
               <param name="pattern">[\c]+/[\c]+</param>
@@ -161,7 +161,7 @@
           <optional>
             <ref name="any"/>
           </optional>  
-        </group-->  
+        </group>  
       </choice>
     </element>
   </define>   
