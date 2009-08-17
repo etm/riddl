@@ -2,37 +2,7 @@
              xmlns="http://riddl.org/ns/description/1.0" 
              xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <resource>
-    <resource relative="groups">
-      <get in="*" out="list-of-groups"/>
-      <post in="create-group"/>
 
-      <resource> <!-- Dynamically: name of the group -->
-        <get in="properties-of-group-request" out="properties-of-group-response"/>
-        <get in="query-input-of-group-request" out="query-input-of-group-response"/>
-        <get in="query-output-of-group-request" out="query-output-of-group-response"/>
-        <get in="invoke-input-of-group-request" out="invoke-input-of-group-response"/>
-        <get in="invoke-output-of-group-request" out="invoke-output-of-group-response"/>
-        <get in="*" out="list-of-subgroups"/>
-        <post in="create-subgroup"/>
-        <put in="create-group"/>
-        <delete in="*"/> 
-
-        <resource> <!-- Dynamically: name of subgroup -->
-          <get in="*" out="list-of-services"/>
-          <post in="create-service"/>
-          <put in="create-subgroup"/>
-          <delete in="*"/>
-
-          <resource> <!-- Dynamically: name of service -->
-            <get in="*" out="details-of-service"/>
-            <put in="create-service"/>
-            <delete in="*"/>
-          </resource>
-        </resource>
-      </resource>
-    </resource>
-  </resource>  
 
 <!-- Messages at group level -->
   <message name="list-of-groups">
@@ -43,19 +13,19 @@
 
   <message name="create-group">
     <parameter name="name-of-group" type="string"/>
-    <parameter name="properties" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="properties" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/properties.rng"/>
     </parameter>
-    <parameter name="query-input" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="query-input" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/query-input.rng"/>
     </parameter>
-    <parameter name="query-output" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="query-output" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/query-output.rng"/>
     </parameter>
-    <parameter name="invoke-input" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="invoke-input" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/invoke-input.rng"/>
     </parameter>
-    <parameter name="invoke-output" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="invoke-output" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/invoke-output.rng"/>
     </parameter>
   </message>
@@ -120,7 +90,7 @@
 
   <message name="create-service">
     <parameter name="name-of-service" type="string"/>
-    <parameter name="details-of-service" type="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="details-of-service" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/details-of-service.rng"/>
     </parameter>
   </message>
@@ -131,6 +101,38 @@
       <xi:include href="rngs/details-of-service.rng"/>
     </parameter>
   </message>
+
+  <resource>
+    <resource relative="groups">
+      <get in="*" out="list-of-groups"/>
+      <post in="create-group"/>
+
+      <resource> <!-- Dynamically: name of the group -->
+        <get in="properties-of-group-request" out="properties-of-group-response"/>
+        <get in="query-input-of-group-request" out="query-input-of-group-response"/>
+        <get in="query-output-of-group-request" out="query-output-of-group-response"/>
+        <get in="invoke-input-of-group-request" out="invoke-input-of-group-response"/>
+        <get in="invoke-output-of-group-request" out="invoke-output-of-group-response"/>
+        <get in="*" out="list-of-subgroups"/>
+        <post in="create-subgroup"/>
+        <put in="create-group"/>
+        <delete in="*"/> 
+
+        <resource> <!-- Dynamically: name of subgroup -->
+          <get in="*" out="list-of-services"/>
+          <post in="create-service"/>
+          <put in="create-subgroup"/>
+          <delete in="*"/>
+
+          <resource> <!-- Dynamically: name of service -->
+            <get in="*" out="details-of-service"/>
+            <put in="create-service"/>
+            <delete in="*"/>
+          </resource>
+        </resource>
+      </resource>
+    </resource>
+  </resource>  
 
 
 
