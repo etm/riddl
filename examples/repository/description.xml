@@ -2,8 +2,7 @@
              xmlns="http://riddl.org/ns/description/1.0" 
              xmlns:xi="http://www.w3.org/2001/XInclude">
 
-
-
+<!--{{{-->
 <!-- Messages at group level -->
   <message name="list-of-groups">
     <parameter name="list-of-groups" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
@@ -101,6 +100,7 @@
       <xi:include href="rngs/details-of-service.rng"/>
     </parameter>
   </message>
+<!--}}}-->
 
   <resource>
     <resource relative="groups">
@@ -133,7 +133,5 @@
       </resource>
     </resource>
   </resource>  
-
-
 
 </description>
