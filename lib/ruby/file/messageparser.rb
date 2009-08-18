@@ -38,12 +38,14 @@ module Riddl
           if b.name == a.attributes['name'] && b.mimetype == a.attributes['mimetype']
             if a.attributes['handler']
               if Riddl::Handlers::handlers[a.attributes['handler']]
+                @mistp += 1
                 return Riddl::Handlers::handlers[a.attributes['handler']].handle(b.value,a.children.map{|e|e.dump}.join)
               else
                 # handler not found leads to an error
                 return false
               end  
             else
+              @mistp += 1
               return true
             end  
           end

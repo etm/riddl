@@ -19,7 +19,7 @@
     <parameter name="query-input" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/query-input.rng"/>
     </parameter>
-    <!-- parameter name="query-output" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="query-output" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/query-output.rng"/>
     </parameter>
     <parameter name="invoke-input" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
@@ -27,7 +27,7 @@
     </parameter>
     <parameter name="invoke-output" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/invoke-output.rng"/>
-    </parameter -->
+    </parameter>
   </message>
 
   <message name="properties-of-group-request">
