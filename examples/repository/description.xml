@@ -3,6 +3,13 @@
              xmlns:xi="http://www.w3.org/2001/XInclude">
 
 <!--{{{-->
+<!-- Messages at root level -->
+  <message name="description">
+    <parameter name="description" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="../../ns/description-1_0.rng"/>
+    </parameter>
+  </message>
+
 <!-- Messages at group level -->
   <message name="list-of-groups">
     <parameter name="list-of-groups" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
@@ -103,6 +110,7 @@
 <!--}}}-->
 
   <resource>
+    <get in="*" out="description"/>
     <resource relative="groups">
       <get in="*" out="list-of-groups"/>
       <post in="create-group"/>

@@ -10,6 +10,7 @@ require 'libs/impl_groups'
 require 'libs/impl_subgroups'
 require 'libs/impl_services'
 require 'libs/impl_details'
+require 'libs/impl_root'
 
 use Rack::ShowStatus
 
@@ -18,6 +19,8 @@ run(
     process_out false
     
     on resource do
+        p 'Processing description ....' if method :get => '*'
+        run RootGET if method :get => '*'
       
       on resource 'groups' do
         # Generating the ATOM feed with groups
