@@ -1,9 +1,9 @@
 <html>
 <body>
 
-<h1>Output</h1>
 <?php
-
+$includes = realpath(dirname(__FILE__));
+include_once($includes . "/../../../lib/php/serversimple.php");
 
 // while($element = each($_FILES)) {
 //  echo $element[ 'key' ];
@@ -12,7 +12,6 @@
 // echo '<br />';
 //}
 
-$boundary = "OneRingtobringthemallandinthedarknessbindthemIntheLandofMordorwheretheShadowslie0xdeadbeef";
 
 $params = array();
 $files = array();
@@ -36,47 +35,31 @@ while($element = each($_POST)) {
     $files[$name] = $value;
   }
 }
-echo "<br/>Method: {$request['method']}";
-echo "<br/>URI: {$request['uri']}";
+//echo "<br/>Method: {$request['method']}";
+//echo "<br/>URI: {$request['uri']}";
 $request['parameters'] = $params;
 $request['files'] = $files;
 
-$body = "--" . $boundary . "\n";
+$s = new RiddlServerSimple("test.txt");
 
-
-echo "<br/>Parameters";
+echo "<br/>Parameters\n";
 foreach($request['parameters'] as $key=>$value) {
-  echo "<br/>$key : $value";
-  $body .= "content-disposition: form-data; name=\"$key\"\n\n$value\n--$boundary\n";
+  echo "<br/>$key : $value\n";
+  $s->add(new RiddlParameterSimple($key, $value));
 }
-echo "<br/>Files";
+echo "<br/>Files\n";
 foreach($request['files'] as $key => $value) {
-  echo "<br/>$key : $value";
   $name = substr($key, 0, strpos($key, ":"));
   $mime = substr(strrchr($key, ":"), 1);
-  $body .= "content-disposition: $mime; name=\"$name\"\n\n$value--$boundary\n";
+echo "Name: " . $name . " <br/>\n";
+echo "MIME: " . $mime . " <br/>\n";
+echo "Value:\n " . $value . "\n<br/>\n";
+  $s->add(new RiddlParameterComplex($name, $mime, $value));
 }
 
 
-echo "\n\n\n\n\n<h1>Message body</h1>\n\n\n";
-echo $body;
-
-  $req = array(
-     'http' => array
-     (
-         'method' => $request['method'],
-         'header'=> "Content-Type: multipart/related; boundary=\"$boundary\"\r\n",
-         'content' => $body
-     )
-  );
-
-  $url = "http://localhost:9292" . $argv[2];
-  $ctx = stream_context_create($req);
-  $fp = fopen($url, 'rb', false, $ctx);
-
-  $response = stream_get_contents($fp);
-  echo "<h1>Response</h1>\n";
-  echo $response;
+//  echo "<h1>Response</h1>\n";
+  $s->riddl_it();
 ?>
 
 
