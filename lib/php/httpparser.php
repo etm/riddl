@@ -1,5 +1,6 @@
 <?
   class RiddlHttpParser {
+    private $params;
     private $MULTIPART_CONTENT_TYPES = array(
       #{{{
       'multipart/form-data',
@@ -16,56 +17,57 @@
     private $EOL = "\r\n";
     private $D = '&;';
 
-    function parse_content($input,$ctype,$content_length,$content_disposition,$content_id) {
+    private function parse_content($input,$ctype,$content_length,$content_disposition,$content_id) {
       #{{{
       if ($ctype == 'text/riddl-data') $ctype = NULL;
-      $mf = preg_match("/ filename=\"?([^\";]*)\"?/ni", $content_disposition, $matchesf); # TODO check if preg_match works like this
-      $mn = preg_match("/ filename=\"?([^\";]*)\"?/ni", $content_disposition, $matchesn); # TODO check if preg_match works like this
-      $filename = $matchesf[0];
-      $name = $mn ? $matchesn[0] : $content_id;
+      $mf = preg_match("/ filename=\"?([^\";]*)\"?/ni", $content_disposition, $matchesf); # TODO debug
+      $mn = preg_match("/ filename=\"?([^\";]*)\"?/ni", $content_disposition, $matchesn); # TODO debug
+      $filename = $matchesf[1];
+      $name = $mn ? $matchesn[1] : $content_id;
 
       if (!is_null($ctype) || !is_null($filename)) {
-        $body = tmpfile(); # TODO check if tempfile works like this
-      else
+        $body = tmpfile(); # TODO debug
+      } else {
         $body = '';
-      end
-      
-      $bufsize = 16384
-         
-      while ($content_length >= 0) {
-        $c = fread($input,bufsize < content_length ? bufsize : content_length)
-        raise EOFError, "bad content body"  if c.nil? || c.empty?
-        body << c
-        $content_length -= c.size;
       }
 
-      add_to_params(name,body,filename,ctype,nil)
+      $bufsize = 16384;
+
+      while ($content_length >= 0) {
+        $c = fread($input,$bufsize < $content_length ? $bufsize : $content_length);
+        if (!$c)
+          throw new Exception("bad content body");
+        $this->write_body($body,$c);
+        $content_length -= strlen($c);
+      }
+
+      $this->add_to_params($name,$body,$filename,$ctype,NULL);
       #}}}
-    end
-    private :parse_content
+    }
 
-    def parse_multipart(input,content_type,content_length)
+    private function parse_multipart($input,$content_type,$content_length) { # TODO
       #{{{
-      content_type =~ %r|\Amultipart/.*boundary=\"?([^\";,]+)\"?|n
-      boundary = "--#{$1}"
+      preg_match("/\Amultipart\/.*boundary=\"?([^\";,]+)\"?/n",$content_type,$matches);
+      $boundary = "--" . $matches[1];
 
-      boundary_size = boundary.size + EOL.size
-      content_length -= boundary_size
-      status = input.read(boundary_size)
-      raise EOFError, "bad content body" unless status == boundary + EOL
+      $boundary_size = strlen($boundary) + strlen($this->EOL);
+      $content_length -= $boundary_size;
+      $status = fread($input,$boundary_size);
+      if (!$status == $boundary . $this->EOL)
+        throw new Exception("bad content body);
 
-      rx = /(?:#{EOL})?#{Regexp.quote boundary}(#{EOL}|--)/n
+      $rx = "/(?:" . $this->EOL . ")?" . preg_quote($boundary) . "(" . $this->EOL . "|--)/n";
 
-      buf = ""
-      bufsize = 16384
-      loop do
-        head = nil
-        body = ''
-        filename = ctype = name = nil
+      $buf = "";
+      $bufsize = 16384;
+      while (true) {
+        $head = NULL;
+        $body = '';
+        $filename = NULL; $ctype = NULL; $name = NULL;
 
-        until head && buf =~ rx
-          if !head && i = buf.index(EOL+EOL)
-            head = buf.slice!(0, i+2) # First \r\n
+        if (!($head && preg_match($rx,$buf))) {
+          if (!$head && $i = strpos($buf,$this->EOL . $this->EOL)) {
+            head = buf.slice!(0, i+2) # First \r\n # TODO substr
             buf.slice!(0, 2)          # Second \r\n
 
             filename = head[/Content-Disposition:.* filename="?([^\";]*)"?/ni, 1]
@@ -77,8 +79,8 @@
               body.binmode  if body.respond_to?(:binmode)
             end
 
-            next
-          end
+            continue;
+          }
 
           # Save the read body part.
           if head && (boundary_size+4 < buf.size)
@@ -89,7 +91,7 @@
           raise EOFError, "bad content body"  if c.nil? || c.empty?
           buf << c
           content_length -= c.size
-        end
+        }
 
         # Save the rest.
         if i = buf.index(rx)
@@ -101,71 +103,72 @@
         add_to_params(name,body,filename,ctype,head)
 
         break if buf.empty? || content_length == -1
-      end
+      }
       #}}}
-    end
-    private :parse_multipart
+    }
 
-    def add_to_params(name,body,filename,ctype,head)
-      #{{
-      if filename == ""
+    private function parse_nested_query($qs, $type) {
+      #{{{
+      $what = preg_split("/[$D] */n",$qs || '');
+      foreach ($what as $p) {
+        $p = urldecode($p);
+        $p = preg_split('/=/',$p,2);
+        array_push($this->params,new RiddlParameterSimple($p[0],$p[1],$type));
+      }
+      #}}}
+    }
+
+    private function write_body($body,$what) {
+      #{{{
+      if (is_resource($body))
+        fwrite($body,$what);
+      if (is_string($body))
+        $body .= $what;
+      #}}}
+    }
+
+    private function add_to_params($name,$body,$filename,$ctype,$head) {
+      #{{{
+      if ($filename == '') {
         # filename is blank which means no file has been selected
-      elsif filename && ctype
-        body.rewind
-
+      } elseif ($filename && $ctype) {
         # Take the basename of the upload's original filename.
         # This handles the full Windows paths given by Internet Explorer
         # (and perhaps other broken user agents) without affecting
         # those which give the lone filename.
-        filename =~ /^(?:.*[:\\\/])?(.*)/m
-        filename = $1
-
-        @params << Parameter::Complex.new(name, ctype, body, filename, head)
-      elsif !filename && ctype
-        body.rewind
-        
+        preg_match("/^(?:.*[:\\\/])?(.*)/m",$filename,$matches);
+        $filename = $matches[1];
+        array_push($this->params,new RiddlParameterComplex.new($name,$ctype,$body,$filename,$head);
+      } elseif (!$filename && $ctype) {
         # Generic multipart cases, not coming from a form
-        @params << Parameter::Complex.new(name, ctype, body, nil, head)
-      else
-        @params << Parameter::Simple.new(name, body, :body)
-      end
+        array_push($this->params,new RiddlParameterComplex($name,$ctype,$body,NULL,$head));
+      } else {
+        array_push($this->params,new RiddlParameterSimple($name,$body,'body'));
+      }
       #}}}
-    end
-    private :add_to_params
+    }
 
-    def parse_nested_query(qs, type)
+    function __construct($query_string,$input,$content_type,$content_length,$content_disposition,$content_id) {
       #{{{
-      (qs || '').split(/[#{D}] */n).each do |p|
-        k, v = unescape(p).split('=', 2)
-        @params << Parameter::Simple.new(k,v,type)
-      end
-      #}}}
-    end
-    private :parse_nested_query
+      $this->params = array();
 
-    def initialize(query_string,input,content_type,content_length,content_disposition,content_id)
-      #{{{
-      media_type = content_type && content_type.split(/\s*[;,]\s*/, 2).first.downcase
-      @params = []
-      parse_nested_query(query_string,:query)
-      if MULTIPART_CONTENT_TYPES.include?(media_type)
-        parse_multipart(input,content_type,content_length.to_i)
-      elsif FORM_CONTENT_TYPES.include?(media_type)
+      $ct = preg_split("/\s*[;,]\s*/",$content_type,2);
+      $media_type = strtolower($ct[0]);
+      $params = array();
+      $this->parse_nested_query($query_string,'query');
+      if (array_search($media_type,$this->MULTIPART_CONTENT_TYPES)) {
+        $this->parse_multipart($input,$content_type,intval($content_length));
+      } elseif (array_search($media_type,$this->FORM_CONTENT_TYPES)) {
         # sub is a fix for Safari Ajax postings that always append \0
-        parse_nested_query(input.read.sub(/\0\z/, ''),:body)
-      else 
-        parse_content(input,content_type,content_length.to_i,content_disposition||'',content_id||'')
-      end
-
-      begin
-        input.rewind if input.respond_to?(:rewind)
-      rescue Errno::ESPIPE
-        # Handles exceptions raised by input streams that cannot be rewound
-        # such as when using plain CGI under Apache
-      end
+        $contents = '';
+        while (!feof($input)) {
+          $contents .= fread($input, 8192);
+        }
+        $this->parse_nested_query(preg_replace("/\0\z/", '', $contents),'body');
+      } else {
+        $this->parse_content($input,$content_type,intval($content_length),$content_disposition||'',$content_id||'');
+      }
       #}}}
-    end
-
-    attr_reader :params
-  end
-end
+    }
+  }
+?>
