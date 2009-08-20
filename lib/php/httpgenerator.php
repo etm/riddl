@@ -14,7 +14,7 @@
     function generate() {
       # set all headers
       foreach ($this->headers as $h) {
-        header($h->name + ": " + $h->value);
+        $this->set_header($h->name(),$h->value());
       }
       # generate content
       if (is_array($this->params) && count($this->params) == 1) {

@@ -7,8 +7,10 @@
   class RiddlServerSimple {
     private $params;
     private $headers;
+    private $debug;
 
-    function __construct() {
+    function __construct($debug=NULL) {
+      $this->debug = $debug;
       $this->params = array();
       $this->headers = array();
     }
@@ -34,7 +36,11 @@
     }
 
     function riddl_it() {
-      $g = new RiddlHttpGenerator($this->headers,$this->params,fopen('php://output','w'),'header');
+      if (is_null($this->debug)) {
+        $g = new RiddlHttpGenerator($this->headers,$this->params,fopen('php://output','w'),'header');
+      } else {
+        $g = new RiddlHttpGenerator($this->headers,$this->params,fopen($this->debug,'w'),'socket');
+      }
       $g->generate();
       exit;
     }
