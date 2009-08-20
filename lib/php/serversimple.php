@@ -22,7 +22,7 @@
         array_push($this->params,$what);
       } elseif (is_a($what,'RiddlHeader')) {
         array_push($this->headers,$what);
-      } elseif (is_array($what) && count($what) > 1)
+      } elseif (is_array($what) && count($what) > 1) {
         foreach ($what as $w) {
           if (is_a($w,'RiddlParameterSimple') || is_a($w,'RiddlParameterComplex')) {
             array_push($this->params,$w);
@@ -33,8 +33,8 @@
       }
     }
 
-    function return() {
-      $g = RiddlHttpGenerator.new($this->headers,$this->params,fopen('php://output'),'header');
+    function riddl_it() {
+      $g = new RiddlHttpGenerator($this->headers,$this->params,fopen('php://output','w'),'header');
       $g->generate();
       exit;
     }

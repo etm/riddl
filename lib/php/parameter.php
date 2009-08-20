@@ -27,7 +27,7 @@
     private $additional;
 
     function __construct($name,$mimetype,$value,$filename=NULL,$additional=array()) {
-      $this->name = $name
+      $this->name = $name;
       $this->mimetype = $mimetype;
       $this->filename = $filename;
       $this->type = 'body';
@@ -51,7 +51,7 @@
     function value() { return $this->value; }
     function type() { return $this->type; }
     function size() { return $this->size; }
-    function filename() { return $this->size; }
-    function additional() { return $this->size; }
+    function filename() { return $this->filename; }
+    function additional() { return $this->additional; }
   }
 ?>
