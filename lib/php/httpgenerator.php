@@ -64,7 +64,7 @@
           fwrite($this->sock, $this->EOL);
         } elseif (is_a($r,'RiddlParameterComplex')) {
           fwrite($this->sock, "--" . $this->BOUNDARY . $this->EOL);
-          fwrite($this->sock, "Content-Disposition: riddl-data; name=\"");
+          fwrite($this->sock, "Content-Disposition: riddl-data; name=\"" . $r->name . "\"");
           if (is_null($r->filename())) {
             fwrite($this->sock, $this->EOL);
           } else {
@@ -72,20 +72,6 @@
           }
           fwrite($this->sock, "Content-Transfer-Encoding: binary" . $this->EOL);
           fwrite($this->sock, "Content-type: " . $r->mimetype() . $this->EOL);
-          fwrite($this->sock, $this->EOL);
-          if (is_resource($r->value()) && (get_resource_type($r->value()) == 'file')) {
-            $this->copy_content($r->value());
-          } elseif (is_string($r->value())) {
-            fwrite($this->sock, $r->value());
-          }
-          fwrite($this->sock, $this->EOL);
-          fwrite($this->sock, "Content-type: " . $r->mimetype() . $this->EOL);
-          fwrite($this->sock, "Content-length: " . $r->size() . $this->EOL);
-          if (is_null($r->filename())) {
-            fwrite($this->sock, "Content-ID: " . $r->name() . $this->EOL);
-          } else {
-            fwrite($this->sock, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"; filename=\"" . $r->filename() . "\"" . $this->EOL);
-          }
           fwrite($this->sock, $this->EOL);
           if (is_resource($r->value()) && (get_resource_type($r->value()) == 'file')) {
             $this->copy_content($r->value());
