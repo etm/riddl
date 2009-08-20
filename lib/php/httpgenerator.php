@@ -64,7 +64,7 @@
           fwrite($this->sock, $this->EOL);
         } elseif (is_a($r,'RiddlParameterComplex')) {
           fwrite($this->sock, "--" . $this->BOUNDARY . $this->EOL);
-          fwrite($this->sock, "Content-Disposition: riddl-data; name=\"" . $r->name . "\"");
+          fwrite($this->sock, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"");
           if (is_null($r->filename())) {
             fwrite($this->sock, $this->EOL);
           } else {
