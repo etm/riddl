@@ -68,41 +68,45 @@
         if (!($head && preg_match($rx,$buf))) {
           if (!$head && $i = strpos($buf,$this->EOL . $this->EOL)) {
             head = buf.slice!(0, i+2) # First \r\n # TODO substr
-            buf.slice!(0, 2)          # Second \r\n
+            buf.slice!(0, 2)          # Second \r\n # TODO substr
 
-            filename = head[/Content-Disposition:.* filename="?([^\";]*)"?/ni, 1]
-            ctype = head[/Content-Type: (.*)#{EOL}/ni, 1]
-            name = head[/Content-Disposition:.*\s+name="?([^\";]*)"?/ni, 1] || head[/Content-ID:\s*([^#{EOL}]*)/ni, 1]
+            preg_match("/Content-Disposition:.* filename="?([^\";]*)\"?/ni", $head, $matches);
+            $filename = $matches[1];
+            preg_match("/Content-Type: (.*)" . $this->EOL . "/ni", $head, $matches);
+            $ctype = $matches[1];
+            preg_match("/Content-Disposition:.*\s+name=\"?([^\";]*)\"?/ni", $head, $matchesd); # TODO testen
+            preg_match("/Content-ID:\s*([^" . $this->EOL . "]*)/ni", $head, $matchesi); # TODO testen
+            $name = $matchesd[1] || $matchesi[1]; # TODO testen
 
-            if ctype || filename
-              body = Parameter::Tempfile.new("RiddlMultipart")
-              body.binmode  if body.respond_to?(:binmode)
-            end
+            if ($ctype || $filename)
+              $body = tmpfile();
 
             continue;
           }
 
           # Save the read body part.
-          if head && (boundary_size+4 < buf.size)
-            body << buf.slice!(0, buf.size - (boundary_size+4))
-          end
+          if ($head && ($boundary_size+4 < strlen($buf))) {
+            body << buf.slice!(0, buf.size - (boundary_size+4)) # TODO
+          }
 
-          c = input.read(bufsize < content_length ? bufsize : content_length)
-          raise EOFError, "bad content body"  if c.nil? || c.empty?
-          buf << c
-          content_length -= c.size
+          $c = fread($input,$bufsize < $content_length ? $bufsize : $content_length);
+          if (!$c)
+            throw new Exception("bad content body");
+          $buf .= $c;
+          $content_length -= strlen($c);
         }
 
         # Save the rest.
-        if i = buf.index(rx)
-          body << buf.slice!(0, i)
-          buf.slice!(0, boundary_size+2)
+        if ($i = strpos($buf,$rx)) {
+          body << buf.slice!(0, i) # TODO
+          buf.slice!(0, boundary_size+2) # TODO
           content_length = -1  if $1 == "--"
-        end
+        }
 
-        add_to_params(name,body,filename,ctype,head)
+        $this->add_to_params($name,$body,$filename,$ctype,$head);
 
-        break if buf.empty? || content_length == -1
+        if (!$buf || $content_length == -1)
+          break;
       }
       #}}}
     }
