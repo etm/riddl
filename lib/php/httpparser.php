@@ -45,7 +45,7 @@
       #}}}
     }
 
-    private function parse_multipart($input,$content_type,$content_length) { # TODO
+    private function parse_multipart($input,$content_type,$content_length) {
       #{{{
       preg_match("/\Amultipart\/.*boundary=\"?([^\";,]+)\"?/n",$content_type,$matches);
       $boundary = "--" . $matches[1];
@@ -67,8 +67,8 @@
 
         if (!($head && preg_match($rx,$buf))) {
           if (!$head && $i = strpos($buf,$this->EOL . $this->EOL)) {
-            head = buf.slice!(0, i+2) # First \r\n # TODO substr
-            buf.slice!(0, 2)          # Second \r\n # TODO substr
+            $head = substr($buf,0,$i+2); # First \r\n
+            $buf = substr($buf,$i+4); # Second \r\n
 
             preg_match("/Content-Disposition:.* filename="?([^\";]*)\"?/ni", $head, $matches);
             $filename = $matches[1];
@@ -86,7 +86,8 @@
 
           # Save the read body part.
           if ($head && ($boundary_size+4 < strlen($buf))) {
-            body << buf.slice!(0, buf.size - (boundary_size+4)) # TODO
+            $body = substr($buf,0, strlen($buf) - ($boundary_size+4));
+            $buf = substr($buf,$boundary_size+4);
           }
 
           $c = fread($input,$bufsize < $content_length ? $bufsize : $content_length);
@@ -98,9 +99,9 @@
 
         # Save the rest.
         if ($i = strpos($buf,$rx)) {
-          body << buf.slice!(0, i) # TODO
-          buf.slice!(0, boundary_size+2) # TODO
-          content_length = -1  if $1 == "--"
+          $body .= substr($buf,0,i);
+          $buf = substr($buf, 0, i + $boundary_size+2);
+          # content_length = -1  if $1 == "--" TODO something
         }
 
         $this->add_to_params($name,$body,$filename,$ctype,$head);
