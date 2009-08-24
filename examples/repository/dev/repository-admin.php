@@ -3,63 +3,44 @@
 
 <?php
 $includes = realpath(dirname(__FILE__));
-include_once($includes . "/../../../lib/php/serversimple.php");
+include_once($includes . "/../../../lib/php/client.php");
 
-// while($element = each($_FILES)) {
-//  echo $element[ 'key' ];
-// echo ' - ';
-// echo $element[ 'value' ];
-// echo '<br />';
-//}
-
-
-$params = array();
-$files = array();
-
-$request = array();
-  
-$request['method'] = $_POST['method'];
-$request['uri'] = $_POST['uri'];
+$what = array();
 
 while($element = each($_POST)) {
   if (substr($element['key'],0,11) == 'param_name_') {
     $name = $element['value'];
     $number = substr(strrchr($element['key'], "_"), 1);
     $value = $_POST["param_value_$number"];
-    $params[$name] = $value;
+    array_push($what, new RiddlParameterSimple($name, $value));
   }
   if (substr($element['key'],0,10) == 'file_name_') {
-    $name = $element['value'];
+    $name = substr($element['value'], 0, strpos($key, ":"));
+    $mime = substr(strrchr($element['value'], ":"), 1);
+
     $number = substr(strrchr($element['key'], "_"), 1);
     $value = file_get_contents($_FILES["file_value_$number"]['tmp_name']);
-    $files[$name] = $value;
+    //$files[$name] = $value;
+    array_push($what, new RiddlParameterComplex($name, $mime, $value));
   }
 }
-//echo "<br/>Method: {$request['method']}";
-//echo "<br/>URI: {$request['uri']}";
-$request['parameters'] = $params;
-$request['files'] = $files;
 
-$s = new RiddlServerSimple("test.txt");
+echo "<h2>\nInput:</h2>";
+echo "<br/>\nURI:" . $_POST['uri'];
+echo "<br/>\nMETHOD:" . $_POST['method'];
+echo "<br/>\nParams:";
+print_r($what);
 
-echo "<br/>Parameters\n";
-foreach($request['parameters'] as $key=>$value) {
-  echo "<br/>$key : $value\n";
-  $s->add(new RiddlParameterSimple($key, $value));
+$client = new RiddlClient("http://localhost:9292");
+$client->resource($_POST['uri']);
+$return = $client->request($_POST['method'], $what);
+
+echo "\n<h2>\nReturnvalue:</h2>";
+foreach($return as $p) {
+  echo "\n<br/>" . $p->name() . ":";
+  rewind($p->value());
+  echo fread($p->value(), $p->size());
 }
-echo "<br/>Files\n";
-foreach($request['files'] as $key => $value) {
-  $name = substr($key, 0, strpos($key, ":"));
-  $mime = substr(strrchr($key, ":"), 1);
-echo "Name: " . $name . " <br/>\n";
-echo "MIME: " . $mime . " <br/>\n";
-echo "Value:\n " . $value . "\n<br/>\n";
-  $s->add(new RiddlParameterComplex($name, $mime, $value));
-}
-
-
-//  echo "<h1>Response</h1>\n";
-  $s->riddl_it();
 ?>
 
 
