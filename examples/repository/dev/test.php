@@ -1,7 +1,9 @@
 <?php
-  session_start();
-?>
+  $includes = realpath(dirname(__FILE__));
+  include_once($includes . "/../../../lib/php/client.php");
 
+  $dom = NULL;
+?>
 <html>
   <head>
     <title>RESCUE Admin</title>
@@ -9,27 +11,36 @@
   <body>
     <h1>RESCUE Admin</h1>
     <form enctype="multipart/form-data" name="request-form" method="POST" action="http://localhost/test">
-      <input type="text" name="PHPSESSID" value="<?=session_id()?>"><br/>
+      <input type="hidden" name="PHPSESSID" value="<?=session_id()?>"><br/>
 
       <?php
-        if((!isset($_POST['descURI'])) && (!isset($_SESSION['descURI']))) { // if no message has been selected
-          selectDescription();
-        } else {
-          if(isset($_POST['descURI'] )) { $_SESSION['descURI'] = $_POST['descURI']; }
-          if(!isset($_SESSION['description'])) {
-            echo "\nThe description seems not to be valide. Pleas enter URI again.<br/>";
-            selectDescription();
-          } else {
-            parseDescription();
-            selectResMessage();
-          }
-          if(isset($_POST['message'])) {
-            $_SESSION['message'] = $_POST['message'];
-            createFormByMessage($_POST['message']);
+        global $dom;
+        $ok = true;
+
+        // Load and verify description
+        selectDescription();
+        if(isset($_POST['rescue:descURI'])) {
+          if(parseDescription() == false) {
+            echo "\n<br/>The entered URI does not respond a valid description.<br/>";
+            $ok = false;
           }
         }
+
+        // Select message
+        if($dom != NULL && $ok == true) {
+          selectResMessage();
+        }
+        // build from
+        if(isset($_POST['rescue:message']) && $ok == true) {
+          createFormByMessage($_POST['rescue:message']);
+        }
+
+        if(isset($_POST['rescue:requestButton'])) {
+          request();
+        }
       ?>
-      <input type="submit" value=" Submit ">
+      <br/>
+      <input type="submit" value="Next">
     </form>
   </body>
 </html>
@@ -39,25 +50,33 @@
 
 <?php
   function selectDescription() {
-    echo "\nInput URI of description file:" . "<input name=\"descURI\" type=\"text\"/><br/>";
+    echo "\nURI of description file (server root URI):" . "<input name=\"rescue:descURI\" type=\"text\" value=\"" . $_POST['rescue:descURI'] . "\"/><br/>";
   }
 
   function parseDescription() {
-    global $validDesc;
+    global $dom;
+
     $dom = new DomDocument();
-    $dom->load($_SESSION['descURI']);
-    if ($dom->relaxNGValidate(realpath(dirname(__FILE__)) . "/../../../ns/description-1_0.rng")) {
-      $_SESSION['description'] = $dom;
-    }
+    $dom->load($_POST['rescue:descURI']);
+    
+    ob_start();
+    $erfolg = $dom->relaxNGValidate(realpath(dirname(__FILE__)) . "/../../../ns/description-1_0.rng");
+    $fehler = ob_get_contents();
+    ob_end_clean();
+    if($erfolg == false) $dom = NULL;
+    return $erfolg;
+
   }
 
   function selectResMessage() {
-    $dom = $_SESSION['description'];
+    global $dom;
+
     $root = $dom->documentElement;
     $rootResource = $root->getElementsByTagname($tagName)->item(0);
-    echo "\n<select name=\"message\">";
+    echo "\nPlease select message from below:<br/>";
+    echo "\n<select name=\"rescue:message\">";
     createResourceGroup($root, "1");
-    echo "\n</select>";
+    echo "\n</select></br></br>";
   }
 
   function createResourceGroup($node, $id) {
@@ -68,8 +87,13 @@
   
     foreach($node->childNodes as $child) {
       if(($child->tagName == "get") || ($child->tagName == "post") || ($child->tagName == "put") || ($child->tagName == "delete")) {
-        echo "\n<option value=\"" . $child->getAttribute("in") . "\">" .
-             $child->tagName . ": " .
+        echo "\n<option value=\"" . $child->tagName . ":" . $child->getAttribute("in");
+        if($_POST['rescue:message'] == $child->tagName . ":" . $child->getAttribute("in")) {
+           echo "\" selected>";
+        } else {
+           echo "\">";
+        }
+        echo     $child->tagName . ": " .
              "Input: " . $child->getAttribute("in") .
              "</option>";
       } elseif($child->tagName == "resource") {
@@ -80,21 +104,81 @@
     echo "\n</optgroup>";
   }
 
-  function createFormByMessage($messageName) {
-    $dom = $_SESSION['description'];
+  function createFormByMessage($message) {
+    global $dom;
+
+    $messageElement = NULL;
     $root = $dom->documentElement;
-    $messageElement = $root->getElementsByTagname($messageName)->item(0);
-    echo "\n<h3>Enter parameter value for " . $messageName . "</h3>";
-//get_class($messageElement)
-    foreach($messageElement->childNodes as $param) {
-      if($param->hasAttribute('type')) {  //Simple Parameter found
-        echo "\n" . $param->getAttribute("name") . "<input name=\"" . $param->getAttribute("name") . "\" type=\"text\"/>";
-      } 
-      if($param->hasAttribute('mimetype')) {  //Complex Parameter found
-        echo "\n" . $param->getAttribute("name") . "<input name=\"" . $param->getAttribute("name") . "\" type=\"file\"/>";
-        echo "\n" . "<input name=\"" . $param->getAttribute("name") . "_mime\" type=\"text\" value=\"" . $param->getAttribute("mimetype") . "\"/>";
-      } 
+    $messages = $root->getElementsByTagname("message");
+
+    $method = substr($message, 0, strpos($message, ":"));
+    $messageName = substr(strrchr($message, ":"), 1);
+
+    foreach($messages as $m) {
+      if($m->getAttribute('name') == $messageName) {
+        $messageElement = $m;
+      }
     }
+    echo "\nEnter resource-path: " . "<input name=\"rescue:resPath\" type=\"text\" value=\"" . $_POST['rescue:resPath'] . "\"/><br/>";
+    echo "\n<b>Method used for the request: " . $method;
+    echo "\n<input name=\"rescue:method\" type=\"hidden\" value=\"" . $method . "\"/>";
+    echo "\n<h3>Enter parameter value for " . $messageName . "</h3>";
+    echo "\n<table>";
+    foreach($messageElement->childNodes as $param) {
+      if($param->tagName == "parameter") {
+        echo "\n<tr>";
+        if($param->hasAttribute('type')) {  //Simple Parameter found
+          echo "\n<td>" . $param->getAttribute("name") . "</td><td>" .
+               "<input name=\"" . $param->getAttribute("name") . "\" type=\"text\" value=\"" . $_POST[$param->getAttribute("name")] . "\"/></td>";
+        } 
+        if($param->hasAttribute('mimetype')) {  //Complex Parameter found
+          echo "\n<td>" . $param->getAttribute("name") . "</td><td><input name=\"" . $param->getAttribute("name") . "\" type=\"file\" value=\"" . $_FILES[$param->getAttribute("name")]['name'] . "\"/>";
+          echo "\n" . "<input name=\"rescue:" . $param->getAttribute("name") . "_mime\" type=\"hidden\" value=\"" . $param->getAttribute("mimetype") . "\"/></td>";
+        } 
+        echo "\n</tr>";
+      }
+    }
+    echo "\n<tr><td colspan=\"2\" align=\"center\"><input type=\"submit\" name=\"rescue:requestButton\" value=\"Perform request\"></td></tr>";
+    echo "\n</table>";
+  }
+
+  function request() {
+    
+    $what = array();
+
+    while($element = each($_POST)) {
+      if(preg_match("/^rescue:(.*)_mime$/", $element['key'])) { // Complex found
+        $name = array();
+        preg_match("/^rescue:(.*)_mime$/",$element['key'], $name);
+        $value = file_get_contents($_FILES[$name[1]]['tmp_name']);
+        $p = new RiddlParameterComplex($name[1], $element['value'], $value);
+        array_push($what, $p); 
+      } 
+      if(!strstr($element['key'], "rescue:") && $element['key'] != "PHPSESSID") {  // Simple found
+//echo $element['key'];
+          $p = new RiddlParameterSimple($element['key'], $element['value']);
+          array_push($what, $p); 
+      }
+    }
+
+    echo "<h2>\nInput:</h2>";
+    echo "<br/>\nURI:" . $_POST['rescue:descURI'] . $_POST['rescue:resPath'];
+    echo "<br/>\nMETHOD:" . $_POST['rescue:method'];
+    echo "<br/>\nParams:";
+    print_r($what);
+
+    echo "\n<h2>\nReturn Value:</h2>";
+    $client = new RiddlClient($_POST['rescue:descURI']);
+    $client->resource($_POST['rescue:resPath']);
+    $return = $client->request($_POST['rescue:method'], $what);
+
+    echo "\n<table><tr><td>";
+print_r($return);
+    foreach($return as $p) {
+      echo "\n<br/><h3>Parameter with name: " . $p->name() . "</h3>";
+      echo fread($p->value(), $p->size());
+    }
+    echo "\n</td></tr></table>";
   }
 ?>
 
