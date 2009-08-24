@@ -17,13 +17,22 @@
     private $EOL = "\r\n";
     private $D = '&;';
 
+    function params(){
+      return $this->params;
+    }  
+
     private function parse_content($input,$ctype,$content_length,$content_disposition,$content_id) {
       #{{{
       if ($ctype == 'text/riddl-data') $ctype = NULL;
-      $mf = preg_match("/ filename=\"?([^\";]*)\"?/ni", $content_disposition, $matchesf); # TODO debug
-      $mn = preg_match("/ filename=\"?([^\";]*)\"?/ni", $content_disposition, $matchesn); # TODO debug
+      $mf = preg_match("/ filename=\"?([^\";]*)\"?/i", $content_disposition, $matchesf); # TODO debug
+      $mn = preg_match("/ filename=\"?([^\";]*)\"?/i", $content_disposition, $matchesn); # TODO debug
       $filename = $matchesf[1];
       $name = $mn ? $matchesn[1] : $content_id;
+
+      print_r($ctype);print "\n";
+      print_r($filename);print "\n";
+      print_r($content_id);print "\n";
+      print_r($name);print "\n";
 
       if (!is_null($ctype) || !is_null($filename)) {
         $body = tmpfile(); # TODO debug
@@ -33,7 +42,7 @@
 
       $bufsize = 16384;
 
-      while ($content_length >= 0) {
+      while ($content_length > 0) {
         $c = fread($input,$bufsize < $content_length ? $bufsize : $content_length);
         if (!$c)
           throw new Exception("bad content body");
@@ -47,18 +56,18 @@
 
     private function parse_multipart($input,$content_type,$content_length) {
       #{{{
-      preg_match("/\Amultipart\/.*boundary=\"?([^\";,]+)\"?/n",$content_type,$matches);
-      $boundary = "--" . $matches[1];
+      preg_match("/\Amultipart\/.*boundary=\"?([^\";,]+)\"?/",$content_type,$matches);
+      $boundary = '--' . $matches[1];
 
       $boundary_size = strlen($boundary) + strlen($this->EOL);
       $content_length -= $boundary_size;
       $status = fread($input,$boundary_size);
       if (!$status == $boundary . $this->EOL)
-        throw new Exception("bad content body);
+        throw new Exception("bad content body");
 
-      $rx = "/(?:" . $this->EOL . ")?" . preg_quote($boundary) . "(" . $this->EOL . "|--)/n";
+      $rx = "/(?:" . $this->EOL . ")?" . preg_quote($boundary) . "(" . $this->EOL . "|--)/";
 
-      $buf = "";
+      $buf = '';
       $bufsize = 16384;
       while (true) {
         $head = NULL;
@@ -70,12 +79,12 @@
             $head = substr($buf,0,$i+2); # First \r\n
             $buf = substr($buf,$i+4); # Second \r\n
 
-            preg_match("/Content-Disposition:.* filename="?([^\";]*)\"?/ni", $head, $matches);
+            preg_match("/Content-Disposition:.* filename=\"?([^\";]*)\"?/i", $head, $matches);
             $filename = $matches[1];
-            preg_match("/Content-Type: (.*)" . $this->EOL . "/ni", $head, $matches);
+            preg_match("/Content-Type: (.*)" . $this->EOL . "/i", $head, $matches);
             $ctype = $matches[1];
-            preg_match("/Content-Disposition:.*\s+name=\"?([^\";]*)\"?/ni", $head, $matchesd); # TODO testen
-            preg_match("/Content-ID:\s*([^" . $this->EOL . "]*)/ni", $head, $matchesi); # TODO testen
+            preg_match("/Content-Disposition:.*\s+name=\"?([^\";]*)\"?/i", $head, $matchesd); # TODO testen
+            preg_match("/Content-ID:\s*([^" . $this->EOL . "]*)/i", $head, $matchesi); # TODO testen
             $name = $matchesd[1] || $matchesi[1]; # TODO testen
 
             if ($ctype || $filename)
@@ -89,6 +98,8 @@
             $body = substr($buf,0, strlen($buf) - ($boundary_size+4));
             $buf = substr($buf,$boundary_size+4);
           }
+          print_r($bufsize < $content_length ? $bufsize : $content_length);
+          print"\n";
 
           $c = fread($input,$bufsize < $content_length ? $bufsize : $content_length);
           if (!$c)
@@ -106,7 +117,7 @@
 
         $this->add_to_params($name,$body,$filename,$ctype,$head);
 
-        if (!$buf || $content_length == -1)
+        if (!$buf || $content_length <= 0)
           break;
       }
       #}}}
@@ -114,7 +125,7 @@
 
     private function parse_nested_query($qs, $type) {
       #{{{
-      $what = preg_split("/[$D] */n",$qs || '');
+      $what = preg_split("/[" . $this->D . "] */",$qs || '');
       foreach ($what as $p) {
         $p = urldecode($p);
         $p = preg_split('/=/',$p,2);
@@ -143,7 +154,7 @@
         # those which give the lone filename.
         preg_match("/^(?:.*[:\\\/])?(.*)/m",$filename,$matches);
         $filename = $matches[1];
-        array_push($this->params,new RiddlParameterComplex.new($name,$ctype,$body,$filename,$head);
+        array_push($this->params,new RiddlParameterComplex($name,$ctype,$body,$filename,$head));
       } elseif (!$filename && $ctype) {
         # Generic multipart cases, not coming from a form
         array_push($this->params,new RiddlParameterComplex($name,$ctype,$body,NULL,$head));

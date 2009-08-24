@@ -30,6 +30,7 @@
     private function body($r) {
       if (is_a($r,'RiddlParameterSimple')) {
         $this->set_header("Content-type","text/riddl-data");
+        $this->set_header("Content-ID",$r->name());
         $this->set_header("Content-length",$r->size());
         $this->critical_eol();
         fwrite($this->sock, $r->value());

@@ -28,12 +28,12 @@ module Riddl
         when Riddl::Parameter::Simple
           tmp.write r.value
           @headers['Content-Type'] = 'text/riddl-data'
-          @headers['Content-Disposition'] = "riddl-data; name=\"#{r.name}\""
+          @headers['Content-ID'] = r.name
         when Riddl::Parameter::Complex
           tmp.write(r.value.respond_to?(:read) ? r.value.read : r.value)
           @headers['Content-Type'] = r.mimetype
           if r.filename.nil?
-            @headers['Content-ID'] = r.name
+           @headers['Content-ID'] = r.name
           else
             @headers['Content-Disposition'] = "riddl-data; name=\"#{r.name}\"; filename=\"#{r.filename}\""
           end  

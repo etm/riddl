@@ -3,6 +3,7 @@
   require_once($includes . "/parameter.php");
   require_once($includes . "/header.php");
   require_once($includes . "/httpgenerator.php");
+  require_once($includes . "/httpparser.php");
 
   class RiddlClient {
     private $EOL = "\r\n";
@@ -20,10 +21,10 @@
       $this->resource = $path;
     }
 
-    function get($what) { $this->request("get",$what); }
-    function get($post) { $this->request("post",$what); }
-    function get($put) { $this->request("put",$what); }
-    function get($delete) { $this->request("delete",$what); }
+    function get($what) { return $this->request("get",$what); }
+    function post($what) { return $this->request("post",$what); }
+    function put($what) { return $this->request("put",$what); }
+    function delete($what) { return $this->request("delete",$what); }
     function request($type,$what) {
       $params = array();
       $headers = array();
@@ -36,45 +37,61 @@
           }
         }
       }
-      $this->riddl_it($type,$params,$headers);
+      return $this->riddl_it(strtoupper($type),$params,$headers);
     }
 
     private function riddl_it($type,$params,$headers) {
-      if (is_null($this->debug)) {
-        $urlp = parse_url($http->base . $http->resource);
-        if (!isset($urlp['scheme']))
-          $urlp['scheme'] = 'http';
-        if (!isset($urlp['port'])) {
-          switch ($urlp['scheme']) {
-            case 'http':
-              $urlp['port'] = 80;
-              break;
-            case 'https':
-              $urlp['port'] = 443;
-              break;
-          }
+      $urlp = parse_url($this->base . $this->resource);
+      if (!isset($urlp['scheme']))
+        $urlp['scheme'] = 'http';
+      if (!isset($urlp['port'])) {
+        switch ($urlp['scheme']) {
+          case 'http':
+            $urlp['port'] = 80;
+            break;
+          case 'https':
+            $urlp['port'] = 443;
+            break;
         }
-
-        $sock = fsockopen($urlp['scheme'] . '://' . $urlp['host'], $urlp['port'], $errno, $errstr, 30);
-        if (!$sock) die("$errstr ($errno)\n");
-        fwrite($sock, $type . " /" . $urlp['path'] . " HTTP/1.0" . $this->EOL);
-        fwrite($sock, "Host: " . $urlp['host'] . $this->EOL);
-        $g = new RiddlHttpGenerator($this->headers,$this->params,fopen($sock,'w'),'socket');
-
-        $headers = "";
-        while ($str = trim(fgets($sock, 4096)))
-        $headers .= "$str\n";
-
-        echo "\n";
-        $body = "";
-        while (!feof($sock))
-        $body .= fgets($sock, 4096);
-        fclose($sock);
-
-      } else {
-        $g = new RiddlHttpGenerator($this->headers,$this->params,fopen($this->debug,'w'),'socket');
       }
+
+      if (is_null($this->debug)) {
+        $sock = fsockopen($urlp['host'], $urlp['port'], $errno, $errstr, 30);
+        if (!$sock) die("$errstr ($errno)\n");
+      } else {  
+        $sock = fopen($this->debug,'w');
+      }
+
+      fwrite($sock, $type . " " . $urlp['path'] . " HTTP/1.0" . $this->EOL);
+      fwrite($sock, "Host: " . $urlp['host'] . $this->EOL);
+      $g = new RiddlHttpGenerator($headers,$params,$sock,'socket');
       $g->generate();
+
+      $headers = '';
+      $body = tmpfile();
+      if (is_null($this->debug)) {
+        while ($str = trim(fgets($sock, 4096)))
+          $headers .= "$str\n";
+
+        echo "##########################################\n";
+        while (!feof($sock))
+          fwrite($body,fgets($sock, 4096));
+      }  
+      fclose($sock);
+      rewind($body);
+
+      print_r($headers);
+      preg_match("/Content-Disposition: (.*)/i", $headers, $matches);
+      $content_disposition = $matches[1];
+      preg_match("/Content-Type: (.*)/i", $headers, $matches);
+      $content_type = $matches[1];
+      preg_match("/Content-ID: (.*)/i", $headers, $matches);
+      $content_id = $matches[1];
+      preg_match("/Content-Length: (.*)/i", $headers, $matches);
+      $content_length = $matches[1];
+
+      $ret = new RiddlHttpParser(NULL,$body,$content_type,$content_length,$content_disposition,$content_id);
+      return $ret->params();
     }
   }
 
