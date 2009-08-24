@@ -34,10 +34,10 @@
       $this->additional = $additional;
       $this->value = $value;
 
-      if (is_resource($r->value) && (!get_resource_type($r->value) == 'file')) {
+      if (is_resource($this->value) && (!get_resource_type($this->value) == 'file' || !get_resource_type($this->value) == 'stream')) {
         throw new Exception('RiddlParameterComplex ' . $name . ' not a file.');
       }
-      if (is_resource($r->value)) {
+      if (is_resource($this->value)) {
         fseek($this->value, 0, SEEK_END);
         $this->size = ftell($this->value);
         rewind($this->value);

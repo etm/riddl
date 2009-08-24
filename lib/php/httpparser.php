@@ -144,7 +144,6 @@
       #{{{
       if (!is_null($filename) && $filename == '') {
         # filename is blank which means no file has been selected
-        print "hall";
       } elseif ($filename && $ctype) {
         # Take the basename of the upload's original filename.
         # This handles the full Windows paths given by Internet Explorer
