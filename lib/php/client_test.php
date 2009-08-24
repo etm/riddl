@@ -7,6 +7,5 @@
   $ret = $s->post(array(
     new RiddlParameterSimple("hello","world")
   ));
-  print "############################\n";
   print_r($ret);
 ?>

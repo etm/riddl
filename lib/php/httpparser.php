@@ -29,11 +29,6 @@
       $filename = $matchesf[1];
       $name = $mn ? $matchesn[1] : $content_id;
 
-      print_r($ctype);print "\n";
-      print_r($filename);print "\n";
-      print_r($content_id);print "\n";
-      print_r($name);print "\n";
-
       if (!is_null($ctype) || !is_null($filename)) {
         $body = tmpfile(); # TODO debug
       } else {
@@ -74,18 +69,19 @@
         $body = '';
         $filename = NULL; $ctype = NULL; $name = NULL;
 
-        if (!($head && preg_match($rx,$buf))) {
+        while (!($head && preg_match($rx,$buf))) {
           if (!$head && $i = strpos($buf,$this->EOL . $this->EOL)) {
             $head = substr($buf,0,$i+2); # First \r\n
             $buf = substr($buf,$i+4); # Second \r\n
+            
+            $mf = preg_match("/Content-Disposition:.* filename=\"?([^\";]*)\"?/i", $head, $matches);
+            $filename = $mf ? $matches[1] : NULL;
+            $mc = preg_match("/Content-Type: (.*)" . $this->EOL . "/i", $head, $matches);
+            $ctype = $mc ? $matches[1] : NULL;
+            $md = preg_match("/Content-Disposition:.*\s+name=\"?([^\";]*)\"?/i", $head, $matchesd);
+            $mi = preg_match("/Content-ID:\s*([^" . $this->EOL . "]*)/i", $head, $matchesi);
 
-            preg_match("/Content-Disposition:.* filename=\"?([^\";]*)\"?/i", $head, $matches);
-            $filename = $matches[1];
-            preg_match("/Content-Type: (.*)" . $this->EOL . "/i", $head, $matches);
-            $ctype = $matches[1];
-            preg_match("/Content-Disposition:.*\s+name=\"?([^\";]*)\"?/i", $head, $matchesd); # TODO testen
-            preg_match("/Content-ID:\s*([^" . $this->EOL . "]*)/i", $head, $matchesi); # TODO testen
-            $name = $matchesd[1] || $matchesi[1]; # TODO testen
+            $name = $md ? $matchesd[1] : ($mi ? $matchesi[1] : 'bullshit');
 
             if ($ctype || $filename)
               $body = tmpfile();
@@ -95,11 +91,9 @@
 
           # Save the read body part.
           if ($head && ($boundary_size+4 < strlen($buf))) {
-            $body = substr($buf,0, strlen($buf) - ($boundary_size+4));
+            $this->write_body($body,substr($buf,0, strlen($buf) - ($boundary_size+4)));
             $buf = substr($buf,$boundary_size+4);
           }
-          print_r($bufsize < $content_length ? $bufsize : $content_length);
-          print"\n";
 
           $c = fread($input,$bufsize < $content_length ? $bufsize : $content_length);
           if (!$c)
@@ -109,15 +103,16 @@
         }
 
         # Save the rest.
-        if ($i = strpos($buf,$rx)) {
-          $body .= substr($buf,0,i);
-          $buf = substr($buf, 0, i + $boundary_size+2);
-          # content_length = -1  if $1 == "--" TODO something
+        preg_match($rx,$buf,$matches);
+        if ($i = strpos($buf,$matches[0])) {
+          $this->write_body(&$body,substr($buf,0,$i));
+          $buf = substr($buf, $i + $boundary_size+2);
+          if ($matches[0] == "--")
+            $content_length = -1;
         }
-
         $this->add_to_params($name,$body,$filename,$ctype,$head);
 
-        if (!$buf || $content_length <= 0)
+        if (!$buf || $content_length == -1)
           break;
       }
       #}}}
@@ -125,12 +120,14 @@
 
     private function parse_nested_query($qs, $type) {
       #{{{
-      $what = preg_split("/[" . $this->D . "] */",$qs || '');
-      foreach ($what as $p) {
-        $p = urldecode($p);
-        $p = preg_split('/=/',$p,2);
-        array_push($this->params,new RiddlParameterSimple($p[0],$p[1],$type));
-      }
+      if ($qs) {
+        $what = preg_split("/[" . $this->D . "] */",$qs);
+        foreach ($what as $p) {
+          $p = urldecode($p);
+          $p = preg_split('/=/',$p,2);
+          array_push($this->params,new RiddlParameterSimple($p[0],$p[1],$type));
+        }
+      }  
       #}}}
     }
 
@@ -145,8 +142,9 @@
 
     private function add_to_params($name,$body,$filename,$ctype,$head) {
       #{{{
-      if ($filename == '') {
+      if (!is_null($filename) && $filename == '') {
         # filename is blank which means no file has been selected
+        print "hall";
       } elseif ($filename && $ctype) {
         # Take the basename of the upload's original filename.
         # This handles the full Windows paths given by Internet Explorer
@@ -182,7 +180,7 @@
         }
         $this->parse_nested_query(preg_replace("/\0\z/", '', $contents),'body');
       } else {
-        $this->parse_content($input,$content_type,intval($content_length),$content_disposition||'',$content_id||'');
+        $this->parse_content($input,$content_type,intval($content_length),$content_disposition ? $content_disposition : '',$content_id ? $content_id : '');
       }
       #}}}
     }

@@ -72,15 +72,12 @@
       if (is_null($this->debug)) {
         while ($str = trim(fgets($sock, 4096)))
           $headers .= "$str\n";
-
-        echo "##########################################\n";
         while (!feof($sock))
           fwrite($body,fgets($sock, 4096));
       }  
       fclose($sock);
       rewind($body);
 
-      print_r($headers);
       preg_match("/Content-Disposition: (.*)/i", $headers, $matches);
       $content_disposition = $matches[1];
       preg_match("/Content-Type: (.*)/i", $headers, $matches);
