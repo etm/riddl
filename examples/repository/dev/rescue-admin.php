@@ -11,8 +11,6 @@
   <body>
     <h1>RESCUE Admin</h1>
     <form enctype="multipart/form-data" name="request-form" method="POST" action="http://localhost/test">
-      <input type="hidden" name="PHPSESSID" value="<?=session_id()?>"><br/>
-
       <?php
         global $dom;
         $ok = true;
@@ -34,13 +32,15 @@
         if(isset($_POST['rescue:message']) && $ok == true) {
           createFormByMessage($_POST['rescue:message']);
         }
-
+      ?>
+      <br/>
+      <input type="submit" value="Next"><br/><br/><br/>
+      <img src="rescue.jpg" width="200" height="250"/>
+      <?php
         if(isset($_POST['rescue:requestButton'])) {
           request();
         }
       ?>
-      <br/>
-      <input type="submit" value="Next">
     </form>
   </body>
 </html>
@@ -132,7 +132,7 @@
                "<input name=\"" . $param->getAttribute("name") . "\" type=\"text\" value=\"" . $_POST[$param->getAttribute("name")] . "\"/></td>";
         } 
         if($param->hasAttribute('mimetype')) {  //Complex Parameter found
-          echo "\n<td>" . $param->getAttribute("name") . "</td><td><input name=\"" . $param->getAttribute("name") . "\" type=\"file\" value=\"" . $_FILES[$param->getAttribute("name")]['name'] . "\"/>";
+          echo "\n<td>" . $param->getAttribute("name") . "</td><td><input name=\"" . $param->getAttribute("name") . "\" type=\"file\"/>";
           echo "\n" . "<input name=\"rescue:" . $param->getAttribute("name") . "_mime\" type=\"hidden\" value=\"" . $param->getAttribute("mimetype") . "\"/></td>";
         } 
         echo "\n</tr>";
@@ -154,8 +154,7 @@
         $p = new RiddlParameterComplex($name[1], $element['value'], $value);
         array_push($what, $p); 
       } 
-      if(!strstr($element['key'], "rescue:") && $element['key'] != "PHPSESSID") {  // Simple found
-//echo $element['key'];
+      if(!strstr($element['key'], "rescue:")) {  // Simple found
           $p = new RiddlParameterSimple($element['key'], $element['value']);
           array_push($what, $p); 
       }
@@ -165,20 +164,25 @@
     echo "<br/>\nURI:" . $_POST['rescue:descURI'] . $_POST['rescue:resPath'];
     echo "<br/>\nMETHOD:" . $_POST['rescue:method'];
     echo "<br/>\nParams:";
+    echo "<br/>\n<pre>";
     print_r($what);
+    echo "\n</pre>";
 
     echo "\n<h2>\nReturn Value:</h2>";
     $client = new RiddlClient($_POST['rescue:descURI']);
     $client->resource($_POST['rescue:resPath']);
     $return = $client->request($_POST['rescue:method'], $what);
 
-    echo "\n<table><tr><td>";
-print_r($return);
+    echo "\n<table>";
     foreach($return as $p) {
-      echo "\n<br/><h3>Parameter with name: " . $p->name() . "</h3>";
-      echo fread($p->value(), $p->size());
+      echo "\n<tr><td><h3>Parameter with name: " . $p->name() . "\n</td></tr>";
+      echo "\n<tr><td><pre>";
+      $s =       fread($p->value(), $p->size());
+      echo "\n<textarea rows=\"10\" cols=\"80\" readonly=\"readonly\" value=\"" . $s . "\"/>";
+      echo "\n</textarea>";
+      echo "\n</pre></td></tr>";
     }
-    echo "\n</td></tr></table>";
+    echo "</table>";
   }
 ?>
 
