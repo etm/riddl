@@ -165,7 +165,9 @@
     echo "<br/>\nMETHOD:" . $_POST['rescue:method'];
     echo "<br/>\nParams:";
     echo "<br/>\n<pre>";
+    echo "\n<textarea rows=\"10\" cols=\"80\" readonly=\"readonly\"/>";
     print_r($what);
+    echo "\n</textarea>";
     echo "\n</pre>";
 
     echo "\n<h2>\nReturn Value:</h2>";
@@ -175,12 +177,17 @@
 
     echo "\n<table>";
     foreach($return as $p) {
-      echo "\n<tr><td><h3>Parameter with name: " . $p->name() . "\n</td></tr>";
-      echo "\n<tr><td><pre>";
-      $s =       fread($p->value(), $p->size());
-      echo "\n<textarea rows=\"10\" cols=\"80\" readonly=\"readonly\" value=\"" . $s . "\"/>";
-      echo "\n</textarea>";
-      echo "\n</pre></td></tr>";
+      echo "\n<tr><td><h3>Parameter with name: " . $p->name() . "\n</h3></td></tr>";
+      if(get_class($p) == "RiddlParameterSimple") {
+         echo "\n<tr><td>Value: " . $p->value() . "</td></tr>";
+      }
+      if(get_class($p) == "RiddlParameterComplex") {
+        echo "\n<tr><td>";
+        $s =  fread($p->value(), $p->size());
+        echo "\n<textarea rows=\"10\" cols=\"80\" readonly=\"readonly\" value=\"" . $s . "\"/>";
+        echo "\n</textarea>";
+        echo "\n</td></tr>";
+      }
     }
     echo "</table>";
   }
