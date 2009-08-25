@@ -1,17 +1,17 @@
-<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns:ann="http://riddl.org/ns/annotation/1.0" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <transformation name="security" ann:test="1">
+  <transformation name="security">
     <add_as_first>
-      <parameter name="security" type="string" ann:test="1"/>
+      <parameter name="security" type="string"/>
     </add_as_first>
   </transformation>  
 
-  <message name="test" ann:test="1">
-    <parameter name="security" type="string" ann:test="1"/>
+  <message name="test">
+    <parameter name="security" type="string"/>
   </message>
 
-  <resource ann:test="1">
-    <get transformation="security" ann:test="12"/>
+  <resource>
+    <get transformation="security"/>
   </resource>  
 
 </description>
