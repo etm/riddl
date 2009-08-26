@@ -36,4 +36,5 @@ end
 #}}}
 
 d = riddl.declaration
+d.visualize_tree_and_composition
 puts d.description
