@@ -177,18 +177,20 @@
   <define name="riddl-root-resource">
     <ref name="riddl-resource-content"/>
   </define>
-  <define name="riddl-resource">
-    <optional>
-      <attribute name="relative">
-        <ref name="riddl-datatype-relpath"/>
-      </attribute>
-    </optional>
+  <define name="riddl-resource-dynamic">
     <optional>
       <attribute name="recursive">
         <data type="boolean"/>
       </attribute>  
     </optional>
     <ref name="riddl-resource-content"/>
+    <ref name="riddl-others"/>
+  </define>
+  <define name="riddl-resource-named">
+    <attribute name="relative">
+      <ref name="riddl-datatype-relpath"/>
+    </attribute>
+    <ref name="riddl-resource-dynamic"/>
   </define>
 
   <define name="riddl-resource-content">
@@ -217,12 +219,17 @@
         </element>  
       </choice>  
     </zeroOrMore>
+    <!-- One named resources, multiple dynamic ones, before or after the named -->
     <zeroOrMore>
       <element name="resource">
-        <ref name="riddl-resource"/>
-        <ref name="riddl-others"/>
+        <ref name="riddl-resource-named"/>
       </element>
     </zeroOrMore>
+    <optional>
+      <element name="resource">
+        <ref name="riddl-resource-named"/>
+      </element>
+    </optional>
   </define>
    
 </grammar>

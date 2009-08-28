@@ -2,14 +2,10 @@
 
   <message name="book-query">
     <header name="Library" type="integer"/>
-    <oneOrMore>
-      <choice>
-        <parameter name="title" type="string"/>
-        <group>
-          <parameter name="author" type="string"/>
-        </group>  
-      </choice>
-    </oneOrMore>
+    <zeroOrMore>
+      <parameter name="author" type="string"/>
+    </zeroOrMore>  
+    <parameter name="title" type="string"/>
   </message>
 
   <transformation name="trans-book-query">
