@@ -18,7 +18,7 @@ module Riddl
           end
         end
 
-        def generate_description
+        def generate_description_xml
           @resource.to_xml
         end
         
@@ -40,8 +40,8 @@ module Riddl
               end
             end
           end
-          if mode == :composition
-            res.composition.each do |k,v|
+          if mode == :facade
+            res.facade.each do |k,v|
               puts "  #{k.upcase}:"
               v.each do |r|
                 puts "      #{r.class.name.gsub(/[^\:]+::/,'')}: #{r.visualize}"
@@ -63,16 +63,16 @@ module Riddl
         #}}}
       end
 
-      def description
-        @fac.generate_description
+      def description_xml
+        @fac.generate_description_xml
       end
 
       def visualize_tree_and_layers
         @fac.visualize :layers
       end
 
-      def visualize_tree_and_composition
-        @fac.visualize :composition
+      def visualize_tree_and_facade
+        @fac.visualize :facade
       end
 
       def initialize(riddl)

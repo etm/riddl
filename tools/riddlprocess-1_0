@@ -9,11 +9,15 @@ require ::File::dirname(curpath) + "/../lib/ruby/file/declaration"
 require 'optparse'
 require 'pp'
 
+dowhat = nil
 ARGV.options { |opt|
   opt.summary_indent = ' ' * 2
   opt.banner = "Usage:\n#{opt.summary_indent}#{File.basename($0)} [options] [FILENAME]\n"
   opt.on("Options:")
-  opt.on("--help", "-h", "This text") { puts opt; exit }
+  opt.on("--help", "-h", "This text.") { puts opt; exit }
+  opt.on("--visualize_tree_and_layers", "-l", "Visualize the resource tree and the layers in each resource.") { dowhat = "layers" }
+  opt.on("--visualize_tree_and_facade", "-f", "Visualize the resource tree and the resulting facade for each resource.") { dowhat = "facade" }
+  opt.on("--description", "-d", "Return the XML description for the facade.") { dowhat = "description" }
   opt.on("Filename has to be a declaration.")
   opt.parse!
 }
@@ -33,8 +37,13 @@ unless riddl.validate!
   puts "Does not conform to specification."
   exit
 end
-#}}}
 
 d = riddl.declaration
-#d.visualize_tree_and_layers
-puts d.description
+case dowhat
+  when 'layers':
+    d.visualize_tree_and_layers
+  when 'facade':
+    d.visualize_tree_and_facade
+  when 'description':
+    puts d.description_xml
+end 

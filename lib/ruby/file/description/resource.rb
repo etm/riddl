@@ -1,6 +1,7 @@
 module Riddl
   class File
     class Description
+      
 
       class Resource
         def initialize(path=nil)
@@ -8,7 +9,7 @@ module Riddl
           @path = path
           @resources = {}
           @requests = {}
-          @composition = {}
+          @facade = {}
           #}}}
         end
 
@@ -39,19 +40,24 @@ module Riddl
         def to_xml
           result = ""
           messages = {}
+          names = []
           messages_result = ""
           to_xml_priv(result,messages,0)
           messages.each do |hash,mess|
-            messages_result << mess.content.root.to_s  
+            t = mess.content.dup
+            name = mess.name
+            name += '_' while names.include?(name)
+            t.root.attributes['name'] = name
+            messages_result << t.root.dump + "\n"
           end
-		  messages_result
+          "<description #{Riddl::File::COMMON}>\n\n" +  messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>"
         end
 
         def to_xml_priv(result,messages,level)
-          s = "  " * level
-          t = "  " * (level + 1)
+          s = "  " * (level + 1)
+          t = "  " * (level + 2)
           result << s + "<resource#{@path != '/' && @path != '' ? " relative=\"#{@path}\"" : ''}>\n"
-          @composition.each do |k,v|
+          @facade.each do |k,v|
             v.each do |m|
               if %w{get post put delete}.include?(k)
                 result << t + "<#{k} "
@@ -120,9 +126,9 @@ module Riddl
             case v.size
               when 0:
               when 1:
-                @composition[k] = v[0]
+                @facade[k] = v[0]
               else
-                @composition[k] = compose(v)
+                @facade[k] = compose(v)
             end
           end  
           #}}}
@@ -239,7 +245,7 @@ module Riddl
         private :add_request_pass
         #}}}
 
-        attr_reader :resources,:path,:requests,:composition
+        attr_reader :resources,:path,:requests,:facade
       end
 
     end

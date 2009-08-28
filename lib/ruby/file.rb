@@ -18,6 +18,7 @@ module Riddl
     DECLARATION = "http://riddl.org/ns/declaration/#{VERSION}"
     DESCRIPTION_FILE = "#{::File.dirname(__FILE__)}/ns/description-#{VERSION_MAJOR}_#{VERSION_MINOR}.rng"
     DECLARATION_FILE = "#{::File.dirname(__FILE__)}/ns/declaration-#{VERSION_MAJOR}_#{VERSION_MINOR}.rng"
+    COMMON = "datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"#{DESCRIPTION}\" xmlns:xi=\"http://www.w3.org/2001/XInclude\""
     CHECK = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"><data/></element>"
     #}}}
 
