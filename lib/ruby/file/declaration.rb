@@ -10,11 +10,11 @@ module Riddl
           @resource = Riddl::File::Description::Resource.new("/")
         end
 
-        def add(path)
+        def add_path(path)
           if path.nil? || path == '/'
             @resource
           else
-            @resource.add(path)
+            @resource.add_path(path)
           end
         end
 
@@ -56,7 +56,7 @@ module Riddl
         def compose(res)
           res.compose!
           res.resources.each do |key,r|
-            self.compose!(r)
+            compose(r)
           end
         end
         private :compose
@@ -80,7 +80,7 @@ module Riddl
         @fac = Facade.new
         ### Forward
         riddl.find("/dec:declaration/dec:facade/dec:tile").each do |tile|
-          res = @fac.add(tile.attributes['path'] || '/')
+          res = @fac.add_path(tile.attributes['path'] || '/')
           res.clean! # for overlapping tiles, each tile gets an empty path
           tile.find("dec:layer").each_with_index do |layer,index|
             apply_to = layer.find("dec:apply-to")
@@ -88,10 +88,10 @@ module Riddl
             des = riddl.find("/dec:declaration/dec:interface[@name=\"#{lname}\"]/des:description").first
             desres = des.find("des:resource").first
             if apply_to.empty?
-              res.add(des,desres,"/",index)
+              res.add_description(des,desres,"/",index)
             else
               apply_to.each do |at|
-                res.add(des,desres,at.to_s,index)
+                res.add_description(des,desres,at.to_s,index)
               end
             end
           end

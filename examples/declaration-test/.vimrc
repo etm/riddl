@@ -1,1 +1,1 @@
-map <F10> :!./riddlprocess 1_declaration.xml<CR>
+map <F10> :!./riddlprocess declaration.xml<CR>

@@ -17,7 +17,7 @@
       </layer>
       <layer name="post"/>
     </tile>
-    <!--tile path="/customers">
+    <tile path="/customers">
       <layer name="pre">
         <apply-to>/</apply-to>
         <apply-to>/foo</apply-to>
@@ -27,6 +27,6 @@
         <block method="post" in="a">/foo</block>
       </layer>
       <layer name="post"/>
-    </tile-->
+    </tile>
   </facade>   
 </declaration>  

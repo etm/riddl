@@ -12,18 +12,81 @@ module Riddl
           #}}}
         end
 
-        def add(des,desres,path,index)
+        def add_description(des,desres,path,index)
           #{{{
           res = add_path(path)
-          add_requests(des,desres,index)
+          res.add_requests(des,desres,index)
           desres.find("des:resource").each do |desres|
-            res.apply_to(des,desres,desres.attributes['relative'] || "{}",index)
+            res.add_description(des,desres,desres.attributes['relative'] || "{}",index)
           end
           #}}}
         end
 
+        def add_path(path)
+          #{{{
+          pres = self
+          path.split('/').each do |p|
+            next if p == ""
+            unless pres.resources.has_key?(p)
+              pres.resources[p] = Resource.new(p)
+            end
+            pres = pres.resources[p]
+          end
+          pres
+          #}}}
+        end
+
         def to_xml
-          "hallo"
+          result = ""
+          messages = {}
+          messages_result = ""
+          to_xml_priv(result,messages,0)
+          messages.each do |hash,mess|
+            messages_result << mess.content.root.to_s  
+          end
+		  messages_result
+        end
+
+        def to_xml_priv(result,messages,level)
+          s = "  " * level
+          t = "  " * (level + 1)
+          result << s + "<resource#{@path != '/' && @path != '' ? " relative=\"#{@path}\"" : ''}>\n"
+          @composition.each do |k,v|
+            v.each do |m|
+              if %w{get post put delete}.include?(k)
+                result << t + "<#{k} "
+              else
+                result << t + "<request method=\"#.upcase{k}\" "
+              end  
+              case m
+                when RequestInOut
+                  result << "in=\"#{m.in.name}\""
+                  messages[m.in.hash] = m.in
+                  unless m.out.nil?
+                    result << " out=\"#{m.out.name}\""
+                    messages[m.out.hash] = m.out
+                  end  
+                when RequestStarOut  
+                  result << "in=\"*\""
+                  unless m.out.nil?
+                    result << " out=\"#{m.out.name}\""
+                    messages[m.out.hash] = m.out
+                  end  
+                when RequestPass
+                  result << "pass=\"#{m.pass.name}\""
+                  messages[m.pass.hash] = m.pass
+                when RequestTransformation
+                  result << "transformation=\"#{m.trans.name}\""
+                  messages[m.trans.hash] = m.trans
+              end  
+              result << "/>\n"
+            end  
+          end
+          @resources.each do |k,v|
+            v.to_xml_priv(result,messages,level+1)
+          end
+          ""
+          result << s + "</resource>\n"
         end
 
         def add_requests(des,desres,index)
@@ -50,7 +113,6 @@ module Riddl
           end
           #}}}
         end
-        private :add_requests
 
         def compose!
           #{{{
@@ -65,7 +127,7 @@ module Riddl
           end  
           #}}}
         end
-
+        
         def compose(layers)
           #{{{
           routes = []
@@ -105,6 +167,12 @@ module Riddl
           #}}}
         end
         private :compose
+        
+        def clean!
+          #{{{
+          @resources = {}
+          #}}}
+        end
 
         def traverse_layers(container,path,layers,layer)
           #{{{
@@ -139,23 +207,6 @@ module Riddl
         #}}}
         end
         private :traverse_layers
-
-        def add_path(path)
-          #{{{
-          pres = self
-          path.split('/').each do |p|
-            next if p == ""
-            unless pres.resources.has_key?(p)
-              pres.resources[p] = Resource.new(p)
-            end
-            pres = pres.resources[p]
-          end
-          pres
-          #}}}
-        end
-        private :add_path
-
-        def clean!; @resouces = {}; end
 
         # add requests helper methods
         #{{{
