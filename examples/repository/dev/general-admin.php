@@ -10,7 +10,7 @@
   </head>
   <body>
     <h1>RESCUE Admin</h1>
-    <form enctype="multipart/form-data" name="request-form" method="POST" action="http://localhost/rescue-admin.php">
+    <form enctype="multipart/form-data" name="request-form" method="POST" action="http://localhost/general-admin.php">
       <?php
         global $dom;
         $ok = true;
