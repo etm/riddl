@@ -103,7 +103,7 @@
 
 <!--- Messages at service-detail level -->
   <message name="details-of-service">
-    <parameter name="details-of-services" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="details-of-service" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rngs/details-of-service.rng"/>
     </parameter>
   </message>

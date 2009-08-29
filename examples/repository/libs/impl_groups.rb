@@ -21,7 +21,7 @@ class GroupsGET < Riddl::Implementation
         link_ :rel => 'self', :type => 'application/atom+xml', :href => "#{$url}#{@r[0]}/"
         groups.each do |g|
           entry_ :lang => 'EN' do
-            id_ "#{$url}#{@r[0]}/#{g}/"
+            id_ "#{g}"
             link_ "#{$url}#{@r[0]}/#{g}/"
             updated_ File.mtime("repository/#{@r[0]}/#{g}").xmlschema
           end
