@@ -89,10 +89,10 @@ class RESCUENavTree {
     $xp = new DomXPath($dom);
     $entries = $xp->query($xpQuery); 
 // ------------------------- XPATH
-print_r($entries);
-echo "\n\n\n\n\n//LENGTH: ". $entries->length;
+//print_r($entries);
+//echo "\n\n\n\n\n//LENGTH: ". $entries->length;
     foreach($entries as $entry) {
-echo "\n\n\n\n\n//TAG-NAME: ". $entry->tagName;
+//echo "\n\n\n\n\n//TAG-NAME: ". $entry->tagName;
       if($entry->tagName != "resource")
         $this->generateTreeEntry($parentIndex, $entry->tagName);
     }
