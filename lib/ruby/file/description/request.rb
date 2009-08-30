@@ -28,7 +28,7 @@ module Riddl
           RequestInOut.new(nil,min,mout)
         end
         attr_reader :in, :out
-        def visualize; "in #{@in.name.inspect} out #{@out.name.inspect}"; end
+        def visualize; "in #{@in.name.inspect} out #{@out.nil? ? "NIL" : @out.name.inspect}"; end
         #}}}
       end
 
@@ -74,7 +74,7 @@ module Riddl
           RequestStarOut.new(nil,mout)
         end
         attr_reader :out
-        def visualize; "out #{@out.name.inspect}"; end
+        def visualize; "out #{@out.nil? ? "NIL" : @out.name.inspect}"; end
         #}}}
       end
 

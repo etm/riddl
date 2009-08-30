@@ -10,8 +10,6 @@ module Riddl
           if layer.nil?
             @content = content
           else  
-            p type
-            p name
             @content = layer.find("des:#{type}[@name='#{name}']").first.to_doc
             @content.find("/#{type}/@name").delete_all!
           end  

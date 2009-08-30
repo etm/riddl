@@ -14,11 +14,11 @@
   <resource>
     <get in="hello-list" out="filter-hello-list"/>
     <get pass="*"/>
-    <resource>
+    <!--resource>
       <get pass="*"/>
-      <put pass="*"/> <!-- if put would be removed, put would not occur in final description -->
+      <put pass="*"/>
       <delete in="*"/>
-    </resource>
+    </resource-->
   </resource>  
 
 </description>

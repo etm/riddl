@@ -41,10 +41,15 @@ module Riddl
             end
           end
           if mode == :facade
-            res.facade.each do |k,v|
+            res.composition.each do |k,v|
               puts "  #{k.upcase}:"
               v.each do |r|
-                puts "      #{r.class.name.gsub(/[^\:]+::/,'')}: #{r.visualize}"
+                pp r
+                p "------------------------"
+                puts "    #{r.result.class.name.gsub(/[^\:]+::/,'')}: #{r.result.visualize}"
+                r.route.each do |ritem|
+                  puts "      #{ritem.class.name.gsub(/[^\:]+::/,'')}: #{ritem.visualize}"
+                end unless r.nil?
               end
             end
           end

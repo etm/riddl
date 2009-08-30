@@ -27,11 +27,11 @@
    </message>
  
    <resource>
-     <post in="hello"/>
-     <post in="hello-form"/>
+     <!--post in="hello"/>
+     <post in="hello-form"/-->
      <get in="*" out="hello-list"/>
      <get in="type-html" out="hello-list-html"/> 
-     <resource>
+     <!--resource>
        <get in="*" out="hello"/>
        <put in="hello" out="hello"/>
        <delete in="*"/>
@@ -41,7 +41,7 @@
      </resource>
      <resource relative="hello">
        <post in="hello"/>
-     </resource>
+     </resource-->
    </resource>
    
  </description>
