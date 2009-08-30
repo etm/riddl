@@ -4,11 +4,20 @@ class RESCUENavTree {
   private $rootURI;
   private $target;
   private $arrayIndex = 0;
+  private $description = NULL;
+  private $riddlClient = NULL;
 
   function __construct($id, $uri, $target) {
     $this->id = $id;
     $this->rootURI = $uri;
     $this->target = $target;
+    $this->riddlClient = new RiddlClient($this->rootURI);
+
+    $return = $this->riddlClient->request("GET", $what);
+    $feed = fread($return[0]->value(), $return[0]->size());
+    $this->description = new DomDocument();
+    $this->description->loadXML($feed);
+
   }
 
   function generate() {
@@ -21,8 +30,8 @@ class RESCUENavTree {
 
     $dom = $this->getFeed("groups");
     $entries = $dom->getElementsByTagName("entry");
-    // Create a node named Groups
-    $this->generateTreeEntry(-1, "Rescue");
+    // Create a nodes named RESCUE and groups
+    $this->generateTreeEntry(-1, "RESCUE");
     $this->addSupportedMessages(" ", 0);
     $this->generateTreeEntry(0, "groups");
     $this->generateReposTree("groups/", 2);
@@ -32,28 +41,7 @@ class RESCUENavTree {
     echo "</div>\n";
   }
 
-  private function generateStyle() {
-    echo "<style type=\"text/css\">\n";
-    echo "." . $this->id . " {font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;font-size: 11px;color: #666;white-space: nowrap; }\n";
-    echo "." . $this->id . " img {border: 0px;vertical-align: middle;}\n";
-    echo "." . $this->id . " a {color: #333;text-decoration: none;}\n";
-    echo "." . $this->id . " a:hover, " . $this->id . " a.nodeSel:hover {color: #333; text-decoration: underline;}\n";
-    echo "." . $this->id . " a.nodeSel {background-color: #c0d2ec;}\n";
-    echo "." . $this->id . " a.clip {overflow: hidden;}\n";
-    echo "</style>\n";
-  }
-  private function getFeed($resourcePath) {
-    // Create new RIDDLCLient to receive feed of groups from repository
-    $client = new RiddlClient($this->rootURI);
-    $client->resource($resourcePath);
-    $return = $client->request("GET", $what);
-    $feed = fread($return[0]->value(), $return[0]->size());
-    $dom = new DomDocument();
-    $dom->loadXML($feed);
-    return $dom;
-  }
 
-//-------------------------------------------------
   private function generateReposTree($resourcePath, $parentIndex) {
     $dom = $this->getFeed($resourcePath, $returnParameterName);
     if($dom == null) return;
@@ -64,73 +52,18 @@ class RESCUENavTree {
       $this->generateReposTree($resourcePath . $entry->getElementsByTagName("id")->item(0)->nodeValue . "/", $this->arrayIndex-1);
     }
    }
-/*
-  // rootURI is with the resource groups e.g. http://localhost:9292/
-  private function generateGroups() {
-    $dom = $this->getFeed("groups", "list-of-groups");
-    $entries = $dom->getElementsByTagName("entry");
-    // Create a node named Groups
-    $this->generateTreeEntry(-1, "Rescue");
-    $this->addSupportedMessages(" ", 0);
-    $this->generateTreeEntry(0, "groups");
-    $this->addSupportedMessages("groups/", 2);
-    foreach($entries as $entry) {
-      $name = $entry->getElementsByTagName("id")->item(0)->nodeValue;
-      $this->generateTreeEntry(2, $name);
-      $this->generateSubgroups("groups/" . $entry->getElementsByTagName("id")->item(0)->nodeValue . "/", $this->arrayIndex-1);
-    } 
-  }
-
-  private function generateSubgroups($resourcePath, $parentIndex) {
-    $dom = $this->getFeed($resourcePath, "list-of-subgroups");
-    $entries = $dom->getElementsByTagName("entry");
-    $this->addSupportedMessages($resourcePath, $parentIndex);
-    foreach($entries as $entry) {
-      $this->generateTreeEntry($parentIndex, $entry->getElementsByTagName("id")->item(0)->nodeValue);
-      $this->generateServices($resourcePath . $entry->getElementsByTagName("id")->item(0)->nodeValue . "/", $this->arrayIndex-1);
-    }
-  }
-
-
-  private function generateServices($resourcePath, $parentIndex) {
-    $dom = $this->getFeed($resourcePath, "list-of-services");
-    $entries = $dom->getElementsByTagName("entry");
-    $this->addSupportedMessages($resourcePath, $parentIndex);
-    foreach($entries as $entry) {
-      $this->generateTreeEntry($parentIndex, $entry->getElementsByTagName("id")->item(0)->nodeValue, $this->rootURI . $resourcePath  . $entry->getElementsByTagName("id")->item(0)->nodeValue);
-      $this->generateServiceDetails($resourcePath . $entry->getElementsByTagName("id")->item(0)->nodeValue . "/", $this->arrayIndex-1);
-    }
-  }
-
-  private function generateServiceDetails($resourcePath, $parentIndex) {
-    $this->addSupportedMessages($resourcePath, $this->arrayIndex-1);
-  }
-*/
-
-  private function generateTreeEntry($parentIndex, $name, $link = "") {
-    echo $this->id . ".add(" . ($this->arrayIndex) . "," . $parentIndex . ",'" . $name . "','" . $link . "');\n";
-    $this->arrayIndex++;
-  }
 
   private function addSupportedMessages($resourcePath, $parentIndex) {
-    $resourceLevel = substr_count($resourcePath, "/");
-    // Create new RIDDLCLient to receive feed of groups from repository
-    $client = new RiddlClient($this->rootURI);
-    $return = $client->request("GET", $what);
-    foreach($return as $p) {
-      if($p->name() == "description")
-        $feed = fread($p->value(), $p->size());
-    }
-    $dom = new DomDocument();
-    $dom->loadXML($feed);
     $i = 0;
+    $resourceLevel = substr_count($resourcePath, "/");
     $xpQuery = "/des:description/des:resource";
     while($i < $resourceLevel) {
       $xpQuery .= "/des:resource";
       $i++;
     }
     $xpQuery .= "/*";
-    $xp = new DomXPath($dom);
+
+    $xp = new DomXPath($this->description);
     $xp->registerNamespace("des", "http://riddl.org/ns/description/1.0");
     $entries = $xp->query($xpQuery); 
     foreach($entries as $entry) {
@@ -161,6 +94,32 @@ class RESCUENavTree {
         $this->generateTreeEntry($parentIndex, $name, $link);
       }
     }
+  }
+
+  private function getFeed($resourcePath) {
+    $this->riddlClient->resource($resourcePath);
+    $return = $this->riddlClient->request("GET", $what);
+    $feed = fread($return[0]->value(), $return[0]->size());
+    $dom = new DomDocument();
+    $dom->loadXML($feed);
+    return $dom;
+  }
+
+
+  private function generateTreeEntry($parentIndex, $name, $link = "") {
+    echo $this->id . ".add(" . ($this->arrayIndex) . "," . $parentIndex . ",'" . $name . "','" . $link . "');\n";
+    $this->arrayIndex++;
+  }
+
+  private function generateStyle() {
+    echo "<style type=\"text/css\">\n";
+    echo "." . $this->id . " {font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;font-size: 11px;color: #666;white-space: nowrap; }\n";
+    echo "." . $this->id . " img {border: 0px;vertical-align: middle;}\n";
+    echo "." . $this->id . " a {color: #333;text-decoration: none;}\n";
+    echo "." . $this->id . " a:hover, " . $this->id . " a.nodeSel:hover {color: #333; text-decoration: underline;}\n";
+    echo "." . $this->id . " a.nodeSel {background-color: #c0d2ec;}\n";
+    echo "." . $this->id . " a.clip {overflow: hidden;}\n";
+    echo "</style>\n";
   }
 
 
