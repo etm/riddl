@@ -18,7 +18,15 @@ class RESCUENavTree {
     echo "<script type=\"text/javascript\">\n";
     echo "var " . $this->id . " = new dTree('". $this->id . "');\n";
     echo $this->id . ".config.target = \"" . $this->target . "\";\n";
-    $this->generateGroups();
+
+    $dom = $this->getFeed("groups", "list-of-groups");
+    $entries = $dom->getElementsByTagName("entry");
+    // Create a node named Groups
+    $this->generateTreeEntry(-1, "Rescue");
+    $this->addSupportedMessages(" ", 0);
+    $this->generateTreeEntry(0, "groups");
+    $this->generateReposTree("groups/", 2);
+
     echo "document.write(" . $this->id . ");\n";
     echo "</script>\n";
     echo "</div>\n";
@@ -34,43 +42,52 @@ class RESCUENavTree {
     echo "." . $this->id . " a.clip {overflow: hidden;}\n";
     echo "</style>\n";
   }
-  private function getFeed($nameOfResource, $nameOfParam) {
+  private function getFeed($resourcePath) {
     // Create new RIDDLCLient to receive feed of groups from repository
     $client = new RiddlClient($this->rootURI);
-    $client->resource($nameOfResource);
+    $client->resource($resourcePath);
     $return = $client->request("GET", $what);
-    foreach($return as $p) {
-      if($p->name() == $nameOfParam)
-        $feed = fread($p->value(), $p->size());
-    }
+    $feed = fread($return[0]->value(), $return[0]->size());
     $dom = new DomDocument();
     $dom->loadXML($feed);
     return $dom;
-  }  
+  }
 
+//-------------------------------------------------
+  private function generateReposTree($resourcePath, $parentIndex) {
+    $dom = $this->getFeed($resourcePath, $returnParameterName);
+    if($dom == null) return;
+    $entries = $dom->getElementsByTagName("entry");
+    $this->addSupportedMessages($resourcePath, $parentIndex);
+    foreach($entries as $entry) {
+      $this->generateTreeEntry($parentIndex, $entry->getElementsByTagName("id")->item(0)->nodeValue);
+      $this->generateReposTree($resourcePath . $entry->getElementsByTagName("id")->item(0)->nodeValue . "/", $this->arrayIndex-1);
+    }
+   }
+/*
   // rootURI is with the resource groups e.g. http://localhost:9292/
   private function generateGroups() {
     $dom = $this->getFeed("groups", "list-of-groups");
     $entries = $dom->getElementsByTagName("entry");
     // Create a node named Groups
     $this->generateTreeEntry(-1, "Rescue");
-    $this->addSupportedMessages("/", 0);
-    $this->generateTreeEntry(0, "Groups");
-    $this->addSupportedMessages("/groups/", 2);
+    $this->addSupportedMessages(" ", 0);
+    $this->generateTreeEntry(0, "groups");
+    $this->addSupportedMessages("groups/", 2);
     foreach($entries as $entry) {
       $name = $entry->getElementsByTagName("id")->item(0)->nodeValue;
       $this->generateTreeEntry(2, $name);
-      $this->generateSubgroups("/groups/" . $entry->getElementsByTagName("id")->item(0)->nodeValue, $this->arrayIndex-1);
+      $this->generateSubgroups("groups/" . $entry->getElementsByTagName("id")->item(0)->nodeValue . "/", $this->arrayIndex-1);
     } 
   }
 
   private function generateSubgroups($resourcePath, $parentIndex) {
     $dom = $this->getFeed($resourcePath, "list-of-subgroups");
     $entries = $dom->getElementsByTagName("entry");
-    $this->addSupportedMessages("/". $resourcePath, $parentIndex);
+    $this->addSupportedMessages($resourcePath, $parentIndex);
     foreach($entries as $entry) {
       $this->generateTreeEntry($parentIndex, $entry->getElementsByTagName("id")->item(0)->nodeValue);
-      $this->generateServices($resourcePath . "/" . $entry->getElementsByTagName("id")->item(0)->nodeValue, $this->arrayIndex-1);
+      $this->generateServices($resourcePath . $entry->getElementsByTagName("id")->item(0)->nodeValue . "/", $this->arrayIndex-1);
     }
   }
 
@@ -78,20 +95,17 @@ class RESCUENavTree {
   private function generateServices($resourcePath, $parentIndex) {
     $dom = $this->getFeed($resourcePath, "list-of-services");
     $entries = $dom->getElementsByTagName("entry");
-    $this->addSupportedMessages($resourcePath . "/" , $parentIndex);
+    $this->addSupportedMessages($resourcePath, $parentIndex);
     foreach($entries as $entry) {
-      $this->generateTreeEntry($parentIndex, $entry->getElementsByTagName("id")->item(0)->nodeValue, $this->rootURI . $resourcePath . "/" . $entry->getElementsByTagName("id")->item(0)->nodeValue);
-      $this->generateServiceDetails($resourcePath . "/" . $entry->getElementsByTagName("id")->item(0)->nodeValue, $this->arrayIndex-1);
+      $this->generateTreeEntry($parentIndex, $entry->getElementsByTagName("id")->item(0)->nodeValue, $this->rootURI . $resourcePath  . $entry->getElementsByTagName("id")->item(0)->nodeValue);
+      $this->generateServiceDetails($resourcePath . $entry->getElementsByTagName("id")->item(0)->nodeValue . "/", $this->arrayIndex-1);
     }
   }
 
   private function generateServiceDetails($resourcePath, $parentIndex) {
-//    $dom = $this->getFeed($resourcePath, "details-of-service");
-    $this->addSupportedMessages("/" . $resourcePath, $this->arrayIndex-1);
-//    $this->generateTreeEntry($parentIndex, "URI", $dom->getElementsByTagName("URI")->item(0)->nodeValue);
-//    $this->generateTreeEntry($parentIndex, "staticProperties", $dom->getElementsByTagName("staticProperties")->item(0)->nodeValue);
+    $this->addSupportedMessages($resourcePath, $this->arrayIndex-1);
   }
-
+*/
 
   private function generateTreeEntry($parentIndex, $name, $link = "") {
     echo $this->id . ".add(" . ($this->arrayIndex) . "," . $parentIndex . ",'" . $name . "','" . $link . "');\n";
@@ -110,7 +124,7 @@ class RESCUENavTree {
     $dom = new DomDocument();
     $dom->loadXML($feed);
     $i = 0;
-    $xpQuery = "/des:description";
+    $xpQuery = "/des:description/des:resource";
     while($i < $resourceLevel) {
       $xpQuery .= "/des:resource";
       $i++;
@@ -121,24 +135,28 @@ class RESCUENavTree {
     $entries = $xp->query($xpQuery); 
     foreach($entries as $entry) {
       if($entry->tagName != "resource") {
-        $name = strtoupper($entry->tagName) . " (" . $entry->getAttribute("in") . " -> " . $entry->getAttribute("out") . ")";
+        if(($entry->getAttribute("in") == "*") && ($entry->hasAttribute("out") == true)) {
+          $name = strtoupper($entry->tagName) . " (Out: " . $entry->getAttribute("out") . ")";
+        } elseif(($entry->getAttribute("in") != "*") && ($entry->hasAttribute("out") == false)) {
+          $name = strtoupper($entry->tagName) . " (In: " . $entry->getAttribute("in") . ")";
+        } elseif(($entry->getAttribute("in") == "*") && ($entry->hasAttribute("out") == false)) {
+          $name = strtoupper($entry->tagName);
+        } else {
+          $name = strtoupper($entry->tagName) . " (" . $entry->getAttribute("in") . " -> " . $entry->getAttribute("out") .")";
+        }
         if($entry->tagName == "get") {
           if($entry->getAttribute("in") == "*") {
             $link = $this->rootURI . $resourcePath;
           } else {
-            $dom2 = new DomDocument();
-            $dom2->loadXML($feed);
-            $xp2 = new DomXPath($dom2);
-            $xp2->registerNamespace("des", "http://riddl.org/ns/description/1.0");
-            $xpQuery2 = "/des:description/des:message[@name = \"" . $entry->getAttribute("in") . "\"]/des:parameter[@name]";
-            $message = $xp->query($xpQuery2);
-            $link = $this->rootURI . $resourcePath . "?";// . $message->item(0)->nodeValue;
-echo "\n\n\n//QUERY: ". $xpQuery2;
-print_r($message);
-echo "\n\n\n//MESSAGE: ". $message->item(0)->nodeValue;
+            $xpQuery = "/des:description/des:message[@name = \"" . $entry->getAttribute("in") . "\"]/des:parameter[@name]";
+            $message = $xp->query($xpQuery);
+            $link = $this->rootURI . $resourcePath . "?";
+            foreach($message as $m) {
+              $link .= $m->getAttribute('name') . "&";
+            }
           }
         } else {
-          $link = $this->rootURI . $resourcePath . "?method=" . $entry->tagName . "&message=" . $entry->getAttribute("in");
+          $link = "create-form-by-message.php" . "?resource=". $resourcePath . "&method=" . $entry->tagName . "&message=" . $entry->getAttribute("in");
         }
         $this->generateTreeEntry($parentIndex, $name, $link);
       }
