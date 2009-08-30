@@ -21,7 +21,7 @@ module Riddl
             @out = mout
           else
             @in = Riddl::File::Description::Message.new(des,min)
-            @out = Riddl::File::Description::Message.new(des,mout)
+            @out = mout.nil? ? nil : Riddl::File::Description::Message.new(des,mout)
           end
         end
         def self.new_from_message(min,mout)
@@ -67,7 +67,7 @@ module Riddl
           if des.nil?
             @out = mout
           else
-            @out = Riddl::File::Description::Message.new(des,mout)
+            @out = mout.nil? ? nil : Riddl::File::Description::Message.new(des,mout)
           end  
         end
         def self.new_from_message(mout)
