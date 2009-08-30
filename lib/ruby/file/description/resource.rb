@@ -156,19 +156,25 @@ module Riddl
             end
           end
           routes.map do |r|
-            if r.first.respond_to?(:in) && r.last.respond_to?(:out)
-              #1: responds first in + last out -> new InOut
-              RequestInOut.new_from_message(r.first.in,r.last.out)
-            elsif r.last.respond_to?(:out) && !r.last.out.nil?
-              #2: responds last out only -> new StarOut
-              RequestStarOut.new_from_message(r.last.out)
-            elsif r.first.class == RequestTransformation && r.last.class == RequestTransformation
-              #3: first transform + last transform -> merge transformations
-              RequestTransformation.new_from_transformation(r.first.trans,r.last.trans)
-            elsif r.last.class == RequestPass
-              #4: last pass -> remove last until #1 or #2 
-              raise "TODO"
-            end
+            begin
+              success = true
+              if r.first.respond_to?(:in) && r.last.respond_to?(:out)
+                #1: responds first in + last out -> new InOut
+                RequestInOut.new_from_message(r.first.in,r.last.out)
+              elsif r.last.respond_to?(:out) && !r.last.out.nil?
+                #2: responds last out only -> new StarOut
+                RequestStarOut.new_from_message(r.last.out)
+              elsif r.first.class == RequestTransformation && r.last.class == RequestTransformation
+                #3: first transform + last transform -> merge transformations
+                RequestTransformation.new_from_transformation(r.first.trans,r.last.trans)
+              elsif r.last.class == RequestPass
+                #4: last pass -> remove last until #1 or #2 or size == 1
+                if r.size > 1
+                  r.pop
+                  success = false
+                end  
+              end
+            end while !success
           end
           #}}}
         end
