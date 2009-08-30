@@ -36,7 +36,7 @@ class SubgroupsGET < Riddl::Implementation
         end
         groups.each do |g|
           entry_ :lang => 'EN' do
-            id_ "#{$url}#{@r[0]}/#{@r.last}/#{g}/"
+            id_ "#{g}"
             link_ "#{$url}#{@r[0]}/#{@r.last}/#{g}/"
             updated_ File.mtime("repository/#{@r[0]}/#{@r.last}/#{g}").xmlschema
           end
