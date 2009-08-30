@@ -19,7 +19,7 @@ class RESCUENavTree {
     echo "var " . $this->id . " = new dTree('". $this->id . "');\n";
     echo $this->id . ".config.target = \"" . $this->target . "\";\n";
 
-    $dom = $this->getFeed("groups", "list-of-groups");
+    $dom = $this->getFeed("groups");
     $entries = $dom->getElementsByTagName("entry");
     // Create a node named Groups
     $this->generateTreeEntry(-1, "Rescue");
