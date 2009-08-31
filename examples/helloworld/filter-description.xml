@@ -17,7 +17,6 @@
     <resource>
       <get pass="*"/>
       <put pass="*"/>
-      <delete in="*"/>
     </resource>
   </resource>  
 

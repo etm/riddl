@@ -130,7 +130,7 @@ module Riddl
             case v.size
               when 0:
               when 1:
-                @composition[k] = Composition.new(nil,v[0])
+                @composition[k] = compose_plain(v[0])
               else
                 @composition[k] = compose(k,v)
             end
@@ -188,6 +188,13 @@ module Riddl
           #}}}
         end
         private :compose
+
+        def compose_plain(requests)
+          requests.map do |ret|
+            Composition.new(nil,ret)
+          end  
+        end
+        private :compose_plain
         
         def clean!
           #{{{

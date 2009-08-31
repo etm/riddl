@@ -10,7 +10,7 @@
     <tile>
       <layer name="main"/>
     </tile>
-    <tile path="/customers/{}">
+    <tile path="/customers/{}/images">
       <layer name="addon"/>
     </tile>
   </facade>  

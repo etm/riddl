@@ -5,7 +5,7 @@ module Riddl
     class Declaration
 
       class Facade
-        #{{{
+        #{{
         def initialize
           @resource = Riddl::File::Description::Resource.new("/")
         end
@@ -47,7 +47,7 @@ module Riddl
                 puts "    #{r.result.class.name.gsub(/[^\:]+::/,'')}: #{r.result.visualize}"
                 r.route.each do |ritem|
                   puts "      #{ritem.class.name.gsub(/[^\:]+::/,'')}: #{ritem.visualize}"
-                end unless r.nil?
+                end unless r.route.nil?
               end
             end
           end
