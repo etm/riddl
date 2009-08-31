@@ -2,23 +2,23 @@
 
   <message name="hello-list">
     <parameter name="hello-list" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <xi:include href="hello-list.rng"/>
+      <xi:include href="rngs/hello-list.rng"/>
     </parameter>
   </message>
   <message name="filter-hello-list">
     <parameter name="filter-hello-list" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <xi:include href="filter-hello-list.rng"/>
+      <xi:include href="rngs/filter-hello-list.rng"/>
     </parameter>
   </message>
 
   <resource>
     <get in="hello-list" out="filter-hello-list"/>
     <get pass="*"/>
-    <!--resource>
+    <resource>
       <get pass="*"/>
       <put pass="*"/>
       <delete in="*"/>
-    </resource-->
+    </resource>
   </resource>  
 
 </description>

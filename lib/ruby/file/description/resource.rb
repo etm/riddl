@@ -61,6 +61,7 @@ module Riddl
           result << s + "<resource#{@path != '/' && @path != '' ? " relative=\"#{@path}\"" : ''}>\n"
           @composition.each do |k,v|
             v.each do |m|
+              m = m.result
               if %w{get post put delete}.include?(k)
                 result << t + "<#{k} "
               else
@@ -166,14 +167,14 @@ module Riddl
               if r.first.respond_to?(:in) && teh_last.respond_to?(:out)
                 #1: responds first in + last out -> new InOut
                 ret = RequestInOut.new_from_message(r.first.in,teh_last.out)
-              elsif teh_last.respond_to?(:out)
-                #2: responds last out only -> new StarOut
-                ret = RequestStarOut.new_from_message(teh_last.out)
-              elsif r.first.class == RequestTransformation && teh_last.class == RequestTransformation
-                #3: first transform + last transform -> merge transformations
+              elsif r.first.class == RequestTransformation && teh_last.class == RequestTransformation && teh_last.out.nil?
+                #2: first transform + last transform -> merge transformations
                 ret = RequestTransformation.new_from_transformation(r.first.trans,teh_last.trans)
+              elsif teh_last.respond_to?(:out)
+                #3: responds last out only -> new StarOut
+                ret = RequestStarOut.new_from_message(teh_last.out)
               elsif teh_last.class == RequestPass
-                #4: last pass -> remove last until #1 or #2 or size == 1
+                #4: last pass -> remove last until #1 or #2 or #3 or size == 1
                 if r.size > 1
                   teh_last = r[-2]
                   success = false
@@ -213,9 +214,19 @@ module Riddl
               traverse_layers(container,path,layers,layer+1)
               return
             end
+            # Find all possible transformations and apply them
+            layers[layer].find_all{ |l| l.class == RequestTransformation }.each_with_index do |r,num|
+              if num > 0
+                path = current_path.dup
+                container << path
+              end  
+              path << r.transform(current)
+              r.used = true
+              traverse_layers(container,path,layers,layer+1)
+            end
             # Find all in=* matches, they are all potential matches, even when used
-            layers[layer].find_all{ |l| l.class == RequestPass || l.class == RequestStarOut || l.class == RequestTransformation }.each do |r|
-              num = add_to_path_and_split(container,path,layers,layer,num||0,current_path,r)
+            layers[layer].find_all{ |l| l.class == RequestPass || l.class == RequestStarOut }.each_with_index do |r,num|
+              add_to_path_and_split(container,path,layers,layer,num,current_path,r)
             end
             return
           end  
@@ -223,8 +234,8 @@ module Riddl
           if (current.class == RequestTransformation && current.out.nil?) ||
               current.class == RequestPass
             # all unused RequestInOut and all others (even if used)
-            layers[layer].find_all{|l| (l.class == RequestInOut && !l.used?) || (l.class != RequestInOut) }.each do |r|
-              num = add_to_path_and_split(container,path,layers,layer,num||0,current_path,r)
+            layers[layer].find_all{|l| (l.class == RequestInOut && !l.used?) || (l.class != RequestInOut) }.each_with_index do |r,num|
+              add_to_path_and_split(container,path,layers,layer,num,current_path,r)
             end
           end  
         #}}}
@@ -240,7 +251,6 @@ module Riddl
           path << r
           path.last.used = true
           traverse_layers(container,path,layers,layer+1)
-          num + 1
           #}}}
         end
         private :add_to_path_and_split
@@ -280,12 +290,6 @@ module Riddl
       end
 
       Composition = Struct.new(:route,:result)
-      #class Composition
-      #  def initialize(route,result)
-      #    @route = route
-      #    @result 
-      #  end
-      #end
     end
   end
 end

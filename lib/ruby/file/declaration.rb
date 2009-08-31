@@ -43,12 +43,12 @@ module Riddl
           if mode == :facade
             res.composition.each do |k,v|
               puts "  #{k.upcase}:"
-              #v.each do |r|
-              #  puts "    #{r.result.class.name.gsub(/[^\:]+::/,'')}: #{r.result.visualize}"
-              #  r.route.each do |ritem|
-              #    puts "      #{ritem.class.name.gsub(/[^\:]+::/,'')}: #{ritem.visualize}"
-              #  end unless r.nil?
-              #end
+              v.each do |r|
+                puts "    #{r.result.class.name.gsub(/[^\:]+::/,'')}: #{r.result.visualize}"
+                r.route.each do |ritem|
+                  puts "      #{ritem.class.name.gsub(/[^\:]+::/,'')}: #{ritem.visualize}"
+                end unless r.nil?
+              end
             end
           end
           res.resources.each do |key,r|

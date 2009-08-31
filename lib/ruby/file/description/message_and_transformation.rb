@@ -51,9 +51,24 @@ module Riddl
             trans.content.root.children.each do |e|
               case e.name.name
                 when 'add_header':
+                  raise "TODO"
                 when 'add_before':
+                  raise "TODO"
                 when 'add_after':
+                  raise "TODO"
                 when 'add_as_first':
+                  t = ret.content.root 
+                  n = t.find("header[last()]").first
+                  if n.nil?
+                    m = t.find("*[not(header)]").first
+                    if m.nil?
+                      t.add(e.children)
+                    else  
+                      m.add_before(e.children)
+                    end
+                  else  
+                    n.add_after(e.children)
+                  end  
                 when 'add_as_last':
                   ret.content.root.add(e.children)
                   ret.update_hash!
