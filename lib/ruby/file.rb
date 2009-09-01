@@ -52,7 +52,7 @@ module Riddl
         @doc.find(tpath + "[@pass and not(@pass='*')]").each do |o|
           return o.attributes['pass'], o.attributes['pass'] if mp.check(o.attributes['pass'])
         end
-        @doc.find(tpath + "[@in and @in='*']").each do
+        @doc.find(tpath + "[@in and @in='*']").each do |o|
           return "*", o.attributes['out']
         end
         @doc.find(tpath + "[@add or @remove]").each do

@@ -1,5 +1,6 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" 
              xmlns="http://riddl.org/ns/description/1.0" 
+             xmlns:ann="http://riddl.org/ns/annotation/1.0" 
              xmlns:xi="http://www.w3.org/2001/XInclude">
 
 <!--{{{-->
@@ -110,13 +111,15 @@
 <!--}}}-->
 
   <resource>
-    <get in="*" out="description"/>
+    <request method="riddl" in="*" out="description"/>
     <resource relative="groups">
       <get in="*" out="list-of-groups"/>
       <post in="create-group"/>
 
       <resource> <!-- Dynamically: name of the group -->
-        <get in="properties-of-group-request" out="properties-of-group-response"/>
+        <get in="properties-of-group-request" out="properties-of-group-response">
+          <ann:label>bla</ann:label>
+        </get>
         <get in="query-input-of-group-request" out="query-input-of-group-response"/>
         <get in="query-output-of-group-request" out="query-output-of-group-response"/>
         <get in="invoke-input-of-group-request" out="invoke-input-of-group-response"/>

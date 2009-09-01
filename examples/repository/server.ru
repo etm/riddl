@@ -19,8 +19,8 @@ run(
     process_out false
     
     on resource do
-        p 'Processing description ....' if method :get => '*'
-        run RootGET if method :get => '*'
+        p 'Processing description ....' if method :riddl => '*'
+        run RootGET if method :riddl => '*'
       
       on resource 'groups' do
         # Generating the ATOM feed with groups

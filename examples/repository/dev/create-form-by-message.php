@@ -63,7 +63,7 @@
 
     // Create new RIDDLCLient to receive feed of groups from repository
     $client = new RiddlClient("http://localhost:9292/");
-    $return = $client->request("GET", $what);
+    $return = $client->request("RIDDL", $what);
     $description = fread($return[0]->value(), $return[0]->size());
     $dom = new DomDocument();
     $dom->loadXML($description);

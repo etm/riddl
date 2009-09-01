@@ -13,7 +13,7 @@ class RESCUENavTree {
     $this->target = $target;
     $this->riddlClient = new RiddlClient($this->rootURI);
 
-    $return = $this->riddlClient->request("GET", $what);
+    $return = $this->riddlClient->request("RIDDL", $what);
     $feed = fread($return[0]->value(), $return[0]->size());
     $this->description = new DomDocument();
     $this->description->loadXML($feed);

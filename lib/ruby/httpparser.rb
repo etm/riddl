@@ -97,8 +97,8 @@ module Riddl
 
           c = input.read(bufsize < content_length ? bufsize : content_length)
           raise EOFError, "bad content body"  if c.nil? || c.empty?
-          buf << c
           content_length -= c.size
+          buf << c
         end
 
         # Save the rest.
@@ -155,6 +155,14 @@ module Riddl
 
     def initialize(query_string,input,content_type,content_length,content_disposition,content_id)
       #{{{
+      # rewind because in some cases it is not at start (when multipart without length)
+      begin
+        input.rewind if input.respond_to?(:rewind)
+      rescue Errno::ESPIPE
+        # Handles exceptions raised by input streams that cannot be rewound
+        # such as when using plain CGI under Apache
+      end
+
       media_type = content_type && content_type.split(/\s*[;,]\s*/, 2).first.downcase
       @params = []
       parse_nested_query(query_string,:query)
