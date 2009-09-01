@@ -4,6 +4,7 @@
   require_once($includes . "/header.php");
   require_once($includes . "/httpgenerator.php");
   require_once($includes . "/httpparser.php");
+  require_once($includes . "/clientresponse.php");
 
   class RiddlClient {
     private $EOL = "\r\n";
@@ -78,6 +79,8 @@
       fclose($sock);
       rewind($body);
 
+      preg_match("/HTTP\/[\d\.]+\s+(\d+)/i", $headers, $matches);
+      $code = $matches[1];
       preg_match("/Content-Disposition: (.*)/i", $headers, $matches);
       $content_disposition = $matches[1];
       preg_match("/Content-Type: (.*)/i", $headers, $matches);
@@ -88,7 +91,7 @@
       $content_length = $matches[1];
 
       $ret = new RiddlHttpParser(NULL,$body,$content_type,$content_length,$content_disposition,$content_id);
-      return $ret->params();
+      return new RiddlClientResponse($code,$ret->params());
     }
   }
 
