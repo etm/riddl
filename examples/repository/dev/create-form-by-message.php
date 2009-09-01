@@ -121,10 +121,11 @@
     $client = new RiddlClient("http://localhost:9292/");
     $client->resource($_POST['rescue:resource']);
     $return = $client->request($_POST['rescue:method'], $what);
-
+     
 
     echo "\n<table>";
-    foreach($return as $p) {
+    $params = $return->parameters();
+    foreach($params as $p) {
       echo "\n<tr><td><h3>Parameter with name: " . $p->name() . "\n</h3></td></tr>";
       if(get_class($p) == "RiddlParameterSimple") {
          echo "\n<tr><td>Value: " . $p->value() . "</td></tr>";
