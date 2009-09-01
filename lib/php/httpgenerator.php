@@ -45,7 +45,7 @@
         }
         $this->critical_eol();
         if (is_resource($r->value()) && (get_resource_type($r->value()) == 'file')) {
-          $this->copy_content($r->value());
+          $this->copy_content($r->value(),$this->sock);
         } elseif (is_string($r->value())) {
           fwrite($this->sock, $r->value());
         }
@@ -55,34 +55,39 @@
 
     private function multipart() {
       $this->set_header("Content-type","multipart/mixed; boundary=\"" . $this->BOUNDARY . "\"");
-      $this->critical_eol();
+      $ret = tmpfile();
       foreach($this->params as $r) {
         if (is_a($r,'RiddlParameterSimple')) {
-          fwrite($this->sock, "--" . $this->BOUNDARY . $this->EOL);
-          fwrite($this->sock, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"" . $this->EOL);
-          fwrite($this->sock, $this->EOL);
-          fwrite($this->sock, $r->value());
-          fwrite($this->sock, $this->EOL);
+          fwrite($ret, "--" . $this->BOUNDARY . $this->EOL);
+          fwrite($ret, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"" . $this->EOL);
+          fwrite($ret, $this->EOL);
+          fwrite($ret, $r->value());
+          fwrite($ret, $this->EOL);
         } elseif (is_a($r,'RiddlParameterComplex')) {
-          fwrite($this->sock, "--" . $this->BOUNDARY . $this->EOL);
-          fwrite($this->sock, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"");
+          fwrite($ret, "--" . $this->BOUNDARY . $this->EOL);
+          fwrite($ret, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"");
           if (is_null($r->filename())) {
-            fwrite($this->sock, $this->EOL);
+            fwrite($ret, $this->EOL);
           } else {
-            fwrite($this->sock, "; filename=\"" . $r->filename() . "\"" . $this->EOL);
+            fwrite($ret, "; filename=\"" . $r->filename() . "\"" . $this->EOL);
           }
-          fwrite($this->sock, "Content-Transfer-Encoding: binary" . $this->EOL);
-          fwrite($this->sock, "Content-type: " . $r->mimetype() . $this->EOL);
-          fwrite($this->sock, $this->EOL);
+          fwrite($ret, "Content-Transfer-Encoding: binary" . $this->EOL);
+          fwrite($ret, "Content-type: " . $r->mimetype() . $this->EOL);
+          fwrite($ret, $this->EOL);
           if (is_resource($r->value()) && (get_resource_type($r->value()) == 'file')) {
-            $this->copy_content($r->value());
+            $this->copy_content($r->value(),$ret);
           } elseif (is_string($r->value())) {
-            fwrite($this->sock, $r->value());
+            fwrite($ret, $r->value());
           }
-          fwrite($this->sock, $this->EOL);
+          fwrite($ret, $this->EOL);
         }  
       }
-      fwrite($this->sock, "--" . $this->BOUNDARY . $this->EOL);
+      fwrite($ret, "--" . $this->BOUNDARY . $this->EOL);
+      $this->set_header("Content-length",ftell($ret));
+
+      $this->critical_eol();
+      rewind($ret);
+      $this->copy_content($ret,$this->sock);
     }
 
     private function critical_eol() {
@@ -99,9 +104,9 @@
       }
     }
 
-    private function copy_content($handle) {
+    private function copy_content($handle,$ret) {
       while (!feof($handle)) {
-        fwrite($this->sock, fread($handle, $this->BUFFERSIZE));
+        fwrite($ret, fread($handle, $this->BUFFERSIZE));
       }
     }
     
