@@ -64,7 +64,8 @@
     // Create new RIDDLCLient to receive feed of groups from repository
     $client = new RiddlClient("http://localhost:9292/");
     $return = $client->request("RIDDL", $what);
-    $description = fread($return[0]->value(), $return[0]->size());
+    $params = $return->parameters();
+    $description = fread($params[0]->value(), $params[0]->size());
     $dom = new DomDocument();
     $dom->loadXML($description);
     $xpQuery = "/des:description/des:message[@name = \"" . $message . "\"]/*";
@@ -121,7 +122,6 @@
     $client->resource($_POST['rescue:resource']);
     $return = $client->request($_POST['rescue:method'], $what);
 
-print_r($return);
 
     echo "\n<table>";
     foreach($return as $p) {
