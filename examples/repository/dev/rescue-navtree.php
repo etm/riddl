@@ -15,6 +15,7 @@ class RESCUENavTree {
 
     $return = $this->riddlClient->request("RIDDL", $what);
     $params = $return->parameters();
+    print $return->status();
     $feed = fread($params[0]->value(), $params[0]->size());
     $this->description = new DomDocument();
     $this->description->loadXML($feed);
