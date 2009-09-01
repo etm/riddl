@@ -121,7 +121,7 @@
     $client = new RiddlClient("http://localhost:9292/");
     $client->resource($_POST['rescue:resource']);
     $return = $client->request($_POST['rescue:method'], $what);
-     
+    echo "\nReturn finished with status-code: " . $return->status() . "<br/>"; 
 
     echo "\n<table>";
     $params = $return->parameters();
