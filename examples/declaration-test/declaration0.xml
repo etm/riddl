@@ -17,16 +17,5 @@
       </layer>
       <layer name="post"/>
     </tile>
-    <!--tile path="/customers">
-      <layer name="pre">
-        <apply-to>/</apply-to>
-        <apply-to>/foo</apply-to>
-        <apply-to>/foo/bar</apply-to>
-      </layer>
-      <layer name="main">
-        <block method="post" in="a">/foo</block>
-      </layer>
-      <layer name="post"/>
-    </tile-->
   </facade>   
 </declaration>  
