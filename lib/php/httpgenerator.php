@@ -23,6 +23,8 @@
         $this->body($this->params);
       } elseif (is_array($this->params) && count($this->params) > 1) {
         $this->multipart();
+      } else {
+        $this->set_header("Content-length","0");
       }
       $this->critical_eol();
     }

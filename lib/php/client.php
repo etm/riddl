@@ -63,7 +63,7 @@
         $sock = fopen($this->debug,'w');
       }
 
-      fwrite($sock, $type . " " . $urlp['path'] . " HTTP/1.0" . $this->EOL);
+      fwrite($sock, $type . " " . trim($urlp['path']) . " HTTP/1.1" . $this->EOL);
       fwrite($sock, "Host: " . $urlp['host'] . $this->EOL);
       $g = new RiddlHttpGenerator($headers,$params,$sock,'socket');
       $g->generate();
