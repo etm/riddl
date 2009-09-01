@@ -91,7 +91,13 @@ class RESCUENavTree {
             }
           }
         } else {
-          $link = "create-form-by-message.php" . "?resource=". $resourcePath . "&method=" . $entry->tagName . "&message=" . $entry->getAttribute("in");
+          $link = "create-form-by-message.php" . "?resource=". $resourcePath . "&method=";
+          if($entry->hasAttribute("method") == true) {
+            $link .= $entry->getAttribute("method");
+          } else {
+            $link .= $entry->tagName;
+          }
+          $link .= "&message=" . $entry->getAttribute("in");
         }
         $this->generateTreeEntry($parentIndex, $name, $link);
       }

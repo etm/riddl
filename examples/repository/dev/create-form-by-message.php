@@ -121,6 +121,8 @@
     $client->resource($_POST['rescue:resource']);
     $return = $client->request($_POST['rescue:method'], $what);
 
+print_r($return);
+
     echo "\n<table>";
     foreach($return as $p) {
       echo "\n<tr><td><h3>Parameter with name: " . $p->name() . "\n</h3></td></tr>";
@@ -129,7 +131,7 @@
       }
       if(get_class($p) == "RiddlParameterComplex") {
         echo "\n<tr><td>";
-        $s =  fread($p->value(), $p->size());
+        if ($p->size() > 0 ) $s =  fread($p->value(), $p->size());
         echo "\n<textarea rows=\"10\" cols=\"80\" readonly=\"readonly\" value=\"" . $s . "\"/>";
         echo "\n</textarea>";
         echo "\n</td></tr>";
