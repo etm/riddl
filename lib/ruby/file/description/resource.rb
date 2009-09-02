@@ -19,6 +19,7 @@ module Riddl
           desres.find("des:resource").each do |desres|
             res.add_description(des,desres,desres.attributes['relative'] || "{}",index)
           end
+          res
           #}}}
         end
 
@@ -124,6 +125,54 @@ module Riddl
           #}}}
         end
 
+        def remove_requests(des,path,filter)
+          pres = self
+          path.split('/').each do |p|
+            next if p == ""
+            if resources.has_key?(p)
+              pres = pres.resources[p]
+            else  
+              return
+            end  
+          end
+
+          freq = if filter['in'] && filter['in'] != '*'
+            t = [RequestInOut,Riddl::File::Description::Message.new(des,filter['in'])]
+            t << (filter['out'] ? Riddl::File::Description::Message.new(des,filter['out']) : nil)
+          elsif filter['pass'] && filter['pass'] != '*'
+            [RequestInOut,Riddl::File::Description::Message.new(des,filter['pass']),Riddl::File::Description::Message.new(des,filter['pass'])]
+          elsif filter['in'] && filter['in'] == '*'
+            t = [RequestStarOut]
+            t << (filter['out'] ? Riddl::File::Description::Message.new(des,filter['out']) : nil)
+          elsif filter['transformation']
+            [RequestTransformation,Riddl::File::Description::Transformation.new(des,filter['transformation'])]
+          elsif filter['pass'] && filter['pass'] == '*'
+            [RequestPass]
+          end
+          raise BlockError, "blocking #{filter.inspect} not possible" if freq.nil?
+
+          if reqs = pres.requests[filter['method']]
+            reqs = reqs.last # current layer
+            reqs.delete_if do |req|
+              if req.class == freq[0]
+                if req.class == RequestInOut
+                  if freq[1] && freq[1].hash == req.in.hash && freq[2] && req.out && freq[2].hash == req.out.hash
+                    true
+                  elsif freq[1] && freq[1].hash == req.in.hash && !freq[2]
+                    true
+                  end
+                elsif eq.class == RequestStarOut
+                  true if freq[1] && req.out && freq[1].hash == req.out.hash
+                elsif eq.class == RequestTransformation
+                  true if freq[1] && freq[1].hash == req.trans.hash
+                elsif eq.class == RequestPass
+                  true
+                end
+              end  
+            end
+          end  
+        end
+
         def compose!
           #{{{
           @requests.each do |k,v|
@@ -141,23 +190,21 @@ module Riddl
         def compose(k,layers)
           #{{{
           routes = []
-          layers.each_with_index do |lay,index|
-            lay.find_all{|l|l.class==RequestInOut}.each do |r|
-              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes += container unless container.nil?
-            end
-            lay.find_all{|l|l.class==RequestTransformation}.each do |r|
-              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes += container unless container.nil?
-            end
-            lay.find_all{|l|l.class==RequestStarOut}.each do |r|
-              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes += container unless container.nil?
-            end
-            lay.find_all{|l|l.class==RequestPass}.each do |r|
-              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes += container unless container.nil?
-            end
+          layers[0].find_all{|l|l.class==RequestInOut}.each do |r|
+            traverse_layers(container = [[r]],container[0],layers,1) unless r.used?
+            routes += container unless container.nil?
+          end
+          layers[0].find_all{|l|l.class==RequestTransformation}.each do |r|
+            traverse_layers(container = [[r]],container[0],layers,1) unless r.used?
+            routes += container unless container.nil?
+          end
+          layers[0].find_all{|l|l.class==RequestStarOut}.each do |r|
+            traverse_layers(container = [[r]],container[0],layers,1) unless r.used?
+            routes += container unless container.nil?
+          end
+          layers[0].find_all{|l|l.class==RequestPass}.each do |r|
+            traverse_layers(container = [[r]],container[0],layers,1) unless r.used?
+            routes += container unless container.nil?
           end
           routes.map do |r|
             ret = nil
@@ -190,9 +237,11 @@ module Riddl
         private :compose
 
         def compose_plain(requests)
+          #{{{
           requests.map do |ret|
             Composition.new(nil,ret)
-          end  
+          end
+          #}}}
         end
         private :compose_plain
         

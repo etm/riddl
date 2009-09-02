@@ -13,7 +13,7 @@
     <tile>
       <layer name="pre"/>
       <layer name="main">
-        <block method="post" in="a">/foo</block>
+        <block method="get" in="a"/>
       </layer>
       <layer name="post"/>
     </tile>

@@ -24,7 +24,7 @@
         <apply-to>/foo/bar</apply-to>
       </layer>
       <layer name="main">
-        <block method="post" in="a">/foo</block>
+        <block method="post" in="a"/>
       </layer>
       <layer name="post"/>
     </tile>

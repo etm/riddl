@@ -5,7 +5,7 @@ module Riddl
     class Declaration
 
       class Facade
-        #{{
+        #{{{
         def initialize
           @resource = Riddl::File::Description::Resource.new("/")
         end
@@ -78,6 +78,13 @@ module Riddl
         @fac.visualize :facade
       end
 
+      def remove_requests(des,block,r)
+        block.each do |bl|
+          r.remove_requests(des,bl.to_s,bl.attributes)
+        end  
+      end
+      private :remove_requests
+
       def initialize(riddl)
         #{{{
         @fac = Facade.new
@@ -87,14 +94,18 @@ module Riddl
           res.clean! # for overlapping tiles, each tile gets an empty path
           tile.find("dec:layer").each_with_index do |layer,index|
             apply_to = layer.find("dec:apply-to")
+            block = layer.find("dec:block")
+
             lname = layer.attributes['name']
             des = riddl.find("/dec:declaration/dec:interface[@name=\"#{lname}\"]/des:description").first
             desres = des.find("des:resource").first
             if apply_to.empty?
-              res.add_description(des,desres,"/",index)
+              r = res.add_description(des,desres,"/",index)
+              remove_requests(des,block,r)
             else
               apply_to.each do |at|
-                res.add_description(des,desres,at.to_s,index)
+                r = res.add_description(des,desres,at.to_s,index)
+                remove_requests(des,block,r)
               end
             end
           end
