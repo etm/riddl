@@ -111,19 +111,29 @@
 <!--}}}-->
 
   <resource>
-    <request method="riddl" in="*" out="description"/>
+    <request method="riddl" in="*" out="description">
+      <ann:label xml:lang="en">Show description</ann:label>
+    </request>
     <resource relative="groups">
       <get in="*" out="list-of-groups"/>
       <post in="create-group"/>
 
       <resource> <!-- Dynamically: name of the group -->
         <get in="properties-of-group-request" out="properties-of-group-response">
-          <ann:label>bla</ann:label>
+          <ann:label xml:lang="en">Show Properties</ann:label>
         </get>
-        <get in="query-input-of-group-request" out="query-input-of-group-response"/>
-        <get in="query-output-of-group-request" out="query-output-of-group-response"/>
-        <get in="invoke-input-of-group-request" out="invoke-input-of-group-response"/>
-        <get in="invoke-output-of-group-request" out="invoke-output-of-group-response"/>
+        <get in="query-input-of-group-request" out="query-input-of-group-response">
+          <ann:label xml:lang="en">Show queryInput</ann:label>
+        </get>
+        <get in="query-output-of-group-request" out="query-output-of-group-response">
+          <ann:label xml:lang="en">Show queryOutptu</ann:label>
+        </get>
+        <get in="invoke-input-of-group-request" out="invoke-input-of-group-response">
+          <ann:label xml:lang="en">Show invokeInput</ann:label>
+        </get>
+        <get in="invoke-output-of-group-request" out="invoke-output-of-group-response">
+          <ann:label xml:lang="en">Show invokeOutput</ann:label>
+        </get>
         <get in="*" out="list-of-subgroups"/>
         <post in="create-subgroup"/>
         <put in="create-group"/>

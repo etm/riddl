@@ -69,15 +69,22 @@ class RESCUENavTree {
     $xp->registerNamespace("des", "http://riddl.org/ns/description/1.0");
     $entries = $xp->query($xpQuery); 
     foreach($entries as $entry) {
+      $name = "";
       if($entry->tagName != "resource") {
-        if(($entry->getAttribute("in") == "*") && ($entry->hasAttribute("out") == true)) {
-          $name = strtoupper($entry->tagName) . " (Out: " . $entry->getAttribute("out") . ")";
-        } elseif(($entry->getAttribute("in") != "*") && ($entry->hasAttribute("out") == false)) {
-          $name = strtoupper($entry->tagName) . " (In: " . $entry->getAttribute("in") . ")";
-        } elseif(($entry->getAttribute("in") == "*") && ($entry->hasAttribute("out") == false)) {
-          $name = strtoupper($entry->tagName);
-        } else {
-          $name = strtoupper($entry->tagName) . " (" . $entry->getAttribute("in") . " -> " . $entry->getAttribute("out") .")";
+        $children = $entry->childNodes;
+        foreach ($children as $child) {
+          if($child->tagName == "ann:label") $name = $child->nodeValue;
+        }
+        if($name == "") {
+          if(($entry->getAttribute("in") == "*") && ($entry->hasAttribute("out") == true)) {
+            $name = strtoupper($entry->tagName) . " (Out: " . $entry->getAttribute("out") . ")";
+          } elseif(($entry->getAttribute("in") != "*") && ($entry->hasAttribute("out") == false)) {
+            $name = strtoupper($entry->tagName) . " (In: " . $entry->getAttribute("in") . ")";
+          } elseif(($entry->getAttribute("in") == "*") && ($entry->hasAttribute("out") == false)) {
+            $name = strtoupper($entry->tagName);
+          } else {
+            $name = strtoupper($entry->tagName) . " (" . $entry->getAttribute("in") . " -> " . $entry->getAttribute("out") .")";
+          }
         }
         if($entry->tagName == "get") {
           if($entry->getAttribute("in") == "*") {
