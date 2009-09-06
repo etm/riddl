@@ -17,5 +17,13 @@
       </layer>
       <layer name="post"/>
     </tile>
+    <tile>
+      <layer name="main">
+        <apply-to>/foo</apply-to>
+        <block method="get" in="b"/>
+        <block method="get" in="c"/>
+        <block method="get" pass="*"/>
+      </layer>
+    </tile>
   </facade>   
 </declaration>  
