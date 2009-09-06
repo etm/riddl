@@ -66,6 +66,33 @@ module Riddl
         #}}}
       end
 
+      class Tile
+        #{{{
+        def initialize
+          @resource = Riddl::File::Description::Resource.new("/")
+        end
+
+        def add_path(path)
+          if path.nil? || path == '/'
+            @resource
+          else
+            @resource.add_path(path)
+          end
+        end
+
+        def compose!
+          compose(@resource)
+        end
+        def compose(res)
+          res.compose!
+          res.resources.each do |key,r|
+            compose(r)
+          end
+        end
+        private :compose
+        #}}}
+      end
+
       def description_xml
         @fac.generate_description_xml
       end
@@ -88,9 +115,11 @@ module Riddl
       def initialize(riddl)
         #{{{
         @fac = Facade.new
+        tiles = []
         ### Forward
         riddl.find("/dec:declaration/dec:facade/dec:tile").each do |tile|
-          res = @fac.add_path(tile.attributes['path'] || '/')
+          tiles << (til = Tile.new)
+          res = tac.add_path(tile.attributes['path'] || '/')
           res.clean! # for overlapping tiles, each tile gets an empty path
           tile.find("dec:layer").each_with_index do |layer,index|
             apply_to = layer.find("dec:apply-to")
@@ -109,8 +138,8 @@ module Riddl
               end
             end
           end
+          til.compose!
         end
-        @fac.compose!
         #}}}
       end
     end
