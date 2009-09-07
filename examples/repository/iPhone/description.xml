@@ -1,0 +1,87 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" 
+             xmlns="http://riddl.org/ns/description/1.0" 
+             xmlns:ann="http://riddl.org/ns/annotation/1.0" 
+             xmlns:xi="http://www.w3.org/2001/XInclude">
+
+<!--Messages {{{-->
+<!-- Messages at root level -->
+  <message name="main">
+    <parameter name="main" mimetype="text/html"/>
+  </message>
+
+<!-- Messages at group level -->
+  <message name="groups">
+    <parameter name="groups" mimetype="text/html"/>
+  </message>
+
+<!-- Messages at subgroup level -->
+  <message name="subgroups">
+    <parameter name="subgroups" mimetype="text/html"/>
+  </message>
+
+<!-- Messages at service level -->
+  <message name="services">
+    <parameter name="services" mimetype="text/html"/>
+  </message>
+
+<!-- Messages at about level -->
+  <message name="about">
+    <parameter name="about" mimetype="text/html"/>
+  </message>
+
+<!-- Messages for java scripts/css -->
+  <message name="java-script">
+    <parameter name="java-script" mimetype="application/x-javascript"/>
+  </message>
+
+  <message name="css">
+    <parameter name="css" mimetype="text/css"/>
+  </message>
+
+  <message name="img">
+    <parameter name="img" mimetype="image/*"/>
+  </message>
+
+<!--}}}-->
+<!--Rescurces {{{-->
+
+  <resource>
+    <resource relative="123"> <!-- Redirected resource -->
+      <get in="*" out="main"/>
+      <resource relative="rescue">
+        <resource> <!-- Groups -->
+          <resource> <!-- Subroups -->
+            <resource> <!-- Services -->
+            </resource>
+          </resource>
+        </resource>
+      </resource>
+      <resource relative="wallet">
+      </resource>
+      <resource relative="workflows">
+      </resource>
+      <resource relative="preferences">
+      </resource>
+      <resource relative="about">
+        <get in="*" out="about"/>
+      </resource>
+    </resource>
+    <resource relative="js">
+      <resource>
+        <get in="*" out="java-script"/>
+      </resource>
+    </resource>
+    <resource relative="themes">
+      <resource>
+        <get in="*" out="css"/>
+      </resource>
+      <resource relative="img">
+        <resource>
+          <get in="*" out="img"/>
+        </resource>
+      </resource>
+    </resource>
+  </resource>  
+<!--}}}-->
+
+</description>
