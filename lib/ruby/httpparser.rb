@@ -154,6 +154,7 @@ module Riddl
     private :parse_nested_query
 
     def initialize(query_string,input,content_type,content_length,content_disposition,content_id,riddl_type)
+      pp input.read
       #{{{
       # rewind because in some cases it is not at start (when multipart without length)
       begin

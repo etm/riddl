@@ -18,12 +18,12 @@ module Riddl
       elsif @params.class == Array && @params.length > 1
         multipart
       else
-        StringIO.new('r+b')
+        StringIO.new('','r+b')
       end  
     end
 
     def body(r)
-      tmp = StringIO.new('r+b')
+      tmp = StringIO.new('','r+b')
       case r
         when Riddl::Parameter::Simple
           tmp.write r.value
@@ -47,7 +47,7 @@ module Riddl
     private :body
 
     def multipart
-      tmp = StringIO.new('r+b')
+      tmp = StringIO.new('','r+b')
       @headers['Content-Type'] = "multipart/mixed; boundary=\"#{BOUNDARY}\""
       @params.each do |r|
         case r
