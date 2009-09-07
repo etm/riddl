@@ -81,9 +81,9 @@
       <resource relative="preferences">
         <get in="*" out="preferences-index"/>
       </resource>
-      <resource relative="about">
-        <get in="*" out="about"/>
-      </resource>
+    </resource>
+    <resource relative="about">
+      <get in="*" out="about"/>
     </resource>
     <resource relative="js">
       <resource>

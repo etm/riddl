@@ -50,11 +50,11 @@ run(
           p 'Executing GetPreferences (prefernces.rb)' if method :get => '*'
         end
 
-        on resource 'about' do
-          p 'Executing About (about.rb)' if method :get => '*'
-          run About if method :get => '*'
-        end
       end
+    end
+    on resource 'about' do
+      p 'Executing About (about.rb)' if method :get => '*'
+      run About if method :get => '*'
     end
     on resource 'js' do
       on resource do
