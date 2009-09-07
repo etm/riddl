@@ -34,6 +34,7 @@ module Riddl
       @env = env
       @req = Rack::Request.new(env)
       @res = Rack::Response.new
+      @log = @env['rack.errors']
       @riddl_path = @paths.find{ |e| e[1] =~ @pinfo }
 
       if @riddl_path
@@ -55,11 +56,13 @@ module Riddl
         @path = ''
         @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_method,@parameters,@headers)
         if @riddl_message_in.nil? && @riddl_message_out.nil?
+          @log.puts "501: the #{@riddl_method} parameters are not matching anything in the description."
           @res.status = 501 # not implemented?!
         else  
           instance_eval(&@blk)
         end  
       else
+        @log.puts "404: this resource for sure does not exist."
         @res.status = 404 # client requests wrong path
       end
       @res.finish
@@ -86,6 +89,7 @@ module Riddl
         headers  = (headers.class == Array ? headers : [headers])
         if @process_out && @res.status == 200
           unless @description.check_message(response,headers,@riddl_message_out)
+            @log.puts "500: the return for the #{@riddl_method} is not matching anything in the description."
             @res.status = 500
             return
           end  
