@@ -39,7 +39,7 @@
   </message>
 
   <message name="img">
-    <parameter name="img" mimetype="image/*"/>
+    <parameter name="img" mimetype="image/png"/>
   </message>
 
 <!--}}}-->

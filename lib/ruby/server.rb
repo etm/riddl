@@ -68,7 +68,7 @@ module Riddl
     def on(resource, &block)
       @path << (@path == '' ? '/' : resource)
       yield
-      @path = ::File.dirname(@path)
+      @path = ::File.dirname(@path) + '/'
     end
 
     def process_out(pout)
