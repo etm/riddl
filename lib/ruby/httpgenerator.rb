@@ -27,11 +27,13 @@ module Riddl
       case r
         when Riddl::Parameter::Simple
           tmp.write r.value
-          @headers['Content-Type'] = 'text/riddl-data'
+          @headers['Content-Type'] = 'text/plain'
           @headers['Content-ID'] = r.name
+          @headers['Riddl-Type'] = 'simple'
         when Riddl::Parameter::Complex
           tmp.write(r.value.respond_to?(:read) ? r.value.read : r.value)
           @headers['Content-Type'] = r.mimetype
+          @headers['Riddl-Type'] = 'complex'
           if r.filename.nil?
            @headers['Content-ID'] = r.name
           else
@@ -51,12 +53,14 @@ module Riddl
         case r
           when Riddl::Parameter::Simple
             tmp.write "--" + BOUNDARY + EOL
+            tmp.write "Riddl-Type: simple" + EOL
             tmp.write "Content-Disposition: riddl-data; name=\"#{r.name}\"" + EOL
             tmp.write EOL
             tmp.write r.value
             tmp.write EOL
           when Riddl::Parameter::Complex
             tmp.write "--" +  BOUNDARY + EOL
+            tmp.write "Riddl-Type: complex" + EOL
             tmp.write "Content-Disposition: riddl-data; name=\"#{r.name}\""
             tmp.write r.filename.nil? ? EOL : "; filename=\"#{r.filename}\"" + EOL
             tmp.write "Content-Transfer-Encoding: binary" + EOL

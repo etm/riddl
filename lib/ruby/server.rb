@@ -47,7 +47,8 @@ module Riddl
           @env['CONTENT_TYPE'],
           @env['CONTENT_LENGTH'],
           @env['HTTP_CONTENT_DISPOSITION'],
-          @env['HTTP_CONTENT_ID']
+          @env['HTTP_CONTENT_ID'],
+          @env['HTTP_RIDDL_TYPE']
         ).params
         @riddl_method = @env['REQUEST_METHOD'].downcase
 

@@ -31,15 +31,17 @@
 
     private function body($r) {
       if (is_a($r,'RiddlParameterSimple')) {
-        $this->set_header("Content-type","text/riddl-data");
+        $this->set_header("Content-Type","text/plain");
+        $this->set_header("Riddl-Type","simple");
         $this->set_header("Content-ID",$r->name());
         $this->set_header("Content-length",$r->size());
         $this->critical_eol();
         fwrite($this->sock, $r->value());
         $this->critical_eol();
       } elseif (is_a($r,'RiddlParameterComplex')) {
-        $this->set_header("Content-type",$r->mimetype());
-        $this->set_header("Content-length",$r->size());
+        $this->set_header("Content-Type",$r->mimetype());
+        $this->set_header("Riddl-Type","complex");
+        $this->set_header("Content-Length",$r->size());
         if (is_null($r->filename())) {
           $this->set_header("Content-ID",$r->name());
         } else {
@@ -61,12 +63,14 @@
       foreach($this->params as $r) {
         if (is_a($r,'RiddlParameterSimple')) {
           fwrite($ret, "--" . $this->BOUNDARY . $this->EOL);
+          fwrite($ret, "Riddl-Type: simple" . $this->EOL);
           fwrite($ret, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"" . $this->EOL);
           fwrite($ret, $this->EOL);
           fwrite($ret, $r->value());
           fwrite($ret, $this->EOL);
         } elseif (is_a($r,'RiddlParameterComplex')) {
           fwrite($ret, "--" . $this->BOUNDARY . $this->EOL);
+          fwrite($ret, "Riddl-Type: complex" . $this->EOL);
           fwrite($ret, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"");
           if (is_null($r->filename())) {
             fwrite($ret, $this->EOL);
@@ -74,7 +78,7 @@
             fwrite($ret, "; filename=\"" . $r->filename() . "\"" . $this->EOL);
           }
           fwrite($ret, "Content-Transfer-Encoding: binary" . $this->EOL);
-          fwrite($ret, "Content-type: " . $r->mimetype() . $this->EOL);
+          fwrite($ret, "Content-Type: " . $r->mimetype() . $this->EOL);
           fwrite($ret, $this->EOL);
           if (is_resource($r->value()) && (get_resource_type($r->value()) == 'file')) {
             $this->copy_content($r->value(),$ret);

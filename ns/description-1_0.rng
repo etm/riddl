@@ -28,7 +28,7 @@
     </zeroOrMore>
     <element name="resource">  
       <ref name="riddl-root-resource"/>
-      <ref name="riddl-others"/>
+      <ref name="riddl-other-atts"/>
     </element>
   </define>
 
@@ -184,7 +184,7 @@
       </attribute>  
     </optional>
     <ref name="riddl-resource-content"/>
-    <ref name="riddl-others"/>
+    <ref name="riddl-other-atts"/>
   </define>
   <define name="riddl-resource-named">
     <attribute name="relative">
@@ -227,9 +227,14 @@
     </zeroOrMore>
     <optional>
       <element name="resource">
-        <ref name="riddl-resource-named"/>
+        <ref name="riddl-resource-dynamic"/>
       </element>
     </optional>
+    <zeroOrMore>
+      <element name="resource">
+        <ref name="riddl-resource-named"/>
+      </element>
+    </zeroOrMore>
   </define>
    
 </grammar>

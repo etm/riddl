@@ -27,9 +27,9 @@ module Riddl
     end
     private :unescape
 
-    def parse_content(input,ctype,content_length,content_disposition,content_id)
+    def parse_content(input,ctype,content_length,content_disposition,content_id,riddl_type)
       #{{{
-      ctype = nil if ctype == 'text/riddl-data'
+      ctype = nil if riddl_type == 'simple'
       filename = content_disposition[/ filename="?([^\";]*)"?/ni, 1]
       name = content_disposition[/ name="?([^\";]*)"?/ni, 1] || content_id
 
@@ -153,7 +153,7 @@ module Riddl
     end
     private :parse_nested_query
 
-    def initialize(query_string,input,content_type,content_length,content_disposition,content_id)
+    def initialize(query_string,input,content_type,content_length,content_disposition,content_id,riddl_type)
       #{{{
       # rewind because in some cases it is not at start (when multipart without length)
       begin
@@ -172,7 +172,7 @@ module Riddl
         # sub is a fix for Safari Ajax postings that always append \0
         parse_nested_query(input.read.sub(/\0\z/, ''),:body)
       else 
-        parse_content(input,content_type,content_length.to_i,content_disposition||'',content_id||'')
+        parse_content(input,content_type,content_length.to_i,content_disposition||'',content_id||'',riddl_type||'')
       end
 
       begin

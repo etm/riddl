@@ -89,7 +89,8 @@ module Riddl
               res['CONTENT-TYPE'],
               res['CONTENT-LENGTH'],
               res['CONTENT-DISPOSITION'],
-              res['CONTENT-ID']
+              res['CONTENT-ID'],
+              res['RIDDL-TYPE']
             ).params
             unless @description.nil?
               unless @description.check_message(response,res,riddl_message_out)

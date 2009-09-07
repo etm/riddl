@@ -89,8 +89,10 @@
       $content_id = $matches[1];
       preg_match("/Content-Length: (.*)/i", $headers, $matches);
       $content_length = $matches[1];
+      preg_match("/Riddl-Type: (.*)/i", $headers, $matches);
+      $riddl_type = $matches[1];
 
-      $ret = new RiddlHttpParser(NULL,$body,$content_type,$content_length,$content_disposition,$content_id);
+      $ret = new RiddlHttpParser(NULL,$body,$content_type,$content_length,$content_disposition,$content_id,$riddl_type);
       return new RiddlClientResponse($code,$ret->params());
     }
   }

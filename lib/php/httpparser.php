@@ -21,9 +21,9 @@
       return $this->params;
     }  
 
-    private function parse_content($input,$ctype,$content_length,$content_disposition,$content_id) {
+    private function parse_content($input,$ctype,$content_length,$content_disposition,$content_id,$riddl_type) {
       #{{{
-      if ($ctype == 'text/riddl-data') $ctype = NULL;
+      if ($riddl_type == 'simple') $ctype = NULL;
       $mf = preg_match("/ filename=\"?([^\";]*)\"?/i", $content_disposition, $matchesf); # TODO debug
       $mn = preg_match("/ filename=\"?([^\";]*)\"?/i", $content_disposition, $matchesn); # TODO debug
       $filename = $matchesf[1];
@@ -161,7 +161,7 @@
       #}}}
     }
 
-    function __construct($query_string,$input,$content_type,$content_length,$content_disposition,$content_id) {
+    function __construct($query_string,$input,$content_type,$content_length,$content_disposition,$content_id,$riddl_type) {
       #{{{
       $this->params = array();
 
@@ -179,7 +179,7 @@
         }
         $this->parse_nested_query(preg_replace("/\0\z/", '', $contents),'body');
       } else {
-        $this->parse_content($input,$content_type,intval($content_length),$content_disposition ? $content_disposition : '',$content_id ? $content_id : '');
+        $this->parse_content($input,$content_type,intval($content_length),$content_disposition ? $content_disposition : '',$content_id ? $content_id : '',$riddl_type ? $riddl_type : '');
       }
       #}}}
     }
