@@ -14,7 +14,7 @@
   if(isset($_GET['resource']) || isset($_POST['rescue:resource'])) {
     createFormByMessage();
   } else {
-    echo "<h2>Please choose a message from the tree on the right</h2>\n";
+    echo "<h2>Please choose a message from the tree on the left</h2>\n";
   }
   if(isset($_POST['rescue:requestButton'])) {
     request();
@@ -56,7 +56,7 @@
     }
     echo $message . "\"/>\n";
 
-    echo "<h3>Meta-Data of request</h3>";
+    echo "<h3>Request</h3>";
     echo "<b>Selected message:</b> " . $message ."<br/>\n";
     echo "<b>Selected method:</b>" . $method ."<br/>\n";
     echo "<b>Selected resource:</b> " . $resource ."<br/>\n";
@@ -74,7 +74,7 @@
     $parameters = $xp->query($xpQuery); 
 
 
-    echo "<h3>Input request parameter</h3>";
+    echo "<h3>Input parameter</h3>";
     echo "\n<table>";
     foreach($parameters as $param) {
       echo "\n<tr>";
@@ -121,7 +121,7 @@
     $client = new RiddlClient("http://localhost:9292/");
     $client->resource($_POST['rescue:resource']);
     $return = $client->request($_POST['rescue:method'], $what);
-    echo "\nReturn finished with status-code: " . $return->status() . "<br/>"; 
+    echo "\nFinished with status-code: " . $return->status() . "<br/>"; 
 
     echo "\n<table>";
     $params = $return->parameters();
