@@ -27,6 +27,9 @@ module Riddl
         def self.new_from_message(min,mout)
           RequestInOut.new(nil,min,mout)
         end
+        def hash
+          @in.hash + (@out.nil? ? 0 : @out.hash)
+        end
         attr_reader :in, :out
         def visualize; "in #{@in.name.inspect} out #{@out.nil? ? "NIL" : @out.name.inspect}"; end
         #}}}
@@ -57,6 +60,9 @@ module Riddl
         end
         attr_reader :trans
         attr_accessor :out
+        def hash
+          @trans.hash + (@out.nil? ? 0 : @out.hash)
+        end
         def visualize; "transformation #{@trans.name.inspect}"; end
         #}}}
       end
@@ -74,6 +80,9 @@ module Riddl
           RequestStarOut.new(nil,mout)
         end
         attr_reader :out
+        def hash
+          @out.nil? ? 0 : @out.hash
+        end
         def visualize; "out #{@out.nil? ? "NIL" : @out.name.inspect}"; end
         #}}}
       end
@@ -81,6 +90,9 @@ module Riddl
       class RequestPass < RequestBase
         #{{{
         def visualize; ""; end
+        def hash
+          0
+        end
         #}}}
       end
       

@@ -12,93 +12,6 @@ module Riddl
           #}}}
         end
 
-        def add_description(des,desres,path,index)
-          #{{{
-          res = add_path(path)
-          res.add_requests(des,desres,index)
-          desres.find("des:resource").each do |desres|
-            res.add_description(des,desres,desres.attributes['relative'] || "{}",index)
-          end
-          #}}}
-        end
-
-        def add_path(path)
-          #{{{
-          pres = self
-          path.split('/').each do |p|
-            next if p == ""
-            unless pres.resources.has_key?(p)
-              pres.resources[p] = Resource.new(p)
-            end
-            pres = pres.resources[p]
-          end
-          pres
-          #}}}
-        end
-
-        def to_xml
-          #{{{
-          result = ""
-          messages = {}
-          names = []
-          messages_result = ""
-          to_xml_priv(result,messages,0)
-          messages.each do |hash,mess|
-            t = mess.content.dup
-            name = mess.name
-            name += '_' while names.include?(name)
-            t.root.attributes['name'] = name
-            messages_result << t.root.dump + "\n"
-          end
-          "<description #{Riddl::File::COMMON}>\n\n" +  messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>"
-          #}}}
-        end
-
-        def to_xml_priv(result,messages,level)
-          #{{{
-          s = "  " * (level + 1)
-          t = "  " * (level + 2)
-          result << s + "<resource#{@path != '/' && @path != '' ? " relative=\"#{@path}\"" : ''}>\n"
-          @composition.each do |k,v|
-            v.each do |m|
-              m = m.result
-              if %w{get post put delete}.include?(k)
-                result << t + "<#{k} "
-              else
-                result << t + "<request method=\"#.upcase{k}\" "
-              end  
-              case m
-                when RequestInOut
-                  result << "in=\"#{m.in.name}\""
-                  messages[m.in.hash] = m.in
-                  unless m.out.nil?
-                    result << " out=\"#{m.out.name}\""
-                    messages[m.out.hash] = m.out
-                  end  
-                when RequestStarOut  
-                  result << "in=\"*\""
-                  unless m.out.nil?
-                    result << " out=\"#{m.out.name}\""
-                    messages[m.out.hash] = m.out
-                  end  
-                when RequestPass
-                  result << "pass=\"#{m.pass.name}\""
-                  messages[m.pass.hash] = m.pass
-                when RequestTransformation
-                  result << "transformation=\"#{m.trans.name}\""
-                  messages[m.trans.hash] = m.trans
-              end  
-              result << "/>\n"
-            end  
-          end
-          @resources.each do |k,v|
-            v.to_xml_priv(result,messages,level+1)
-          end
-          ""
-          result << s + "</resource>\n"
-          #}}}
-        end
-
         def add_requests(des,desres,index)
           #{{{
           desres.find("des:*[@in and not(@in='*')]").each do |m|
@@ -124,6 +37,46 @@ module Riddl
           #}}}
         end
 
+        def remove_requests(des,filter)
+          #{{{
+          freq = if filter['in'] && filter['in'] != '*'
+            t = [RequestInOut,Riddl::File::Description::Message.new(des,filter['in'])]
+            t << (filter['out'] ? Riddl::File::Description::Message.new(des,filter['out']) : nil)
+          elsif filter['pass'] && filter['pass'] != '*'
+            [RequestInOut,Riddl::File::Description::Message.new(des,filter['pass']),Riddl::File::Description::Message.new(des,filter['pass'])]
+          elsif filter['in'] && filter['in'] == '*'
+            t = [RequestStarOut]
+            t << (filter['out'] ? Riddl::File::Description::Message.new(des,filter['out']) : nil)
+          elsif filter['transformation']
+            [RequestTransformation,Riddl::File::Description::Transformation.new(des,filter['transformation'])]
+          elsif filter['pass'] && filter['pass'] == '*'
+            [RequestPass]
+          end
+          raise BlockError, "blocking #{filter.inspect} not possible" if freq.nil?
+
+          if reqs = @requests[filter['method']]
+            reqs = reqs.last # current layer
+            reqs.delete_if do |req|
+              if req.class == freq[0]
+                if req.class == RequestInOut
+                  if freq[1] && freq[1].hash == req.in.hash && freq[2] && req.out && freq[2].hash == req.out.hash
+                    true
+                  elsif freq[1] && freq[1].hash == req.in.hash && !freq[2]
+                    true
+                  end
+                elsif req.class == RequestStarOut
+                  true if freq[1] && req.out && freq[1].hash == req.out.hash
+                elsif req.class == RequestTransformation
+                  true if freq[1] && freq[1].hash == req.trans.hash
+                elsif req.class == RequestPass
+                  true
+                end
+              end  
+            end
+          end  
+          #}}}
+        end
+
         def compose!
           #{{{
           @requests.each do |k,v|
@@ -132,32 +85,30 @@ module Riddl
               when 1:
                 @composition[k] = compose_plain(v[0])
               else
-                @composition[k] = compose(k,v)
+                @composition[k] = compose_layers(k,v)
             end
           end  
           #}}}
         end
         
-        def compose(k,layers)
+        def compose_layers(k,layers)
           #{{{
           routes = []
-          layers.each_with_index do |lay,index|
-            lay.find_all{|l|l.class==RequestInOut}.each do |r|
-              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes += container unless container.nil?
-            end
-            lay.find_all{|l|l.class==RequestTransformation}.each do |r|
-              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes += container unless container.nil?
-            end
-            lay.find_all{|l|l.class==RequestStarOut}.each do |r|
-              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes += container unless container.nil?
-            end
-            lay.find_all{|l|l.class==RequestPass}.each do |r|
-              traverse_layers(container = [[r]],container[0],layers,index+1) unless r.used?
-              routes += container unless container.nil?
-            end
+          layers[0].find_all{|l|l.class==RequestInOut}.each do |r|
+            traverse_layers(container = [[r]],container[0],layers,1) unless r.used?
+            routes += container unless container.nil?
+          end
+          layers[0].find_all{|l|l.class==RequestTransformation}.each do |r|
+            traverse_layers(container = [[r]],container[0],layers,1) unless r.used?
+            routes += container unless container.nil?
+          end
+          layers[0].find_all{|l|l.class==RequestStarOut}.each do |r|
+            traverse_layers(container = [[r]],container[0],layers,1) unless r.used?
+            routes += container unless container.nil?
+          end
+          layers[0].find_all{|l|l.class==RequestPass}.each do |r|
+            traverse_layers(container = [[r]],container[0],layers,1) unless r.used?
+            routes += container unless container.nil?
           end
           routes.map do |r|
             ret = nil
@@ -187,21 +138,17 @@ module Riddl
           end
           #}}}
         end
-        private :compose
+        private :compose_layers
 
         def compose_plain(requests)
+          #{{{
           requests.map do |ret|
             Composition.new(nil,ret)
-          end  
+          end
+          #}}}
         end
         private :compose_plain
         
-        def clean!
-          #{{{
-          @resources = {}
-          #}}}
-        end
-
         def traverse_layers(container,path,layers,layer)
           #{{{
           return if layers.count <= layer
@@ -293,7 +240,7 @@ module Riddl
         private :add_request_pass
         #}}}
 
-        attr_reader :resources,:path,:requests,:composition,:routes
+        attr_reader :resources,:path,:requests,:composition
       end
 
       Composition = Struct.new(:route,:result)
