@@ -29,6 +29,21 @@
     <parameter name="about" mimetype="text/html"/>
   </message>
 
+<!-- Messages at wallet level -->
+  <message name="wallet-index">
+    <parameter name="wallet-index" mimetype="text/html"/>
+  </message>
+
+<!-- Messages at workflow level -->
+  <message name="workflow-index">
+    <parameter name="workflow-index" mimetype="text/html"/>
+  </message>
+
+<!-- Messages at preferences level -->
+  <message name="preferences-index">
+    <parameter name="prefernces-index" mimetype="text/html"/>
+  </message>
+
 <!-- Messages for java scripts/css -->
   <message name="java-script">
     <parameter name="java-script" mimetype="application/x-javascript"/>
@@ -39,7 +54,7 @@
   </message>
 
   <message name="img">
-    <parameter name="img" mimetype="image/*"/>
+    <parameter name="img" mimetype="image/png"/>
   </message>
 
 <!--}}}-->
@@ -49,18 +64,22 @@
     <resource relative="123"> <!-- Redirected resource -->
       <get in="*" out="main"/>
       <resource relative="rescue">
+        <get in="*" out="groups"/>
         <resource> <!-- Groups -->
+          <get in="*" out="subgroups"/>
           <resource> <!-- Subroups -->
-            <resource> <!-- Services -->
-            </resource>
+            <get in="*" out="services"/>
           </resource>
         </resource>
       </resource>
       <resource relative="wallet">
+        <get in="*" out="wallet-index"/>
       </resource>
       <resource relative="workflows">
+        <get in="*" out="workflow-index"/>
       </resource>
       <resource relative="preferences">
+        <get in="*" out="preferences-index"/>
       </resource>
       <resource relative="about">
         <get in="*" out="about"/>
@@ -72,13 +91,13 @@
       </resource>
     </resource>
     <resource relative="themes">
-      <resource>
-        <get in="*" out="css"/>
-      </resource>
       <resource relative="img">
         <resource>
           <get in="*" out="img"/>
         </resource>
+      </resource>
+      <resource>
+        <get in="*" out="css"/>
       </resource>
     </resource>
   </resource>  
