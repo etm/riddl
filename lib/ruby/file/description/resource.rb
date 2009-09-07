@@ -240,7 +240,7 @@ module Riddl
         private :add_request_pass
         #}}}
 
-        attr_reader :resources,:path,:requests,:composition,:routes
+        attr_reader :resources,:path,:requests,:composition
       end
 
       Composition = Struct.new(:route,:result)
