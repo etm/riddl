@@ -31,6 +31,7 @@ module Riddl
     def _call(env)
       @pinfo = (env["PATH_INFO"] + '/').gsub(/\/+/,'/')
       @process_out = true
+      @cross_site_xhr = false
       @env = env
       @req = Rack::Request.new(env)
       @res = Rack::Response.new
@@ -77,13 +78,17 @@ module Riddl
     def process_out(pout)
       @process_out = pout
     end
+    def cross_site_xhr(csxhr)
+      @cross_site_xhr = csxhr
+    end
 
-    def run(what)
-      if what.class == Class and what.superclass == Riddl::Implementation
-        w = what.new(@headers,@parameters,@pinfo.sub(/\//,'').split('/'))
+    def run(what,*args)
+      if what.class == Class && what.superclass == Riddl::Implementation
+        w = what.new(@headers,@parameters,@pinfo.sub(/\//,'').split('/'),@path.sub(/\//,'').split('/'),@env.reject{|k,v| k =~ /^rack\./},args)
         response    = w.response
         headers     = w.headers
         @res.status = w.status
+        @res['Access-Control'] = 'allow <*>' if @cross_site_xhr
 
         response = (response.class == Array ? response : [response])
         headers  = (headers.class == Array ? headers : [headers])

@@ -93,8 +93,7 @@ module Riddl
     def paths
       #{{{
       (@description ? get_paths(@doc.find("/des:description/des:resource")) : []).map do |p|
-        pp p
-        [p[0],Regexp.new("^" + p[0].gsub(/\{\}/,"[^/]+") + "$")]
+        [p[0],Regexp.new("^" + p[0].gsub(/\{\}/,"[^/]+") + (p[1] ? '' : '$'))]
       end
       #}}}
     end
