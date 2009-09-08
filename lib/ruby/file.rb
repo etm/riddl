@@ -93,7 +93,8 @@ module Riddl
     def paths
       #{{{
       (@description ? get_paths(@doc.find("/des:description/des:resource")) : []).map do |p|
-        [p,Regexp.new("^" + p.gsub(/\{\}/,"[^/]+") + "$")]
+        pp p
+        [p[0],Regexp.new("^" + p[0].gsub(/\{\}/,"[^/]+") + "$")]
       end
       #}}}
     end
@@ -107,8 +108,8 @@ module Riddl
         else
           [res.attributes['relative'].nil? ? path.dup << '{}/' : path.dup << res.attributes['relative'] + '/',res.attributes['recursive'].nil? ? false : true]
         end
-        tpath += get_paths(res.find("des:resource[@relative]"),xpath) 
-        tpath += get_paths(res.find("des:resource[not(@relative)]"),xpath) 
+        tpath += get_paths(res.find("des:resource[@relative]"),xpath[0]) 
+        tpath += get_paths(res.find("des:resource[not(@relative)]"),xpath[0]) 
       end  
       tpath
       #}}}
