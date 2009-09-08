@@ -35,7 +35,7 @@ module Riddl
           end
         end
         if b.class == Riddl::Parameter::Complex && a.attributes['mimetype']
-          if b.name == a.attributes['name'] && b.mimetype == a.attributes['mimetype']
+          if b.name == a.attributes['name'] && (a.attributes['mimetype'] == '*' || b.mimetype == a.attributes['mimetype'])
             if a.attributes['handler']
               if Riddl::Handlers::handlers[a.attributes['handler']]
                 @mistp += 1
