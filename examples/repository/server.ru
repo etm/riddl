@@ -14,6 +14,8 @@ require 'libs/impl_root'
 
 use Rack::ShowStatus
 
+$0 = "hallo"
+
 run(
   Riddl::Server.new("description.xml") do
     process_out false
