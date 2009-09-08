@@ -5,6 +5,7 @@ require '../../../lib/ruby/server'
 require '../libs/MarkUS_V3.0'
 require 'xml/smart'
 require 'fileutils'
+require 'logger'
 
 require 'libs/main'
 require 'libs/about'
@@ -14,6 +15,8 @@ require 'libs/root'
 #require 'libs/impl_root'
 
 use Rack::ShowStatus
+options = {:Port => 9291, :Host => "0.0.0.0", :AccessLog => [Logger.new('server.log')]}
+$0 = "RESCUE: iPhone"
 
 run(
   Riddl::Server.new('description.xml') do
