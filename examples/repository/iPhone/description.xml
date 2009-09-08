@@ -81,23 +81,23 @@
       <resource relative="preferences">
         <get in="*" out="preferences-index"/>
       </resource>
-    </resource>
-    <resource relative="about">
-      <get in="*" out="about"/>
-    </resource>
     <resource relative="js">
       <resource>
         <get in="*" out="java-script"/>
       </resource>
-    </resource>
-    <resource relative="themes">
-      <resource relative="img">
+      </resource>
+      <resource relative="themes">
+        <resource relative="img">
+          <resource>
+            <get in="*" out="img"/>
+          </resource>
+        </resource>
         <resource>
-          <get in="*" out="img"/>
+          <get in="*" out="css"/>
         </resource>
       </resource>
-      <resource>
-        <get in="*" out="css"/>
+      <resource relative="about">
+        <get in="*" out="about"/>
       </resource>
     </resource>
   </resource>  

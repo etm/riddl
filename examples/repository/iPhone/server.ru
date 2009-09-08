@@ -19,8 +19,10 @@ run(
   Riddl::Server.new('description.xml') do
     process_out false
     
+    # Show the entrie-screen and get re-ridected
     on resource do
-      # Show the entrie-screen and get re-ridected
+      p 'Executing RootResource - that schould not happen' if method :get => '*'
+
       on resource '123' do
 
         # Browse repository (Groups)
@@ -49,29 +51,28 @@ run(
         on resource 'preferences' do
           p 'Executing GetPreferences (prefernces.rb)' if method :get => '*'
         end
-
-      end
-    end
-    on resource 'about' do
-      p 'Executing About (about.rb)' if method :get => '*'
-      run About if method :get => '*'
-    end
-    on resource 'js' do
-      on resource do
-        p 'Executing GetJS (root.rb)'  if method :get => '*'
-        run GetJS if method :get => '*'
-      end
-    end
-    on resource 'themes' do
-      on resource 'img' do
-        on resource do
-          p 'Executing GetImage (root.rb)' if method :get => '*'
-          run GetImage if method :get => '*'
+        on resource 'js' do
+          on resource do
+            p 'Executing GetJS (root.rb)'  if method :get => '*'
+            run GetJS if method :get => '*'
+          end
         end
-      end
-      on resource do
-        p 'Executing GetTheme (root.rb)' if method :get => '*'
-        run GetTheme if method :get => '*'
+        on resource 'themes' do
+          on resource 'img' do
+            on resource do
+              p 'Executing GetImage (root.rb)' if method :get => '*'
+              run GetImage if method :get => '*'
+            end
+          end
+          on resource do
+            p 'Executing GetTheme (root.rb)' if method :get => '*'
+            run GetTheme if method :get => '*'
+          end
+        end
+        on resource 'about' do
+          p 'Executing About (about.rb)' if method :get => '*'
+          run About if method :get => '*'
+        end
       end
     end
   end
