@@ -3,7 +3,7 @@
   <message name="book-query">
     <header name="Library" type="integer"/>
     <zeroOrMore>
-      <parameter name="author" type="string"/>
+      <parameter name="author" mimetype="*"/>
     </zeroOrMore>  
     <parameter name="title" type="string"/>
   </message>
