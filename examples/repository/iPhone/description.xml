@@ -44,7 +44,7 @@
     <parameter name="prefernces-index" mimetype="text/html"/>
   </message>
 
-<!-- Messages for java scripts/css -->
+<!-- Messages for java scripts/css>
   <message name="java-script">
     <parameter name="java-script" mimetype="application/x-javascript"/>
   </message>
@@ -55,8 +55,11 @@
 
   <message name="img">
     <parameter name="img" mimetype="image/png"/>
-  </message>
+  </message -->
 
+  <message name="file">
+    <parameter name="file" mimetype="*"/>
+  </message>
 <!--}}}-->
 <!--Rescurces {{{-->
 
@@ -81,24 +84,12 @@
       <resource relative="preferences">
         <get in="*" out="preferences-index"/>
       </resource>
-    <resource relative="js">
-      <resource>
-        <get in="*" out="java-script"/>
-      </resource>
-      </resource>
-      <resource relative="themes">
-        <resource relative="img">
-          <resource>
-            <get in="*" out="img"/>
-          </resource>
-        </resource>
-        <resource>
-          <get in="*" out="css"/>
-        </resource>
-      </resource>
-      <resource relative="about">
-        <get in="*" out="about"/>
-      </resource>
+    </resource>
+    <resource relative="about">
+      <get in="*" out="preferences-index"/>
+    </resource>
+    <resource relative="js" recursive="true">
+      <get in="*" out="file"/>
     </resource>
   </resource>  
 <!--}}}-->
