@@ -9,7 +9,6 @@ require 'fileutils'
 require 'logger'
 
 require 'libs/main'
-require 'libs/about'
 #require 'libs/root'
 #require 'libs/impl_services'
 #require 'libs/impl_details'
@@ -47,23 +46,21 @@ run(
         on resource 'wallet' do
           p 'Executing GetWallet (wallet.rb)' if method :get => '*'
         end
-
         on resource 'workflows' do
           p 'Executing GetWorkflows (workflows.rb)' if method :get => '*'
         end
-
         on resource 'preferences' do
           p 'Executing GetPreferences (prefernces.rb)' if method :get => '*'
         end
       end
+
       on resource 'about' do
-        p 'Executing About (about.rb)' if method :get => '*'
-        run About if method :get => '*'
+        run Riddl::Utils::FileServe, 'html/about.html' if method :get => '*'
       end
       on resource 'js' do
-#       p 'Executing jqTouch-request (root.rb)' if method :get => '*'
         run Riddl::Utils::FileServe, 'js' if method :get => '*'
       end
+
     end
   end
 )
