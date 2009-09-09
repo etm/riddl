@@ -14,12 +14,13 @@ module Riddl
 
     attr_reader :env, :req, :res
 
-    def initialize(description,&blk)
+    def initialize(description,cross_site_xhr=false,&blk)
       @description = Riddl::File::new(description)
       @description.load_necessary_handlers!
       raise SpecificationError, 'No RIDDL description found.' unless @description.description?
       raise SpecificationError, 'RIDDL description does not conform to specification' unless @description.validate!
       raise SpecificationError, 'RIDDL description contains invalid resources' unless @description.valid_resources?
+      @cross_site_xhr = cross_site_xhr
       @paths = @description.paths
       @blk = blk
     end
@@ -31,7 +32,6 @@ module Riddl
     def _call(env)
       @pinfo = (env["PATH_INFO"] + '/').gsub(/\/+/,'/')
       @process_out = true
-      @cross_site_xhr = false
       @env = env
       @req = Rack::Request.new(env)
       @res = Rack::Response.new
@@ -43,6 +43,7 @@ module Riddl
         @env.each do |h,v|
           @headers[$1] = v if h =~ /^HTTP_(.*)$/
         end
+        pp @env
         @parameters = Riddl::HttpParser.new(
           @env['QUERY_STRING'],
           @env['rack.input'],
@@ -57,10 +58,25 @@ module Riddl
         @path = ''
         @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_method,@parameters,@headers)
         if @riddl_message_in.nil? && @riddl_message_out.nil?
-          @log.puts "501: the #{@riddl_method} parameters are not matching anything in the description."
-          @res.status = 501 # not implemented?!
+          pp @env.has_key?('HTTP_ORIGIN')
+          pp @cross_site_xhr
+          if @env.has_key?('HTTP_ORIGIN') && @cross_site_xhr
+            @res['Access-Control-Allow-Origin'] = @env['HTTP_ORIGIN']
+            @res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            @res['Access-Control-Max-Age'] = '0'
+            @res['Content-Length'] = '0'
+            @res.status = 200
+            pp @res
+          else
+            @log.puts "501: the #{@riddl_method} parameters are not matching anything in the description."
+            @res.status = 501 # not implemented?!
+          end  
         else  
           instance_eval(&@blk)
+          if @cross_site_xhr
+            @res['Access-Control-Allow-Origin'] = '*'
+            @res['Access-Control-Max-Age'] = '0'
+          end
         end  
       else
         @log.puts "404: this resource for sure does not exist."
@@ -76,9 +92,11 @@ module Riddl
     end
 
     def process_out(pout)
+      pp "hallo1"
       @process_out = pout
     end
     def cross_site_xhr(csxhr)
+      pp "hallo2"
       @cross_site_xhr = csxhr
     end
 
@@ -88,7 +106,6 @@ module Riddl
         response    = w.response
         headers     = w.headers
         @res.status = w.status
-        @res['Access-Control'] = 'allow <*>' if @cross_site_xhr
 
         response = (response.class == Array ? response : [response])
         headers  = (headers.class == Array ? headers : [headers])
