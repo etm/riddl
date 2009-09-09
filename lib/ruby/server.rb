@@ -43,7 +43,6 @@ module Riddl
         @env.each do |h,v|
           @headers[$1] = v if h =~ /^HTTP_(.*)$/
         end
-        pp @env
         @parameters = Riddl::HttpParser.new(
           @env['QUERY_STRING'],
           @env['rack.input'],
@@ -58,15 +57,12 @@ module Riddl
         @path = ''
         @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_method,@parameters,@headers)
         if @riddl_message_in.nil? && @riddl_message_out.nil?
-          pp @env.has_key?('HTTP_ORIGIN')
-          pp @cross_site_xhr
           if @env.has_key?('HTTP_ORIGIN') && @cross_site_xhr
             @res['Access-Control-Allow-Origin'] = @env['HTTP_ORIGIN']
             @res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
             @res['Access-Control-Max-Age'] = '0'
             @res['Content-Length'] = '0'
             @res.status = 200
-            pp @res
           else
             @log.puts "501: the #{@riddl_method} parameters are not matching anything in the description."
             @res.status = 501 # not implemented?!
@@ -92,11 +88,9 @@ module Riddl
     end
 
     def process_out(pout)
-      pp "hallo1"
       @process_out = pout
     end
     def cross_site_xhr(csxhr)
-      pp "hallo2"
       @cross_site_xhr = csxhr
     end
 
