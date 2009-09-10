@@ -88,6 +88,9 @@
     <resource relative="about">
       <get in="*" out="preferences-index"/>
     </resource>
+    <resource relative="about2">
+      <get in="*" out="preferences-index"/>
+    </resource>
     <resource relative="js" recursive="true">
       <get in="*" out="file"/>
     </resource>

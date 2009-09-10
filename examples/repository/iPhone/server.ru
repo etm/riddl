@@ -57,6 +57,9 @@ run(
       on resource 'about' do
         run Riddl::Utils::FileServe, 'html/about.html' if method :get => '*'
       end
+      on resource 'about2' do
+        run Riddl::Utils::FileServe, 'html/about2.html' if method :get => '*'
+      end
       on resource 'js' do
         run Riddl::Utils::FileServe, 'js' if method :get => '*'
       end
