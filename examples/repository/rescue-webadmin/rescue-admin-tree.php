@@ -18,7 +18,7 @@
 <b>Repository:</b><br /><br />
 
 <?php 
-  $tree = new RESCUENavTree("myRepos", "http://sumatra.pri.univie.ac.at:9290/", "Daten");
+  $tree = new RESCUENavTree("myRepos", "http://sumatra.pri.univie.ac.at:9290:/", "Daten");
   $tree->generate();
 ?>
 
