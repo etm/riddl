@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/44/trunk/demos/clock/img
+END
+hour.png
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/32/trunk/demos/clock/img/hour.png
+END
+face.png
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/32/trunk/demos/clock/img/face.png
+END
+minute.png
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/32/trunk/demos/clock/img/minute.png
+END
+startup.png
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/44/trunk/demos/clock/img/startup.png
+END
+second.png
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/32/trunk/demos/clock/img/second.png
+END
