@@ -95,6 +95,7 @@ module Riddl
     end
 
     def run(what,*args)
+      return if @path == ''
       if what.class == Class && what.superclass == Riddl::Implementation
         w = what.new(@headers,@parameters,@pinfo.sub(/\//,'').split('/'),@path.sub(/\//,'').split('/'),@env.reject{|k,v| k =~ /^rack\./},args)
         response    = w.response
@@ -105,6 +106,8 @@ module Riddl
         headers  = (headers.class == Array ? headers : [headers])
         if @process_out && @res.status == 200
           unless @description.check_message(response,headers,@riddl_message_out)
+            pp response
+            pp headers
             @log.puts "500: the return for the #{@riddl_method} is not matching anything in the description."
             @res.status = 500
             return
@@ -129,10 +132,10 @@ module Riddl
       end
       false
     end  
-    def post(min); check(min) && @riddl_method == 'post' end
-    def get(min); check(min) && @riddl_method == 'get' end
-    def delete(min); check(min) && @riddl_method == 'delete' end
-    def put(min); check(min) && @riddl_method == 'put' end
+    def post(min='*'); check(min) && @riddl_method == 'post' end
+    def get(min='*'); check(min) && @riddl_method == 'get' end
+    def delete(min='*'); check(min) && @riddl_method == 'delete' end
+    def put(min='*'); check(min) && @riddl_method == 'put' end
     def check(min)
        @path == @riddl_path[0] && min == @riddl_message_in
     end

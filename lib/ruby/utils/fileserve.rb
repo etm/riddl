@@ -1,21 +1,26 @@
 require 'mime/types'
+require 'digest/md5'
 
 module Riddl
   module Utils
     class FileServe < Riddl::Implementation
       def response
-        if ::File.directory?(@a[0])
-          cur = @r[@m.length..-1]
-          path = "#{@a[0]}/#{cur.join('/')}".gsub(/\/+/,'/')
-          if ::File.directory?(path)
-            return Riddl::Parameter::Complex.new("file","text/html","<b>W00t. It's a directory. Someone has to implement directory listing.</b>")
-          end
-          if ::File.exists?(path)
-            return Riddl::Parameter::Complex.new("file",MIME::Types.type_for(path),::File.open(path,'r'))
-          end
+        path = ::File.file?(@a[0]) ? @a[0] : "#{@a[0]}/#{@r[@m.length..-1].join('/')}".gsub(/\/+/,'/')
+        if ::File.directory?(path)
+          return Riddl::Parameter::Complex.new("file","text/html","<b>W00t. It's a directory. Someone has to implement directory listing.</b>")
         end
-        if ::File.exists?(@a[0])
-          return Riddl::Parameter::Complex.new("file",MIME::Types.type_for(@a[0]),::File.open(@a[0],'r'))
+        if ::File.exists?(path)
+          mtime = ::File.mtime(path)
+          @headers << Riddl::Header.new("Last-Modified",mtime.httpdate)
+          @headers << Riddl::Header.new("ETag",Digest::MD5.hexdigest(mtime.httpdate))
+          htime = @e["HTTP_IF_MODIFIED_SINCE"].nil? ? Time.at(0) : Time.parse(@e["HTTP_IF_MODIFIED_SINCE"])
+          if htime == mtime
+            @headers << Riddl::Header.new("Connection","close")
+            @status = 304 # Not modified
+            return []
+          else 
+            return Riddl::Parameter::Complex.new("file",MIME::Types.type_for(path).to_s,::File.open(path,'r'))
+          end  
         end
         @status = 404
       end  
