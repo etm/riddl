@@ -9,9 +9,9 @@ class RESCUE < Riddl::Implementation
     @status = status
     if status != "200"
       p "An error occurde on resource: groups/#{@r[2...5].join("/")}"
-      return "An error (No. #{status}) occurde on resource: groups/#{@r[2...5].join("/")}"
+      return Riddl::Parameter::Complex.new("feed","text/html") do "An error (No. #{status}) occurde on resource: groups/#{@r[2...5].join("/")}" end
     end
-    html = "<div id=\"#{@r[2...5]}\">\n"
+    html = "<div id=\"#{@r[2...5].join("/")}\">\n"
     Document.new(res[0].value).elements.each("//entry") { |e| 
       id = ""
       link = ""
@@ -27,7 +27,11 @@ class RESCUE < Riddl::Implementation
       html += "\t<li><a href=\"#{link}\">#{id}</a></li>\n"
     }
     html += "</div>\n"
-p html
-    return html
+    ret = Riddl::Parameter::Complex.new("feed","text/html") do
+      html
+    end
+pp ret
+    # Riddl::Parameter::Simple.new("Test", "test_val", "string") 
+    return ret
   end
 end

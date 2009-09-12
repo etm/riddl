@@ -11,7 +11,7 @@
 
 <!-- Messages at RESCUE level -->
   <message name="feed">
-    <parameter name="feed" mimetype="text/xml"/>
+    <parameter name="feed" mimetype="*"/>
   </message>
 
 <!-- Messages at subgroup level -->
