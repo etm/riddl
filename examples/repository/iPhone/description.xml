@@ -10,13 +10,8 @@
   </message>
 
 <!-- Messages at RESCUE level -->
-  <message name="feed">
-    <parameter name="feed" mimetype="*"/>
-  </message>
-
-<!-- Messages at subgroup level -->
-  <message name="subgroups">
-    <parameter name="subgroups" mimetype="text/html"/>
+  <message name="feedAsDiv">
+    <parameter name="div" mimetype="text/html"/>
   </message>
 
 <!-- Messages at service level -->
@@ -50,7 +45,7 @@
     <resource relative="123"> <!-- Redirected resource -->
       <get in="*" out="main"/>
       <resource relative="rescue" recursive="true">
-        <get in="*" out="feed"/>
+        <get in="*" out="feedAsDiv"/>
       </resource>
       <resource relative="wallet">
         <get in="*" out="wallet-index"/>

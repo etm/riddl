@@ -29,7 +29,7 @@ run(
       p 'Executing RootResource - that schould not happen if forwarding is implenebted' if method :get => '*'
 
       on resource '123' do
-
+        run Riddl::Utils::FileServe, 'html/main.html' if method :get => '*'
         # Browse repository (Groups)
         on resource 'rescue' do
           p 'Executing RESCUE-request (rescue.rb)' if method :get => '*'

@@ -60,7 +60,7 @@ else
     puts "Parameter: #{param.name}"
     puts "-" * 50
     pp param
-    #puts "Value:\n"
-    #pp param.value.read
+    puts "Value:\n"
+    pp param.value.read
   end  
 end
