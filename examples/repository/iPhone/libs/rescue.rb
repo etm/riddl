@@ -30,7 +30,7 @@ pp "URI: Rescource: #{@r.join("/")}"
         end
       }
       # Add the following line: <li><a href="#item1">Item 1</a></li>
-      html += "<li class=\"arrow\"><a href=\"#{@r[1...4].join("/")}/#{id}\">#{id}</a></li>\n"
+      html += "<li class=\"arrow\"><a href=\"123/#{@r[1...4].join("/")}/#{id}\">#{id}</a></li>\n"
     }
     html += "</ul>\n"
     html += "</div>\n"
