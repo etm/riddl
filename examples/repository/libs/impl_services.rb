@@ -1,7 +1,7 @@
 class ServicesGET < Riddl::Implementation
   include MarkUSModule
 
-  $url = 'http://localhost:9292/'
+  $url = 'http://sumatra.pri.univie.ac.at:9290/'
 
   def response
     if File.exist?("repository/#{@r[0]}/#{@r[1]}/#{@r.last}") == false

@@ -2,13 +2,15 @@
 require 'rack'
 require 'socket'
 require '../../../lib/ruby/server'
+require '../../../lib/ruby/client'
 require '../../../lib/ruby/utils/fileserve'
 require '../libs/MarkUS_V3.0'
 require 'xml/smart'
 require 'fileutils'
 require 'logger'
 
-require 'libs/main'
+require 'libs/rescue'
+
 #require 'libs/root'
 #require 'libs/impl_services'
 #require 'libs/impl_details'
@@ -24,23 +26,14 @@ run(
     
     # Show the entrie-screen and get re-ridected
     on resource do
-      p 'Executing RootResource - that schould not happen' if method :get => '*'
+      p 'Executing RootResource - that schould not happen if forwarding is implenebted' if method :get => '*'
 
       on resource '123' do
 
         # Browse repository (Groups)
         on resource 'rescue' do
-          p 'Executing GetGroups (rescue.rb)' if method :get => '*'
-
-          # Browse repository (Subgroups)
-          on resource do 
-            p 'Executing GetSubroups (rescue.rb)' if method :get => '*'
-
-            # Browse repository (Services)
-            on resource do 
-              p 'Executing GetServices (rescue.rb)' if method :get => '*'
-            end
-          end
+          p 'Executing RESCUE-request (rescue.rb)' if method :get => '*'
+          run RESCUE if method :get => '*'
         end
 
         on resource 'wallet' do
