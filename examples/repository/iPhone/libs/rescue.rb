@@ -1,7 +1,5 @@
-require 'rexml/document'
-
 class RESCUE < Riddl::Implementation
-  include REXML
+  include MarkUSModule
 
   def response
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[2...5].join("/"))
@@ -10,32 +8,22 @@ class RESCUE < Riddl::Implementation
       p "An error occurde on resource: groups/#{@r[2...5].join("/")}"
       return Riddl::Parameter::Complex.new("feed","text/html") do "An error (No. #{status}) occurde on resource: groups/#{@r[2...5].join("/")}" end
     end
-    html ="
-           <div id=\"rescue\">
-             <div class=\"toolbar\">
-               <h1>#{@r.last}</h1>
-                <a class=\"back button\" href=\"#\">Back</a>
-             </div>
-             <ul>"
-pp "URI: Rescource: #{@r.join("/")}"
-    Document.new(res[0].value).elements.each("//entry") { |e| 
-      id = ""
-      link = ""
-      e.elements.each() { |child| 
-        if child.name == "id"
-          id = child.text
-        end
-        if child.name == "link"
-          link = child.text
-        end
-      }
-      # Add the following line: <li><a href="#item1">Item 1</a></li>
-      html += "<li class=\"arrow\"><a href=\"123/#{@r[1...4].join("/")}/#{id}\">#{id}</a></li>\n"
-    }
-    html += "</ul>\n"
-    html += "</div>\n"
-    Riddl::Parameter::Complex.new("div","text/html") do
-      html
+    html = div_(:id => 'resuce') do
+      div_ :class => "toolbar" do
+        h1_ @r.last
+        a_ "Back", :class => "back button", :href => "#"
+      end
+      ul_ do
+        pp "URI: Rescource: #{@r.join("/")}"
+        XML::Smart::string(res[0].value).find("//entry").each do |e|
+          id = e.find("string(id)")
+          link = e.find("string(link)")
+          li_ :class => "arrow" do
+            a_ id, :href => "123/#{@r[1...4].join("/")}/#{id}"
+          end
+      end
     end
+    Riddl::Parameter::Complex.new("div","text/html",html)
   end
+end
 end

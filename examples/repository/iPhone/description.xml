@@ -42,11 +42,11 @@
 <!--Rescurces {{{-->
 
   <resource>
+    <resource relative="rescue" recursive="true">
+      <get in="*" out="feedAsDiv"/>
+    </resource>
     <resource relative="123"> <!-- Redirected resource -->
       <get in="*" out="main"/>
-      <resource relative="rescue" recursive="true">
-        <get in="*" out="feedAsDiv"/>
-      </resource>
       <resource relative="wallet">
         <get in="*" out="wallet-index"/>
       </resource>
