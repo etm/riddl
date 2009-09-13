@@ -2,7 +2,7 @@
 class GroupsGET < Riddl::Implementation
   include MarkUSModule
 
-  $url = e['HTTP_HOST']
+  $url = @e['HTTP_HOST']
   
   def response
     groups = []

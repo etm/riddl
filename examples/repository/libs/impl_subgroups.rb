@@ -2,7 +2,7 @@
 class SubgroupsGET < Riddl::Implementation
   include MarkUSModule
 
-  $url = e['HTTP_HOST']
+  $url = @e['HTTP_HOST']
 
   def response
     if File.exist?("repository/#{@r[0]}/#{@r.last}") == false
