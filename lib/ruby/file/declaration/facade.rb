@@ -3,7 +3,6 @@ module Riddl
     class Declaration
 
       class Facade
-        #{{{
         def initialize
           @resource = Riddl::File::Description::Resource.new("/")
         end
@@ -76,7 +75,6 @@ module Riddl
         end
 
         attr_reader :resource
-        #}}}
       end
 
     end

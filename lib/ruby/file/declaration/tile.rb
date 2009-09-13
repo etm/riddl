@@ -44,7 +44,7 @@ module Riddl
         end
 
         def add_description(des,desres,path,index,block,res=@base_path,rel="/")
-          #{{
+          #{{{
           res = add_path(path,res)
           res.add_requests(des,desres,index)
           block.each do |bl|
@@ -63,10 +63,12 @@ module Riddl
         end
           
         def compose!(res=@base_path)
+          #{{{
           res.compose!
           res.resources.each do |k,r|
             compose!(r)
           end
+          #}}}
         end
 
         def add_path(path,res)

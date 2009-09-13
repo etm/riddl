@@ -30,14 +30,18 @@ module Riddl
         #}}}
       end
 
-      def merge_tiles(res)
-        #pp res.path
-        #pp res.resources
+      def merge_tiles(res,fac=@fac.resource)
+        pp res.path
+        pp res.resources
       end
       private :merge_tiles
 
+      private :merge_tiles_rec
+
       def initialize(riddl)
-        #{{
+        @fac = Riddl::File::Description::Resource.new("/")
+
+        #{{{
         ### create single tiles
         @tiles = []
         riddl.find("/dec:declaration/dec:facade/dec:tile").each do |tile|
@@ -63,7 +67,6 @@ module Riddl
         end
 
         ### merge tiles into a facade
-        @fac = Facade.new
         @tiles.each do |til|
           merge_tiles(til.resource)
         end
