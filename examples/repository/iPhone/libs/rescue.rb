@@ -16,7 +16,9 @@ class RESCUE < Riddl::Implementation
       end
       ul_ do
         pp "URI: Rescource: #{@r.join("/")}"
-        XML::Smart::string(res[0].value.read).find("//entry").each do |e|
+        str = res[0].value.read
+        puts str
+        XML::Smart::string(str).find("//entry").each do |e|
           id = e.find("string(id)")
           link = e.find("string(link)")
           li_ :class => "arrow" do

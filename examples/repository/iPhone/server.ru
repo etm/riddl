@@ -10,7 +10,7 @@ require 'fileutils'
 require 'logger'
 
 require 'libs/rescue'
-
+require 'libs/forward'
 #require 'libs/root'
 #require 'libs/impl_services'
 #require 'libs/impl_details'
@@ -26,14 +26,14 @@ run(
     
     # Show the entrie-screen and get re-ridected
     on resource do
-      p 'Executing RootResource - that schould not happen if forwarding is implenebted' if method :get => '*'
+      run Forward if get
 
       on resource 'rescue' do
         p 'Executing RESCUE-request (rescue.rb)' if method :get => '*'
         run RESCUE if method :get => '*'
       end
 
-      on resource '123' do
+      on resource do
         run Riddl::Utils::FileServe, 'html/main.html' if method :get => '*'
         # Browse repository (Groups)
 

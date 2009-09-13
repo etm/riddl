@@ -19,6 +19,9 @@
     <parameter name="services" mimetype="text/html"/>
   </message>
 
+  <message name="redirect">
+    <header name="location" type="string"/>
+  </message>
 
 <!-- Messages at wallet level -->
   <message name="wallet-index">
@@ -42,10 +45,11 @@
 <!--Rescurces {{{-->
 
   <resource>
+    <get in="*" out="redirect"/>
     <resource relative="rescue" recursive="true">
       <get in="*" out="feedAsDiv"/>
     </resource>
-    <resource relative="123"> <!-- Redirected resource -->
+    <resource> <!-- Redirected resource -->
       <get in="*" out="main"/>
       <resource relative="wallet">
         <get in="*" out="wallet-index"/>

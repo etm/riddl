@@ -106,8 +106,6 @@ module Riddl
         headers  = (headers.class == Array ? headers : [headers])
         if @process_out && @res.status == 200
           unless @description.check_message(response,headers,@riddl_message_out)
-            pp response
-            pp headers
             @log.puts "500: the return for the #{@riddl_method} is not matching anything in the description."
             @res.status = 500
             return
@@ -115,12 +113,12 @@ module Riddl
         end
         if @res.status == 200
           @res.write HttpGenerator.new(response,@res).generate.read
-          headers.each do |h|
-            if h.class == Riddl::Header
-              @res[h.name] = h.value
-            end  
-          end
         end  
+        headers.each do |h|
+          if h.class == Riddl::Header
+            @res[h.name] = h.value
+          end  
+        end
       end
     end
 
