@@ -9,14 +9,9 @@
     <parameter name="main" mimetype="text/html"/>
   </message>
 
-<!-- Messages at group level -->
-  <message name="groups">
-    <parameter name="groups" mimetype="text/html"/>
-  </message>
-
-<!-- Messages at subgroup level -->
-  <message name="subgroups">
-    <parameter name="subgroups" mimetype="text/html"/>
+<!-- Messages at RESCUE level -->
+  <message name="feedAsDiv">
+    <parameter name="div" mimetype="text/html"/>
   </message>
 
 <!-- Messages at service level -->
@@ -24,10 +19,6 @@
     <parameter name="services" mimetype="text/html"/>
   </message>
 
-<!-- Messages at about level -->
-  <message name="about">
-    <parameter name="about" mimetype="text/html"/>
-  </message>
 
 <!-- Messages at wallet level -->
   <message name="wallet-index">
@@ -44,19 +35,6 @@
     <parameter name="prefernces-index" mimetype="text/html"/>
   </message>
 
-<!-- Messages for java scripts/css>
-  <message name="java-script">
-    <parameter name="java-script" mimetype="application/x-javascript"/>
-  </message>
-
-  <message name="css">
-    <parameter name="css" mimetype="text/css"/>
-  </message>
-
-  <message name="img">
-    <parameter name="img" mimetype="image/png"/>
-  </message -->
-
   <message name="file">
     <parameter name="file" mimetype="*"/>
   </message>
@@ -66,14 +44,8 @@
   <resource>
     <resource relative="123"> <!-- Redirected resource -->
       <get in="*" out="main"/>
-      <resource relative="rescue">
-        <get in="*" out="groups"/>
-        <resource> <!-- Groups -->
-          <get in="*" out="subgroups"/>
-          <resource> <!-- Subroups -->
-            <get in="*" out="services"/>
-          </resource>
-        </resource>
+      <resource relative="rescue" recursive="true">
+        <get in="*" out="feedAsDiv"/>
       </resource>
       <resource relative="wallet">
         <get in="*" out="wallet-index"/>

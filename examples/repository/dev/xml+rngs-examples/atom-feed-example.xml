@@ -5,17 +5,17 @@
 <id>http://localhost:9292/groups/</id>
 <link type="application/atom+xml" rel="self" href="http://localhost:9292/groups/"/>
 <entry lang="EN">
-<id>http://localhost:9292/groups/testgroup/</id>
+<id>testgroup/</id>
 <link>http://localhost:9292/groups/testgroup/</link>
 <updated>2009-08-11T17:49:34+02:00</updated>
 </entry>
 <entry lang="EN">
-<id>http://localhost:9292/groups/cinemas/</id>
+<id>cinemas/</id>
 <link>http://localhost:9292/groups/cinemas/</link>
 <updated>2009-08-11T14:52:13+02:00</updated>
 </entry>
 <entry lang="EN">
-<id>http://localhost:9292/groups/transport/</id>
+<id>transport/</id>
 <link>http://localhost:9292/groups/transport/</link>
 <updated>2009-08-11T14:52:13+02:00</updated>
 </entry>
