@@ -17,20 +17,35 @@ class RESCUE < Riddl::Implementation
     end
 
     html = div_ :id => 'rescue', :class => "edgetoedge" do
-      div_ :class => "toolbar" do
-        h1_ @r.last.capitalize
-        a_ "Back", :class => "back button", :href => "#"
+      if path.size <= 2 #Groups or Subgrops
+        div_ :class => "toolbar" do
+          h1_ @r.last.capitalize
+          a_ "Back", :class => "back button", :href => "#"
+        end
+        ul_ do
+          feed = XML::Smart::string(res[0].value.read)
+          feed.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
+          letter = ""
+          feed.find("//atom:entry").each do |e|
+            id = e.find("string(atom:id)")
+            if letter != id[0,1]
+              letter = id[0,1]
+              l_ letter.capitalize, :class => "head"
+            end
+            li_  do
+              a_ id.capitalize, :href => "rescue/#{path.join("/")}/#{id}"
+            end
+          end  
+        end
       end
-      ul_ do
-        pp "URI: Rescource: groups/#{path.join("/")}"
-        feed = XML::Smart::string(res[0].value.read)
-        feed.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
-        feed.find("//atom:entry").each do |e|
-          id = e.find("string(atom:id)")
-          li_ :class => "arrow" do
-            a_ id.capitalize, :href => "rescue/#{path.join("/")}/#{id}"
-          end
-        end  
+      if path.size == 3 # Servicedetails
+        details = XML::Smart::string(res[0].value.read)
+        div_ :class => "toolbar" do
+          h1_ @r.last.capitalize
+          a_ "Back", :class => "back button", :href => "#"
+        end
+pp details.find("/det:details/det:vendor/det:name", {"det" => "http://rescue.org/servicedestails"}).first.name
+        h1_ details.find("details/vendor/name").to_s
       end
     end
     Riddl::Parameter::Complex.new("div","text/html",html)
