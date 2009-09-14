@@ -54,36 +54,35 @@ class RESCUE < Riddl::Implementation
           h1_ name
           a_ "Back", :class => "back button", :href => "#"
         end
-        table_  do
-          tr_ do
-            td_ :colspan => "2" do h4_ "Adress" end
+        div_ :class => "contact", :align=>"center" do
+          br_
+          br_
+          h3_ "Contact", :style=>"font-size: 24pt; color: #FFFFFF"
+          br_
+          div_ :style=>"font-size: 18px" do
+            span_ do b_ name end
+            br_
+            span_ street + " " + houseno
+            br_
+            span_ zip + " " + city
+            br_
+            span_ state
           end
-          tr_ do
-            td_ street
-            td_ houseno, :align=>"right"
-          end
-          tr_ do
-            td_ zip
-            td_ city
-          end
-          tr_ do
-            td_ state, :colspan => "2"
-          end
-        end
-        br_
-        br_
-        table_ do
-          tr_ do
-            td_ "Phone:"
-            td_ do a_ phone, :href => "tel:#{phone}" end
-          end
-          tr_ do
-            td_ "@Mail:"
-            td_ do a_ mail, :href => "mailto:#{mail}" end
-          end
-          tr_ do
-            td_ "URI:"
-            td_ do a_ uri, :href => uri end
+          br_
+          br_
+          table_ :style=>"font-size: 18px" do
+            tr_ do
+              td_ "Phone:"
+              td_ do a_ phone, :href => "tel:#{phone}" end
+            end
+            tr_ do
+              td_ "@Mail:"
+              td_ do a_ mail, :href => "mailto:#{mail}" end
+            end
+            tr_ do
+              td_ "URI:"
+              td_ do a_ uri, :href => uri end
+            end
           end
         end
       end
