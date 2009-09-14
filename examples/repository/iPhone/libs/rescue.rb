@@ -3,21 +3,16 @@ class RESCUE < Riddl::Implementation
 
   def response
 
-    # This generation of the path seems to be necessary because jqTuche adds som elements to the URI itself
-    path = Array.new()
-    for i in 0..@r.size-1 do
-      path << @r[i] if @r[i] != "rescue"
-    end
-
-    client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + path.join("/"))
+    client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[1...4].join("/"))
     status, res = client.request "get" => []
     if status != "200"
-      p "An error occurde on resource: groups/#{path.join("/")}"
-      return Riddl::Parameter::Complex.new("feed","text/html") do "An error (No. #{status}) occurde on resource: groups/#{path.join("/")}" end
+      p "An error occurde on resource: groups/#{@r[1...4].join("/")}"
+      return Riddl::Parameter::Complex.new("feed","text/html") do "An error (No. #{status}) occurde on resource: groups/#{@r[1...4].join("/")}" end
     end
 
-    html = div_ :id => 'rescue', :class => "edgetoedge" do
-      if path.size <= 2 #Groups or Subgrops
+    html = ""
+    if @r.size <= 3 #Groups or Subgrops
+      html = div_ :id => 'rescue', :class => "edgetoedge" do
         div_ :class => "toolbar" do
           h1_ @r.last.capitalize
           a_ "Back", :class => "back button", :href => "#"
@@ -30,24 +25,70 @@ class RESCUE < Riddl::Implementation
             id = e.find("string(atom:id)")
             if letter != id[0,1]
               letter = id[0,1]
-              l_ letter.capitalize, :class => "head"
+              li_ letter.capitalize, :class => "head"
             end
-            li_  do
-              a_ id.capitalize, :href => "rescue/#{path.join("/")}/#{id}"
+            li_ do
+              a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}"
             end
           end  
         end
       end
-      if path.size == 3 # Servicedetails
+    end
+    if @r.size == 4 # Servicedetails
+      html = div_ :id => 'rescue' do
+
         details = XML::Smart::string(res[0].value.read)
+        details.namespaces = {"d" => "http://rescue.org/servicedetails"}
+
+        name = details.find("d:details/d:vendor/text()").first.to_s
+        street = details.find("/d:details/d:adress/d:street/text()").first.to_s
+        houseno = details.find("/d:details/d:adress/d:housenumber/text()").first.to_s
+        zip = details.find("/d:details/d:adress/d:ZIP/text()").first.to_s
+        city = details.find("/d:details/d:adress/d:city/text()").first.to_s
+        state = details.find("/d:details/d:adress/d:state/text()").first.to_s
+        phone = details.find("/d:details/d:phone/text()").first.to_s
+        mail = details.find("/d:details/d:mail/text()").first.to_s
+        uri = details.find("/d:details/d:URI/text()").first.to_s
+
         div_ :class => "toolbar" do
-          h1_ @r.last.capitalize
+          h1_ name
           a_ "Back", :class => "back button", :href => "#"
         end
-pp details.find("/det:details/det:vendor/det:name", {"det" => "http://rescue.org/servicedestails"}).first.name
-        h1_ details.find("details/vendor/name").to_s
+        table_  do
+          tr_ do
+            td_ :colspan => "2" do h4_ "Adress" end
+          end
+          tr_ do
+            td_ street
+            td_ houseno, :align=>"right"
+          end
+          tr_ do
+            td_ zip
+            td_ city
+          end
+          tr_ do
+            td_ state, :colspan => "2"
+          end
+        end
+        br_
+        br_
+        table_ do
+          tr_ do
+            td_ "Phone:"
+            td_ do a_ phone, :href => "tel:#{phone}" end
+          end
+          tr_ do
+            td_ "@Mail:"
+            td_ do a_ mail, :href => "mailto:#{mail}" end
+          end
+          tr_ do
+            td_ "URI:"
+            td_ do a_ uri, :href => uri end
+          end
+        end
       end
     end
     Riddl::Parameter::Complex.new("div","text/html",html)
   end
 end
+
