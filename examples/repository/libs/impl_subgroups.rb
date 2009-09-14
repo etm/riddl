@@ -12,8 +12,7 @@ class SubgroupsGET < Riddl::Implementation
     end
 
     groups = []
-    dirs = Dir["repository/#{@r[0]}/#{@r.last}/*"]
-    dirs.each do |f|
+    Dir["repository/#{@r[0]}/#{@r.last}/*"].sort.each do |f|
       if File::directory? f
         groups << File::basename(f) 
       end  

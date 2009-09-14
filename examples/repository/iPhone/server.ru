@@ -7,14 +7,9 @@ require '../../../lib/ruby/utils/fileserve'
 require '../libs/MarkUS_V3.0'
 require 'xml/smart'
 require 'fileutils'
-#require 'logger'
 
 require 'libs/rescue'
-require 'libs/forward'
-#require 'libs/root'
-#require 'libs/impl_services'
-#require 'libs/impl_details'
-#require 'libs/impl_root'
+#require 'libs/forward'
 
 use Rack::ShowStatus
 options = {:Port => 9291, :Host => "0.0.0.0", :AccessLog => []}
@@ -26,7 +21,7 @@ run(
     
     # Show the entrie-screen and get re-ridected
     on resource do
-      run Forward if get
+#      run Forward if get
 
       on resource 'rescue' do
         p 'Executing RESCUE-request (rescue.rb)' if method :get => '*'

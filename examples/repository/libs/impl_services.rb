@@ -10,7 +10,7 @@ class ServicesGET < Riddl::Implementation
       return
     end
     groups = []
-    Dir["repository/#{@r[0]}/#{@r[1]}/#{@r.last}/*"].each do |f|
+    Dir["repository/#{@r[0]}/#{@r[1]}/#{@r.last}/*"].sort.each do |f|
       if File::directory? f
         groups << File::basename(f) 
       end  
