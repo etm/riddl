@@ -2,9 +2,9 @@
 class GroupsGET < Riddl::Implementation
   include MarkUSModule
 
-  $url = @e['HTTP_HOST']
   
   def response
+    $url = "http://" + @e['HTTP_HOST'] + "/"
     groups = []
     Dir["repository/#{@r[0]}/*"].each do |f|
       if File::directory? f
@@ -207,7 +207,6 @@ end
 class GroupProperties < Riddl::Implementation
   include MarkUSModule
 
-  $url = 'http://localhost:9292/'
   
   def response
     fileName = "repository/#{@r[0]}/#{@r[1]}/properties.xml"
@@ -230,7 +229,6 @@ end
 class GroupQueryInput < Riddl::Implementation
   include MarkUSModule
 
-  $url = 'http://localhost:9292/'
   
   def response
     fileName = "repository/#{@r[0]}/#{@r[1]}/query-input.xml"
@@ -250,8 +248,6 @@ end
 class GroupQueryOutput < Riddl::Implementation
   include MarkUSModule
 
-  $url = 'http://localhost:9292/'
-  
   def response
     fileName = "repository/#{@r[0]}/#{@r[1]}/query-output.xml"
     if File.exist?(fileName) == false
@@ -270,7 +266,6 @@ end
 class GroupInvokeInput < Riddl::Implementation
   include MarkUSModule
 
-  $url = 'http://localhost:9292/'
   
   def response
     fileName = "repository/#{@r[0]}/#{@r[1]}/invoke-input.xml"
@@ -291,7 +286,6 @@ end
 class GroupInvokeOutput < Riddl::Implementation
   include MarkUSModule
 
-  $url = 'http://localhost:9292/'
   
   def response
     fileName = "repository/#{@r[0]}/#{@r[1]}/invoke-output.xml"

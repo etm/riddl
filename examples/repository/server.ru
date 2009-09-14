@@ -6,7 +6,8 @@ require '../../lib/ruby/server'
 require 'libs/MarkUS_V3.0'
 require 'xml/smart'
 require 'fileutils'
-require 'logger'
+
+#require 'logger'
 
 
 require 'libs/impl_groups'
@@ -17,14 +18,14 @@ require 'libs/impl_root'
 
 use Rack::ShowStatus
 
-options = {:Port => 9290, :Host => "0.0.0.0", :AccessLog => [Logger.new('server.log')]}
+options = {:Port => 9290, :Host => "0.0.0.0", :AccessLog => []}
 $0 = "RESCUE"
+
 
 run(
   Riddl::Server.new("description.xml") do
   $0 = "RESCUE - Server Port: 9290"
     process_out false
-    
     on resource do
         p 'Processing description ....' if method :riddl => '*'
         run RootGET if method :riddl => '*'

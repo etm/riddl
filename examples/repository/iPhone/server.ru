@@ -7,7 +7,7 @@ require '../../../lib/ruby/utils/fileserve'
 require '../libs/MarkUS_V3.0'
 require 'xml/smart'
 require 'fileutils'
-require 'logger'
+#require 'logger'
 
 require 'libs/rescue'
 require 'libs/forward'

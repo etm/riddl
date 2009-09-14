@@ -2,6 +2,7 @@ class RESCUE < Riddl::Implementation
   include MarkUSModule
 
   def response
+pp @e
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[1..5].join("/"))
     status, res = client.request "get" => []
     if status != "200"

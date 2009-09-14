@@ -2,9 +2,9 @@
 class SubgroupsGET < Riddl::Implementation
   include MarkUSModule
 
-  $url = @e['HTTP_HOST']
 
   def response
+    $url = "http://" + @e['HTTP_HOST'] + "/"
     if File.exist?("repository/#{@r[0]}/#{@r.last}") == false
       @status = 410 # 410: Gone
       p "Group not found"
