@@ -35,9 +35,10 @@ run(
 
         on resource 'wallet' do
           p 'Executing GetWallet (wallet.rb)' if method :get => '*'
+          run GetWallet if method :get => '*'
 
           p 'Executing AddToWallet (wallet.rb)' if method :post => 'addToWallet'
-          run AddToWallet if method :post => 'addToWallet'          
+          run AddToWallet if method :post => 'addToWallet'
         end
         on resource 'workflows' do
           p 'Executing GetWorkflows (workflows.rb)' if method :get => '*'

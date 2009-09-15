@@ -4,11 +4,10 @@ class RESCUE < Riddl::Implementation
   def response
 
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[2...5].join("/"))
-pp "groups/" + @r[2...5].join("/")
     status, res = client.request "get" => []
     if status != "200"
       p "An error occurde on resource: groups/#{@r[2...5].join("/")}"
-      return Riddl::Parameter::Complex.new("feed","text/html") do "An error (No. #{status}) occurde on resource: groups/#{@r[2...5].join("/")}" end
+      return Riddl::Parameter::Complex.new("html","text/html") do "An error (No. #{status}) occurde on resource: groups/#{@r[2...5].join("/")}" end
     end
 
     html = ""
@@ -19,7 +18,7 @@ pp "groups/" + @r[2...5].join("/")
     if @r.size == 5 # Servicedetails
       html = generateDetails(xml)
     end
-    Riddl::Parameter::Complex.new("div","text/html",html)
+    Riddl::Parameter::Complex.new("hmtl","text/html",html)
   end
 
   def generateList( feed )
@@ -40,27 +39,53 @@ pp "groups/" + @r[2...5].join("/")
           li_ do
             form_ :id=>"ajax_post", :action=>"wallet", :method=>"POST", :class=>"form" do
               a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}", :style => "display:inline"
-              input_ :type=>"hidden", :name=>"resource", :value=>@r.join("/")+"/"+id, :style => "display:inline"
-              input_ :type=>"image", :style => "display:inline; position: absolute; right: 0;", :src=>"/js/custom/plusButton.png", :value=>"Add"
+              input_ :type=>"hidden", :name=>"resource", :value=>@r[2...5].join("/")+"/"+id, :style => "display:inline"
+              input_ :type=>"submit", :style => "display:inline; position: absolute; right: 0;", :value=>"Add"
             end
           end
         end  
       end
     end
   end
-
+=begin
+  def generateList( feed )
+    div_ :id => 'rescue', :class => "edgetoedge" do
+      div_ :class => "toolbar" do
+        h1_ @r.last.capitalize
+        a_ "Back", :class => "back button", :href => "#"
+      end
+      ul_ do
+        feed.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
+        letter = ""
+        feed.find("//atom:entry").each do |e|
+          id = e.find("string(atom:id)")
+          if letter != id[0,1]
+            letter = id[0,1]
+            li_ letter.capitalize, :class => "head"
+          end
+          li_ do
+            form_ :id=>"ajax_post", :action=>"wallet", :method=>"POST", :class=>"form" do
+              a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}", :style => "display:inline"
+              input_ :type=>"hidden", :name=>"resource", :value=>@r[2...5].join("/")+"/"+id, :style => "display:inline"
+              input_ :type=>"submit", :style => "display:inline; position: absolute; right: 0;", :value=>"Add"
+            end
+          end
+        end  
+      end
+    end
+  end
+=end
   def generateDetails( details )
-    details.namespaces = {"d" => "http://rescue.org/servicedetails"}
     div_ :id => 'rescue' do
-      name = details.find("d:details/d:vendor/text()").first.to_s
-      street = details.find("/d:details/d:adress/d:street/text()").first.to_s
-      houseno = details.find("/d:details/d:adress/d:housenumber/text()").first.to_s
-      zip = details.find("/d:details/d:adress/d:ZIP/text()").first.to_s
-      city = details.find("/d:details/d:adress/d:city/text()").first.to_s
-      state = details.find("/d:details/d:adress/d:state/text()").first.to_s
-      phone = details.find("/d:details/d:phone/text()").first.to_s
-      mail = details.find("/d:details/d:mail/text()").first.to_s
-      uri = details.find("/d:details/d:URI/text()").first.to_s
+      name = details.find("string(details/vendor)")
+      street = details.find("string(details/adress/street)")
+      houseno = details.find("string(details/adress/housenumber)")
+      zip = details.find("string(details/adress/ZIP)")
+      city = details.find("string(details/adress/city)")
+      state = details.find("string(details/adress/state)")
+      phone = details.find("string(details/phone)")
+      mail = details.find("string(details/mail)")
+      uri = details.find("string(details/URI)")
 
       div_ :class => "toolbar" do
         h1_ name

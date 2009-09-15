@@ -4,46 +4,34 @@
              xmlns:xi="http://www.w3.org/2001/XInclude">
 
 <!--Messages {{{-->
-<!-- Messages at root level -->
-  <message name="main">
-    <parameter name="main" mimetype="text/html"/>
+  <message name="html">
+    <parameter name="html" mimetype="text/html"/>
   </message>
+
+  <message name="file">
+    <parameter name="file" mimetype="*"/>
+  </message>
+
+<!-- Messages at root level -->
 
 <!-- Messages at RESCUE level -->
-  <message name="feedAsDiv">
-    <parameter name="div" mimetype="text/html"/>
-  </message>
 
 <!-- Messages at service level -->
-  <message name="services">
-    <parameter name="services" mimetype="text/html"/>
-  </message>
 
   <message name="redirect">
     <header name="location" type="string"/>
   </message>
 
 <!-- Messages at wallet level -->
-  <message name="wallet-index">
-    <parameter name="wallet-index" mimetype="text/html"/>
-  </message>
+
   <message name="addToWallet">
     <parameter name="resource" type="string"/>
   </message>
 
 <!-- Messages at workflow level -->
-  <message name="workflow-index">
-    <parameter name="workflow-index" mimetype="text/html"/>
-  </message>
 
 <!-- Messages at preferences level -->
-  <message name="preferences-index">
-    <parameter name="prefernces-index" mimetype="text/html"/>
-  </message>
 
-  <message name="file">
-    <parameter name="file" mimetype="*"/>
-  </message>
 <!--}}}-->
 <!--Rescurces {{{-->
 
@@ -51,32 +39,32 @@
     <get in="*" out="redirect"/>
 
     <resource> <!-- Redirected resource -->
-      <get in="*" out="main"/>
+      <get in="*" out="html"/>
 
       <resource relative="rescue" recursive="true">
-        <get in="*" out="feedAsDiv"/>
+        <get in="*" out="html"/>
       </resource>
 
       <resource relative="wallet">
-        <get in="*" out="wallet-index"/>
-        <post in="addToWallet"/>
+        <get in="*" out="html"/>
+        <post in="addToWallet" out="html"/>
       </resource>
 
       <resource relative="workflows">
-        <get in="*" out="workflow-index"/>
+        <get in="*" out="html"/>
       </resource>
 
       <resource relative="preferences">
-        <get in="*" out="preferences-index"/>
+        <get in="*" out="html"/>
       </resource>
     </resource>
 
     <resource relative="about">
-      <get in="*" out="preferences-index"/>
+      <get in="*" out="html"/>
     </resource>
 
     <resource relative="about2">
-      <get in="*" out="preferences-index"/>
+      <get in="*" out="hmtl"/>
     </resource>
     <resource relative="js" recursive="true">
       <get in="*" out="file"/>
