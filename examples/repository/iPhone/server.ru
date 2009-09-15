@@ -24,14 +24,14 @@ run(
     on resource do
       run Forward if get
 
-      on resource 'rescue' do
-        p 'Executing RESCUE-request (rescue.rb)' if method :get => '*'
-        run RESCUE if method :get => '*'
-      end
-
       on resource do
         run Riddl::Utils::FileServe, 'html/main.html' if method :get => '*'
         # Browse repository (Groups)
+
+        on resource 'rescue' do
+          p 'Executing RESCUE-request (rescue.rb)' if method :get => '*'
+          run RESCUE if method :get => '*'
+        end
 
         on resource 'wallet' do
           p 'Executing GetWallet (wallet.rb)' if method :get => '*'

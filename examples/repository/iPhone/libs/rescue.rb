@@ -3,19 +3,20 @@ class RESCUE < Riddl::Implementation
 
   def response
 
-    client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[1...4].join("/"))
+    client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[2...5].join("/"))
+pp "groups/" + @r[2...5].join("/")
     status, res = client.request "get" => []
     if status != "200"
-      p "An error occurde on resource: groups/#{@r[1...4].join("/")}"
-      return Riddl::Parameter::Complex.new("feed","text/html") do "An error (No. #{status}) occurde on resource: groups/#{@r[1...4].join("/")}" end
+      p "An error occurde on resource: groups/#{@r[2...5].join("/")}"
+      return Riddl::Parameter::Complex.new("feed","text/html") do "An error (No. #{status}) occurde on resource: groups/#{@r[2...5].join("/")}" end
     end
 
     html = ""
     xml = XML::Smart::string(res[0].value.read)
-    if @r.size <= 3 #Groups or Subgrops
+    if @r.size <= 4 #Groups or Subgrops
       html = generateList(xml)
     end
-    if @r.size == 4 # Servicedetails
+    if @r.size == 5 # Servicedetails
       html = generateDetails(xml)
     end
     Riddl::Parameter::Complex.new("div","text/html",html)
@@ -37,12 +38,10 @@ class RESCUE < Riddl::Implementation
             li_ letter.capitalize, :class => "head"
           end
           li_ do
-            # 123 needs to be changed to be dynamic
-            form_ :id=>"ajax_post", :action=>"123/wallet", :method=>"POST", :class=>"form" do
+            form_ :id=>"ajax_post", :action=>"wallet", :method=>"POST", :class=>"form" do
               a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}", :style => "display:inline"
-              input_ :hidden=>"text", :name=>"resource", :value=>@r.join("/")+"/"+id, :style => "display:inline"
-              input_ :type=>"submit", :style => "display:inline"
-              a_ "Add to wallet", :style=>"margin:0 10px;color:rgba(0,0,0,.9); display:inline", :href=>"#", :class=>"submit whiteButton"
+              input_ :type=>"hidden", :name=>"resource", :value=>@r.join("/")+"/"+id, :style => "display:inline"
+              input_ :type=>"image", :style => "display:inline; position: absolute; right: 0;", :src=>"/js/custom/plusButton.png", :value=>"Add"
             end
           end
         end  

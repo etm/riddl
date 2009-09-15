@@ -49,12 +49,13 @@
 
   <resource>
     <get in="*" out="redirect"/>
-    <resource relative="rescue" recursive="true">
-      <get in="*" out="feedAsDiv"/>
-    </resource>
 
     <resource> <!-- Redirected resource -->
       <get in="*" out="main"/>
+
+      <resource relative="rescue" recursive="true">
+        <get in="*" out="feedAsDiv"/>
+      </resource>
 
       <resource relative="wallet">
         <get in="*" out="wallet-index"/>
