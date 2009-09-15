@@ -9,6 +9,7 @@ require 'xml/smart'
 require 'fileutils'
 
 require 'libs/rescue'
+require 'libs/wallet'
 #require 'libs/forward'
 
 use Rack::ShowStatus
@@ -34,6 +35,9 @@ run(
 
         on resource 'wallet' do
           p 'Executing GetWallet (wallet.rb)' if method :get => '*'
+
+          p 'Executing AddToWallet (wallet.rb)' if method :post => 'addToWallet'
+          run AddToWallet if method :post => 'addToWallet'          
         end
         on resource 'workflows' do
           p 'Executing GetWorkflows (workflows.rb)' if method :get => '*'
