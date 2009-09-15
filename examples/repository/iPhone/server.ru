@@ -10,7 +10,7 @@ require 'fileutils'
 
 require 'libs/rescue'
 require 'libs/wallet'
-#require 'libs/forward'
+require 'libs/forward'
 
 use Rack::ShowStatus
 options = {:Port => 9291, :Host => "0.0.0.0", :AccessLog => []}
@@ -22,7 +22,7 @@ run(
     
     # Show the entrie-screen and get re-ridected
     on resource do
-#      run Forward if get
+      run Forward if get
 
       on resource 'rescue' do
         p 'Executing RESCUE-request (rescue.rb)' if method :get => '*'

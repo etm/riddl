@@ -37,12 +37,12 @@ class RESCUE < Riddl::Implementation
             li_ letter.capitalize, :class => "head"
           end
           li_ do
-# 123 needs to be changed to be dynamic
+            # 123 needs to be changed to be dynamic
             form_ :id=>"ajax_post", :action=>"123/wallet", :method=>"POST", :class=>"form" do
-              a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}"
-              input_ :hidden=>"text", :name=>"resource", :value=>@r.join("/")+"/"+id
-              input_ :type=>"submit"
-              a_ "Add to wallet", :style=>"margin:0 10px;color:rgba(0,0,0,.9); size", :href=>"#", :class=>"submit whiteButton"
+              a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}", :style => "display:inline"
+              input_ :hidden=>"text", :name=>"resource", :value=>@r.join("/")+"/"+id, :style => "display:inline"
+              input_ :type=>"submit", :style => "display:inline"
+              a_ "Add to wallet", :style=>"margin:0 10px;color:rgba(0,0,0,.9); display:inline", :href=>"#", :class=>"submit whiteButton"
             end
           end
         end  
