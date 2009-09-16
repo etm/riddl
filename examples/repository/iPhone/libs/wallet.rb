@@ -38,8 +38,8 @@ class GetWallet < Riddl::Implementation
 
   def response
     # If Wallet is empty
-    if File.exist?("user/#{@r[0]}/wallet") == false
-      p "Wallet does not exists"
+    if ((File.exist?("user/#{@r[0]}/wallet") == false) || (Dir["user/#{@r[0]}/wallet/*"].size == 0))
+      p "Wallet does not exists or is empty"
       Riddl::Parameter::Complex.new("html","text/html") do
         div_ :id => 'wallet' do  
           div_ :class => "toolbar" do
@@ -49,7 +49,7 @@ class GetWallet < Riddl::Implementation
           div_ :class => "message", :align=>"center" do
             br_
             br_
-            h3_ "Your wallet is empty", :style=>"font-size: 24pt; color: #FFFFFF"
+            h3_ "Your wallet is empty", :style=>"font-size: 24pt;"
           end
         end
       end

@@ -64,7 +64,7 @@ class RESCUE < Riddl::Implementation
       div_ :class => "contact", :align=>"center" do
         br_
         br_
-        h3_ "Contact", :style=>"font-size: 24pt; color: #FFFFFF"
+        h2_ "Contact", :style=>"font-size: 24pt;"
         br_
         div_ :style=>"font-size: 18px" do
           span_ do b_ name end
