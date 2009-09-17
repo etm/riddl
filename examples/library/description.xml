@@ -51,7 +51,8 @@
   </message>
 
   <resource>
-    <get in="*" out="html-output"/>
+    <get in="*"/>
+    <!--get in="*" out="html-output"/-->
     <resource relative="books">
       <post in="book-description-form" out="book-id"/>
       <post in="book-description" out="book-id"/>
