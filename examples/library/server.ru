@@ -1,6 +1,7 @@
 require 'rack'
 require 'socket'
 require '../../lib/ruby/server'
+require '../../lib/ruby/utils/erbserve'
 require 'pp'
 
 use Rack::ShowStatus
@@ -33,10 +34,13 @@ run(
   Riddl::Server.new("description.xml") do
     process_out false
     on resource do
-      run HtmlTest if get
+      run Riddl::Utils::ERBServe, "static/info.txt"  if get
       on resource "books" do
         run BookQuery if method :get => 'book-query'
       end
+    end
+    on resource "about" do
+      run Riddl::Utils::ERBServe, "static/info.txt"  if get
     end
   end
 )
