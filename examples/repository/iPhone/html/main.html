@@ -27,7 +27,6 @@
       });
 
         function addToWallet(resource, url) {
-//          if(!confirm("Add '" + resource + "' to your wallet?")) return;
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
           request.open('post', url, true);
@@ -49,17 +48,17 @@
         }
 
         function removeFromWallet(resource, url) {
-//          if(!confirm("Remove '" + $('#' + resource + ' > span').text() + "' from your wallet?")) return;
+//console.log(resource);
+//console.log($('#'+resource).html());
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
           request.open('delete', url, true);
           request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-          request.send('resource='+$('#' + resource + ' > span').text());
-          //while(request.readyState != 4); //console.log("request.readyState = " + request.readyState);
+          request.send('resource='+$('#span' + resource).text());
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
               if(request.status == 200) {
-                $('#'+resource).remove()
+                $('#'+resource).remove();
               } else if (request.status == 410) {
                 alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
               } else {

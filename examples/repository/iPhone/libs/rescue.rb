@@ -36,7 +36,7 @@ class RESCUE < Riddl::Implementation
             letter = id[0,1]
             li_ letter.capitalize, :class => "head", :style=>"background-color:#e1e1e1;"
           end
-          li_ :style=>"vertical-align: center" do
+          li_ :style=>"vertical-align: middle" do
             table_ :style=>"width: 100%;" do 
               tr_ do 
                 td_ :style=>"width:100%;" do 
