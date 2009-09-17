@@ -34,47 +34,17 @@ class RESCUE < Riddl::Implementation
           id = e.find("string(atom:id)")
           if letter != id[0,1]
             letter = id[0,1]
-            li_ letter.capitalize, :class => "head"
+            li_ letter.capitalize, :class => "head", :style=>"background-color:95A795;"
           end
-          li_ do
-            form_ :id=>"ajax_post", :action=>"wallet", :method=>"POST", :class=>"form" do
-              a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}", :style => "display:inline"
-              input_ :type=>"hidden", :name=>"resource", :value=>@r[2...5].join("/")+"/"+id, :style => "display:inline"
-              input_ :type=>"submit", :style => "display:inline; position: absolute; right: 0;", :value=>"Add"
-            end
+          li_ :style=>"vertical-align: center" do
+            img_ :src=>"../js/custom/plusButton.png", :onclick=>"addToWallet('#{@r[2...5].join("/")}/#{id}', 'wallet')"
+            a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}", :style => "display:inline; margin-left:10px;"
           end
         end  
       end
     end
   end
-=begin
-  def generateList( feed )
-    div_ :id => 'rescue', :class => "edgetoedge" do
-      div_ :class => "toolbar" do
-        h1_ @r.last.capitalize
-        a_ "Back", :class => "back button", :href => "#"
-      end
-      ul_ do
-        feed.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
-        letter = ""
-        feed.find("//atom:entry").each do |e|
-          id = e.find("string(atom:id)")
-          if letter != id[0,1]
-            letter = id[0,1]
-            li_ letter.capitalize, :class => "head"
-          end
-          li_ do
-            form_ :id=>"ajax_post", :action=>"wallet", :method=>"POST", :class=>"form" do
-              a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}", :style => "display:inline"
-              input_ :type=>"hidden", :name=>"resource", :value=>@r[2...5].join("/")+"/"+id, :style => "display:inline"
-              input_ :type=>"submit", :style => "display:inline; position: absolute; right: 0;", :value=>"Add"
-            end
-          end
-        end  
-      end
-    end
-  end
-=end
+ 
   def generateDetails( details )
     div_ :id => 'rescue' do
       name = details.find("string(details/vendor)")
@@ -94,7 +64,7 @@ class RESCUE < Riddl::Implementation
       div_ :class => "contact", :align=>"center" do
         br_
         br_
-        h3_ "Contact", :style=>"font-size: 24pt; color: #FFFFFF"
+        h2_ "Contact", :style=>"font-size: 24pt;"
         br_
         div_ :style=>"font-size: 18px" do
           span_ do b_ name end

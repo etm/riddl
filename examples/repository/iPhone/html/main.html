@@ -24,13 +24,58 @@
             '../js/themes/apple/img/button.png'
             ]
       });
+
+        function addToWallet(resource, url) {
+          if(!confirm("Add '" + resource + "' to your wallet?")) return;
+          request = new XMLHttpRequest();
+          if(!request) alert("Failure creating XMLHttpRequest-Object");
+          request.open('post', url, true);
+          request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          request.send('resource='+resource);
+          //while(request.readyState != 4); //console.log("request.readyState = " + request.readyState);
+          request.onreadystatechange = function() {
+            if(request.readyState == 4) { // Request is finished
+//              if(request.status == 200) {
+//                alert("Adding resource to wallet sucsessful");
+//              } else if (request.status == 409) {
+              if (request.status == 409) {
+                alert("Resource (or any subresource) already in your wallet");
+              } else if (request.status != 200) {
+                alert("Something unexpected happend. Statuscode: " + request.status);
+              }
+            }
+          }
+        }
+
+        function removeFromWallet(resource, url) {
+          if(!confirm("Remove '" + resource + "' from your wallet?")) return;
+          request = new XMLHttpRequest();
+          if(!request) alert("Failure creating XMLHttpRequest-Object");
+          request.open('delete', url, true);
+          request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          request.send('resource='+resource);
+          //while(request.readyState != 4); //console.log("request.readyState = " + request.readyState);
+          request.onreadystatechange = function() {
+            if(request.readyState == 4) { // Request is finished
+              if(request.status == 200) {
+                window.location.href = "#wallet"
+                alert("Removing resource from wallet sucsessful");
+              } else if (request.status == 410) {
+                alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
+              } else {
+                alert("Something unexpected happend. Statuscode: " + request.status);
+              }
+            }
+          }
+        }
     </script>
   </head>
 
-  <body style="padding-top:20px;">
+  <body>
     <div id="main">
       <div class="toolbar">
         <h1>iPhone Client</h1>
+        <a class="button slideup" id="infoButton" href="#about">About</a>
       </div>
       <ul>
         <li class="arrow"><a href="rescue">RESCUE</a></li>
@@ -58,5 +103,19 @@
       </div>
       not implementd yet!
     </div>
+
+    <div id="about">
+      <div class="toolbar">
+        <h1>About</h1>
+        <a class="back button" href="#">Back</a>
+      </div>
+      <div align="center">
+        This a RESCUE client for mobil devices<br/><br/>
+        Ralph VIGNE<br/><a href="mailto:ralph.vigne@univie.ac.at">ralph.vigne@univie.ac.at</a><br/><br/>
+        J&uuml;rgen MANGLER<br/><a href="mailto:juergen.mangler@univie.ac.at">juergen.mangler@univie.ac.at</a><br/><br/>
+        Erich SCHIKUTA<br/><a href="mailto:erich.schikuta@univie.ac.at">erich.schikuta@univie.ac.at</a>
+      </div>
+    </div>
+
   </body>
 </html>

@@ -11,7 +11,9 @@
     <style type="text/css" media="screen">@import "js/themes/jqt/theme.css";</style>
 
     <script type="text/javascript">
-      $.jQTouch({
+      var request = false;
+
+      var jQT = new $.jQTouch({
         icon: 'js/custom/app_icon.png',
         statusBar: 'black-translucent',
         startupScreen: 'js/custom/app_startup.png',
@@ -22,6 +24,32 @@
             'js/themes/apple/img/blueButton.png'
             ]
       });
+
+        // Some sample Javascript functions:
+        $(function(){
+
+            $('#addWallet').click(function() {
+                confirm('Added');
+            });
+        });
+
+        function addToWallet(resource, url) {
+          request = new XMLHttpRequest();
+          if(!request) alert("Failure creating XMLHttpRequest-Object");
+          request.open('post', url, true);
+          request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          request.send('resource='+resource);
+          //while(request.readyState != 4); //console.log("request.readyState = " + request.readyState);
+          request.onreadystatechange = function() {
+            if(request.readyState == 4) { // Request is finished
+              if(request.status == 200) {
+                alert("Adding resource to wallet sucsessful");
+              } else if ((request.status == 409) {
+                alert("Resource (or any subresource) already in your wallet");
+              } else {
+                alert("Something unexpected happend. Statuscode: " + request.status);
+            }
+        }
     </script>
   </head>
 
@@ -34,8 +62,8 @@
         </div>
         <h4>Options</h4>
         <ul>
-            <li><a href="#item1">Item 1</a></li>
-            <li><a href="#item2">Item 2</a></li>
+            <li><a href="#item1">Item 1</a><img onclick="addToWallet('Eins', '123/wallet')" src="js/custom/plusButton.png"/></li>
+            <li><a href="#item2">Item 2</a><img onclick="addToWallet('Zwei', '123/wallet')" src="js/custom/plusButton.png"/></li>
             <li><a href="#item3">Item 3</a></li>
             <li><a href="about2">About2</a></li>
         </ul>

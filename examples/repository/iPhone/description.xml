@@ -24,7 +24,7 @@
 
 <!-- Messages at wallet level -->
 
-  <message name="addToWallet">
+  <message name="editWallet">
     <parameter name="resource" type="string"/>
   </message>
 
@@ -47,7 +47,8 @@
 
       <resource relative="wallet">
         <get in="*" out="html"/>
-        <post in="addToWallet" out="html"/>
+        <post in="editWallet"/>
+        <delete in="editWallet"/>
       </resource>
 
       <resource relative="workflows">
