@@ -1,3 +1,6 @@
+require 'digest/md5'
+
+
 class DeleteFromWallet < Riddl::Implementation
   include MarkUSModule
 
@@ -62,7 +65,7 @@ class GetWallet < Riddl::Implementation
             a_ "Back", :class => "back button", :href => "#"
           end
           div_ :id => 'walletIndex', :class => "edgetoedge" do
-            ul_ do
+            ul_ :id=>"walletEntries" do
               createEntry ("user/#{@r[0]}/wallet/*")
             end
           end
@@ -79,8 +82,9 @@ class GetWallet < Riddl::Implementation
       end
     else 
       x = dir.split("/")
-      li_ :style=>"vertical-align: center;" do
-        img_ :src=>"../js/custom/minusButton.png", :onclick=>"removeFromWallet('#{x[3...x.size-1].join("/")}', 'wallet')", :style=>"vertical-align: center;"
+      li_ :style=>"vertical-align: center;", :id=>Digest::MD5.hexdigest(x[3...x.size-1].join("-")) do
+        img_ :src=>"../js/custom/minusButton.png", :onclick=>"removeFromWallet('#{Digest::MD5.hexdigest(x[3...x.size-1].join("-"))}', 'wallet')", :style=>"vertical-align: center;"
+#        img_ :src=>"../js/custom/minusButton.png", :onclick=>"removeFromWallet('#{x[3...x.size-1].join("/")}', 'wallet')", :style=>"vertical-align: center;"
         span_ x[3...x.size-1].join("/"), :style=>"display:inline; margin-left:10px;vertical-align: center;"
       end
     end

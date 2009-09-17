@@ -22,7 +22,7 @@ class RESCUE < Riddl::Implementation
   end
 
   def generateList( feed )
-    div_ :id => 'rescue', :class => "edgetoedge" do
+    html = div_ :id => 'rescue', :class => "edgetoedge" do
       div_ :class => "toolbar" do
         h1_ @r.last.capitalize
         a_ "Back", :class => "back button", :href => "#"
@@ -34,15 +34,45 @@ class RESCUE < Riddl::Implementation
           id = e.find("string(atom:id)")
           if letter != id[0,1]
             letter = id[0,1]
-            li_ letter.capitalize, :class => "head", :style=>"background-color:95A795;"
+            li_ letter.capitalize, :class => "head", :style=>"background-color:#e1e1e1;"
           end
           li_ :style=>"vertical-align: center" do
-            img_ :src=>"../js/custom/plusButton.png", :onclick=>"addToWallet('#{@r[2...5].join("/")}/#{id}', 'wallet')"
-            a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}", :style => "display:inline; margin-left:10px;"
+            table_ :style=>"width: 100%;" do 
+              tr_ do 
+                td_ :style=>"width:100%;" do 
+                  a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}", :style=>"display:block; " 
+                end 
+                td_ :style => "vertical-align:middle;"do 
+                  a_ :href=>"#confirm" + Digest::MD5.hexdigest(@r.join("/")+"/"+id), :class=>"slideup" do 
+                    img_ :src=>"../js/custom/plusButton.png"
+                  end
+                end
+              end
+            end
           end
         end  
       end
     end
+    # Parse feed a second time and generate confirm-div's
+    feed.find("//atom:entry").each do |e|
+      id = e.find("string(atom:id)")
+      html += div_ :id=>"confirm" + Digest::MD5.hexdigest(@r.join("/")+"/"+id) do
+        div_ :class => "toolbar" do
+          h1_ "Confirm"
+        end
+        br_
+        br_
+        h4_ "Do you want to add the resoure '#{id}' to your wallet?", :style=>"font-size: 20pt; text-align:center;"
+        br_
+        br_
+        br_
+        br_
+        a_ "Yes", :style=>"margin:0 10px;color:green", :onclick=>"addToWallet('#{@r[2...5].join("/")}/#{id}', 'wallet')", :class=>"whiteButton goback"
+        br_
+        a_ "Cancel", :style=>"margin:0 10px;color:red", :href=>"#", :class=>"whiteButton goback"
+      end
+    end
+    html
   end
  
   def generateDetails( details )
