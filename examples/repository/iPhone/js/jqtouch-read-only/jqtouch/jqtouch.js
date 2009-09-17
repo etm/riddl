@@ -21,9 +21,13 @@
 
 (function($) {
     $.jQTouch = function(options) {
-        var $body, $head=$('head'), hist=[], newPageCount=0, jQTSettings={}, dumbLoop, currentPage;
+        
+        var $body, $head=$('head'), hist=[], newPageCount=0, jQTSettings={}, dumbLoop, currentPage, orientation;
+
         init(options);
-        function init(options) {
+
+        function init(options) {   
+            
             var defaults = {
                 addGlossToIcon: true,
                 backSelector: '.back, .cancel, .goback',
@@ -115,7 +119,7 @@
                     var hash = $el.attr('hash');
                     
                     if (hash && hash!='#') {
-                        showPage($(hash), transition);
+                        goToPage($(hash), transition);
                     } else if ($el.attr('target') != '_blank') {
                         $el.addClass('loading');
                         showPageByHref($el.attr('href'), null, null, null, transition, function(){ $el.removeClass('loading'); setTimeout($.fn.unselect, 250, $el) });
@@ -130,19 +134,17 @@
             }
             // Initialize on document load:
             $(document).ready(function(){
-                
-                // TODO: Find best way to customize and make event live...
                 $body = $('body');
                 $body.bind('orientationchange', updateOrientation).trigger('orientationchange');
                 if (jQTSettings.fullScreenClass && window.navigator.standalone == true) {
                     $body.addClass(jQTSettings.fullScreenClass + ' ' + jQTSettings.statusBar);
                 }
-                
+
                 if (jQTSettings.initializeTouch) $(jQTSettings.initializeTouch).addTouchHandlers();
                 $(jQTSettings.formSelector).submit(submitForm);
                 
                 if (jQTSettings.submitSelector)
-                    $(jQTSettings.submitSelector).click(submitParentForm);
+                    $(jQTSettings.submitSelector).live('click', submitParentForm);
 
                 // Make sure exactly one child of body has "current" class
                 if ($('body > .current').length == 0) {
@@ -160,8 +162,36 @@
                 dumbLoopStart();
             });
         }
-        function addPageToHistory(page, transition) {
+        
+        // PUBLIC FUNCTIONS
+        function goBack(numberOfPages) {
 
+            // Init the param
+            var numberOfPages = numberOfPages || 1;
+
+            // Grab the current page for the "from" info
+            var transition = hist[0].transition;
+            var fromPage = hist[0].page;
+
+            // Remove all pages in front of the target page
+            hist.splice(0, numberOfPages);
+
+            // Grab the target page
+            var toPage = hist[0].page;
+
+            // Make the transition
+            animatePages(fromPage, toPage, transition, true);
+        }
+        function goToPage(toPage, transition) {
+            var fromPage = hist[0].page;
+            if (animatePages(fromPage, toPage, transition)) addPageToHistory(toPage, transition);
+        }
+        function getOrientation() {
+            return orientation;
+        }
+
+        // PRIVATE FUNCTIONS
+        function addPageToHistory(page, transition) {
             // Grab some info
             var pageId = page.attr('id');
 
@@ -171,7 +201,6 @@
                 transition: transition, 
                 id: pageId
             });
-
         }
         function animatePages(fromPage, toPage, transition, backwards) {
 
@@ -241,26 +270,7 @@
         function dumbLoopStop() {
             clearInterval(dumbLoop);
         }
-        function goBack(numberOfPages) {
-
-            // Init the param
-            var numberOfPages = numberOfPages || 1;
-
-            // Grab the current page for the "from" info
-            var transition = hist[0].transition;
-            var fromPage = hist[0].page;
-
-            // Remove all pages in front of the target page
-            hist.splice(0, numberOfPages);
-
-            // Grab the target page
-            var toPage = hist[0].page;
-
-            // Make the transition
-            animatePages(fromPage, toPage, transition, true);
-        }
         function insertPages(nodes, transition) {
-
             var targetPage;
             nodes.each(function(index, node){
                 if (!$(this).attr('id')) {
@@ -272,13 +282,8 @@
                 }
             });
             if (targetPage) {
-                showPage(targetPage, transition);
+                goToPage(targetPage, transition);
             }
-        }
-        function showPage(toPage, transition) {
-            var fromPage = hist[0].page;
-            
-            if (animatePages(fromPage, toPage, transition)) addPageToHistory(toPage, transition);
         }
         function showPageByHref(href, data, method, replace, transition, cb) {
             if (href != '#')
@@ -311,15 +316,22 @@
         }
         function submitParentForm(){
             $(this).parent('form').submit();
+            return false;
         }
         function submitForm() {
             showPageByHref($(this).attr('action') || "POST", $(this).serialize(), $(this).attr('method'));
             return false;
         }
         function updateOrientation() {
-            var newOrientation = window.innerWidth < window.innerHeight ? 'profile' : 'landscape';
-            $body.removeClass('profile landscape').addClass(newOrientation).trigger('turn', {orientation: newOrientation});
+            orientation = window.innerWidth < window.innerHeight ? 'profile' : 'landscape';
+            $body.removeClass('profile landscape').addClass(orientation).trigger('turn', {orientation: orientation});
             scrollTo(0, 0);
+        }
+
+        return {
+            getOrientation : getOrientation,
+            goBack : goBack,
+            goToPage : goToPage
         }
     }
     $.fn.flip = function(options) {
@@ -398,6 +410,7 @@
 
         })
     }
+
     $.fn.transition = function(css, options) {
         var $el = $(this);
         var defaults = {
@@ -451,6 +464,7 @@
     var jQTouchHandler = {
         
         currentTouch : {},
+        hoverTimeout : null,
 
         handleStart : function(e){
             
@@ -463,8 +477,14 @@
                 deltaT : 0
             };
 
-            $(this).addClass('active').bind('touchmove touchend', jQTouchHandler.handle);
+            $(this).bind('touchmove touchend', jQTouchHandler.handle);
+            
+            jQTouchHandler.hoverTimeout = setTimeout(jQTouchHandler.makeActive, 100, $(this));
             return true;
+        },
+        
+        makeActive : function($el){
+            $el.addClass('active');
         },
         
         handle : function(e){
@@ -479,19 +499,26 @@
                     jQTouchHandler.currentTouch.deltaY = first.pageY - jQTouchHandler.currentTouch.startY;
                     jQTouchHandler.currentTouch.deltaT = (new Date).getTime() - jQTouchHandler.currentTouch.startTime;
                     
+                    // Check for Swipe
                     if (Math.abs(jQTouchHandler.currentTouch.deltaX) > Math.abs(jQTouchHandler.currentTouch.deltaY) && (jQTouchHandler.currentTouch.deltaX > 35 || jQTouchHandler.currentTouch.deltaX < -35) && jQTouchHandler.currentTouch.deltaT < 1000)
                     {
                         $(this).trigger('swipe', {direction: (jQTouchHandler.currentTouch.deltaX < 0) ? 'left' : 'right'}).unbind('touchmove touchend');
                     }
                     
+                    if (Math.abs(jQTouchHandler.currentTouch.deltaY) > 1)
+                    {
+                        $(this).removeClass('active');
+                    }
+                    
                     type = 'mousemove';
+                    
+                    clearTimeout(jQTouchHandler.hoverTimeout);
                 break;
 
                 case 'touchend':
                     if (!jQTouchHandler.currentTouch.deltaY && !jQTouchHandler.currentTouch.deltaX)
                     {
                         type = 'mouseup';
-                        // TODO: Remove this selected!
                         $(this).trigger('tap');
                     }
                     else
