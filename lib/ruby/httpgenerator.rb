@@ -16,7 +16,20 @@ module Riddl
       elsif @params.class == Riddl::Parameter::Simple || @params.class == Riddl::Parameter::Complex
         body(@params)
       elsif @params.class == Array && @params.length > 1
-        multipart
+        count = 0
+        @params.each do |r|
+          case r
+            when Riddl::Parameter::Simple
+              count += 1
+            when Riddl::Parameter::Complex
+              count += 1
+          end
+        end
+        if count > 0
+          multipart
+        else  
+          StringIO.new('','r+b')
+        end  
       else
         StringIO.new('','r+b')
       end  

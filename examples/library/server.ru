@@ -23,10 +23,17 @@ class BookQuery < Riddl::Implementation
   end
 end
 
+class HtmlTest < Riddl::Implementation
+  def response
+    @status = 200
+  end
+end
+
 run(
   Riddl::Server.new("description.xml") do
     process_out false
     on resource do
+      run HtmlTest if get
       on resource "books" do
         run BookQuery if method :get => 'book-query'
       end
