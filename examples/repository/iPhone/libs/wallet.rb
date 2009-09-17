@@ -9,7 +9,7 @@ class DeleteFromWallet < Riddl::Implementation
       puts "Directory: user/#{@r.join("/")}/#{@p[0].value} does not exist" 
       @status = 410 # Gone
     else
-      FileUtils.rm_r("user/#{@r.join("/")}/#{@p[0].value}")
+      FileUtils.rm("user/#{@r.join("/")}/#{@p[0].value}/subscribed")
     end
   end
 end
@@ -22,11 +22,17 @@ class AddToWallet < Riddl::Implementation
     #pp @p[0].value
     #["08c5c293b7c28c0910ebc4848136e058", "wallet"]
     # Create user dir if not exist
-    if File.exists?("user/#{@r.join("/")}/#{@p[0].value}")
+    if File.exists?("user/#{@r.join("/")}/#{@p[0].value}/subscribed")
       puts "Directory: user/#{@r.join("/")}/#{@p[0].value} already exists" 
       @status = 409 # Conflict
     else
-      FileUtils.mkdir_p("user/#{@r.join("/")}/#{@p[0].value}")
+      begin
+        FileUtils.mkdir_p("user/#{@r.join("/")}/#{@p[0].value}")
+      rescue
+        p "Resource has been subscribed befor"
+      end
+p "user/#{@r.join("/")}/#{@p[0].value}/subscribed"
+      File.new("user/#{@r.join("/")}/#{@p[0].value}/subscribed","w")
     end
   end
 end
@@ -36,8 +42,10 @@ class GetWallet < Riddl::Implementation
   include MarkUSModule
 
   def response
+    entries = Array.new
+    findEntries("user/#{@r[0]}/wallet", entries)
     # If Wallet is empty
-    if ((File.exist?("user/#{@r[0]}/wallet") == false) || (Dir["user/#{@r[0]}/wallet/*"].size == 0))
+    if (entries.size == 0)
       p "Wallet does not exists or is empty"
       Riddl::Parameter::Complex.new("html","text/html") do
         div_ :id => 'wallet' do  
@@ -54,8 +62,6 @@ class GetWallet < Riddl::Implementation
       end
     else
     # Wallet is not empty
-      entries = Array.new
-      findEntries("user/#{@r[0]}/wallet/*", entries)
       html = div_ :id => 'wallet' do  
         div_ :class => "toolbar" do
           h1_ "Wallet"
@@ -88,17 +94,17 @@ class GetWallet < Riddl::Implementation
   end
 
   def findEntries(dir, entries)
-    actDir = Dir[dir]
-    if actDir.size != 0
-      actDir.sort.each do |f|
-        findEntries(f + "/*", entries)
+    actDir = Dir[dir+"/*"]
+
+    actDir.sort.each do |f|
+      if File::directory? f
+        findEntries(f, entries)
+      elsif File::basename(f) == "subscribed"
+        tmp = f.split("/")
+        entries << tmp[3...tmp.size-1].join("/")
       end
-    else
-      tmp = dir.split("/")
-      entries << tmp[3...tmp.size-1].join("/")
     end
   end
-
 
   def createConfirm(entries)
     html = ""
@@ -109,7 +115,7 @@ class GetWallet < Riddl::Implementation
         end
         br_
         br_
-        h4_ "Do you want to removethe resoure '#{entry}' from your wallet?", :style=>"font-size: 20pt; text-align:center;"
+        h4_ "Do you want to remove the resoure '#{entry}' from your wallet?", :style=>"font-size: 20pt; text-align:center;"
         br_
         br_
         br_
