@@ -1,4 +1,4 @@
-require ::File.dirname(__FILE__) + "/parameter"
+require ::File.expand_path(::File.dirname(__FILE__) + "/parameter")
 
 module Riddl
   class HttpParser

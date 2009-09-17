@@ -1,12 +1,10 @@
 require 'rubygems'
 gem 'ruby-xml-smart', '>= 0.2.0.1'
 require 'xml/smart'
-require ::File.dirname(__FILE__) + '/file/messageparser'
-require ::File.dirname(__FILE__) + '/file/resourcechecker'
-require ::File.dirname(__FILE__) + '/file/layerchecker'
-require ::File.dirname(__FILE__) + '/handlers'
-
-$iii = 0
+require ::File.expand_path(::File.dirname(__FILE__) + '/file/messageparser')
+require ::File.expand_path(::File.dirname(__FILE__) + '/file/resourcechecker')
+require ::File.expand_path(::File.dirname(__FILE__) + '/file/layerchecker')
+require ::File.expand_path(::File.dirname(__FILE__) + '/handlers')
 
 module Riddl
   class File
@@ -84,7 +82,7 @@ module Riddl
       #{{{
       @doc.find("//des:parameter/@handler").map{|h|h.to_s}.uniq.each do |h|
         if ::File.exists?(::File.dirname(__FILE__) + '/handlers/' + ::File.basename(h) + ".rb")
-          require ::File.dirname(__FILE__) + '/handlers/' + ::File.basename(h)
+          require ::File.expand_path(::File.dirname(__FILE__) + '/handlers/' + ::File.basename(h))
         end
       end
       #}}}

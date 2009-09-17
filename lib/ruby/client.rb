@@ -1,9 +1,9 @@
 require 'net/http'
-require ::File.dirname(__FILE__) + "/file"
-require ::File.dirname(__FILE__) + "/error"
-require ::File.dirname(__FILE__) + "/httpgenerator"
-require ::File.dirname(__FILE__) + '/httpparser'
-require ::File.dirname(__FILE__) + "/header"
+require ::File.expand_path(::File.dirname(__FILE__) + "/file")
+require ::File.expand_path(::File.dirname(__FILE__) + "/error")
+require ::File.expand_path(::File.dirname(__FILE__) + "/httpgenerator")
+require ::File.expand_path(::File.dirname(__FILE__) + '/httpparser')
+require ::File.expand_path(::File.dirname(__FILE__) + "/header")
 require 'pp'
 
 module Riddl

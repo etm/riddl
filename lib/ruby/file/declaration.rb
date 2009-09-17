@@ -1,6 +1,6 @@
-require ::File.dirname(__FILE__) + '/description'
-require ::File.dirname(__FILE__) + '/declaration/tile'
-require ::File.dirname(__FILE__) + '/declaration/facade'
+require ::File.expand_path(::File.dirname(__FILE__) + '/description')
+require ::File.expand_path(::File.dirname(__FILE__) + '/declaration/tile')
+require ::File.expand_path(::File.dirname(__FILE__) + '/declaration/facade')
 
 module Riddl
   class File

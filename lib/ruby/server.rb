@@ -1,10 +1,10 @@
-require ::File.dirname(__FILE__) + '/implementation'
-require ::File.dirname(__FILE__) + '/httpparser'
-require ::File.dirname(__FILE__) + '/httpgenerator'
-require ::File.dirname(__FILE__) + '/header'
-require ::File.dirname(__FILE__) + '/parameter'
-require ::File.dirname(__FILE__) + '/error'
-require ::File.dirname(__FILE__) + '/file'
+require ::File.expand_path(::File.dirname(__FILE__) + '/implementation')
+require ::File.expand_path(::File.dirname(__FILE__) + '/httpparser')
+require ::File.expand_path(::File.dirname(__FILE__) + '/httpgenerator')
+require ::File.expand_path(::File.dirname(__FILE__) + '/header')
+require ::File.expand_path(::File.dirname(__FILE__) + '/parameter')
+require ::File.expand_path(::File.dirname(__FILE__) + '/error')
+require ::File.expand_path(::File.dirname(__FILE__) + '/file')
 require 'pp'
 
 module Riddl
