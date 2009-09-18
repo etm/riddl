@@ -1,5 +1,6 @@
 <details>
-  <vendor>Tom Riddle</vendor>
+  <vendor>
+  <name>Tom Riddle</name>
   <adress>
     <street>not known</street>
     <housenumber>not necessary</housenumber>
@@ -9,6 +10,9 @@
   </adress>
   <mail>office@azkaban.co.uk</mail>
   <phone>+44 (20) 555 4711</phone>
+  </vendor>
+  <service>
   <URI>http://www.azkaban.co.uk/book-online</URI>
   <staticProperties>http://www.azkaban.co.uk/props.xml</staticProperties>
+  </service>
 </details>

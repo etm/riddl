@@ -1,17 +1,19 @@
 <details>
-  <vendor>Black's Production</vendor>
+  <vendor>
+  <name>Black's Production</name>
   <adress>
     <street>Grimmauld Place</street>
     <housenumber>12</housenumber>
     <ZIP>6320</ZIP>
     <city>London</city>
-
     <state>England</state>
   </adress>
   <mail>office@bh.uk</mail>
   <phone>+44 (20) 555 1718</phone>
+  </vendor>
+  <service>
   <URI>http://www.bh.uk/restAPI</URI>
   <staticProperties>http://www.bh.uk/props/static.xml</staticProperties>
-
+  </service>
 </details>
 

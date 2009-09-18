@@ -1,5 +1,6 @@
 <details>
-  <vendor>The Dysk</vendor>
+  <vendor>
+  <name>The Dysk</name>
   <adress>
     <street>Cockbill Street</street>
     <housenumber>139</housenumber>
@@ -9,6 +10,9 @@
   </adress>
   <mail>office@thedysk.dw</mail>
   <phone>+4020 (13) 555 9089</phone>
-  <URI>http://www.thedysk.dw/restAPI</URI>
-  <staticProperties>http://www.thedysk.dw/static.xml</staticProperties>
+  </vendor>
+  <service>
+    <URI>http://www.thedysk.dw/restAPI</URI>
+    <staticProperties>http://www.thedysk.dw/static.xml</staticProperties>
+  </service>
 </details>

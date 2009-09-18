@@ -1,5 +1,6 @@
 <details>
-  <vendor>The Burrow (Weasleys)</vendor>
+  <vendor>
+  <name>The Burrow (Weasleys)</name>
   <adress>
     <street>Field Street</street>
     <housenumber>139</housenumber>
@@ -9,6 +10,9 @@
   </adress>
   <mail>office@theburrow.co.uk</mail>
   <phone>+44 (20) 555 4711</phone>
+  </vendor>
+  <service>
   <URI>http://www.theburrow.co.uk/API</URI>
   <staticProperties>http://www.theburrow.co.uk/staticProps.xml</staticProperties>
+  </service>
 </details>
