@@ -67,7 +67,7 @@ class GetWallet < Riddl::Implementation
           h1_ "Wallet"
           a_ "Back", :class => "back button", :href => "#"
         end
-        div_ do span_ "Press entry to query the resource" end
+        div_ :style=>"text-align: center;" do span_ "<br/><b>Touch resource to query it!</b><br/><br/>", :style=>"font-size: 16pt; color: green;" end
         div_ :id => 'walletIndex', :class => "edgetoedge" do
           ul_ :id=>"walletEntries" do
             entries.each do |entry| 
