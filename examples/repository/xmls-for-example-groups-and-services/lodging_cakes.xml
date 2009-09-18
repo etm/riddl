@@ -1,0 +1,14 @@
+<details>
+  <vendor>Mrs. Evadne Cake</vendor>
+  <adress>
+    <street>Elm Street</street>
+    <housenumber>69</housenumber>
+    <ZIP>11239</ZIP>
+    <city>Ankh-Morprok</city>
+    <state>Discworld</state>
+  </adress>
+  <mail>office@evadne-cake.dw</mail>
+  <phone>+4020 (13) 555 9089</phone>
+  <URI>http://www.evadne-cake.dw/booking</URI>
+  <staticProperties>http://www.evadne-cake.dw/prop.xml</staticProperties>
+</details>

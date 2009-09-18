@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<properties>
+  <static>
+    <element name="longlat">
+      <caption lang="en">Geo-position (long/lat)</caption>
+      <caption lang="de">Ge-Position (Laenge/breite)</caption>
+      <data type="string">
+        <param name="pattern">\d+\.\d+:\d+\.\d+</param>
+      </data>
+    </element>
+  </static>
+  <dynamic>
+    <queryInput>
+      <element name="from">
+        <caption lang="en">From</caption>
+        <caption lang="de">Ab</caption>
+        <data type="string"/>
+      </element>
+      <element name="to">
+        <caption lang="en">To</caption>
+        <caption lang="de">Nach</caption>
+        <data type="string"/>
+      </element>
+      <element name="numberOfSeats">
+        <caption lang="en">Number of seats</caption>
+        <caption lang="de">Anzahl Sitzplaetze</caption>
+        <data type="positiveInteger"/>
+      </element>
+      <element name="departureTime">
+        <caption lang="en">Departure time</caption>
+        <caption lang="de">Abfahrtszeit</caption>
+        <data type="dateTime"/>
+      </element>
+    </queryInput>
+
+    <queryOutput>
+      <element name="arraivelTime">
+        <caption lang="en">Arraivel time</caption>
+        <caption lang="de">Ankunftszeit</caption>
+        <data type="dateTime"/>
+      </element>
+      <element name="price">
+        <caption lang="en">Price per Ticket</caption>
+        <caption lang="de">Preis pro Karte</caption>
+        <data type="float"/>
+      </element>
+      <element name="invokeID">
+        <caption lang="en">invokeID</caption>
+        <caption lang="de">invokeID</caption>
+        <data type="string"/>
+      </element>
+    </queryOutput>
+
+    <invokeInput>
+      <element name="invokeID">
+        <caption lang="en">invokeID</caption>
+        <caption lang="de">invokeID</caption>
+        <data type="string"/>
+      </element>
+    </invokeInput>
+
+    <invokeOutput>
+      <element name="reservationID">
+        <caption lang="en">Reservation number</caption>
+        <caption lang="de">Reservierungsnummer</caption>
+        <data type="string"/>
+      </element>
+    </invokeOutput>
+
+
+  </dynamic>
+</properties>

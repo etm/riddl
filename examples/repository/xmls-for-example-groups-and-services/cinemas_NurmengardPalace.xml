@@ -1,0 +1,17 @@
+<details >
+  <vendor>Gellert Grindenwald</vendor>
+  <adress>
+    <street>Nurmengard</street>
+    <housenumber>666</housenumber>
+    <ZIP>6320</ZIP>
+    <city>London</city>
+
+    <state>England</state>
+  </adress>
+  <mail>office@ggn.uk</mail>
+  <phone>+44 (20) 555 12 56 89</phone>
+  <URI>http://www.ggn.uk/restAPI</URI>
+  <staticProperties>http://www.ggn.uk/props/static.xml</staticProperties>
+
+</details>
+

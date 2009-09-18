@@ -1,0 +1,14 @@
+<details>
+  <vendor>Tom Riddle</vendor>
+  <adress>
+    <street>not known</street>
+    <housenumber>not necessary</housenumber>
+    <ZIP>6649</ZIP>
+    <city>In the middle of the North Sea</city>
+    <state>England</state>
+  </adress>
+  <mail>office@azkaban.co.uk</mail>
+  <phone>+44 (20) 555 4711</phone>
+  <URI>http://www.azkaban.co.uk/book-online</URI>
+  <staticProperties>http://www.azkaban.co.uk/props.xml</staticProperties>
+</details>

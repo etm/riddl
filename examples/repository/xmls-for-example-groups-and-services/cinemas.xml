@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<properties>
+  <static>
+    <element name="longlat">
+      <caption lang="en">Geo-position (long/lat)</caption>
+      <caption lang="de">Ge-Position (Laenge/breite)</caption>
+      <data type="string">
+        <param name="pattern">\d+\.\d+:\d+\.\d+</param>
+      </data>
+    </element>
+  </static>
+  <dynamic>
+    <queryInput>
+      <element name="Title">
+        <caption lang="en">Title</caption>
+        <caption lang="de">Titel</caption>
+        <data type="string"/>
+      </element>
+      <element name="numberOfSeats">
+        <caption lang="en">Number of seats</caption>
+        <caption lang="de">Anzahl Sitzplaetze</caption>
+        <data type="positiveInteger">
+          <param name="minInclusive">1</param>
+          <param name="maxInclusive">10</param>
+        </data>
+      </element>
+    </queryInput>
+
+    <queryOutput>
+      <element name="movieID">
+        <caption lang="en">movieID</caption>
+        <caption lang="de">movieID</caption>
+        <data type="string"/>
+      </element>
+      <element name="startingTime">
+        <caption lang="en">Starting time</caption>
+        <caption lang="de">Startzeit</caption>
+        <data type="dateTime"/>
+      </element>
+      <element name="price">
+        <caption lang="en">Price per Ticket</caption>
+        <caption lang="de">Preis pro Karte</caption>
+        <data type="float"/>
+      </element>
+    </queryOutput>
+
+    <invokeInput>
+      <element name="movieID">
+        <caption lang="en">movieID</caption>
+        <caption lang="de">movieID</caption>
+        <data type="string"/>
+      </element>
+      <element name="numberOfSeats">
+        <caption lang="en">Number of seats</caption>
+        <caption lang="de">Anzahl Sitzplaetze</caption>
+        <data type="positiveInteger"/>
+      </element>
+    </invokeInput>
+
+    <invokeOutput>
+      <element name="reservationID">
+        <caption lang="en">Reservation number</caption>
+        <caption lang="de">Reservierungsnummer</caption>
+        <data type="string"/>
+      </element>
+    </invokeOutput>
+
+
+  </dynamic>
+</properties>
