@@ -11,6 +11,7 @@ require 'fileutils'
 require 'libs/rescue'
 require 'libs/wallet'
 require 'libs/forward'
+require 'libs/query'
 
 use Rack::ShowStatus
 options = {:Port => 9291, :Host => "0.0.0.0", :AccessLog => []}
@@ -48,6 +49,11 @@ run(
         end
         on resource 'preferences' do
           p 'Executing GetPreferences (prefernces.rb)' if method :get => '*'
+        end
+
+        on resource 'query' do
+          p 'Dispose query (query.rb)' if method :get => 'disposeQuery'
+          run DisposeQuery if method :get => 'disposeQuery'
         end
       end
 

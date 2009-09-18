@@ -65,8 +65,6 @@ class RESCUE < Riddl::Implementation
         h4_ "Do you want to add the resoure '#{id}' to your wallet?", :style=>"font-size: 20pt; text-align:center;"
         br_
         br_
-        br_
-        br_
         a_ "Yes", :style=>"margin:0 10px;color:green", :onclick=>"addToWallet('#{@r[2...5].join("/")}/#{id}', 'wallet')", :class=>"whiteButton goback"
         br_
         a_ "Cancel", :style=>"margin:0 10px;color:red", :href=>"#", :class=>"whiteButton goback"

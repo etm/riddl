@@ -28,6 +28,9 @@
     <parameter name="resource" type="string"/>
   </message>
 
+  <message name="disposeQuery">
+    <parameter name="pointOfEntry" type="string"/>
+  </message>
 <!-- Messages at workflow level -->
 
 <!-- Messages at preferences level -->
@@ -58,6 +61,11 @@
       <resource relative="preferences">
         <get in="*" out="html"/>
       </resource>
+
+      <resource relative="query">
+        <get in="disposeQuery" out="html"/>
+      </resource>
+
     </resource>
 
     <resource relative="about">
