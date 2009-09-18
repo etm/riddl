@@ -1,4 +1,5 @@
 <queryOutputMessage>
-  <title>Star Trek</title>
-  <numberOfSeats>5</numberOfSeats>
+  <movieID>ST1715</movieID>
+  <startingTime>2009-09-24T17:15:00</startingTime>
+  <price>6.50</price>
 </queryOutputMessage>

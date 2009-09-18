@@ -11,7 +11,7 @@
   </static>
   <dynamic>
     <queryInput>
-      <element name="title">
+      <element name="Title">
         <caption lang="en">Title</caption>
         <caption lang="de">Titel</caption>
         <data type="string"/>
@@ -27,20 +27,20 @@
     </queryInput>
 
     <queryOutput>
-      <element name="price">
-        <caption lang="en">Price per Ticket</caption>
-        <caption lang="de">Preis pro Karte</caption>
-        <data type="float"/>
+      <element name="movieID">
+        <caption lang="en">movieID</caption>
+        <caption lang="de">movieID</caption>
+        <data type="string"/>
       </element>
       <element name="startingTime">
         <caption lang="en">Starting time</caption>
         <caption lang="de">Startzeit</caption>
         <data type="dateTime"/>
       </element>
-      <element name="movieID">
-        <caption lang="en">movieID</caption>
-        <caption lang="de">movieID</caption>
-        <data type="string"/>
+      <element name="price">
+        <caption lang="en">Price per Ticket</caption>
+        <caption lang="de">Preis pro Karte</caption>
+        <data type="float"/>
       </element>
     </queryOutput>
 
@@ -61,7 +61,7 @@
       <element name="reservationID">
         <caption lang="en">Reservation number</caption>
         <caption lang="de">Reservierungsnummer</caption>
-        <data type="positiveInteger"/>
+        <data type="string"/>
       </element>
     </invokeOutput>
 

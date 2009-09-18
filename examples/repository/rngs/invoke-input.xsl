@@ -9,7 +9,7 @@
       <xsl:attribute name="datatypeLibrary">http://www.w3.org/2001/XMLSchema-datatypes</xsl:attribute>
       <xsl:element name="start">
         <xsl:element name="element">
-          <xsl:attribute name="name">invokeiNputMessage</xsl:attribute>
+          <xsl:attribute name="name">invokeInputMessage</xsl:attribute>
           <xsl:apply-templates select="/properties/dynamic/invokeInput/element"/>
         </xsl:element>
       </xsl:element>

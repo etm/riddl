@@ -3,14 +3,11 @@
          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
 
 <start>
-  <element name="invokeOutputMessage">
-    <element name="title">
-      <data type="string"/>
-    </element>
-    <element name="numberOfSeats">
-      <data type="positiveInteger"/>
-    </element>
+<element name="invokeOutputMessage">
+  <element name="reservationID">
+    <data type="string"/>
   </element>
-
+</element>
 </start>
 </grammar>
+

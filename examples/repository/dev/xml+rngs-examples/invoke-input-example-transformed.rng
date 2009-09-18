@@ -3,14 +3,14 @@
          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
 
 <start>
-  <element name="queryInputMessage">
-    <element name="title">
-      <data type="string"/>
-    </element>
-    <element name="numberOfSeats">
-      <data type="positiveInteger"/>
-    </element>
+<element name="invokeInputMessage">
+  <element name="movieID">
+    <data type="string"/>
   </element>
+  <element name="numberOfSeats">
+    <data type="positiveInteger"/>
+  </element>
+</element>
 </start>
 </grammar>
 
