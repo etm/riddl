@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<invokeOutputMessage>
-  <output name="title" type="string"/>
-  <output name="numberOfSeats" type="positiveInteger"/>
-</invokeOutputMessage>

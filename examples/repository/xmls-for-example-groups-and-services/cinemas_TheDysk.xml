@@ -1,0 +1,18 @@
+<details>
+  <vendor>
+  <name>The Dysk</name>
+  <adress>
+    <street>Cockbill Street</street>
+    <housenumber>139</housenumber>
+    <ZIP>11236</ZIP>
+    <city>Ankh-Morprok</city>
+    <state>Discworld</state>
+  </adress>
+  <mail>office@thedysk.dw</mail>
+  <phone>+4020 (13) 555 9089</phone>
+  </vendor>
+  <service>
+    <URI>http://www.thedysk.dw/restAPI</URI>
+    <staticProperties>http://www.thedysk.dw/static.xml</staticProperties>
+  </service>
+</details>

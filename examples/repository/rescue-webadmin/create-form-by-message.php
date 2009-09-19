@@ -9,7 +9,7 @@
 <head>
 </head>
 <body>
-<form enctype="multipart/form-data" name="request-form" method="POST" action="http://localhost/create-form-by-message.php">
+<form enctype="multipart/form-data" name="request-form" method="POST" action="http://localhost/rescue-webadmin/create-form-by-message.php">
 <?php
   if(isset($_GET['resource']) || isset($_POST['rescue:resource'])) {
     createFormByMessage();
@@ -20,7 +20,7 @@
     request();
     // Reload tree-view
     echo "\n<script type=\"text/javascript\">";
-    echo "\ntop.parent.frames['Navigation'].location=\"http://localhost/rescue-admin-tree.php\"";
+    echo "\ntop.parent.frames['Navigation'].location=\"http://localhost/rescue-webadmin/rescue-admin-tree.php\"";
     echo "\n</script>";
   }
 ?>
@@ -62,7 +62,7 @@
     echo "<b>Selected resource:</b> " . $resource ."<br/>\n";
 
     // Create new RIDDLCLient to receive feed of groups from repository
-    $client = new RiddlClient("http://localhost:9292/");
+    $client = new RiddlClient("http://localhost:9290/");
     $return = $client->request("RIDDL", $what);
     $params = $return->parameters();
     $description = fread($params[0]->value(), $params[0]->size());
@@ -118,7 +118,7 @@
     echo "\n</pre>";
 
     echo "\n<h2>\nReturn Value:</h2>";
-    $client = new RiddlClient("http://localhost:9292/");
+    $client = new RiddlClient("http://localhost:9290/");
     $client->resource($_POST['rescue:resource']);
     $return = $client->request($_POST['rescue:method'], $what);
     echo "\nFinished with status-code: " . $return->status() . "<br/>"; 

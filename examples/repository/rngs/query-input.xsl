@@ -8,25 +8,20 @@
       <xsl:attribute name="xmlns">http://relaxng.org/ns/structure/1.0</xsl:attribute>
       <xsl:attribute name="datatypeLibrary">http://www.w3.org/2001/XMLSchema-datatypes</xsl:attribute>
       <xsl:element name="start">
-        <xsl:apply-templates select="queryInputMessage"/>
+        <xsl:element name="element">
+          <xsl:attribute name="name">queryInputMessage</xsl:attribute>
+          <xsl:apply-templates select="/properties/dynamic/queryInput/element"/>
+        </xsl:element>
       </xsl:element>
      </xsl:element>
   </xsl:template>
 
-  <xsl:template match="queryInputMessage">
+  <xsl:template match="/properties/dynamic/queryInput/element">
     <xsl:element name="element">
-      <xsl:attribute name="name">queryInputMessage</xsl:attribute>
-      <xsl:apply-templates select="input"/>
+      <xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>
+      <xsl:copy-of select="child::data"/>
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="input">
-    <xsl:element name="element">
-      <xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>
-        <xsl:element name="data">
-          <xsl:attribute name="type"><xsl:value-of select="@type"/></xsl:attribute>
-        </xsl:element>
-    </xsl:element>
-  </xsl:template>
 </xsl:stylesheet>
 

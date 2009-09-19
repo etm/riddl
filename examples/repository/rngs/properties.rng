@@ -23,8 +23,9 @@
         </oneOrMore>
       </element>
     </optional>
-    <optional>  <!-- Is a group without static properties imaginable? -->
-      <element name="dynamic">
+    <element name="dynamic">
+<!-- queryInput  -->
+      <element name="queryInput">
         <oneOrMore>
           <element name="element">
             <attribute name="name"><text/></attribute>
@@ -39,7 +40,56 @@
           </element>
         </oneOrMore>
       </element>
-    </optional>
+<!-- queryOutput  -->
+      <element name="queryOutput">
+        <oneOrMore>
+          <element name="element">
+            <attribute name="name"><text/></attribute>
+            <oneOrMore>
+              <element name="caption"><text/>
+                <attribute name="lang"><data type="language"/></attribute>
+              </element>
+            </oneOrMore>
+            <element name="data">
+              <ref name="data"/>
+            </element>
+          </element>
+        </oneOrMore>
+      </element>
+<!-- invokeInput  -->
+      <element name="invokeInput">
+        <oneOrMore>
+          <element name="element">
+            <attribute name="name"><text/></attribute>
+            <oneOrMore>
+              <element name="caption"><text/>
+                <attribute name="lang"><data type="language"/></attribute>
+              </element>
+            </oneOrMore>
+            <element name="data">
+              <ref name="data"/>
+            </element>
+          </element>
+        </oneOrMore>
+      </element>
+<!-- invokeOutput  -->
+      <element name="invokeOutput">
+        <oneOrMore>
+          <element name="element">
+            <attribute name="name"><text/></attribute>
+            <oneOrMore>
+              <element name="caption"><text/>
+                <attribute name="lang"><data type="language"/></attribute>
+              </element>
+            </oneOrMore>
+            <element name="data">
+              <ref name="data"/>
+            </element>
+          </element>
+        </oneOrMore>
+      </element>
+    </element>
+
   </element>
 </start>
 </grammar>

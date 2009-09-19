@@ -11,30 +11,32 @@
   </static>
   <dynamic>
     <queryInput>
-      <element name="Title">
-        <caption lang="en">Title</caption>
-        <caption lang="de">Titel</caption>
+      <element name="from">
+        <caption lang="en">From</caption>
+        <caption lang="de">Ab</caption>
+        <data type="string"/>
+      </element>
+      <element name="to">
+        <caption lang="en">To</caption>
+        <caption lang="de">Nach</caption>
         <data type="string"/>
       </element>
       <element name="numberOfSeats">
         <caption lang="en">Number of seats</caption>
         <caption lang="de">Anzahl Sitzplaetze</caption>
-        <data type="positiveInteger">
-          <param name="minInclusive">1</param>
-          <param name="maxInclusive">10</param>
-        </data>
+        <data type="positiveInteger"/>
+      </element>
+      <element name="departureTime">
+        <caption lang="en">Departure time</caption>
+        <caption lang="de">Abfahrtszeit</caption>
+        <data type="dateTime"/>
       </element>
     </queryInput>
 
     <queryOutput>
-      <element name="movieID">
-        <caption lang="en">movieID</caption>
-        <caption lang="de">movieID</caption>
-        <data type="string"/>
-      </element>
-      <element name="startingTime">
-        <caption lang="en">Starting time</caption>
-        <caption lang="de">Startzeit</caption>
+      <element name="arraivelTime">
+        <caption lang="en">Arraivel time</caption>
+        <caption lang="de">Ankunftszeit</caption>
         <data type="dateTime"/>
       </element>
       <element name="price">
@@ -42,18 +44,18 @@
         <caption lang="de">Preis pro Karte</caption>
         <data type="float"/>
       </element>
+      <element name="invokeID">
+        <caption lang="en">invokeID</caption>
+        <caption lang="de">invokeID</caption>
+        <data type="string"/>
+      </element>
     </queryOutput>
 
     <invokeInput>
-      <element name="movieID">
-        <caption lang="en">movieID</caption>
-        <caption lang="de">movieID</caption>
+      <element name="invokeID">
+        <caption lang="en">invokeID</caption>
+        <caption lang="de">invokeID</caption>
         <data type="string"/>
-      </element>
-      <element name="numberOfSeats">
-        <caption lang="en">Number of seats</caption>
-        <caption lang="de">Anzahl Sitzplaetze</caption>
-        <data type="positiveInteger"/>
       </element>
     </invokeInput>
 

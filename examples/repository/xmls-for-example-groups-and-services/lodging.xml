@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<properties>
+  <static>
+    <element name="longlat">
+      <caption lang="en">Geo-position (long/lat)</caption>
+      <caption lang="de">Ge-Position (Laenge/breite)</caption>
+      <data type="string">
+        <param name="pattern">\d+\.\d+:\d+\.\d+</param>
+      </data>
+    </element>
+  </static>
+  <dynamic>
+    <queryInput>
+      <element name="arraivel">
+        <caption lang="en">Arravial</caption>
+        <caption lang="de">Ankunft</caption>
+        <data type="date"/>
+      </element>
+      <element name="departure">
+        <caption lang="en">Departure</caption>
+        <caption lang="de">Abreise</caption>
+        <data type="date"/>
+      </element>
+      <element name="numberOfPersons">
+        <caption lang="en">Departure</caption>
+        <caption lang="de">Abreise</caption>
+        <data type="positiveInteger">
+          <param name="minInclusive">1</param>
+          <param name="maxInclusive">10</param>
+        </data>
+      </element>
+    </queryInput>
+
+    <queryOutput>
+      <element name="availability">
+        <caption lang="en">Availability</caption>
+        <caption lang="de">Verfügbarkeit</caption>
+        <data type="boolean"/>
+      </element>
+      <element name="price">
+        <caption lang="en">Price per person</caption>
+        <caption lang="de">Preis pro Person</caption>
+        <data type="float"/>
+      </element>
+    </queryOutput>
+
+    <invokeInput>
+      <element name="arraivel">
+        <caption lang="en">Arravial</caption>
+        <caption lang="de">Ankunft</caption>
+        <data type="date"/>
+      </element>
+      <element name="departure">
+        <caption lang="en">Departure</caption>
+        <caption lang="de">Abreise</caption>
+        <data type="date"/>
+      </element>
+      <element name="numberOfPersons">
+        <caption lang="en">Departure</caption>
+        <caption lang="de">Abreise</caption>
+        <data type="positiveInteger">
+          <param name="minInclusive">1</param>
+          <param name="maxInclusive">10</param>
+        </data>
+      </element>
+      <element name="bankAccount">
+        <caption lang="en">Bank account</caption>
+        <caption lang="de">Bankkonto</caption>
+        <data type="string"/>
+      </element>
+    </invokeInput>
+
+    <invokeOutput>
+      <element name="reservationID">
+        <caption lang="en">Reservation number</caption>
+        <caption lang="de">Reservierungsnummer</caption>
+        <data type="string"/>
+      </element>
+    </invokeOutput>
+
+
+  </dynamic>
+</properties>

@@ -8,7 +8,10 @@
       <data type="string"/>
     </element>
     <element name="numberOfSeats">
-      <data type="positiveInteger"/>
+      <data type="positiveInteger">
+        <param name="minInclusive">1</param>
+        <param name="maxInclusive">10</param>
+      </data>
     </element>
   </element>
 </start>

@@ -1,4 +1,4 @@
 <invokeInputMessage>
-  <title>Star Trek</title>
+  <movieID>ST1715</movieID>
   <numberOfSeats>5</numberOfSeats>
 </invokeInputMessage>

@@ -3,14 +3,17 @@
          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
 
 <start>
-  <element name="queryOutputMessage">
-    <element name="title">
-      <data type="string"/>
-    </element>
-    <element name="numberOfSeats">
-      <data type="positiveInteger"/>
-    </element>
+<element name="queryOutputMessage">
+  <element name="movieID">
+    <data type="string"/>
   </element>
+  <element name="startingTime">
+    <data type="dateTime"/>
+  </element>
+  <element name="price">
+    <data type="float"/>
+  </element>
+</element>
 </start>
 </grammar>
 

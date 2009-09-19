@@ -40,7 +40,8 @@ class RESCUE < Riddl::Implementation
             table_ :style=>"width: 100%;" do 
               tr_ do 
                 td_ :style=>"width:100%;" do 
-                  a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}", :style=>"display:block; " 
+                  a_ id, :href => "/#{@r.join("/")}/#{id}", :style=>"display:block; " 
+#                  a_ id.capitalize, :href => "/#{@r.join("/")}/#{id}", :style=>"display:block; " 
                 end 
                 td_ :style => "vertical-align:middle;"do 
                   a_ :href=>"#confirm" + Digest::MD5.hexdigest(@r.join("/")+"/"+id), :class=>"slideup" do 
@@ -65,8 +66,6 @@ class RESCUE < Riddl::Implementation
         h4_ "Do you want to add the resoure '#{id}' to your wallet?", :style=>"font-size: 20pt; text-align:center;"
         br_
         br_
-        br_
-        br_
         a_ "Yes", :style=>"margin:0 10px;color:green", :onclick=>"addToWallet('#{@r[2...5].join("/")}/#{id}', 'wallet')", :class=>"whiteButton goback"
         br_
         a_ "Cancel", :style=>"margin:0 10px;color:red", :href=>"#", :class=>"whiteButton goback"
@@ -77,15 +76,15 @@ class RESCUE < Riddl::Implementation
  
   def generateDetails( details )
     div_ :id => 'rescue' do
-      name = details.find("string(details/vendor)")
-      street = details.find("string(details/adress/street)")
-      houseno = details.find("string(details/adress/housenumber)")
-      zip = details.find("string(details/adress/ZIP)")
-      city = details.find("string(details/adress/city)")
-      state = details.find("string(details/adress/state)")
-      phone = details.find("string(details/phone)")
-      mail = details.find("string(details/mail)")
-      uri = details.find("string(details/URI)")
+      name = details.find("string(details/vendor/name)")
+      street = details.find("string(details/vendor/adress/street)")
+      houseno = details.find("string(details/vendor/adress/housenumber)")
+      zip = details.find("string(details/vendor/adress/ZIP)")
+      city = details.find("string(details/vendor/adress/city)")
+      state = details.find("string(details/vendor/adress/state)")
+      phone = details.find("string(details/vendor/phone)")
+      mail = details.find("string(details/vendor/mail)")
+      uri = details.find("string(details/service/URI)")
 
       div_ :class => "toolbar" do
         h1_ name
