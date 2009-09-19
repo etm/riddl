@@ -43,8 +43,9 @@ class ExecuteQuery < Riddl::Implementation
     end
 
     # Get all services within the selected resource
-    getServices("http://sumatra.pri.univie.ac.at:9290/groups/"+resource.join("/"))
-
+    services = Array.new()
+    getServices("http://sumatra.pri.univie.ac.at:9290/groups/"+resource.join("/"), services)
+pp services
     # Execute request for services
 
     # Generate HTML respond
@@ -54,16 +55,25 @@ class ExecuteQuery < Riddl::Implementation
 =end
   end
   
-  def getServices( link )
-p "LINK: " + link
+  def getServices( link, services )
     client = Riddl::Client.new(link).resource("")
     status, res = client.request :get => []
     xml = XML::Smart::string(res[0].value.read)
-
-    xml.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
-    xml.find("//atom:entry/atom:link").each do |link|
-pp link.text
-      getServices(link.text)
+    if res[0].name == "list-of-subgroups"
+      xml.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
+      xml.find("//atom:entry/atom:link").each do |link|
+        getServices(link.text, services)
+      end
+    elsif res[0].name == "list-of-services"
+      xml.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
+      xml.find("//atom:entry/atom:link").each do |link|
+        services <<  link.text
+# Thinking: Will the name of the service or URi will be helpfull for later use?
+      end
+    else
+      message = "Illigeal paramter responded named " + res[0].name
+      p message
+      return Show.new().showPage("Error: Collecting sub-rescource", message, status)
     end
   end
 end
