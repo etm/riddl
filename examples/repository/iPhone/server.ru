@@ -12,6 +12,9 @@ require 'libs/rescue'
 require 'libs/wallet'
 require 'libs/forward'
 require 'libs/query'
+require 'libs/show'
+
+
 
 use Rack::ShowStatus
 options = {:Port => 9291, :Host => "0.0.0.0", :AccessLog => []}

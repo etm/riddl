@@ -35,7 +35,7 @@ class ServicesGET < Riddl::Implementation
           entry_ :lang => 'EN' do
             id_ "#{g}"
             detailFile = XML::Smart::open("repository/#{@r[0]}/#{@r[1]}/#{@r.last}/#{g}/details.xml")
-            link_ detailFile.find("string(/details/URI)")
+            link_ detailFile.find("string(/details/service/URI)")
             updated_ File.mtime("repository/#{@r[0]}/#{@r[1]}/#{@r.last}/#{g}").xmlschema
           end
         end  

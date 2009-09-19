@@ -39,12 +39,8 @@
           request.open('post', url, true);
           request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
           request.send('resource='+resource);
-          //while(request.readyState != 4); //console.log("request.readyState = " + request.readyState);
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
-//              if(request.status == 200) {
-//                alert("Adding resource to wallet sucsessful");
-//              } else if (request.status == 409) {
               if (request.status == 409) {
                 alert("Resource (or any subresource) already in your wallet");
               } else if (request.status != 200) {
@@ -55,8 +51,6 @@
         }
 
         function removeFromWallet(resource, url) {
-//console.log(resource);
-//console.log($('#'+resource).html());
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
           request.open('delete', url, true);
@@ -75,6 +69,28 @@
           }
         }
 
+        function getQueryResult(parameters) {
+          request = new XMLHttpRequest();
+          if(!request) alert("Failure creating XMLHttpRequest-Object");
+          var url = 'query?';
+          for (i in parameters) {
+            url += parameters[i]+'='+document.getElementById('input_'+parameters[i]).value+"&";
+          }
+          request.open('get', url, true);
+          request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          request.send();
+          request.onreadystatechange = function() {
+            if(request.readyState == 4) { // Request is finished
+              if (request.status == 409) {
+                alert("Resource (or any subresource) already in your wallet");
+              } else if (request.status == 200) {
+                $('#query').html(request.responseText);
+              } else if (request.status != 200) {
+                alert("Something unexpected happend. Statuscode: " + request.status);
+              }
+            }
+          }
+        }
     </script>
   </head>
 

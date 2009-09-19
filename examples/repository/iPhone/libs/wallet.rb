@@ -45,20 +45,9 @@ class GetWallet < Riddl::Implementation
     findEntries("user/#{@r[0]}/wallet", entries)
     # If Wallet is empty
     if (entries.size == 0)
-      p "Wallet does not exists or is empty"
-      Riddl::Parameter::Complex.new("html","text/html") do
-        div_ :id => 'wallet' do  
-          div_ :class => "toolbar" do
-            h1_ "Wallet"
-            a_ "Back", :class => "back button", :href => "#"
-          end
-          div_ :class => "message", :align=>"center" do
-            br_
-            br_
-            h3_ "Your wallet is empty", :style=>"font-size: 24pt;"
-          end
-        end
-      end
+      message = "Wallet does not exists or is empty"
+      p message
+      return Show.new().showPage("Wallet", message)
     else
     # Wallet is not empty
       html = div_ :id => 'wallet' do  

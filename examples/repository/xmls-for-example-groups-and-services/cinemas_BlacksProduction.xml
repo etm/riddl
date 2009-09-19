@@ -12,7 +12,8 @@
   <phone>+44 (20) 555 1718</phone>
   </vendor>
   <service>
-  <URI>http://www.bh.uk/restAPI</URI>
+  <!-- URI>http://www.bh.uk/restAPI</URI -->
+  <URI>http://www.pri.univie.ac.at/~ralph/TestServices/blacks</URI>
   <staticProperties>http://www.bh.uk/props/static.xml</staticProperties>
   </service>
 </details>

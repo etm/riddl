@@ -6,8 +6,9 @@ class RESCUE < Riddl::Implementation
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[2...5].join("/"))
     status, res = client.request "get" => []
     if status != "200"
-      p "An error occurde on resource: groups/#{@r[2...5].join("/")}"
-      return Riddl::Parameter::Complex.new("html","text/html") do "An error (No. #{status}) occurde on resource: groups/#{@r[2...5].join("/")}" end
+      message = "An error occurde on resource: groups/#{@r[2...5].join("/")}"
+      p message
+      return Show.new().showPage("Error: ReceivingFeed", message, status)
     end
 
     html = ""
