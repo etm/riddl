@@ -7,7 +7,8 @@ module Riddl
       def response
         path = ::File.file?(@a[0]) ? @a[0] : "#{@a[0]}/#{@r[@m.length..-1].join('/')}".gsub(/\/+/,'/')
         if ::File.directory?(path)
-          return Riddl::Parameter::Complex.new("file","text/html","<b>W00t. It's a directory. Someone has to implement directory listing.</b>")
+          @status = 404
+          return []
         end
         if ::File.exists?(path)
           mtime = ::File.mtime(path)
