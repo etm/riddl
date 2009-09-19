@@ -31,7 +31,6 @@ class AddToWallet < Riddl::Implementation
       rescue
         p "Resource has been subscribed befor"
       end
-p "user/#{@r.join("/")}/#{@p[0].value}/subscribed"
       File.new("user/#{@r.join("/")}/#{@p[0].value}/subscribed","w")
     end
   end

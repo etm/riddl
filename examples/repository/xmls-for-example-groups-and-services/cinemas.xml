@@ -11,10 +11,15 @@
   </static>
   <dynamic>
     <queryInput>
-      <element name="Title">
+      <element name="title">
         <caption lang="en">Title</caption>
         <caption lang="de">Titel</caption>
         <data type="string"/>
+      </element>
+      <element name="date">
+        <caption lang="en">Date (YYYY-MM-DD)</caption>
+        <caption lang="de">Datum (JJJJ-MM-TT)</caption>
+        <data type="date"/>
       </element>
       <element name="numberOfSeats">
         <caption lang="en">Number of seats</caption>
@@ -35,7 +40,7 @@
       <element name="startingTime">
         <caption lang="en">Starting time</caption>
         <caption lang="de">Startzeit</caption>
-        <data type="dateTime"/>
+        <data type="time"/>
       </element>
       <element name="price">
         <caption lang="en">Price per Ticket</caption>

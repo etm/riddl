@@ -22,8 +22,8 @@
         <data type="date"/>
       </element>
       <element name="numberOfPersons">
-        <caption lang="en">Departure</caption>
-        <caption lang="de">Abreise</caption>
+        <caption lang="en">Number of persons</caption>
+        <caption lang="de">Personenanzhal</caption>
         <data type="positiveInteger">
           <param name="minInclusive">1</param>
           <param name="maxInclusive">10</param>

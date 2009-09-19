@@ -54,6 +54,9 @@ run(
         on resource 'query' do
           p 'Dispose query (query.rb)' if method :get => 'disposeQuery'
           run DisposeQuery if method :get => 'disposeQuery'
+
+          p 'Execute query (query.rb)' if method :get => '*'
+          run ExecuteQuery if method :get => '*'
         end
       end
 

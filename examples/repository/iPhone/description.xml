@@ -64,6 +64,7 @@
 
       <resource relative="query">
         <get in="disposeQuery" out="html"/>
+        <get in="*" out="html"/>
       </resource>
 
     </resource>
