@@ -86,9 +86,12 @@ class ExecuteQuery < Riddl::Implementation
             if status != "200"
               li_ "Service '#{s['link']}' did not respond. Statuscode: #{status}", :style=>"font-size:14px; color: red;"
             else 
-              res = out[0].value.read
+              xml = out[0].value.read
               li_ do
-                pre_ res, :style=>"widht: 100%; font-size:14px;"
+                if XML::Smart::string(xml).validate_against(rng) == false
+                  span_ "Serviuce responded wrong queryOutputMessage"
+                else
+                  pre_ res, :style=>"widht: 100%; font-size:14px;"
 =begin                table_ :style=>"widht: 100%; font-size:14px;" do
                   qo.each do |p|
                     tr_ do
@@ -99,6 +102,7 @@ class ExecuteQuery < Riddl::Implementation
                   end
                 end
 =end
+                end
               end
             end
           end
