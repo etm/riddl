@@ -4,96 +4,60 @@
 
 <include href="relaxng-modular.rng"/>
 
+<define name="property">
+  <element name="element">
+    <attribute name="name"><text/></attribute>
+      <oneOrMore>
+        <element name="caption"><text/>
+          <attribute name="lang"><data type="language"/></attribute>
+        </element>
+      </oneOrMore>
+    <element name="data">
+      <ref name="data"/>
+    </element>
+  </element>
+</define>
+
 <start>
   <element name="properties">
     <optional>  <!-- Is a group without static properties imaginable? -->
       <element name="static">
         <oneOrMore>
-          <element name="element">
-            <attribute name="name"><text/></attribute>
-            <oneOrMore>
-              <element name="caption"><text/>
-                <attribute name="lang"><data type="language"/></attribute>
-              </element>
-            </oneOrMore>
-            <element name="data">
-              <ref name="data"/>
-            </element>
-          </element>
+          <ref name="property"/>
         </oneOrMore>
       </element>
     </optional>
     <element name="dynamic">
+
 <!-- queryInput  -->
       <element name="queryInput">
         <oneOrMore>
-          <element name="element">
-            <attribute name="name"><text/></attribute>
-            <oneOrMore>
-              <element name="caption"><text/>
-                <attribute name="lang"><data type="language"/></attribute>
-              </element>
-            </oneOrMore>
-            <element name="data">
-              <ref name="data"/>
-            </element>
-          </element>
+          <ref name="property"/>
         </oneOrMore>
       </element>
+
 <!-- queryOutput  -->
       <element name="queryOutput">
-        <zeroOrMore>
-          <group>
-            <oneOrMore>
-              <element name="element">
-                <attribute name="name"><text/></attribute>
-                <oneOrMore>
-                  <element name="caption"><text/>
-                    <attribute name="lang"><data type="language"/></attribute>
-                  </element>
-                </oneOrMore>
-                  <element name="data">
-                    <ref name="data"/>
-                  </element>
-              </element>
-            </oneOrMore>
-          </group>
-        </zeroOrMore>
+        <oneOrMore>
+          <ref name="property"/>
+        </oneOrMore>
       </element>
+
 <!-- invokeInput  -->
       <element name="invokeInput">
         <oneOrMore>
-          <element name="element">
-            <attribute name="name"><text/></attribute>
-            <oneOrMore>
-              <element name="caption"><text/>
-                <attribute name="lang"><data type="language"/></attribute>
-              </element>
-            </oneOrMore>
-            <element name="data">
-              <ref name="data"/>
-            </element>
-          </element>
+          <ref name="property"/>
         </oneOrMore>
       </element>
+
 <!-- invokeOutput  -->
       <element name="invokeOutput">
         <oneOrMore>
-          <element name="element">
-            <attribute name="name"><text/></attribute>
-            <oneOrMore>
-              <element name="caption"><text/>
-                <attribute name="lang"><data type="language"/></attribute>
-              </element>
-            </oneOrMore>
-            <element name="data">
-              <ref name="data"/>
-            </element>
-          </element>
+          <ref name="property"/>
         </oneOrMore>
       </element>
-    </element>
 
+    </element>
   </element>
 </start>
 </grammar>

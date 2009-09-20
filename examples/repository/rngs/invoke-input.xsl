@@ -7,10 +7,21 @@
     <xsl:element name="grammar">
       <xsl:attribute name="xmlns">http://relaxng.org/ns/structure/1.0</xsl:attribute>
       <xsl:attribute name="datatypeLibrary">http://www.w3.org/2001/XMLSchema-datatypes</xsl:attribute>
+      <xsl:element name="define">
+        <xsl:attribute name="name">properties</xsl:attribute>
+        <xsl:apply-templates select="/properties/dynamic/invokeInput/element"/>
+      </xsl:element>
+
       <xsl:element name="start">
         <xsl:element name="element">
           <xsl:attribute name="name">invokeInputMessage</xsl:attribute>
-          <xsl:apply-templates select="/properties/dynamic/invokeInput/element"/>
+            <xsl:element name="zeroOrMore">
+              <xsl:element name="etnry">
+                <xsl:element name="ref">
+                  <xsl:attribute name="name">properties</xsl:attribute>
+                </xsl:element>
+              </xsl:element>
+            </xsl:element>
         </xsl:element>
       </xsl:element>
      </xsl:element>
