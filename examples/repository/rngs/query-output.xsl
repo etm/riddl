@@ -23,7 +23,7 @@
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="//cation">
+  <xsl:template match="//caption">
   <!-- remove all caption elements -->
   </xsl:template>
 
