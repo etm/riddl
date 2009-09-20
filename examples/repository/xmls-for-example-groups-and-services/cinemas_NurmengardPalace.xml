@@ -12,7 +12,8 @@
   <phone>+44 (20) 555 12 56 89</phone>
   </vendor>
   <service>
-  <URI>http://www.ggn.uk/restAPI</URI>
+  <!-- URI>http://www.ggn.uk/restAPI</URI -->
+  <URI>http://www.pri.univie.ac.at/~ralph/TestServices/nurmengard</URI>
   <staticProperties>http://www.ggn.uk/props/static.xml</staticProperties>
   </service>
 </details>

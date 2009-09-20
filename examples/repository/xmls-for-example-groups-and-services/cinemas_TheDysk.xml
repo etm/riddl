@@ -12,7 +12,8 @@
   <phone>+4020 (13) 555 9089</phone>
   </vendor>
   <service>
-    <URI>http://www.thedysk.dw/restAPI</URI>
+    <!-- URI>http://www.thedysk.dw/restAPI</URI -->
+  <URI>http://www.pri.univie.ac.at/~ralph/TestServices/dysk</URI>
     <staticProperties>http://www.thedysk.dw/static.xml</staticProperties>
   </service>
 </details>

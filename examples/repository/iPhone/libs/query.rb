@@ -23,7 +23,7 @@ class ExecuteQuery < Riddl::Implementation
     qi = Hash.new()
     rng = XML::Smart::string(res[0].value.read)
     rng.namespaces = {"rng" => "http://relaxng.org/ns/structure/1.0"}
-    elements = rng.find("//rng:element[@name='queryInputMessage']/rng:element/@name")
+    elements = rng.find("//rng:define/rng:element/@name")
     elements.each do |e|
       @p.each do |p|
         qi[p.name] = p.value if p.name == e.value
@@ -31,9 +31,9 @@ class ExecuteQuery < Riddl::Implementation
     end
 
     # Validate if params of request fit to queryInputSchema
-    xml = "<queryInputMessage>\n"
+    xml = "<queryInputMessage>\n<entry>"
     qi.each_pair {|key, value| xml += "<#{key}>#{value}</#{key}>\n" }
-    xml += "</queryInputMessage>\n"
+    xml += "</entry></queryInputMessage>\n"
     if XML::Smart::string(xml).validate_against(rng) == false
       message = "Some parameters in queryInput maybe wrong or may have an illegal value"
       p message
@@ -60,14 +60,14 @@ class ExecuteQuery < Riddl::Implementation
     qo = Array.new()
     rng = XML::Smart::string(res[0].value.read)
     rng.namespaces = {"rng" => "http://relaxng.org/ns/structure/1.0"}
-    elements = rng.find("//rng:element[@name='queryOutputMessage']/rng:element/@name")
+    elements = rng.find("//rng:define/rng:element/@name")
     elements.each do |e|
       qo << e.value
     end
 
     # Execute request for services and generate HTML respond
     Riddl::Parameter::Complex.new("html","text/html") do
-      div_ :id => 'rescue', :class => "metal" do
+      div_ :id => 'query', :class => "metal" do
         div_ :class => "toolbar" do
           h1_ "Query Results"
           a_ "Back", :class => "back button", :href => "#"
@@ -86,22 +86,23 @@ class ExecuteQuery < Riddl::Implementation
             if status != "200"
               li_ "Service '#{s['link']}' did not respond. Statuscode: #{status}", :style=>"font-size:14px; color: red;"
             else 
-              xml = out[0].value.read
+              xml = XML::Smart::string(out[0].value.read)
               li_ do
-                if XML::Smart::string(xml).validate_against(rng) == false
-                  span_ "Serviuce responded wrong queryOutputMessage"
+                if xml.validate_against(rng) == false
+                  span_ "Service responded wrong queryOutputMessage"
                 else
-                  pre_ res, :style=>"widht: 100%; font-size:14px;"
-=begin                table_ :style=>"widht: 100%; font-size:14px;" do
-                  qo.each do |p|
-                    tr_ do
-                      td_ p
-                      td_ "&nbsp;" * 5
-                      td_ "some value"
+                  table_ :style=>"widht: 100%; font-size:14px;" do
+                    xml.find("//entry").each do |e|
+                      qo.each_with_index do |p, index|
+                        tr_ do
+                          td_ p
+                          td_ "&nbsp;" * 5
+                          td_ e.children[index].to_s
+                        end
+                      end
+                      tr_ do td_ :colspan=>"3" do hr_ end end
                     end
                   end
-                end
-=end
                 end
               end
             end
