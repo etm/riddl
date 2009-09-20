@@ -14,7 +14,7 @@
 
       <xsl:element name="start">
         <xsl:element name="element">
-          <xsl:attribute name="name">queryIntputMessage</xsl:attribute>
+          <xsl:attribute name="name">queryInputMessage</xsl:attribute>
             <xsl:element name="zeroOrMore">
               <xsl:element name="element">
                 <xsl:attribute name="name">entry</xsl:attribute>
