@@ -16,7 +16,8 @@
         <xsl:element name="element">
           <xsl:attribute name="name">queryOutputMessage</xsl:attribute>
             <xsl:element name="zeroOrMore">
-              <xsl:element name="etnry">
+              <xsl:element name="element">
+                <xsl:attribute name="name">entry</xsl:attribute>
                 <xsl:element name="ref">
                   <xsl:attribute name="name">properties</xsl:attribute>
                 </xsl:element>
