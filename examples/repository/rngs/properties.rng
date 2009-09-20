@@ -42,19 +42,23 @@
       </element>
 <!-- queryOutput  -->
       <element name="queryOutput">
-        <oneOrMore>
-          <element name="element">
-            <attribute name="name"><text/></attribute>
+        <zeroOrMore>
+          <group>
             <oneOrMore>
-              <element name="caption"><text/>
-                <attribute name="lang"><data type="language"/></attribute>
+              <element name="element">
+                <attribute name="name"><text/></attribute>
+                <oneOrMore>
+                  <element name="caption"><text/>
+                    <attribute name="lang"><data type="language"/></attribute>
+                  </element>
+                </oneOrMore>
+                  <element name="data">
+                    <ref name="data"/>
+                  </element>
               </element>
             </oneOrMore>
-            <element name="data">
-              <ref name="data"/>
-            </element>
-          </element>
-        </oneOrMore>
+          </group>
+        </zeroOrMore>
       </element>
 <!-- invokeInput  -->
       <element name="invokeInput">

@@ -84,7 +84,7 @@
               if (request.status == 409) {
                 alert("Resource (or any subresource) already in your wallet");
               } else if (request.status == 200) {
-                $('#query').html(request.responseText);
+                $('#queryForm').html(request.responseText);
               } else if (request.status != 200) {
                 alert("Something unexpected happend. Statuscode: " + request.status);
               }

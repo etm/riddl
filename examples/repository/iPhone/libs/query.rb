@@ -2,9 +2,8 @@ class ExecuteQuery < Riddl::Implementation
   include MarkUSModule
 
   def response
-    qiParams = Array.new()
-    resource = nil
     # Get the queryInput of the group from selected resource
+    resource = nil
     if @p[0].name == "selectedResource"
       resource = @p[0].value.split("/")
     else
@@ -13,7 +12,7 @@ class ExecuteQuery < Riddl::Implementation
       return Show.new().showPage("Error: ExecuteQuery", message, status)
     end
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + resource[0])
-    status, qiRes = client.request :get => [Riddl::Parameter::Simple.new("queryInput", "")]
+    status, res = client.request :get => [Riddl::Parameter::Simple.new("queryInput", "")]
     if status != "200"
       message = "Can not receive groups queryInput of " + resource[0]
       p message
@@ -21,20 +20,19 @@ class ExecuteQuery < Riddl::Implementation
     end
     
     # Read params according to queryInput
-    rng = XML::Smart::string(qiRes[0].value.read)
+    qi = Hash.new()
+    rng = XML::Smart::string(res[0].value.read)
     rng.namespaces = {"rng" => "http://relaxng.org/ns/structure/1.0"}
     elements = rng.find("//rng:element[@name='queryInputMessage']/rng:element/@name")
     elements.each do |e|
       @p.each do |p|
-        qiParams << {'name' =>  p.name, 'value' => p.value} if p.name == e.value
+        qi[p.name] = p.value if p.name == e.value
       end
     end
 
     # Validate if params of request fit to queryInputSchema
     xml = "<queryInputMessage>\n"
-    qiParams.each do |p|
-      xml += "<#{p['name']}>#{p['value']}</#{p['name']}>"
-    end
+    qi.each_pair {|key, value| xml += "<#{key}>#{value}</#{key}>\n" }
     xml += "</queryInputMessage>\n"
     if XML::Smart::string(xml).validate_against(rng) == false
       message = "Some parameters in queryInput maybe wrong or may have an illegal value"
@@ -42,33 +40,92 @@ class ExecuteQuery < Riddl::Implementation
       return Show.new().showPage("Error: Parameter validation", message)
     end
 
+    # Generate RIDDL input Parameters-Array
+    riddlParams = Array.new();   
+    qi.each_pair {|key, value| riddlParams << Riddl::Parameter::Simple.new(key, value) }
+
     # Get all services within the selected resource
     services = Array.new()
-    getServices("http://sumatra.pri.univie.ac.at:9290/groups/"+resource.join("/"), services)
-pp services
-    # Execute request for services
+    getServices("http://sumatra.pri.univie.ac.at:9290/groups/", resource.join("/"), services)
 
-    # Generate HTML respond
-=begin    Riddl::Parameter::Complex.new("html","text/html") do
-"bla"
+    # Get queryOuput schema
+    status, res = client.request :get => [Riddl::Parameter::Simple.new("queryOutput", "")]
+    if status != "200"
+      message = "Can not receive groups queryOutput of " + resource[0]
+      p message
+      return Show.new().showPage("Error: ExecuteQuery", message, status)
     end
+    
+    # Read params according to queryOutput
+    qo = Array.new()
+    rng = XML::Smart::string(res[0].value.read)
+    rng.namespaces = {"rng" => "http://relaxng.org/ns/structure/1.0"}
+    elements = rng.find("//rng:element[@name='queryOutputMessage']/rng:element/@name")
+    elements.each do |e|
+      qo << e.value
+    end
+
+    # Execute request for services and generate HTML respond
+    Riddl::Parameter::Complex.new("html","text/html") do
+      div_ :id => 'rescue', :class => "metal" do
+        div_ :class => "toolbar" do
+          h1_ "Query Results"
+          a_ "Back", :class => "back button", :href => "#"
+        end
+        ul_ do
+          services.each do |s|
+            li_ s['id'], :class => "head", :style=>"background-color:#e1e1e1; font-size:16px;"
+            # Query service
+            p "Query serivce at: #{s['link']}"
+            service = Riddl::Client.new(s['link']).resource("")
+            begin
+              status, out = service.request :get => riddlParams
+            rescue
+              status = "Server not found"
+            end
+            if status != "200"
+              li_ "Service '#{s['link']}' did not respond. Statuscode: #{status}", :style=>"font-size:14px; color: red;"
+            else 
+              res = out[0].value.read
+              li_ do
+                pre_ res, :style=>"widht: 100%; font-size:14px;"
+=begin                table_ :style=>"widht: 100%; font-size:14px;" do
+                  qo.each do |p|
+                    tr_ do
+                      td_ p
+                      td_ "&nbsp;" * 5
+                      td_ "some value"
+                    end
+                  end
+                end
 =end
+              end
+            end
+          end
+        end
+      end
+    end
   end
   
-  def getServices( link, services )
-    client = Riddl::Client.new(link).resource("")
+  def getServices( link, resource, services )
+    client = Riddl::Client.new(link).resource(resource)
     status, res = client.request :get => []
     xml = XML::Smart::string(res[0].value.read)
     if res[0].name == "list-of-subgroups"
       xml.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
-      xml.find("//atom:entry/atom:link").each do |link|
-        getServices(link.text, services)
+      xml.find("//atom:entry/atom:id").each do |id|
+        getServices(link, resource+"/"+id.text, services)
       end
     elsif res[0].name == "list-of-services"
       xml.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
-      xml.find("//atom:entry/atom:link").each do |link|
-        services <<  link.text
-# Thinking: Will the name of the service or URi will be helpfull for later use?
+      xml.find("//atom:entry").each do |e|
+        link = ""
+        id = ""
+        e.children.each do |c|
+          id = c.text if c.name.name  == "id" 
+          link = c.text if c.name.name  == "link" 
+        end
+        services <<  {'id'=>resource+"/"+id, 'link'=>link}
       end
     else
       message = "Illigeal paramter responded named " + res[0].name
@@ -96,7 +153,7 @@ class DisposeQuery < Riddl::Implementation
 
     Riddl::Parameter::Complex.new("html","text/html") do
       arrayString = "new Array('selectedResource',"
-      form_ :method=>"GET", :action=>"query" do
+      form_ :method=>"GET", :action=>"query", :id=>"queryForm" do
         div_ :class => "toolbar" do
           h1_ "Resource query"
           a_ "Back", :class => "back button", :href => "#"
@@ -130,7 +187,7 @@ class DisposeQuery < Riddl::Implementation
     tr_ do 
       tr_ do td_ :style=>"font-size: 24pt;" do label + ": " end end
       if minS == nil && maxS == nil
-        tr_ do td_ do input_ :style=>"font-size: 24px;", :type=>"text", :name=>name, :id=>"input_"+name end end
+        tr_ do td_ do input_ :style=>"font-size: 24px;", :type=>"text", :name=>name, :id=>"input_"+name, :value=>"1212-12-12" end end
       else
         min = minS.to_i
         max = maxS.to_i
