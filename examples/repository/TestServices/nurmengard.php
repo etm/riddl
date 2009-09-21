@@ -4,14 +4,14 @@
 
   $ret  = "<queryOutputMessage>\n";
   $ret .= "<entry>";
-  $ret .= "<movieID>NURM-".$_GET['title']."-1</movieID>";
-  $ret .= "<startingTime>17:15:00</startingTime>";
-  $ret .= "<price>6.50</price>";
+  $ret .= "<movieID>NURM-".$_GET['title']."-".rand(10,59)."</movieID>";
+  $ret .= "<startingTime>" . rand(10,23) . ":".rand(10,59).":00</startingTime>";
+  $ret .= "<price>" . rand(2,20) . "." . rand(0,99) . "</price>";
   $ret .= "</entry>";
   $ret .= "<entry>";
-  $ret .= "<movieID>NURM-".$_GET['title']."-2</movieID>";
-  $ret .= "<startingTime>18:15:00</startingTime>";
-  $ret .= "<price>10.50</price>";
+  $ret .= "<movieID>NURM-".$_GET['title']."-".rand(10,59)."</movieID>";
+  $ret .= "<startingTime>" . rand(10,23) . ":".rand(10,59).":00</startingTime>";
+  $ret .= "<price>" . rand(2,20) . "." . rand(0,99) . "</price>";
   $ret .= "</entry>";
   $ret .= "</queryOutputMessage>";
 

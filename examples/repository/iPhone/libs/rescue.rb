@@ -35,7 +35,7 @@ class RESCUE < Riddl::Implementation
           id = e.find("string(atom:id)")
           if letter != id[0,1]
             letter = id[0,1]
-            li_ letter.capitalize, :class => "head", :style=>"background-color:#e1e1e1;"
+            li_ letter.capitalize, :class => "sep"        #, :style=>"background-color:#e1e1e1;"
           end
           li_ :style=>"vertical-align: middle" do
             table_ :style=>"width: 100%;" do 
@@ -64,7 +64,7 @@ class RESCUE < Riddl::Implementation
         end
         br_
         br_
-        h4_ "Do you want to add the resoure '#{id}' to your wallet?", :style=>"font-size: 20pt; text-align:center;"
+        h4_ "Do you want to add the resoure '#{id}' to your wallet?", :style=>"text-align:center;"
         br_
         br_
         a_ "Yes", :style=>"margin:0 10px;color:green", :onclick=>"addToWallet('#{@r[2...5].join("/")}/#{id}', 'wallet')", :class=>"whiteButton goback"
@@ -94,9 +94,9 @@ class RESCUE < Riddl::Implementation
       div_ :class => "contact", :align=>"center" do
         br_
         br_
-        h2_ "Contact", :style=>"font-size: 24pt;"
+        h2_ "Contact", :style=>""
         br_
-        div_ :style=>"font-size: 18px" do
+        div_ :style=>"" do
           span_ do b_ name end
           br_
           span_ street + " " + houseno
@@ -107,7 +107,7 @@ class RESCUE < Riddl::Implementation
         end
         br_
         br_
-        table_ :style=>"font-size: 18px" do
+        table_ :style=>"" do
           tr_ do
             td_ "Phone:"
             td_ do a_ phone, :href => "tel:#{phone}" end

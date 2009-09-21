@@ -28,30 +28,28 @@ return
       return Show.new().showPage("Error: ExecuteQuery", message, status)
     end
     
-    # Read params according to queryInput
-    qi = Hash.new()
+    # Read params according to queryInput and RIDDL-them into riddlParams
+    riddlParams = Array.new();   
     rng = XML::Smart::string(res[0].value.read)
     rng.namespaces = {"rng" => "http://relaxng.org/ns/structure/1.0"}
     elements = rng.find("//rng:define/rng:element/@name")
+    xml = "<queryInputMessage>\n\t<entry>\n"
     elements.each do |e|
       @p.each do |p|
-        qi[p.name] = p.value if p.name == e.value
+        if p.name == e.value
+          xml += "\t\t<#{p.name}>#{p.value}</#{p.name}>\n"
+          riddlParams << Riddl::Parameter::Simple.new(p.name, p.value)
+        end
       end
     end
+    xml += "\t</entry>\n</queryInputMessage>\n"
 
     # Validate if params of request fit to queryInputSchema
-    xml = "<queryInputMessage>\n<entry>"
-    qi.each_pair {|key, value| xml += "<#{key}>#{value}</#{key}>\n" }
-    xml += "</entry></queryInputMessage>\n"
     if XML::Smart::string(xml).validate_against(rng) == false
       message = "Some parameters in queryInput maybe wrong or may have an illegal value"
       p message
       return Show.new().showPage("Error: Parameter validation", message)
     end
-
-    # Generate RIDDL input Parameters-Array
-    riddlParams = Array.new();   
-    qi.each_pair {|key, value| riddlParams << Riddl::Parameter::Simple.new(key, value) }
 
     # Get all services within the selected resource
     services = Array.new()
@@ -76,9 +74,12 @@ return
 
     # Execute request for services and generate HTML respond
     Riddl::Parameter::Complex.new("html","text/html") do
-        ul_ do
+        ul_ :id=>"queryResultsList", :class=>"metal" do
           services.each do |s|
-            li_ s['id'], :class => "head", :style=>"background-color:#e1e1e1; font-size:16px;"
+
+            # Header for Service
+            li_ s['id'], :class => "head", :style=>"background-color:#e1e1e1;"
+
             # Query service
             p "Query serivce #{s['id']} at: #{s['link']}"
             service = Riddl::Client.new(s['link']).resource("")
@@ -88,7 +89,7 @@ return
               status = "Server not found"
             end
             if status != "200"
-              li_ "Service '#{s['id']}' did not respond. Statuscode: #{status}", :style=>"font-size:14px; color: red;"
+              li_ "Service '#{s['id']}' did not respond. Statuscode: #{status}", :style=>"color: red;"
             else 
               xml = XML::Smart::string(out[0].value.read)
               if xml.validate_against(rng) == false
@@ -98,7 +99,8 @@ return
               else
                 xml.find("//entry").each do |e|
                   li_ do
-                    table_ :style=>"widht: 100%; font-size:14px;" do
+                    # Reslutset
+                    table_ :style=>"" do
                       qo.each_with_index do |p, index|
                         tr_ do
                           td_ p
@@ -155,14 +157,11 @@ class DisposeQuery < Riddl::Implementation
 
     Riddl::Parameter::Complex.new("html","text/html") do
       arrayString = "new Array('selectedResource',"
-      form_ :method=>"GET", :action=>"query", :id=>"queryForm" do
-        div_ :class => "toolbar" do
-          h1_ "Resource query"
-          a_ "Back", :class => "back button", :href => "#"
-        end
-        div_ :id=>"queryInput" do
-          input_ :type=>"text", :value=>@p[0].value, :name=>"input_selectedResource", :id=>"input_selectedResource"
-#          input_ :type=>"text", :value=>@p[0].value, :name=>"selectedResource", :id=>"input_selectedResource"
+#      form_ :method=>"GET", :action=>"query", :id=>"queryForm" do
+        div_ :id=>"disposeQueryForm" do
+          h3_ "Enter query parameter for resource: " 
+          h3_ @p[0].value
+          input_ :type=>"hidden", :value=>@p[0].value, :name=>"input_selectedResource", :id=>"input_selectedResource"
           table_ :style=>"" do
             xml = XML::Smart::string(prop[0].value.read)
             qi = xml.find("/properties/dynamic/queryInput/*/@name")
@@ -171,12 +170,10 @@ class DisposeQuery < Riddl::Implementation
               arrayString += "'#{e.value}',"
             end
           end
-          arrayString = arrayString.chop + ")"
-          a_ "Query", :style=>"margin:0 10px;color:green", :class=>"whiteButton", :onClick=>"getQueryResult(#{arrayString})", :href=>"#queryResults"
-#          a_ "Query", :style=>"margin:0 10px;color:green", :class=>"whiteButton .submit"
-#          input_ :type=>"submit"
         end
-      end
+        arrayString = arrayString.chop + ")"
+        a_ "Query", :onClick=>"getQueryResult(#{arrayString})", :href=>"#queryResult", :style=>"margin:0 10px;color:green", :class=>"whiteButton slideup", :id=>"queryButton"
+#      end
     end
   end
 
@@ -190,16 +187,14 @@ class DisposeQuery < Riddl::Implementation
       maxS = xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/data/param[@name='maxInclusive'])")
     end
     tr_ do 
-      tr_ do td_ :style=>"font-size: 24pt;" do label + ": " end end
+      tr_ do td_ :style=>"" do label + ": " end end
       if minS == nil && maxS == nil
-        tr_ do td_ do input_ :style=>"font-size: 24px;", :type=>"text", :name=>name, :id=>"input_"+name, :value=>"1212-12-12" end end
-#        tr_ do td_ do input_ :style=>"font-size: 24px;", :type=>"text", :name=>name, :id=>name, :value=>"1212-12-12" end end
+        tr_ do td_ do input_ :style=>"", :type=>"text", :name=>name, :id=>"input_"+name, :value=>"" end end
       else
         min = minS.to_i
         max = maxS.to_i
         tr_ do td_ do
-          select_ :style=>"font-size: 24px;", :name=>name, :id=>"input_"+name do
-#          select_ :style=>"font-size: 24px;", :name=>name, :id=>name do
+          select_ :style=>"", :name=>name, :id=>"input_"+name do
             while min <= max do
               option_ min
               min = min+1

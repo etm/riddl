@@ -55,7 +55,9 @@ class GetWallet < Riddl::Implementation
           h1_ "Wallet"
           a_ "Back", :class => "back button", :href => "#"
         end
-        div_ :style=>"text-align: center;" do span_ "<br/><b>Touch resource to query it!</b><br/><br/>", :style=>"font-size: 16pt; color: green;" end
+        div_ :style=>"text-align: center;" do 
+          span_ "<br/><b>Touch resource to query it!</b><br/><br/>", :style=>"color: green;" 
+        end
         div_ :id => 'walletIndex', :class => "edgetoedge" do
           ul_ :id=>"walletEntries" do
             entries.each do |entry| 
@@ -63,7 +65,7 @@ class GetWallet < Riddl::Implementation
                 table_ :style=>"width: 100%;" do 
                   tr_ do 
                     td_ :style=>"width:100%;" do 
-                      a_ entry, :href=>"query?pointOfEntry=" + entry, :style=>"display:inline; margin-left:5px;vertical-align: center;", :id=>"span"+Digest::MD5.hexdigest(entry), :class=>"flip"
+                      a_ entry, :onClick=>"generateQueryForm('#{entry}')", :href=>"#disposeQuery", :style=>"display:inline; margin-left:5px;vertical-align: center;", :id=>"span"+Digest::MD5.hexdigest(entry), :class=>"slideup"
                     end 
                     td_ :style => "vertical-align:middle;"do 
                       a_ :href=>"#confirm" + Digest::MD5.hexdigest(entry), :class=>"slideup" do 
@@ -104,7 +106,7 @@ class GetWallet < Riddl::Implementation
         end
         br_
         br_
-        h4_ "Do you want to remove the resoure '#{entry}' from your wallet?", :style=>"font-size: 20pt; text-align:center;"
+        h4_ "Do you want to remove the resoure '#{entry}' from your wallet?", :style=>"text-align:center;"
         br_
         br_
         a_ "Yes", :style=>"margin:0 10px;color:green", :onclick=>"removeFromWallet('#{Digest::MD5.hexdigest(entry)}', 'wallet')", :class=>"whiteButton goback"

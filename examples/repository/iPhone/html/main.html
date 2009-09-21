@@ -10,6 +10,7 @@
     <script src="../js/jquery.md5.js" type="text/javascript" charset="utf-8"></script>
     <style type="text/css" media="screen">@import "../js/jqtouch/jqtouch.css";</style>
     <style type="text/css" media="screen">@import "../js/themes/apple/theme.css";</style>
+    <!-- style type="text/css" media="screen">@import "../js/custom/theme.css";</style -->
 
     <!-- Spinning wheel seem to be incompatible with jqTouch
          http://cubiq.org/spinning-wheel-on-webkit-for-iphone-ipod-touch/11
@@ -33,6 +34,9 @@
             ]
       });
 
+//------------------------------------------------------------------------------
+// Functions for Wallet
+//------------------------------------------------------------------------------
         function addToWallet(resource, url) {
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
@@ -54,7 +58,7 @@
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
           request.open('delete', url, true);
-          //request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
           request.send('resource='+$('#span' + resource).text());
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
@@ -69,36 +73,89 @@
           }
         }
 
+//------------------------------------------------------------------------------
+// Functions for Query
+//------------------------------------------------------------------------------
+
+        function generateQueryForm(entryPoint) {
+          request = new XMLHttpRequest();
+          if(!request) alert("Failure creating XMLHttpRequest-Object");
+          var url = 'query?pointOfEntry='+entryPoint;
+          request.open('get', url, true);
+          request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          request.send(null);
+          request.onreadystatechange = function() {
+            if(request.readyState == 4) { // Request is finished
+              if(request.status == 200) {
+                $('#disposeQueryForm').html(request.responseText);
+              } else if (request.status == 410) {
+                alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
+              } else {
+                alert("Something unexpected happend. Statuscode: " + request.status);
+              }
+            }
+          }
+        }
+
         function getQueryResult(parameters) {
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
           var url = 'query';
+          
+/* -----------------------------------------------------------------------------
+          // Using "params-as-array"-style
           var p = new Array();
-          var paramString = "";
           for (i in parameters) {
             p[parameters[i]] = document.getElementById('input_'+parameters[i]).value;
+          }
+          for (n in p) {
+            console.log(n + " : " + p[n]);
+          }
+          request.open('get', url, true);
+          request.send(p);
+    
+----------------------------------------------------------------------------- */
+
+          // Using "params-in-url"-style
+          var paramString = "";
+          for (i in parameters) {
             paramString += parameters[i]+'='+document.getElementById('input_'+parameters[i]).value+"&";
           }
-for (n in p) {
-console.log(n + " : " + p[n]);
-}
-console.log( paramString.substring(0, paramString.length-1));
           request.open('get', url+"?"+paramString, true);
-          //request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-          //request.send(paramString.substring(0, paramString.length-1));
           request.send(null);
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
               if (request.status == 200) {
-//console.log($('#queryResults').html());
-                $('#results').html(request.responseText);
-//console.log($('#queryResults').html());
+                $('#queryResultsList').html(request.responseText);
               } else if (request.status != 200) {
                 alert("Something unexpected happend. Statuscode: " + request.status);
               }
             }
           }
         }
+
+
+
+//------------------------------------------------------------------------------
+// Page-loading events
+//------------------------------------------------------------------------------
+        $(document).ready(function(e){
+
+
+// ------------- disposeQuery
+          $('#queryResult').bind('pageTransitionEnd', function(e, info){
+            if (info.direction == 'out') { 
+              $('#queryResultsList').html("<li align=\"center\">Loading ....</li>");
+            }
+          })
+
+
+
+
+
+         }); // End of pageTransitions
+
+
     </script>
   </head>
 
@@ -129,10 +186,32 @@ console.log( paramString.substring(0, paramString.length-1));
 
     <div id="preferences">
       <div class="toolbar">
-        <h1>Preferrnces</h1>
+        <h1>Preferences</h1>
         <a class="back button" href="#">Back</a>
       </div>
       not implementd yet!
+    </div>
+
+    <div id="disposeQuery">
+      <div class="toolbar">
+        <h1>Enter query</h1>
+        <a class="back button" href="#">Back</a>
+      </div>
+      <div id="disposeQueryForm">
+        <center>Loading ....</center>
+      </div>
+    </div>
+
+    <div id="queryResult">
+      <div class="toolbar">
+        <h1>Query results</h1>
+        <a class="back button" href="#">Back</a>
+      </div>
+      <div id="queryResultList">
+        <ul id="queryResultsList">
+          <li align="center">Loading ....</li>
+        </ul>
+      </div>
     </div>
 
     <div id="about">
@@ -150,13 +229,5 @@ console.log( paramString.substring(0, paramString.length-1));
       </div>
     </div>
     
-    <div id="queryResults">
-      <div class="toolbar">
-        <h1>About</h1>
-        <a class="back button" href="#">Back</a>
-      </div>
-      <div id="results"/>
-    </div>
-
   </body>
 </html>
