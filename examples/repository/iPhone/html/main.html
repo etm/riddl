@@ -54,7 +54,7 @@
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
           request.open('delete', url, true);
-          request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          //request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
           request.send('resource='+$('#span' + resource).text());
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
@@ -72,19 +72,27 @@
         function getQueryResult(parameters) {
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
-          var url = 'query?';
+          var url = 'query';
+          var p = new Array();
+          var paramString = "";
           for (i in parameters) {
-            url += parameters[i]+'='+document.getElementById('input_'+parameters[i]).value+"&";
+            p[parameters[i]] = document.getElementById('input_'+parameters[i]).value;
+            paramString += parameters[i]+'='+document.getElementById('input_'+parameters[i]).value+"&";
           }
-          request.open('get', url, true);
-          request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-          request.send();
+for (n in p) {
+console.log(n + " : " + p[n]);
+}
+console.log( paramString.substring(0, paramString.length-1));
+          request.open('get', url+"?"+paramString, true);
+          //request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          //request.send(paramString.substring(0, paramString.length-1));
+          request.send(null);
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
-              if (request.status == 409) {
-                alert("Resource (or any subresource) already in your wallet");
-              } else if (request.status == 200) {
-                $('#queryForm').html(request.responseText);
+              if (request.status == 200) {
+//console.log($('#queryResults').html());
+                $('#results').html(request.responseText);
+//console.log($('#queryResults').html());
               } else if (request.status != 200) {
                 alert("Something unexpected happend. Statuscode: " + request.status);
               }
@@ -140,6 +148,14 @@
         Erich <b>SCHIKUTA</b><br/><a href="mailto:erich.schikuta@univie.ac.at">erich.schikuta@univie.ac.at</a><br/><br/>
         <b>&copy; 2009</b>
       </div>
+    </div>
+    
+    <div id="queryResults">
+      <div class="toolbar">
+        <h1>About</h1>
+        <a class="back button" href="#">Back</a>
+      </div>
+      <div id="results"/>
     </div>
 
   </body>

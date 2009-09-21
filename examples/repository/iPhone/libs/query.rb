@@ -2,6 +2,15 @@ class ExecuteQuery < Riddl::Implementation
   include MarkUSModule
 
   def response
+=begin
+puts "-"*50
+puts "PARAMS:"
+puts "-"*50
+pp @p
+puts "-"*50
+puts "-"*50
+return
+=end
     # Get the queryInput of the group from selected resource
     resource = nil
     if @p[0].name == "selectedResource"
@@ -9,7 +18,7 @@ class ExecuteQuery < Riddl::Implementation
     else
       message = "The prameter 'selectedResource' is not given. Execution of the query is ompossible."
       p message
-      return Show.new().showPage("Error: ExecuteQuery", message, status)
+      return Show.new().showPage("Error: ExecuteQuery", message)
     end
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + resource[0])
     status, res = client.request :get => [Riddl::Parameter::Simple.new("queryInput", "")]
@@ -67,16 +76,11 @@ class ExecuteQuery < Riddl::Implementation
 
     # Execute request for services and generate HTML respond
     Riddl::Parameter::Complex.new("html","text/html") do
-      div_ :id => 'query', :class => "metal" do
-        div_ :class => "toolbar" do
-          h1_ "Query Results"
-          a_ "Back", :class => "back button", :href => "#"
-        end
         ul_ do
           services.each do |s|
             li_ s['id'], :class => "head", :style=>"background-color:#e1e1e1; font-size:16px;"
             # Query service
-            p "Query serivce at: #{s['link']}"
+            p "Query serivce #{s['id']} at: #{s['link']}"
             service = Riddl::Client.new(s['link']).resource("")
             begin
               status, out = service.request :get => riddlParams
@@ -84,7 +88,7 @@ class ExecuteQuery < Riddl::Implementation
               status = "Server not found"
             end
             if status != "200"
-              li_ "Service '#{s['link']}' did not respond. Statuscode: #{status}", :style=>"font-size:14px; color: red;"
+              li_ "Service '#{s['id']}' did not respond. Statuscode: #{status}", :style=>"font-size:14px; color: red;"
             else 
               xml = XML::Smart::string(out[0].value.read)
               if xml.validate_against(rng) == false
@@ -109,7 +113,6 @@ class ExecuteQuery < Riddl::Implementation
             end
           end
         end
-      end
     end
   end
   
@@ -117,22 +120,15 @@ class ExecuteQuery < Riddl::Implementation
     client = Riddl::Client.new(link).resource(resource)
     status, res = client.request :get => []
     xml = XML::Smart::string(res[0].value.read)
-    if res[0].name == "list-of-subgroups"
+    if res[0].name == "list-of-subgroups" || res[0].name == "list-of-services"
       xml.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
       xml.find("//atom:entry/atom:id").each do |id|
         getServices(link, resource+"/"+id.text, services)
       end
-    elsif res[0].name == "list-of-services"
-      xml.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
-      xml.find("//atom:entry").each do |e|
-        link = ""
-        id = ""
-        e.children.each do |c|
-          id = c.text if c.name.name  == "id" 
-          link = c.text if c.name.name  == "link" 
-        end
-        services <<  {'id'=>resource+"/"+id, 'link'=>link}
-      end
+    elsif res[0].name == "details-of-service"
+      link = xml.find("string(//service/URI)")
+      name = xml.find("string(//vendor/name)")
+      services <<  {'id'=>name+" ("+resource+")", 'link'=>link}
     else
       message = "Illigeal paramter responded named " + res[0].name
       p message
@@ -150,7 +146,7 @@ class DisposeQuery < Riddl::Implementation
     # Get the properties of the group from selected resource
     resource = @p[0].value.split("/")
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + resource[0])
-    status, res = client.request :get => [Riddl::Parameter::Simple.new("properties", "")]
+    status, prop = client.request :get => [Riddl::Parameter::Simple.new("properties", "")]
     if status != "200"
       mesage = "Can not receive groups properties of " + resource[0]
       p message
@@ -164,10 +160,11 @@ class DisposeQuery < Riddl::Implementation
           h1_ "Resource query"
           a_ "Back", :class => "back button", :href => "#"
         end
-        div_ :id=>"query" do
+        div_ :id=>"queryInput" do
           input_ :type=>"text", :value=>@p[0].value, :name=>"input_selectedResource", :id=>"input_selectedResource"
+#          input_ :type=>"text", :value=>@p[0].value, :name=>"selectedResource", :id=>"input_selectedResource"
           table_ :style=>"" do
-            xml = XML::Smart::string(res[0].value.read)
+            xml = XML::Smart::string(prop[0].value.read)
             qi = xml.find("/properties/dynamic/queryInput/*/@name")
             qi.each do |e|
               createInput(e.value, xml)
@@ -175,7 +172,9 @@ class DisposeQuery < Riddl::Implementation
             end
           end
           arrayString = arrayString.chop + ")"
-          a_ "Query", :style=>"margin:0 10px;color:green", :class=>"whiteButton", :onClick=>"getQueryResult(#{arrayString})"
+          a_ "Query", :style=>"margin:0 10px;color:green", :class=>"whiteButton", :onClick=>"getQueryResult(#{arrayString})", :href=>"#queryResults"
+#          a_ "Query", :style=>"margin:0 10px;color:green", :class=>"whiteButton .submit"
+#          input_ :type=>"submit"
         end
       end
     end
@@ -194,11 +193,13 @@ class DisposeQuery < Riddl::Implementation
       tr_ do td_ :style=>"font-size: 24pt;" do label + ": " end end
       if minS == nil && maxS == nil
         tr_ do td_ do input_ :style=>"font-size: 24px;", :type=>"text", :name=>name, :id=>"input_"+name, :value=>"1212-12-12" end end
+#        tr_ do td_ do input_ :style=>"font-size: 24px;", :type=>"text", :name=>name, :id=>name, :value=>"1212-12-12" end end
       else
         min = minS.to_i
         max = maxS.to_i
         tr_ do td_ do
           select_ :style=>"font-size: 24px;", :name=>name, :id=>"input_"+name do
+#          select_ :style=>"font-size: 24px;", :name=>name, :id=>name do
             while min <= max do
               option_ min
               min = min+1
