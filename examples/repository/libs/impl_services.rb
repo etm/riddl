@@ -34,7 +34,7 @@ class ServicesGET < Riddl::Implementation
         groups.each do |g|
           entry_ :lang => 'EN' do
             id_ "#{g}"
-            link_ "repository/#{@r[0]}/#{@r[1]}/#{@r.last}/#{g}"
+            link_ "#{$url}#{@r[0]}/#{@r.last}/#{g}/"
             updated_ File.mtime("repository/#{@r[0]}/#{@r[1]}/#{@r.last}/#{g}").xmlschema
           end
         end  
