@@ -12,7 +12,8 @@
   <phone>+44 (20) 555 4711</phone>
   </vendor>
   <service>
-  <URI>http://www.theburrow.co.uk/API</URI>
+  <!-- URI>http://www.theburrow.co.uk/API</URI -->
+  <URI>http://www.pri.univie.ac.at/~ralph/TestServices/burrow</URI>
   <staticProperties>http://www.theburrow.co.uk/staticProps.xml</staticProperties>
   </service>
 </details>

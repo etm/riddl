@@ -12,7 +12,8 @@
   <phone>+4020 (13) 555 9089</phone>
   </vendor>
   <service>
-  <URI>http://www.evadne-cake.dw/booking</URI>
+  <!-- URI>http://www.evadne-cake.dw/booking</URI -->
+  <URI>http://www.pri.univie.ac.at/~ralph/TestServices/cakes</URI>
   <staticProperties>http://www.evadne-cake.dw/prop.xml</staticProperties>
   </service>
 </details>

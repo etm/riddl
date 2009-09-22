@@ -12,7 +12,8 @@
   <phone>+44 (20) 555 4711</phone>
   </vendor>
   <service>
-  <URI>http://www.azkaban.co.uk/book-online</URI>
+  <!-- URI>http://www.azkaban.co.uk/book-online</URI -->
+  <URI>http://www.pri.univie.ac.at/~ralph/TestServices/azkaban</URI>
   <staticProperties>http://www.azkaban.co.uk/props.xml</staticProperties>
   </service>
 </details>
