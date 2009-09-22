@@ -31,10 +31,12 @@ class RESCUE < Riddl::Implementation
       ul_ do
         feed.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
         letter = ""
-        status, res = client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[2...5].join("/")+"/count")
-        count = res[0].value
         feed.find("//atom:entry").each do |e|
           id = e.find("string(atom:id)")
+          client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[2...5].join("/")+"/#{id}/count")
+          status, res =  client.request :get=>[]
+          count = res[0].value
+
           if letter != id[0,1]
             letter = id[0,1]
             li_ letter.capitalize, :class => "sep"
@@ -50,8 +52,10 @@ class RESCUE < Riddl::Implementation
                     img_ :src=>"../js/custom/plusButton.png"
                   end
                 end
-                td_ do
-                  small_ count, :class=>"counter"
+                if @r.size < 4 && status == "200"
+                  td_ do
+                    small_ count, :class=>"counter", :style=>"margin: 0px 5px;"
+                  end
                 end
               end
             end
