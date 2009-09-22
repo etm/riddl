@@ -15,6 +15,7 @@ require 'libs/impl_subgroups'
 require 'libs/impl_services'
 require 'libs/impl_details'
 require 'libs/impl_root'
+require 'libs/count'
 
 use Rack::ShowStatus
 
@@ -38,6 +39,12 @@ run(
         # Creating a new group
         p 'Create group ...' if method :post => 'create-group'
         run GroupPOST if method :post => 'create-group'
+
+        on resource 'count' do
+          # Generating the ATOM feed with the services
+          p 'Count group entries .... ' if method :get => '*'
+          run Count if method :get => '*'
+        end
         
         on resource do # Group
           # Generating the ATOM feed with subgroups
@@ -75,6 +82,12 @@ run(
           # Updating an existing group
           p 'Updating group ...' if method :put => 'create-group'
           run GroupPUT if method :put => 'create-group'
+
+          on resource 'count' do
+            # Generating the ATOM feed with the services
+            p 'Count subgroup entries .... ' if method :get => '*'
+            run Count if method :get => '*'
+          end
           
           on resource do  # Subgrouop
             # Generating the ATOM feed with the services
@@ -93,6 +106,12 @@ run(
             # Deleting an existing subgroup
             p 'Deleting subgroup ...' if method :delete => '*'
             run SubgroupDELETE if method :delete => '*'
+
+            on resource 'count' do
+              # Generating the ATOM feed with the services
+              p 'Count service entries .... ' if method :get => '*'
+              run Count if method :get => '*'
+            end
             
             on resource do  # Service
               # Responding the service details

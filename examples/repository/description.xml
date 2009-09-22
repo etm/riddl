@@ -96,6 +96,13 @@
       <xi:include href="rngs/details-of-service.rng"/>
     </parameter>
   </message>
+
+
+
+  <message name="count-entries">
+    <parameter name="count" type="string"/>
+  </message>
+
 <!--}}}-->
 
   <resource>
@@ -106,6 +113,10 @@
       <get in="*" out="list-of-groups"/>
       <post in="create-group"/>
 
+      <resource relative="count"> 
+        <get in="*" out="count-entries"/>
+      </resource>
+
       <resource> <!-- Dynamically: name of the group -->
         <get in="properties-of-group-request" out="properties-of-group-response">
           <ann:label xml:lang="en">Show Properties</ann:label>
@@ -114,7 +125,7 @@
           <ann:label xml:lang="en">Show queryInput</ann:label>
         </get>
         <get in="query-output-of-group-request" out="query-output-of-group-response">
-          <ann:label xml:lang="en">Show queryOutptu</ann:label>
+          <ann:label xml:lang="en">Show queryOutptut</ann:label>
         </get>
         <get in="invoke-input-of-group-request" out="invoke-input-of-group-response">
           <ann:label xml:lang="en">Show invokeInput</ann:label>
@@ -125,13 +136,21 @@
         <get in="*" out="list-of-subgroups"/>
         <post in="create-subgroup"/>
         <put in="create-group"/>
-        <delete in="*"/> 
+        <delete in="*"/>
+      
+        <resource relative="count"> 
+          <get in="*" out="count-entries"/>
+        </resource>
 
         <resource> <!-- Dynamically: name of subgroup -->
           <get in="*" out="list-of-services"/>
           <post in="create-service"/>
           <put in="create-subgroup"/>
           <delete in="*"/>
+
+          <resource relative="count"> 
+            <get in="*" out="count-entries"/>
+          </resource>
 
           <resource> <!-- Dynamically: name of service -->
             <get in="*" out="details-of-service"/>
