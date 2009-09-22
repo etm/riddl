@@ -56,24 +56,13 @@ class GetWallet < Riddl::Implementation
           a_ "Back", :class => "back button", :href => "#"
         end
         div_ :style=>"text-align: center;" do 
-          span_ "<br/><b>Touch resource to query it!</b><br/><br/>", :style=>"color: green;" 
+          p_ "Touch resource to query it!", :class=>"infoText";
         end
         div_ :id => 'walletIndex', :class => "edgetoedge" do
           ul_ :id=>"walletEntries" do
             entries.each do |entry| 
               li_ :style=>"vertical-align: middle;", :id=>Digest::MD5.hexdigest(entry) do
-                table_ :style=>"width: 100%;" do 
-                  tr_ do 
-                    td_ :style=>"width:100%;" do 
-                      a_ entry, :onClick=>"generateQueryForm('#{entry}')", :href=>"#disposeQuery", :style=>"display:inline; margin-left:5px;vertical-align: center;", :id=>"span"+Digest::MD5.hexdigest(entry), :class=>"slideup"
-                    end 
-                    td_ :style => "vertical-align:middle;"do 
-                      a_ :href=>"#confirm" + Digest::MD5.hexdigest(entry), :class=>"slideup" do 
-                        img_ :src=>"../js/custom/minusButton.png"
-                      end
-                    end
-                  end
-                end
+                a_ entry, :href=>"#confirm" + Digest::MD5.hexdigest(entry), :class=>"slideup"
               end
             end
           end
@@ -102,16 +91,14 @@ class GetWallet < Riddl::Implementation
     entries.sort.each do |entry|
       html = div_ :id=>"confirm" + Digest::MD5.hexdigest(entry) do
         div_ :class => "toolbar" do
-          h1_ "Confirm"
+          a_ "Back", :class => "back button", :href => "#"
+          h1_ "Res: " + entry
         end
-        br_
-        br_
-        h4_ "Do you want to remove the resoure '#{entry}' from your wallet?", :style=>"text-align:center;"
-        br_
-        br_
-        a_ "Yes", :style=>"margin:0 10px;color:green", :onclick=>"removeFromWallet('#{Digest::MD5.hexdigest(entry)}', 'wallet')", :class=>"whiteButton goback"
-        br_
-        a_ "Cancel", :style=>"margin:0 10px;color:red", :href=>"#", :class=>"whiteButton goback"
+        p_ "What do you want to do with the resource", :class=>"infoText"
+        p_ entry, :class=>"infoText", :id=>"p" + Digest::MD5.hexdigest(entry)
+        a_ "Query", :href=>"#disposeQuery", :onClick=>"generateQueryForm('#{entry}')", :class=>"greenButton slideup"
+        a_ "Delete", :onclick=>"removeFromWallet('#{Digest::MD5.hexdigest(entry)}', 'wallet')", :class=>"redButton goback"
+        a_ "Back", :href=>"#", :class=>"whiteButton goback"
       end
     end
     html

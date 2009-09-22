@@ -46,7 +46,7 @@ return
 
     # Validate if params of request fit to queryInputSchema
     if XML::Smart::string(xml).validate_against(rng) == false
-      message = "Some parameters in queryInput maybe wrong or may have an illegal value"
+      message = "Some parameters have an illegal value"
       p message
       return Show.new().showPage("Error: Parameter validation", message)
     end
@@ -78,7 +78,7 @@ return
           services.each do |s|
 
             # Header for Service
-            li_ s['id'], :class => "head", :style=>"background-color:#e1e1e1;"
+            li_ s['id'], :class => "head", :class=>"sep"
 
             # Query service
             p "Query serivce #{s['id']} at: #{s['link']}"
@@ -89,7 +89,7 @@ return
               status = "Server not found"
             end
             if status != "200"
-              li_ "Service '#{s['id']}' did not respond. Statuscode: #{status}", :style=>"color: red;"
+              li_ "Service '#{s['id']}' did not respond. Statuscode: #{status}", :class=>"errorText"
             else 
               xml = XML::Smart::string(out[0].value.read)
               if xml.validate_against(rng) == false
@@ -100,7 +100,7 @@ return
                 xml.find("//entry").each do |e|
                   li_ do
                     # Reslutset
-                    table_ :style=>"" do
+                    table_ :class=>"result" do
                       qo.each_with_index do |p, index|
                         tr_ do
                           td_ p
@@ -130,7 +130,7 @@ return
     elsif res[0].name == "details-of-service"
       link = xml.find("string(//service/URI)")
       name = xml.find("string(//vendor/name)")
-      services <<  {'id'=>name+" ("+resource+")", 'link'=>link}
+      services <<  {'id'=>name, 'link'=>link}
     else
       message = "Illigeal paramter responded named " + res[0].name
       p message
@@ -159,10 +159,9 @@ class DisposeQuery < Riddl::Implementation
       arrayString = "new Array('selectedResource',"
 #      form_ :method=>"GET", :action=>"query", :id=>"queryForm" do
         div_ :id=>"disposeQueryForm" do
-          h3_ "Enter query parameter for resource: " 
-          h3_ @p[0].value
+          p_ "Enter query parameter for resource: #{@p[0].value}", :class=>"infoText"
           input_ :type=>"hidden", :value=>@p[0].value, :name=>"input_selectedResource", :id=>"input_selectedResource"
-          table_ :style=>"" do
+          table_ do
             xml = XML::Smart::string(prop[0].value.read)
             qi = xml.find("/properties/dynamic/queryInput/*/@name")
             qi.each do |e|
@@ -172,7 +171,7 @@ class DisposeQuery < Riddl::Implementation
           end
         end
         arrayString = arrayString.chop + ")"
-        a_ "Query", :onClick=>"getQueryResult(#{arrayString})", :href=>"#queryResult", :style=>"margin:0 10px;color:green", :class=>"whiteButton slideup", :id=>"queryButton"
+        a_ "Query", :onClick=>"getQueryResult(#{arrayString})", :href=>"#queryResult", :class=>"greenButton slideup", :id=>"queryButton"
 #      end
     end
   end
@@ -180,27 +179,43 @@ class DisposeQuery < Riddl::Implementation
   def createInput(name, xml)
     label =  xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/caption[@lang='en'])")
     type =  xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/data/@type)")
-    min = ""
-    max = ""
+    minS = ""
+    maxS = ""
     if type.downcase.include? "integer"
       minS = xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/data/param[@name='minInclusive'])")
       maxS = xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/data/param[@name='maxInclusive'])")
     end
     tr_ do 
-      tr_ do td_ :style=>"" do label + ": " end end
-      if minS == nil && maxS == nil
-        tr_ do td_ do input_ :style=>"", :type=>"text", :name=>name, :id=>"input_"+name, :value=>"" end end
-      else
+      tr_ do td_ :class=>"formLabel" do label + ": " end end
+      # Found number input with given range
+      if minS != "" && maxS != ""
         min = minS.to_i
         max = maxS.to_i
         tr_ do td_ do
-          select_ :style=>"", :name=>name, :id=>"input_"+name do
+          select_ :class=>"formLabel", :name=>name, :id=>"input_"+name do
             while min <= max do
               option_ min
               min = min+1
             end
           end
         end end
+      # Found date
+      elsif type.downcase.include? "date"
+      # Found string or number without any pecification
+        tr_ do td_ do
+          select_ :class=>"formLabel", :name=>name, :id=>"input_"+name do
+            today = Date.today();
+            i=0
+            while i <= 356 do
+             xD = (today+i)
+             option_ "#{Date::ABBR_DAYNAMES[xD.wday()]}, %02d. #{Date::MONTHNAMES[xD.month()]} #{xD.year()}" % xD.day(), :value=>(today+i).to_s
+              i = i+1
+            end
+          end
+        end end
+      
+      else
+        tr_ do td_ do input_ :style=>"", :type=>"text", :name=>name, :id=>"input_"+name, :class=>"formLabel" end end
       end
     end
   end

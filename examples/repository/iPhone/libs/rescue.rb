@@ -35,7 +35,7 @@ class RESCUE < Riddl::Implementation
           id = e.find("string(atom:id)")
           if letter != id[0,1]
             letter = id[0,1]
-            li_ letter.capitalize, :class => "sep"        #, :style=>"background-color:#e1e1e1;"
+            li_ letter.capitalize, :class => "sep"
           end
           li_ :style=>"vertical-align: middle" do
             table_ :style=>"width: 100%;" do 
@@ -62,14 +62,9 @@ class RESCUE < Riddl::Implementation
         div_ :class => "toolbar" do
           h1_ "Confirm"
         end
-        br_
-        br_
-        h4_ "Do you want to add the resoure '#{id}' to your wallet?", :style=>"text-align:center;"
-        br_
-        br_
-        a_ "Yes", :style=>"margin:0 10px;color:green", :onclick=>"addToWallet('#{@r[2...5].join("/")}/#{id}', 'wallet')", :class=>"whiteButton goback"
-        br_
-        a_ "Cancel", :style=>"margin:0 10px;color:red", :href=>"#", :class=>"whiteButton goback"
+        p_ "Do you want to add the resoure '#{id}' to your wallet?", :class=>"infoText"
+        a_ "Yes", :onclick=>"addToWallet('#{@r[2...5].join("/")}/#{id}', 'wallet')", :class=>"greenButton goback"
+        a_ "Cancel", :href=>"#", :class=>"redButton goback"
       end
     end
     html
@@ -92,22 +87,15 @@ class RESCUE < Riddl::Implementation
         a_ "Back", :class => "back button", :href => "#"
       end
       div_ :class => "contact", :align=>"center" do
-        br_
-        br_
-        h2_ "Contact", :style=>""
-        br_
-        div_ :style=>"" do
-          span_ do b_ name end
-          br_
-          span_ street + " " + houseno
-          br_
-          span_ zip + " " + city
-          br_
-          span_ state
+        p_ "Contact", :class=>"head"
+        div_ :class=>"address" do
+          p_ do b_ name end
+          p_ street + " " + houseno
+          p_ zip + " " + city
+          p_ state
         end
         br_
-        br_
-        table_ :style=>"" do
+        table_ :class=>"address", :style=>"text-align: left; margin: 0.5cm" do
           tr_ do
             td_ "Phone:"
             td_ do a_ phone, :href => "tel:#{phone}" end
@@ -117,7 +105,7 @@ class RESCUE < Riddl::Implementation
             td_ do a_ mail, :href => "mailto:#{mail}" end
           end
           tr_ do
-            td_ "URI:"
+            td_ "WWW:"
             td_ do a_ uri, :href => uri end
           end
         end

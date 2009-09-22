@@ -10,11 +10,10 @@ class Show
           a_ "Back", :class => "back button", :href => "#"
         end
 =end
-        div_ :class => "message", :align=>"center" do
-          br_
-          br_
-          h3_ message, :style=>""
-          h3_ "HTTP-Status: (" + status + ")", :style=>"" if status != nil
+        div_  :align=>"center" do
+          p_ message, :class => "errorText"
+          br_  if status != nil
+          p_ "HTTP-Status: (" + status + ")", :class => "errorText" if status != nil
         end
       end
     end
