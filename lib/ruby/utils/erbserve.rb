@@ -11,6 +11,7 @@ module Riddl
           return []
         end
         if ::File.exists?(path)
+          __ERB_FILE__ = path
           rval = ERB.new(::File.read(path), 0, "%<>")
           return Riddl::Parameter::Complex.new("data",MIME::Types.type_for(path).to_s,rval.result(binding))
         end
