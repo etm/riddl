@@ -97,7 +97,7 @@ return
                 li_ do
                   span_ "Service responded wrong queryOutputMessage"
                 end
-              else
+              else 
                 xml.find("//entry").each do |e|
                   li_ do
                     # Reslutset

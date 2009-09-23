@@ -108,7 +108,7 @@ class RESCUE < Riddl::Implementation
         table_ :class=>"address", :style=>"text-align: left; margin: 0.5cm" do
           tr_ do
             td_ "Phone:"
-            td_ do a_ phone, :href => "tel:#{phone}" end
+            td_ do a_ phone, :href => "tel:#{phone}" end 
           end
           tr_ do
             td_ "@Mail:"
