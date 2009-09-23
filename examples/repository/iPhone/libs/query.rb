@@ -21,7 +21,14 @@ return
       return Show.new().showPage("Error: ExecuteQuery", message)
     end
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + resource[0])
-    status, res = client.request :get => [Riddl::Parameter::Simple.new("queryInput", "")]
+    begin
+      status, res = client.request :get => [Riddl::Parameter::Simple.new("queryInput", "")]
+    rescue
+      message = "Server (http://sumatra.pri.univie.ac.at:9290/) refused connection on resource: " + resource.join("/") + "?queryInput"
+      p message
+      return Show.new().showPage("Error: Connection refused", message, status, true)
+    end
+
     if status != "200"
       message = "Can not receive groups queryInput of " + resource[0]
       p message
@@ -56,7 +63,14 @@ return
     getServices("http://sumatra.pri.univie.ac.at:9290/groups/", resource.join("/"), services)
 
     # Get queryOuput schema
-    status, res = client.request :get => [Riddl::Parameter::Simple.new("queryOutput", "")]
+    begin
+      status, res = client.request :get => [Riddl::Parameter::Simple.new("queryOutput", "")]
+    rescue
+      message = "Server (http://sumatra.pri.univie.ac.at:9290/) refused connection on resource: " + resource.join("/") + "?queryOutput"
+      p message
+      return Show.new().showPage("Error: Connection refused", message, status, true)
+    end
+
     if status != "200"
       message = "Can not receive groups queryOutput of " + resource[0]
       p message
@@ -87,7 +101,9 @@ return
             begin
               status, out = service.request :get => riddlParams
             rescue
-              status = "Server not found"
+              message = "Server (http://sumatra.pri.univie.ac.at:9290/) refused connection on resource: " + resource.join("/") + riddlParams.join(", ")
+              p message
+              return Show.new().showPage("Error: Connection refused", message, status, true)
             end
             if status != "200"
               li_ "Service '#{s['id']}' did not respond. Statuscode: #{status}", :class=>"errorText"
@@ -121,7 +137,14 @@ return
   
   def getServices( link, resource, services )
     client = Riddl::Client.new(link).resource(resource)
-    status, res = client.request :get => []
+    begin
+      status, res = client.request :get => []
+    rescue
+      message = "Server (#{link}) refused connection on resource: " + resource
+      p message
+      return Show.new().showPage("Error: Connection refused", message, status, true)
+    end
+
     xml = XML::Smart::string(res[0].value.read)
     if res[0].name == "list-of-subgroups" || res[0].name == "list-of-services"
       xml.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
@@ -135,7 +158,7 @@ return
     else
       message = "Illigeal paramter responded named " + res[0].name
       p message
-      return Show.new().showPage("Error: Collecting sub-rescource", message, status)
+      return Show.new().showPage("Error: Collecting sub-resource", message, status)
     end
   end
 end
@@ -149,7 +172,14 @@ class DisposeQuery < Riddl::Implementation
     # Get the properties of the group from selected resource
     resource = @p[0].value.split("/")
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + resource[0])
-    status, prop = client.request :get => [Riddl::Parameter::Simple.new("properties", "")]
+    begin
+      status, prop = client.request :get => [Riddl::Parameter::Simple.new("properties", "")]
+    rescue
+      message = "Server (#{link}) refused connection on resource: groups/" + resource[0]
+      p message
+      return Show.new().showPage("Error: Connection refused", message, status, true)
+    end
+
     if status != "200"
       mesage = "Can not receive groups properties of " + resource[0]
       p message
@@ -209,7 +239,7 @@ class DisposeQuery < Riddl::Implementation
             i=0
             while i <= 356 do
              xD = (today+i)
-             option_ "#{Date::ABBR_DAYNAMES[xD.wday()]}, %02d. #{Date::MONTHNAMES[xD.month()]} #{xD.year()}" % xD.day(), :value=>(today+i).to_s
+             option_ "#{Date::ABBR_DAYNAMES[xD.wday()]}, %02d. #{Date::ABBR_MONTHNAMES[xD.month()]} #{xD.year()}" % xD.day(), :value=>(today+i).to_s, :class=>"formLabel"
               i = i+1
             end
           end
