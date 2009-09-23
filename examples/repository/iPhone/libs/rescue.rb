@@ -4,11 +4,17 @@ class RESCUE < Riddl::Implementation
   def response
 
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[2...5].join("/"))
-    status, res = client.request "get" => []
+    begin
+      status, res = client.request "get" => []
+    rescue
+      message = "Server (http://sumatra.pri.univie.ac.at:9290/) refused connection on resource: groups/#{@r[2...5].join("/")}"
+      p message
+      return Show.new().showPage("Error: Connection refused", message, status, true)
+    end
     if status != "200"
       message = "An error occurde on resource: groups/#{@r[2...5].join("/")}"
       p message
-      return Show.new().showPage("Error: ReceivingFeed", message, status)
+      return Show.new().showPage("Error: RESCUE sever dis not respond as expected", message, status, true)
     end
 
     html = ""
@@ -35,7 +41,14 @@ class RESCUE < Riddl::Implementation
         feed.find("//atom:entry").each do |e|
           id = e.find("string(atom:id)")
           client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[2...5].join("/")+"/#{id}/count")
-          status, res =  client.request :get=>[]
+          begin
+            status, res =  client.request :get=>[]
+          rescue
+            message = "Server (http://sumatra.pri.univie.ac.at:9290/) refused connection on resource: groups/" + @r[2...5].join("/")+"/#{id}/count"
+            p message
+            return Show.new().showPage("Error: Connection refused", message, status, true)
+          end
+
           count = res[0].value
 
           if letter != id[0,1]

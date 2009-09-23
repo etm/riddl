@@ -47,7 +47,7 @@ class GetWallet < Riddl::Implementation
     if (entries.size == 0)
       message = "Wallet does not exists or is empty"
       p message
-      return Show.new().showPage("Wallet", message)
+      return Show.new().showPage("Wallet", message, nil, true)
     else
     # Wallet is not empty
       html = div_ :id => 'wallet' do  

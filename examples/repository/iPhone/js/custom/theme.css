@@ -1,18 +1,30 @@
+div {
+  background:#006699;
+  color; #f2f2f2;
+}
+
+a {
+  color: #f2f2f2;
+}
+
+
 .errorText {
   font-size: 1.3em;
-  margin: 1cm;
+  margin: 1cm 0cm;
   color: red;
+  background: #ffffff;
   text-align: center;
   vertical-align: middle;
 }
 
 .infoText {
   font-size: 1.3em;
-  margin: 0.5cm;
+  margin: 0.4cm;
   text-align: center;
   vertical-align: middle;
   color: black;
   font-weight: bold;
+  color: #f2f2f2;
 }
 
 .formLabel {
@@ -20,6 +32,7 @@
   margin: 0.1cm 0.3cm;
   vertical-align: middle;
   color: black;
+//  font-family:Arial;
 }
 
 .result {
@@ -62,9 +75,15 @@
 }
 
 .sep {
-  background-color: rgb(154,159,170);
+//  background-color: rgb(154,159,170);
+  background-color: #006699;
   color: white;
   padding: 0.1cm 0.3cm;
+}
+
+ul li small.counter {
+  background:#006699;
+  color; #f2f2f2;
 }
 
 .head {
@@ -72,5 +91,5 @@
   font-weight: bold;
   text-align: center;
   margin: 0.5cm;
-  color: #919191;
+  color: #f2f2f2;
 }
