@@ -78,8 +78,9 @@ return
           services.each do |s|
 
             # Header for Service
-            li_ s['id'], :class => "head", :class=>"sep"
-
+            li_ :class=>"sep" do 
+              p_ s['id'], :style=>"text-overflow:ellipsis;overflow:hidden;max-width:260px;"
+            end
             # Query service
             p "Query serivce #{s['id']} at: #{s['link']}"
             service = Riddl::Client.new(s['link']).resource("")
@@ -130,7 +131,7 @@ return
     elsif res[0].name == "details-of-service"
       link = xml.find("string(//service/URI)")
       name = xml.find("string(//vendor/name)")
-      services <<  {'id'=>name, 'link'=>link}
+      services <<  {'id'=>name+' ('+resource+')', 'link'=>link}
     else
       message = "Illigeal paramter responded named " + res[0].name
       p message

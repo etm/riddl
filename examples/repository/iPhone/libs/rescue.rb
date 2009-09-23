@@ -27,6 +27,7 @@ class RESCUE < Riddl::Implementation
       div_ :class => "toolbar" do
         h1_ @r.last.capitalize
         a_ "Back", :class => "back button", :href => "#"
+        a_ "Main", :class=>"button flip", :id=>"infoButton", :href=>"#main"
       end
       ul_ do
         feed.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
@@ -93,6 +94,7 @@ class RESCUE < Riddl::Implementation
       div_ :class => "toolbar" do
         h1_ name
         a_ "Back", :class => "back button", :href => "#"
+        a_ "Main", :class=>"button flip", :id=>"infoButton", :href=>"#main"
       end
       div_ :class => "contact", :align=>"center" do
         p_ "Contact", :class=>"head"
@@ -114,7 +116,7 @@ class RESCUE < Riddl::Implementation
           end
           tr_ do
             td_ "WWW:"
-            td_ do a_ uri, :href => uri end
+            td_ :style=>"text-overflow:ellipsis;overflow:hidden;max-width:240px;" do a_ uri, :href => uri end
           end
         end
       end
