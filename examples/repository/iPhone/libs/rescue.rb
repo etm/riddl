@@ -62,7 +62,7 @@ class RESCUE < Riddl::Implementation
                   a_ id, :href => "/#{@r.join("/")}/#{id}", :style=>"display:block; " 
                 end 
                 td_ :style => "vertical-align:middle;" do 
-                  a_ :href=>"#confirm" + Digest::MD5.hexdigest(@r.join("/")+"/"+id), :class=>"slideup" do 
+                  a_ :href=>"#confirm" + Digest::MD5.hexdigest(@r.join("/")+"/"+id), :class=>"pop" do 
                     img_ :src=>"../js/custom/plusButton.png"
                   end
                 end
