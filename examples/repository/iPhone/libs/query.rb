@@ -2,21 +2,12 @@ class ExecuteQuery < Riddl::Implementation
   include MarkUSModule
 
   def response
-=begin
-puts "-"*50
-puts "PARAMS:"
-puts "-"*50
-pp @p
-puts "-"*50
-puts "-"*50
-return
-=end
     # Get the queryInput of the group from selected resource
     resource = nil
     if @p[0].name == "selectedResource"
       resource = @p[0].value.split("/")
     else
-      message = "The prameter 'selectedResource' is not given. Execution of the query is ompossible."
+      message = "The parameter 'selectedResource' is not given. Execution of the query is impossible."
       p message
       return Show.new().showPage("Error: ExecuteQuery", message)
     end
