@@ -3,6 +3,7 @@
   require_once($includes . "/parameter.php");
   require_once($includes . "/header.php");
   require_once($includes . "/httpgenerator.php");
+  require_once($includes . "/httpparser.php");
 
   class RiddlServerSimple {
     private $params;
@@ -13,6 +14,12 @@
       $this->debug = $debug;
       $this->params = array();
       $this->headers = array();
+      $rhp = new RiddlHttpParser($_SERVER["QUERY_STRING"],fopen('php://input','rb'),$_SERVER["CONTENT_TYPE"],$_SERVER["CONTENT_LENGTH"],$_SERVER["HTTP_CONTENT_DISPOSITION"],$_SERVER["HTTP_CONTENT_ID"],$_SERVER["HTTP_RIDDL_TYPE"]);
+      $this->request = $rhp->params();
+    }
+
+    function request() {
+      return $this->request;
     }
 
     function add($what) {
