@@ -30,6 +30,10 @@
             '../js/custom/greenButton.png',
             '../js/custom/redButton.png',
             '../js/custom/plusButton.png',
+            '../js/custom/rescue_icon.png',
+            '../js/custom/wallet_icon.png',
+            '../js/custom/preferences_icon.png',
+            '../js/custom/workflow_icon.png',
             '../js/themes/apple/img/whiteButton.png',
             '../js/themes/apple/img/toolbar.png.png',
             '../js/themes/apple/img/back_button.png'
@@ -48,7 +52,7 @@
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
               if (request.status == 409) {
-                alert("Resource (or any subresource) already in your wallet");
+//   do not delete             alert("Resource (or any subresource) already in your wallet");
               } else if (request.status != 200) {
                 alert("Something unexpected happend. Statuscode: " + request.status);
               }
@@ -69,7 +73,7 @@ console.log(url);
               if(request.status == 200) {
                 $('#'+resource).remove();
               } else if (request.status == 410) {
-                alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
+// do not delete                alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
               } else {
                 alert("Something unexpected happend. Statuscode: " + request.status);
               }
@@ -94,9 +98,9 @@ console.log(url);
               if(request.status == 200) {
                 $('#disposeQueryForm').html(request.responseText);
               } else if (request.status == 410) {
-                alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
+// do not delete                alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
               } else {
-                alert("Something unexpected happend. Statuscode: " + request.status);
+                showQueryErrorPage('#disposeQueryForm', 'Server ' + url + ' did not respond', request.status);
               }
             }
           }
@@ -134,16 +138,29 @@ console.log(url);
               if (request.status == 200) {
                 $('#queryResultsList').html(request.responseText);
               } else if (request.status != 200) {
-                alert("Something unexpected happend. Statuscode: " + request.status);
+                showQueryErrorPage('#queryResultsList', 'Server ' + url + ' did not respond', request.status);
               }
             }
           }
         }
 
-
+//------------------------------------------------------------------------------
+// Miscelanous functions
+//------------------------------------------------------------------------------
         function resetForm() {
           $('#disposeQueryForm').html('<div id="disposeQueryForm"><ul><li align="center">Loading ....</li></ul>');
   
+        }
+
+        function showQueryErrorPage(id, mes, status) {
+          html = '<div id="disposeQueryForm">' +   
+                    '<div class="errorText">' +
+                      '<p>' + mes + '</p>' +
+                      '<br/>' + 
+                      '<p>HTTP-Status: (' + status + ')</p>' +
+                    '</div>' +
+                 '</div>';
+          $(id).html(html);
         }
 
 //------------------------------------------------------------------------------
@@ -176,7 +193,7 @@ comsol.log("wallet out");
     <div id="main">
       <div class="toolbar">
         <h1>iRescue</h1>
-        <a class="button slideup" id="infoButton" href="#about">About</a>
+        <a class="button flip" id="infoButton" href="#about">About</a>
       </div>
       <div style="vertical-align:middle;background:#006699;">
         <table style="margin: auto;">

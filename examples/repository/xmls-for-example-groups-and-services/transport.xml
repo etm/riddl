@@ -29,7 +29,7 @@
       <element name="departureTime">
         <caption lang="en">Departure time</caption>
         <caption lang="de">Abfahrtszeit</caption>
-        <data type="dateTime"/>
+        <data type="date"/>
       </element>
     </queryInput>
 
@@ -37,7 +37,7 @@
       <element name="arraivelTime">
         <caption lang="en">Arraivel time</caption>
         <caption lang="de">Ankunftszeit</caption>
-        <data type="dateTime"/>
+        <data type="date"/>
       </element>
       <element name="price">
         <caption lang="en">Price per Ticket</caption>

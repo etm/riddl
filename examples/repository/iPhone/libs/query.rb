@@ -89,6 +89,7 @@ return
     # Execute request for services and generate HTML respond
     Riddl::Parameter::Complex.new("html","text/html") do
         ul_ :id=>"queryResultsList", :class=>"metal" do
+          li_ "No services found in the given resource" if services.size == 0
           services.each do |s|
 
             # Header for Service
@@ -170,6 +171,7 @@ class DisposeQuery < Riddl::Implementation
 
   def response
     # Get the properties of the group from selected resource
+puts "Generating form"
     resource = @p[0].value.split("/")
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + resource[0])
     begin
@@ -202,7 +204,7 @@ class DisposeQuery < Riddl::Implementation
           end
         end
         arrayString = arrayString.chop + ")"
-        a_ "Query", :onClick=>"getQueryResult(#{arrayString})", :href=>"#queryResult", :class=>"greenButton slideup", :id=>"queryButton"
+        a_ "Query", :onClick=>"getQueryResult(#{arrayString})", :href=>"#queryResult", :class=>"greenButton pop", :id=>"queryButton"
 #      end
     end
   end

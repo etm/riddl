@@ -17,8 +17,8 @@
         <data type="string"/>
       </element>
       <element name="date">
-        <caption lang="en">Date (YYYY-MM-DD)</caption>
-        <caption lang="de">Datum (JJJJ-MM-TT)</caption>
+        <caption lang="en">Date</caption>
+        <caption lang="de">Datum</caption>
         <data type="date"/>
       </element>
       <element name="numberOfSeats">
