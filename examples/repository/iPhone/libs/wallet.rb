@@ -62,7 +62,7 @@ class GetWallet < Riddl::Implementation
           ul_ :id=>"walletEntries" do
             entries.each do |entry| 
               li_ :style=>"vertical-align: middle;", :id=>Digest::MD5.hexdigest(entry) do
-                a_ entry, :href=>"#confirm" + Digest::MD5.hexdigest(entry), :class=>"flip"
+                a_ entry, :href=>"#confirm" + Digest::MD5.hexdigest(entry), :class=>"pop"
               end
             end
           end
