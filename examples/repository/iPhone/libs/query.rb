@@ -89,6 +89,7 @@ return
     # Execute request for services and generate HTML respond
     Riddl::Parameter::Complex.new("html","text/html") do
         ul_ :id=>"queryResultsList", :class=>"metal" do
+          li_ "No services found in the given resource" if services.size == 0
           services.each do |s|
 
             # Header for Service
