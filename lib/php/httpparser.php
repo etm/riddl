@@ -23,6 +23,7 @@
 
     private function parse_content($input,$ctype,$content_length,$content_disposition,$content_id,$riddl_type) {
       #{{{
+      if ($content_length == 0) return;
       if ($riddl_type == 'simple') $ctype = NULL;
       $mf = preg_match("/ filename=\"?([^\";]*)\"?/i", $content_disposition, $matchesf); # TODO debug
       $mn = preg_match("/ filename=\"?([^\";]*)\"?/i", $content_disposition, $matchesn); # TODO debug
