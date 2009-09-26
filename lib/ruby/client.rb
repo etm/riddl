@@ -95,15 +95,16 @@ module Riddl
       return res.code, response
     end
     private :exec_request
-  end  
-
-  class Request < Net::HTTPGenericRequest
-    def initialize(method, path, parameters, headers)
-      super method, true, true, path, headers
-      tmp = HttpGenerator.new(parameters,self).generate
-      self.content_length = tmp.size
-      self.body_stream = tmp
+  
+    class Request < Net::HTTPGenericRequest
+      def initialize(method, path, parameters, headers)
+        super method, true, true, path, headers
+        tmp = HttpGenerator.new(parameters,self).generate
+        self.content_length = tmp.size
+        self.body_stream = tmp
+      end
     end
-  end
+
+  end  
 
 end  
