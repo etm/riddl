@@ -36,6 +36,7 @@ class GroupPOST < Riddl::Implementation
   def response
     begin
       # Checking properties
+
       properties = @p[1].value.read
       x = XML::Smart.string(properties)
       if x.validate_against(XML::Smart::open("rngs/properties.rng")) == false

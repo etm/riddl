@@ -7,9 +7,22 @@
 
 <html>
 <head>
+<script type="text/javascript" src="http://jqueryjs.googlecode.com/files/jquery-1.3.2.js"></script>
+<script type="text/javascript">
+  function checkInput() {
+    var ret = true;
+    $('input').each( function () {
+                         if($(this).val() == "" || $(this).val() == null) { 
+                           alert("Please enter all data"); 
+                           ret = false;
+                         }
+                     });
+    return ret;
+  }
+</script>
 </head>
 <body>
-<form enctype="multipart/form-data" name="request-form" method="POST" action="http://localhost/rescue-webadmin/create-form-by-message.php">
+<form enctype="multipart/form-data" id="request" name="request-form" method="POST" action="http://localhost/rescue-webadmin/create-form-by-message.php" onsubmit="return checkInput();">
 <?php
   if(isset($_GET['resource']) || isset($_POST['rescue:resource'])) {
     createFormByMessage();
