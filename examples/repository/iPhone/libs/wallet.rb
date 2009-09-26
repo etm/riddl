@@ -62,7 +62,7 @@ class GetWallet < Riddl::Implementation
           ul_ :id=>"walletEntries" do
             entries.each do |entry| 
               li_ :style=>"vertical-align: middle;", :id=>Digest::MD5.hexdigest(entry) do
-                a_ entry, :href=>"#confirm" + Digest::MD5.hexdigest(entry), :class=>"pop"
+                a_ entry, :href=>"#confirm" + Digest::MD5.hexdigest(entry), :class=>"slideup"
               end
             end
           end
@@ -96,7 +96,7 @@ class GetWallet < Riddl::Implementation
         end
         p_ "What do you want to do with the resource", :class=>"infoText"
         p_ entry, :class=>"infoText", :id=>"p" + Digest::MD5.hexdigest(entry)
-        a_ "Query", :href=>"#disposeQuery", :onClick=>"generateQueryForm('#{entry}')", :class=>"greenButton pop"
+        a_ "Query", :href=>"#disposeQuery", :onClick=>"generateQueryForm('#{entry}')", :class=>"greenButton slideup"
         a_ "Delete", :onclick=>"removeFromWallet('#{Digest::MD5.hexdigest(entry)}', 'wallet')", :class=>"redButton goback"
         a_ "Back", :href=>"#", :class=>"whiteButton goback"
       end

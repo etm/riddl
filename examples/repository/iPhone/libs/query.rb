@@ -11,11 +11,11 @@ class ExecuteQuery < Riddl::Implementation
       p message
       return Show.new().showPage("Error: ExecuteQuery", message)
     end
-    client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + resource[0])
+    client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290").resource("/groups/" + resource[0])
     begin
       status, res = client.request :get => [Riddl::Parameter::Simple.new("queryInput", "")]
     rescue
-      message = "Server (http://sumatra.pri.univie.ac.at:9290/) refused connection on resource: " + resource.join("/") + "?queryInput"
+      message = "Server (http://sumatra.pri.univie.ac.at:9290) refused connection on resource: /" + resource.join("/") + "?queryInput"
       p message
       return Show.new().showPage("Error: Connection refused", message, status, true)
     end
@@ -57,7 +57,7 @@ class ExecuteQuery < Riddl::Implementation
     begin
       status, res = client.request :get => [Riddl::Parameter::Simple.new("queryOutput", "")]
     rescue
-      message = "Server (http://sumatra.pri.univie.ac.at:9290/) refused connection on resource: " + resource.join("/") + "?queryOutput"
+      message = "Server (http://sumatra.pri.univie.ac.at:9290) refused connection on resource: /" + resource.join("/") + "?queryOutput"
       p message
       return Show.new().showPage("Error: Connection refused", message, status, true)
     end
@@ -93,7 +93,7 @@ class ExecuteQuery < Riddl::Implementation
             begin
               status, out = service.request :get => riddlParams
             rescue
-              message = "Server (http://sumatra.pri.univie.ac.at:9290/) refused connection on resource: " + resource.join("/") + riddlParams.join(", ")
+              message = "Server (http://sumatra.pri.univie.ac.at:9290) refused connection on resource: /" + resource.join("/") + riddlParams.join(", ")
               p message
               return Show.new().showPage("Error: Connection refused", message, status, true)
             end
@@ -128,7 +128,7 @@ class ExecuteQuery < Riddl::Implementation
   end
   
   def getServices( link, resource, services )
-    client = Riddl::Client.new(link).resource(resource)
+    client = Riddl::Client.new(link).resource('/'+resource)
     begin
       status, res = client.request :get => []
     rescue
@@ -148,7 +148,7 @@ class ExecuteQuery < Riddl::Implementation
       name = xml.find("string(//vendor/name)")
       services <<  {'id'=>name+' ('+resource+')', 'link'=>link}
     else
-      message = "Illigeal paramter responded named " + res[0].name
+      message = "Illegeal paramter responded named " + res[0].name
       p message
       return Show.new().showPage("Error: Collecting sub-resource", message, status)
     end
@@ -164,7 +164,7 @@ class DisposeQuery < Riddl::Implementation
     # Get the properties of the group from selected resource
 puts "Generating form"
     resource = @p[0].value.split("/")
-    client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + resource[0])
+    client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290").resource("/groups/" + resource[0])
     begin
       status, prop = client.request :get => [Riddl::Parameter::Simple.new("properties", "")]
     rescue
@@ -195,7 +195,7 @@ puts "Generating form"
           end
         end
         arrayString = arrayString.chop + ")"
-        a_ "Query", :onClick=>"getQueryResult(#{arrayString})", :href=>"#queryResult", :class=>"greenButton pop", :id=>"queryButton"
+        a_ "Query", :onClick=>"getQueryResult(#{arrayString})", :href=>"#queryResult", :class=>"greenButton slideup", :id=>"queryButton"
 #      end
     end
   end

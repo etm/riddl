@@ -3,11 +3,11 @@ class RESCUE < Riddl::Implementation
 
   def response
 
-    client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[2...5].join("/"))
+    client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290").resource("/groups/" + @r[2...5].join("/"))
     begin
       status, res = client.request "get" => []
     rescue
-      message = "Server (http://sumatra.pri.univie.ac.at:9290/) refused connection on resource: groups/#{@r[2...5].join("/")}"
+      message = "Server (http://sumatra.pri.univie.ac.at:9290) refused connection on resource: /groups/#{@r[2...5].join("/")}"
       p message
       return Show.new().showPage("Error: Connection refused", message, status, true)
     end
@@ -33,18 +33,18 @@ class RESCUE < Riddl::Implementation
       div_ :class => "toolbar" do
         h1_ @r.last.capitalize
         a_ "Back", :class => "back button", :href => "#"
-        a_ "Main", :class=>"button flip", :id=>"infoButton", :href=>"#main"
+        a_ "Main", :class=>"button goback", :id=>"infoButton", :href=>"#main"
       end
       ul_ do
         feed.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
         letter = ""
         feed.find("//atom:entry").each do |e|
           id = e.find("string(atom:id)")
-          client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/").resource("groups/" + @r[2...5].join("/")+"/#{id}/count")
+          client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290").resource("/groups/" + @r[2...5].join("/")+"/#{id}/count")
           begin
             status, res =  client.request :get=>[]
           rescue
-            message = "Server (http://sumatra.pri.univie.ac.at:9290/) refused connection on resource: groups/" + @r[2...5].join("/")+"/#{id}/count"
+            message = "Server (http://sumatra.pri.univie.ac.at:9290) refused connection on resource: /groups/" + @r[2...5].join("/")+"/#{id}/count"
             p message
             return Show.new().showPage("Error: Connection refused", message, status, true)
           end
@@ -62,7 +62,7 @@ class RESCUE < Riddl::Implementation
                   a_ id, :href => "/#{@r.join("/")}/#{id}", :style=>"display:block; " 
                 end 
                 td_ :style => "vertical-align:middle;" do 
-                  a_ :href=>"#confirm" + Digest::MD5.hexdigest(@r.join("/")+"/"+id), :class=>"pop" do 
+                  a_ :href=>"#confirm" + Digest::MD5.hexdigest(@r.join("/")+"/"+id), :class=>"slideup" do 
                     img_ :src=>"../js/custom/plusButton.png"
                   end
                 end
@@ -107,7 +107,7 @@ class RESCUE < Riddl::Implementation
       div_ :class => "toolbar" do
         h1_ name
         a_ "Back", :class => "back button", :href => "#"
-        a_ "Main", :class=>"button flip", :id=>"infoButton", :href=>"#main"
+        a_ "Main", :class=>"button goback", :id=>"infoButton", :href=>"#main"
       end
       div_ :class => "contact", :align=>"center" do
         p_ "Contact", :class=>"head"
