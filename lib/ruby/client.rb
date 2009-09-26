@@ -28,6 +28,7 @@ module Riddl
       if @path.nil?
         raise PathError, 'Path not found.'
       end
+      self
     end  
 
     def get(parameters = [])
