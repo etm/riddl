@@ -41,6 +41,7 @@ class GetWallet < Riddl::Implementation
   include MarkUSModule
 
   def response
+    @headers << Riddl::Header.new("Cache-Control","No-Cache")
     entries = Array.new
     findEntries("user/#{@r[0]}/wallet", entries)
     # If Wallet is empty
