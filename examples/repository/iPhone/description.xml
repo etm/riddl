@@ -34,6 +34,15 @@
 <!-- Messages at workflow level -->
 
 <!-- Messages at preferences level -->
+  <message name="preferences-schema">
+    <parameter name="preferences-schema" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rngs/preferences.rng"/>
+    </parameter>
+  </message>
+
+  <message name="preferences-value">
+    <parameter name="preferences-value" type="string"/>
+  </message>
 
 <!--}}}-->
 <!--Rescurces {{{-->
@@ -60,6 +69,12 @@
 
       <resource relative="preferences">
         <get in="*" out="html"/>
+        <resource relative="schema">
+          <get in="*" out="preferences-schema"/>
+       </resource>
+       <resource recursive="true">
+         <get in="*" out="preferences-value"/>
+       </resource>
       </resource>
 
       <resource relative="query">

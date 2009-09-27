@@ -162,7 +162,6 @@ class DisposeQuery < Riddl::Implementation
 
   def response
     # Get the properties of the group from selected resource
-puts "Generating form"
     resource = @p[0].value.split("/")
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290").resource("/groups/" + resource[0])
     begin
@@ -181,7 +180,6 @@ puts "Generating form"
 
     Riddl::Parameter::Complex.new("html","text/html") do
       arrayString = "new Array('selectedResource',"
-#      form_ :method=>"GET", :action=>"query", :id=>"queryForm" do
         div_ :id=>"disposeQueryForm" do
           p_ "Enter query parameter for resource: #{@p[0].value}", :class=>"infoText"
           input_ :type=>"hidden", :value=>@p[0].value, :name=>"input_selectedResource", :id=>"input_selectedResource"
@@ -201,6 +199,7 @@ puts "Generating form"
   end
 
   def createInput(name, xml)
+    lang = 
     label =  xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/caption[@lang='en'])")
     type =  xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/data/@type)")
     minS = ""

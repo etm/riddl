@@ -14,6 +14,7 @@ require 'libs/wallet'
 require 'libs/forward'
 require 'libs/query'
 require 'libs/show'
+require 'libs/preferences'
 
 
 
@@ -51,8 +52,20 @@ run(
         on resource 'workflows' do
           p 'Executing GetWorkflows (workflows.rb)' if method :get => '*'
         end
+
+
         on resource 'preferences' do
           p 'Executing GetPreferences (prefernces.rb)' if method :get => '*'
+          run PreferencesForm if method :get => '*'
+          on resource 'schema' do
+            p 'Responding preferences.schema (prefernces.rb)' if method :get => '*'
+            run Riddl::Utils::FileServe, 'rngs/preferences.rng' if method :get => '*'
+          end
+
+          on resource do
+            p 'Responding an attribute of the preferences (prefernces.rb)' if method :get => '*'
+            run PreferencesValue if method :get => '*'
+          end
         end
 
         on resource 'query' do
