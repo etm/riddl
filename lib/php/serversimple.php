@@ -21,6 +21,12 @@
     function request() {
       return $this->request;
     }
+    function request_path() {
+      return array_key_exists("PATH_INFO",$_SERVER) ? $_SERVER["PATH_INFO"] : "/";
+    }
+    function request_method() {
+      return $_SERVER["REQUEST_METHOD"];
+    }
 
     function add($what) {
       if (is_array($what) && count($what) == 1 && (is_a($what[0],'RiddlParameterSimple') || is_a($what[0],'RiddlParameterComplex'))) {
@@ -42,13 +48,17 @@
       }
     }
 
-    function riddl_it() {
-      if (is_null($this->debug)) {
-        $g = new RiddlHttpGenerator($this->headers,$this->params,fopen('php://output','w'),'header');
+    function riddl_it($status = 200) {
+      if ($status == 200) {
+        if (is_null($this->debug)) {
+          $g = new RiddlHttpGenerator($this->headers,$this->params,fopen('php://output','w'),'header');
+        } else {
+          $g = new RiddlHttpGenerator($this->headers,$this->params,fopen($this->debug,'w'),'socket');
+        }
+        $g->generate();
       } else {
-        $g = new RiddlHttpGenerator($this->headers,$this->params,fopen($this->debug,'w'),'socket');
-      }
-      $g->generate();
+        header("HTTP/1.1 " . $status);
+      }  
       exit;
     }
   }

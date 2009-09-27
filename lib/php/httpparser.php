@@ -178,7 +178,7 @@
         while (!feof($input)) {
           $contents .= fread($input, 8192);
         }
-        $this->parse_nested_query(preg_replace("/\0\z/", '', $contents),'body');
+        $this->parse_nested_query(preg_replace("/\\0\\z/", '', $contents),'body');
       } else {
         $this->parse_content($input,$content_type,intval($content_length),$content_disposition ? $content_disposition : '',$content_id ? $content_id : '',$riddl_type ? $riddl_type : '');
       }
