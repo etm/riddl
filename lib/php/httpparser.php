@@ -42,7 +42,7 @@
         $c = fread($input,$bufsize < $content_length ? $bufsize : $content_length);
         if (!$c)
           throw new Exception("bad content body");
-        $this->write_body($body,$c);
+        $body = $this->write_body($body,$c);
         $content_length -= strlen($c);
       }
 
@@ -92,7 +92,7 @@
 
           # Save the read body part.
           if ($head && ($boundary_size+4 < strlen($buf))) {
-            $this->write_body($body,substr($buf,0, strlen($buf) - ($boundary_size+4)));
+            $body = $this->write_body($body,substr($buf,0, strlen($buf) - ($boundary_size+4)));
             $buf = substr($buf,$boundary_size+4);
           }
 
@@ -106,7 +106,7 @@
         # Save the rest.
         preg_match($rx,$buf,$matches);
         if ($i = strpos($buf,$matches[0])) {
-          $this->write_body(&$body,substr($buf,0,$i));
+          $body = $this->write_body(&$body,substr($buf,0,$i));
           $buf = substr($buf, $i + $boundary_size+2);
           if ($matches[0] == "--")
             $content_length = -1;
@@ -139,6 +139,7 @@
       if (is_string($body))
         $body .= $what;
       #}}}
+      return $body;
     }
 
     private function add_to_params($name,$body,$filename,$ctype,$head) {
