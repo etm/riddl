@@ -57,7 +57,7 @@ class GetWallet < Riddl::Implementation
           a_ "Back", :class => "back button", :href => "#"
         end
         div_ :style=>"text-align: center;" do 
-          p_ "Touch resource to query it!", :class=>"infoText";
+          p_ "Tab resource to query it!", :class=>"infoText";
         end
         div_ :id => 'walletIndex', :class => "edgetoedge" do
           ul_ :id=>"walletEntries" do

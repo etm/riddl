@@ -32,6 +32,9 @@
     <parameter name="pointOfEntry" type="string"/>
   </message>
 <!-- Messages at workflow level -->
+  <message name="addWorkflow">
+    <parameter name="name" type="string"/>
+  </message>
 
 <!-- Messages at preferences level -->
   <message name="preferences-schema">
@@ -65,6 +68,10 @@
 
       <resource relative="workflows">
         <get in="*" out="html"/>
+        <post in="addWorkflow"/>
+        <resource>
+          <delete in="*"/>
+        </resource>
       </resource>
 
       <resource relative="preferences">

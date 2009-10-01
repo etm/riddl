@@ -165,6 +165,46 @@ console.log(url);
         }
 
 //------------------------------------------------------------------------------
+// Functions for Workflows
+//------------------------------------------------------------------------------
+        function addWorkflow() {
+          request = new XMLHttpRequest();
+          if(!request) alert("Failure creating XMLHttpRequest-Object");
+          request.open('post', 'workflows', true);
+          request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          request.send('name='+$('#addWorkflowName').val());
+          request.onreadystatechange = function() {
+            if(request.readyState == 4) { // Request is finished
+              if (request.status == 409) {
+//   do not delete             alert("Resource (or any subresource) already in your wallet");
+              } else if (request.status != 200) {
+                alert("Something unexpected happend. Statuscode: " + request.status);
+              }
+            }
+          }
+        }
+
+        function removeWorkflow(resource, id) {
+          request = new XMLHttpRequest();
+          if(!request) alert("Failure creating XMLHttpRequest-Object");
+          request.open('delete', 'workflows/'+resource, true);
+          request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          request.send(null);
+          request.onreadystatechange = function() {
+            if(request.readyState == 4) { // Request is finished
+              if(request.status == 200) {
+//alert($('#'+id).html());
+                $('#'+id).remove();
+              } else if (request.status == 410) {
+// do not delete                alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
+              } else {
+                alert("Something unexpected happend. Statuscode: " + request.status);
+              }
+            }
+          }
+        }
+
+//------------------------------------------------------------------------------
 // Page-loading events
 //------------------------------------------------------------------------------
         $(document).ready(function(e){
@@ -198,58 +238,47 @@ comsol.log("wallet out");
       </div>
       <div style="vertical-align:middle;background:#006699;">
         <table style="margin: auto;">
-          <tr>
-            <td>
-              <a href="rescue" class="cube"><img src="../js/custom/rescue_icon.png"/></a>
-            </td>
-            <td>
-              <a href="wallet" class="cube"><img src="../js/custom/wallet_icon.png"/></a>
-            </td>
+          <tr><td><a href="rescue" class="cube"><img src="../js/custom/rescue_icon.png"/></a></td>
+              <td><a href="wallet" class="cube"><img src="../js/custom/wallet_icon.png"/></a></td>
           </tr>
-          <tr>
-            <td>
-              <p class="infoText">RESCUE</p>
-            </td>
-            <td>
-              <p class="infoText">Wallet</p>
-            </td>
+          <tr><td><p class="infoText">RESCUE</p></td>
+              <td><p class="infoText">Wallet</p></td>
           </tr>
-          <tr>
-            <td>
-              <a href="#preferences" class="cube"><img src="../js/custom/preferences_icon.png"/></a>
-            </td>
-            <td>
-              <a href="#workflows" class="cube"><img src="../js/custom/workflow_icon.png"/></a>
-            </td>
+          <tr><td><a href="#preferences" class="cube"><img src="../js/custom/preferences_icon.png"/></a></td>
+              <td><a href="workflows" class="cube"><img src="../js/custom/workflow_icon.png"/></a></td>
           </tr>
-          <tr>
-            <td>
-              <p class="infoText">Preferences</p>
-            </td>
-            <td>
-              <p class="infoText">Workflows</p>
-            </td>
+          <tr><td><p class="infoText">Preferences</p></td>
+              <td><p class="infoText">Workflows</p></td>
           </tr>
         </table>
       </div>
-      <!--ul>
-        <li class="arrow"></li>
-        <li class="arrow"><a href="wallet">Wallet</a></li>
-        <li class="arrow"><a href="#workflows">Workflows</a></li>
-        <li class="arrow"><a href="#preferences">Preferences</a></li>
-      </ul-->
     </div>
 
 
-    <div id="workflows">
+    <!-- div id="workflows">
       <div class="toolbar">
         <h1>Workflows</h1>
         <a class="back button" href="#">Back</a>
+        <a class="button slideup" id="addButton" href="#addWorkflow">New</a>
       </div>
       <ul>
         <li style="text-align:center">Not yet implemented</li>
       </ul>
+    </div -->
+
+    <div id="addWorkflow">
+      <div class="toolbar">
+        <h1>Workflows</h1>
+        <a class="back button" href="#">Back</a>
+      </div>
+      <form method="POST" action="workflows" class="form">
+        <p class="formLabel">Enter name for new workflow</p>
+        <input class="formLabel" type="text" name="name" id="addWorkflowName"/>
+        <a href="#" class="greenButton" onclick="addWorkflow()">Submit</a>
+        <a href="#" class="goback redButton">Cancel</a>
+      </form>
     </div>
+
 
 
     <div id="preferences">

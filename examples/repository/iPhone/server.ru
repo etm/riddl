@@ -15,6 +15,7 @@ require 'libs/forward'
 require 'libs/query'
 require 'libs/show'
 require 'libs/preferences'
+require 'libs/workflows'
 
 
 
@@ -51,6 +52,13 @@ run(
         end
         on resource 'workflows' do
           p 'Executing GetWorkflows (workflows.rb)' if method :get => '*'
+          run GetWorkflows if method :get => '*'
+          p 'Executing AddWorkflow (workflows.rb)' if method :post => 'addWorkflow'
+          run AddWorkflow if method :post => 'addWorkflow'
+          on resource do
+            p 'Executing DeleteWorkflow (workflows.rb)' if method :delete => '*'
+            run DeleteWorkflow if method :delete => '*'
+          end
         end
 
 
