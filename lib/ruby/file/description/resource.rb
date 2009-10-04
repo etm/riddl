@@ -12,27 +12,27 @@ module Riddl
           #}}}
         end
 
-        def add_requests(des,desres,index)
+        def add_requests(des,desres,index,interface)
           #{{{
           desres.find("des:*[@in and not(@in='*')]").each do |m|
             method = m.attributes['method'] || m.name.name
-            add_request_in_out(index,des,method,m.attributes['in'],m.attributes['out'])
+            add_request_in_out(index,interface,des,method,m.attributes['in'],m.attributes['out'])
           end
           desres.find("des:*[@pass and not(@pass='*')]").each do |m|
             method = m.attributes['method'] || m.name.name
-            add_request_in_out(index,des,method,m.attributes['pass'],m.attributes['pass'])
+            add_request_in_out(index,interface,des,method,m.attributes['pass'],m.attributes['pass'])
           end
           desres.find("des:*[@transformation]").each do |m|
             method = m.attributes['method'] || m.name.name
-            add_request_transform(index,des,method,m.attributes['transformation'])
+            add_request_transform(index,interface,des,method,m.attributes['transformation'])
           end
           desres.find("des:*[@in and @in='*']").each do |m|
             method = m.attributes['method'] || m.name.name
-            add_request_star_out(index,des,method,m.attributes['out'])
+            add_request_star_out(index,interface,des,method,m.attributes['out'])
           end
           desres.find("des:*[@pass and @pass='*']").each do |m|
             method = m.attributes['method'] || m.name.name
-            add_request_pass(index,des,method)
+            add_request_pass(index,interface,method)
           end
           #}}}
         end
@@ -117,13 +117,13 @@ module Riddl
               success = true
               if r.first.respond_to?(:in) && teh_last.respond_to?(:out)
                 #1: responds first in + last out -> new InOut
-                ret = RequestInOut.new_from_message(r.first.in,teh_last.out)
+                ret = RequestInOut.new_from_message(r.first.in,teh_last.out,r.first.interface)
               elsif r.first.class == RequestTransformation && teh_last.class == RequestTransformation && teh_last.out.nil?
                 #2: first transform + last transform -> merge transformations
-                ret = RequestTransformation.new_from_transformation(r.first.trans,teh_last.trans)
+                ret = RequestTransformation.new_from_transformation(r.first.trans,teh_last.trans,r.first.interface)
               elsif teh_last.respond_to?(:out)
                 #3: responds last out only -> new StarOut
-                ret = RequestStarOut.new_from_message(teh_last.out)
+                ret = RequestStarOut.new_from_message(teh_last.out,r.first.interface)
               elsif teh_last.class == RequestPass
                 #4: last pass -> remove last until #1 or #2 or #3 or size == 1
                 if r.size > 1
@@ -211,31 +211,31 @@ module Riddl
 
         # add requests helper methods
         #{{{
-        def add_request_in_out(index,des,method,min,mout)
+        def add_request_in_out(index,interface,des,method,min,mout)
           @requests[method] ||= []
           @requests[method][index] ||= []
-          @requests[method][index] << RequestInOut.new(des,min,mout)
+          @requests[method][index] << RequestInOut.new(des,min,mout,interface)
         end
         private :add_request_in_out
 
-        def add_request_transform(index,des,method,mtrans)
+        def add_request_transform(index,interface,des,method,mtrans)
           @requests[method] ||= []
           @requests[method][index] ||= []
-          @requests[method][index] << RequestTransformation.new(des,mtrans)
+          @requests[method][index] << RequestTransformation.new(des,mtrans,interface)
         end
         private :add_request_transform
 
-        def add_request_star_out(index,des,method,mout)
+        def add_request_star_out(index,interface,des,method,mout)
           @requests[method] ||= []
           @requests[method][index] ||= []
-          @requests[method][index] << RequestStarOut.new(des,mout)
+          @requests[method][index] << RequestStarOut.new(des,mout,interface)
         end
         private :add_request_star_out
 
-        def add_request_pass(index,des,method)
+        def add_request_pass(index,interface,method)
           @requests[method] ||= []
           @requests[method][index] ||= []
-          @requests[method][index] << RequestPass.new
+          @requests[method][index] << RequestPass.new(interface)
         end
         private :add_request_pass
         #}}}

@@ -5,14 +5,12 @@ require ::File.expand_path(::File.dirname(__FILE__) + '/declaration/facade')
 module Riddl
   class File
     class Declaration
-
+        
       def description_xml
-        #{{{
-        @fac.generate_description_xml
-        #}}}
-      end
-
-      def visualize_tree_and_layers
+        @facade.description_xml
+      end  
+        
+      def visualize_tiles_and_layers
         #{{{
         @tiles.each_with_index do |til,index|
           puts "### Tile #{index} " + ("#" * 60)
@@ -20,27 +18,35 @@ module Riddl
         end
         #}}}
       end
-
-      def visualize_tree_and_facade
+      def visualize_tiles_and_compositions
         #{{{
         @tiles.each_with_index do |til,index|
           puts "### Tile #{index} " + ("#" * 60)
-          til.visualize :facade
+          til.visualize :composition
         end
         #}}}
       end
-
-      def merge_tiles(res,fac=@fac.resource)
-        pp res.path
-        pp res.resources
+      def visualize_facade(res=@facade.resource,what='')
+        #{{{
+          what += res.path
+          puts what
+          res.composition.each do |k,v|
+            puts "  #{k.upcase}:"
+            v.each do |r|
+              puts "    #{r.result.class.name.gsub(/[^\:]+::/,'')}: #{r.result.visualize}"
+              r.route.each do |ritem|
+                puts "      #{ritem.class.name.gsub(/[^\:]+::/,'')}: #{ritem.visualize}"
+              end unless r.route.nil?
+            end
+          end
+          res.resources.each do |key,r|
+            visualize_facade(r,what + (what == '/' ? ''  : '/'))
+          end
+        #}}}
       end
-      private :merge_tiles
-
-      private :merge_tiles_rec
 
       def initialize(riddl)
-        @fac = Riddl::File::Description::Resource.new("/")
-
+        @facade = Riddl::File::Declaration::Facade.new
         #{{{
         ### create single tiles
         @tiles = []
@@ -56,10 +62,10 @@ module Riddl
             des = riddl.find("/dec:declaration/dec:interface[@name=\"#{lname}\"]/des:description").first
             desres = des.find("des:resource").first
             if apply_to.empty?
-              til.add_description(des,desres,"/",index,block)
+              til.add_description(des,desres,"/",index,lname,block)
             else
               apply_to.each do |at|
-                til.add_description(des,desres,at.to_s,index,block)
+                til.add_description(des,desres,at.to_s,index,lname,block)
               end
             end
           end
@@ -68,7 +74,7 @@ module Riddl
 
         ### merge tiles into a facade
         @tiles.each do |til|
-          merge_tiles(til.resource)
+          @facade.merge_tiles(til.resource)
         end
         #}}}
       end

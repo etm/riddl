@@ -15,8 +15,9 @@ ARGV.options { |opt|
   opt.banner = "Usage:\n#{opt.summary_indent}#{File.basename($0)} [options] [FILENAME]\n"
   opt.on("Options:")
   opt.on("--help", "-h", "This text.") { puts opt; exit }
-  opt.on("--visualize_tree_and_layers", "-l", "Visualize the resource tree and the layers in each resource.") { dowhat = "layers" }
-  opt.on("--visualize_tree_and_facade", "-f", "Visualize the resource tree and the resulting facade for each resource.") { dowhat = "facade" }
+  opt.on("--vtl", "-l", "For each tile visualize the resource tree and the layers.") { dowhat = "layers" }
+  opt.on("--vtc", "-c", "For each tile visualize the resource tree and the resulting compositions.") { dowhat = "compositions" }
+  opt.on("--vf", "-f", "Visualize the resulting facade.") { dowhat = "facade" }
   opt.on("--description", "-d", "Return the XML description for the facade.") { dowhat = "description" }
   opt.on("Filename has to be a declaration.")
   opt.parse!
@@ -41,9 +42,11 @@ end
 d = riddl.declaration
 case dowhat
   when 'layers':
-    d.visualize_tree_and_layers
+    d.visualize_tiles_and_layers
+  when 'compositions':
+    d.visualize_tiles_and_compositions
   when 'facade':
-    d.visualize_tree_and_facade
+    d.visualize_facade
   when 'description':
     puts d.description_xml
 end 

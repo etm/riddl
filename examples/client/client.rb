@@ -2,12 +2,16 @@
 require '../../lib/ruby/client'
 require 'pp'
 
-library = Riddl::Client.new("http://localhost/serversimple_test.php")
-books = library.resource("/")
-status, res = books.request :get => [
-  Riddl::Header.new("Library",7),
-  Riddl::Parameter::Simple.new("author","mangler"),
-  Riddl::Parameter::Simple.new("title","12")
+library = Riddl::Client.new("http://sumatra.pri.univie.ac.at/services/delay.php")
+status, res = library.post [
+  Riddl::Parameter::Simple.new("delay","10"),
 ]
-p status
-pp res
+id = res[0].value
+p id
+
+while true
+  status, res = library.resource("/#{id}").get
+  pp status
+  pp res[0]
+  sleep 1
+end  

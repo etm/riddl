@@ -76,13 +76,15 @@ module Riddl
           bs = Parameter::Tempfile.new("RiddlBody")
           res.read_body(bs)
           bs.rewind
+          p bs.read
+
           response = Riddl::HttpParser.new(
             "",
             bs,
             res['CONTENT-TYPE'],
             res['CONTENT-LENGTH'],
             res['CONTENT-DISPOSITION'],
-            res['CONTENT-ID'],
+            res['HTTP-CONTENT-ID'],
             res['RIDDL-TYPE']
           ).params
           unless @description.nil?
