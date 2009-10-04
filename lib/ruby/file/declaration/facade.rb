@@ -7,17 +7,13 @@ module Riddl
           @resource = Riddl::File::Description::Resource.new("/")
         end
 
-        def generate_description_xml
-          @resource.to_xml
-        end
-        
-        def to_xml
+        def description_xml
           #{{{
           result = ""
           messages = {}
           names = []
           messages_result = ""
-          to_xml_priv(result,messages,0)
+          description_xml_priv(result,messages,0)
           messages.each do |hash,mess|
             t = mess.content.dup
             name = mess.name
@@ -28,13 +24,12 @@ module Riddl
           "<description #{Riddl::File::COMMON}>\n\n" +  messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>"
           #}}}
         end
-
-        def to_xml_priv(result,messages,level)
+        def description_xml_priv(result,messages,level,res=@resource)
           #{{{
           s = "  " * (level + 1)
           t = "  " * (level + 2)
-          result << s + "<resource#{@path != '/' && @path != '' ? " relative=\"#{@path}\"" : ''}>\n"
-          @composition.each do |k,v|
+          result << s + "<resource#{res.path != '/' && res.path != '' ? " relative=\"#{res.path}\"" : ''}>\n"
+          res.composition.each do |k,v|
             v.each do |m|
               m = m.result
               if %w{get post put delete}.include?(k)
@@ -43,34 +38,50 @@ module Riddl
                 result << t + "<request method=\"#.upcase{k}\" "
               end  
               case m
-                when RequestInOut
+                when Riddl::File::Description::RequestInOut
                   result << "in=\"#{m.in.name}\""
                   messages[m.in.hash] = m.in
                   unless m.out.nil?
                     result << " out=\"#{m.out.name}\""
                     messages[m.out.hash] = m.out
                   end  
-                when RequestStarOut  
+                when Riddl::File::Description::RequestStarOut
                   result << "in=\"*\""
                   unless m.out.nil?
                     result << " out=\"#{m.out.name}\""
                     messages[m.out.hash] = m.out
                   end  
-                when RequestPass
+                when Riddl::File::Description::RequestPass
                   result << "pass=\"#{m.pass.name}\""
                   messages[m.pass.hash] = m.pass
-                when RequestTransformation
+                when Riddl::File::Description::RequestTransformation
                   result << "transformation=\"#{m.trans.name}\""
                   messages[m.trans.hash] = m.trans
               end  
               result << "/>\n"
             end  
           end
-          @resources.each do |k,v|
-            v.to_xml_priv(result,messages,level+1)
+          res.resources.each do |k,v|
+            description_xml_priv(result,messages,level+1,v)
           end
           ""
           result << s + "</resource>\n"
+          #}}}
+        end
+        private :description_xml_priv
+      
+        def merge_tiles(res,fac=@resource)
+          #{{{
+          res.composition.each do |method,s|
+            fac.composition[method] ||= []
+            fac.composition[method] += s
+          end  
+          res.resources.each do |path,r|
+            unless fac.resources.has_key?(path)
+              fac.resources[path] = Riddl::File::Description::Resource.new(path)
+            end  
+            merge_tiles(r,fac.resources[path])
+          end
           #}}}
         end
 
