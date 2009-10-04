@@ -1,9 +1,9 @@
-require ::File.expand_path(::File.dirname(__FILE__) + '/description/resource')
-require ::File.expand_path(::File.dirname(__FILE__) + '/description/request')
-require ::File.expand_path(::File.dirname(__FILE__) + '/description/message_and_transformation')
+require File.expand_path(File.dirname(__FILE__) + '/description/resource')
+require File.expand_path(File.dirname(__FILE__) + '/description/request')
+require File.expand_path(File.dirname(__FILE__) + '/description/message_and_transformation')
 
 module Riddl
-  class File
+  class Wrapper
     class Description
       def initialize(riddl)
         des = riddl.find("/dec:declaration/dec:interface[@name=\"#{lname}\"]/des:description").first

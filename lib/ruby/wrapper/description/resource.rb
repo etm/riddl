@@ -1,5 +1,5 @@
 module Riddl
-  class File
+  class Wrapper
     class Description
       
       class Resource
@@ -40,15 +40,15 @@ module Riddl
         def remove_requests(des,filter)
           #{{{
           freq = if filter['in'] && filter['in'] != '*'
-            t = [RequestInOut,Riddl::File::Description::Message.new(des,filter['in'])]
-            t << (filter['out'] ? Riddl::File::Description::Message.new(des,filter['out']) : nil)
+            t = [RequestInOut,Riddl::Wrapper::Description::Message.new(des,filter['in'])]
+            t << (filter['out'] ? Riddl::Wrapper::Description::Message.new(des,filter['out']) : nil)
           elsif filter['pass'] && filter['pass'] != '*'
-            [RequestInOut,Riddl::File::Description::Message.new(des,filter['pass']),Riddl::File::Description::Message.new(des,filter['pass'])]
+            [RequestInOut,Riddl::Wrapper::Description::Message.new(des,filter['pass']),Riddl::Wrapper::Description::Message.new(des,filter['pass'])]
           elsif filter['in'] && filter['in'] == '*'
             t = [RequestStarOut]
-            t << (filter['out'] ? Riddl::File::Description::Message.new(des,filter['out']) : nil)
+            t << (filter['out'] ? Riddl::Wrapper::Description::Message.new(des,filter['out']) : nil)
           elsif filter['transformation']
-            [RequestTransformation,Riddl::File::Description::Transformation.new(des,filter['transformation'])]
+            [RequestTransformation,Riddl::Wrapper::Description::Transformation.new(des,filter['transformation'])]
           elsif filter['pass'] && filter['pass'] == '*'
             [RequestPass]
           end

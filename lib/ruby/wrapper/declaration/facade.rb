@@ -1,10 +1,10 @@
 module Riddl
-  class File
+  class Wrapper
     class Declaration
 
       class Facade
         def initialize
-          @resource = Riddl::File::Description::Resource.new("/")
+          @resource = Riddl::Wrapper::Description::Resource.new("/")
         end
 
         def description_xml
@@ -21,7 +21,7 @@ module Riddl
             t.root.attributes['name'] = name
             messages_result << t.root.dump + "\n"
           end
-          "<description #{Riddl::File::COMMON}>\n\n" +  messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>"
+          "<description #{Riddl::Wrapper::COMMON}>\n\n" +  messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>"
           #}}}
         end
         def description_xml_priv(result,messages,level,res=@resource)
@@ -38,23 +38,23 @@ module Riddl
                 result << t + "<request method=\"#.upcase{k}\" "
               end  
               case m
-                when Riddl::File::Description::RequestInOut
+                when Riddl::Wrapper::Description::RequestInOut
                   result << "in=\"#{m.in.name}\""
                   messages[m.in.hash] = m.in
                   unless m.out.nil?
                     result << " out=\"#{m.out.name}\""
                     messages[m.out.hash] = m.out
                   end  
-                when Riddl::File::Description::RequestStarOut
+                when Riddl::Wrapper::Description::RequestStarOut
                   result << "in=\"*\""
                   unless m.out.nil?
                     result << " out=\"#{m.out.name}\""
                     messages[m.out.hash] = m.out
                   end  
-                when Riddl::File::Description::RequestPass
+                when Riddl::Wrapper::Description::RequestPass
                   result << "pass=\"#{m.pass.name}\""
                   messages[m.pass.hash] = m.pass
-                when Riddl::File::Description::RequestTransformation
+                when Riddl::Wrapper::Description::RequestTransformation
                   result << "transformation=\"#{m.trans.name}\""
                   messages[m.trans.hash] = m.trans
               end  
@@ -78,7 +78,7 @@ module Riddl
           end  
           res.resources.each do |path,r|
             unless fac.resources.has_key?(path)
-              fac.resources[path] = Riddl::File::Description::Resource.new(path)
+              fac.resources[path] = Riddl::Wrapper::Description::Resource.new(path)
             end  
             merge_tiles(r,fac.resources[path])
           end

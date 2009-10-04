@@ -1,5 +1,5 @@
 module Riddl
-  class File
+  class Wrapper
     class MessageParser
       def initialize(doc,params,headers)
         #{{{

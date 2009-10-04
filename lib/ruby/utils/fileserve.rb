@@ -5,13 +5,13 @@ module Riddl
   module Utils
     class FileServe < Riddl::Implementation
       def response
-        path = ::File.file?(@a[0]) ? @a[0] : "#{@a[0]}/#{@r[@m.length..-1].join('/')}".gsub(/\/+/,'/')
-        if ::File.directory?(path)
+        path = File.file?(@a[0]) ? @a[0] : "#{@a[0]}/#{@r[@m.length..-1].join('/')}".gsub(/\/+/,'/')
+        if File.directory?(path)
           @status = 404
           return []
         end
-        if ::File.exists?(path)
-          mtime = ::File.mtime(path)
+        if File.exists?(path)
+          mtime = File.mtime(path)
           @headers << Riddl::Header.new("Last-Modified",mtime.httpdate)
           @headers << Riddl::Header.new("ETag",Digest::MD5.hexdigest(mtime.httpdate))
           htime = @e["HTTP_IF_MODIFIED_SINCE"].nil? ? Time.at(0) : Time.parse(@e["HTTP_IF_MODIFIED_SINCE"])
@@ -20,7 +20,7 @@ module Riddl
             @status = 304 # Not modified
             return []
           else 
-            return Riddl::Parameter::Complex.new("file",MIME::Types.type_for(path).to_s,::File.open(path,'r'))
+            return Riddl::Parameter::Complex.new("file",MIME::Types.type_for(path).to_s,File.open(path,'r'))
           end  
         end
         @status = 404

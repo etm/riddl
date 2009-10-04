@@ -1,9 +1,9 @@
-require ::File.expand_path(::File.dirname(__FILE__) + '/description')
-require ::File.expand_path(::File.dirname(__FILE__) + '/declaration/tile')
-require ::File.expand_path(::File.dirname(__FILE__) + '/declaration/facade')
+require File.expand_path(File.dirname(__FILE__) + '/description')
+require File.expand_path(File.dirname(__FILE__) + '/declaration/tile')
+require File.expand_path(File.dirname(__FILE__) + '/declaration/facade')
 
 module Riddl
-  class File
+  class Wrapper
     class Declaration
         
       def description_xml
@@ -46,7 +46,7 @@ module Riddl
       end
 
       def initialize(riddl)
-        @facade = Riddl::File::Declaration::Facade.new
+        @facade = Riddl::Wrapper::Declaration::Facade.new
         #{{{
         ### create single tiles
         @tiles = []

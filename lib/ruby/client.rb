@@ -1,9 +1,9 @@
 require 'net/http'
-require ::File.expand_path(::File.dirname(__FILE__) + "/file")
-require ::File.expand_path(::File.dirname(__FILE__) + "/error")
-require ::File.expand_path(::File.dirname(__FILE__) + "/httpgenerator")
-require ::File.expand_path(::File.dirname(__FILE__) + '/httpparser')
-require ::File.expand_path(::File.dirname(__FILE__) + "/header")
+require File.expand_path(File.dirname(__FILE__) + "/wrapper")
+require File.expand_path(File.dirname(__FILE__) + "/error")
+require File.expand_path(File.dirname(__FILE__) + "/httpgenerator")
+require File.expand_path(File.dirname(__FILE__) + '/httpparser')
+require File.expand_path(File.dirname(__FILE__) + "/header")
 
 module Riddl
 
@@ -14,7 +14,7 @@ module Riddl
       @rpath = ''
       @description = nil
       unless riddl.nil?
-        @description = Riddl::File::new(riddl)
+        @description = Riddl::Wrapper::new(riddl)
         @description.load_necessary_handlers!
         raise SpecificationError, 'No RIDDL description found.' unless @description.description?
         raise SpecificationError, 'RIDDL description does not conform to specification' unless @description.validate!

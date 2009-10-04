@@ -1,21 +1,21 @@
 require 'rubygems'
 gem 'ruby-xml-smart', '>= 0.2.0.1'
 require 'xml/smart'
-require ::File.expand_path(::File.dirname(__FILE__) + '/file/messageparser')
-require ::File.expand_path(::File.dirname(__FILE__) + '/file/resourcechecker')
-require ::File.expand_path(::File.dirname(__FILE__) + '/file/layerchecker')
-require ::File.expand_path(::File.dirname(__FILE__) + '/handlers')
+require File.expand_path(File.dirname(__FILE__) + '/wrapper/messageparser')
+require File.expand_path(File.dirname(__FILE__) + '/wrapper/resourcechecker')
+require File.expand_path(File.dirname(__FILE__) + '/wrapper/layerchecker')
+require File.expand_path(File.dirname(__FILE__) + '/handlers')
 
 module Riddl
-  class File
+  class Wrapper
     #{{{
     VERSION_MAJOR = 1
     VERSION_MINOR = 0
     VERSION = "#{VERSION_MAJOR}.#{VERSION_MINOR}"
     DESCRIPTION = "http://riddl.org/ns/description/#{VERSION}"
     DECLARATION = "http://riddl.org/ns/declaration/#{VERSION}"
-    DESCRIPTION_FILE = "#{::File.dirname(__FILE__)}/ns/description-#{VERSION_MAJOR}_#{VERSION_MINOR}.rng"
-    DECLARATION_FILE = "#{::File.dirname(__FILE__)}/ns/declaration-#{VERSION_MAJOR}_#{VERSION_MINOR}.rng"
+    DESCRIPTION_FILE = "#{File.dirname(__FILE__)}/ns/description-#{VERSION_MAJOR}_#{VERSION_MINOR}.rng"
+    DECLARATION_FILE = "#{File.dirname(__FILE__)}/ns/declaration-#{VERSION_MAJOR}_#{VERSION_MINOR}.rng"
     COMMON = "datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"#{DESCRIPTION}\" xmlns:xi=\"http://www.w3.org/2001/XInclude\""
     CHECK = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"><data/></element>"
     #}}}
@@ -35,7 +35,10 @@ module Riddl
     end
 
     def declaration
-      Riddl::File::Declaration.new(@doc)
+      Riddl::Wrapper::Declaration.new(@doc)
+    end
+    def description
+      Riddl::Wrapper::Description.new(@doc)
     end
 
     def get_message(path,operation,params,headers)
@@ -81,8 +84,8 @@ module Riddl
     def load_necessary_handlers!
       #{{{
       @doc.find("//des:parameter/@handler").map{|h|h.to_s}.uniq.each do |h|
-        if ::File.exists?(::File.dirname(__FILE__) + '/handlers/' + ::File.basename(h) + ".rb")
-          require ::File.expand_path(::File.dirname(__FILE__) + '/handlers/' + ::File.basename(h))
+        if File.exists?(File.dirname(__FILE__) + '/handlers/' + File.basename(h) + ".rb")
+          require File.expand_path(File.dirname(__FILE__) + '/handlers/' + File.basename(h))
         end
       end
       #}}}

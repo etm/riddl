@@ -4,8 +4,8 @@ while ::File::symlink?(curpath)
   curpath = ::File::dirname(curpath) + '/' + ::File::readlink(curpath)
 end  
 require 'rubygems'
-require ::File::dirname(curpath) + "/../lib/ruby/file"
-require ::File::dirname(curpath) + "/../lib/ruby/file/declaration"
+require ::File::dirname(curpath) + "/../lib/ruby/wrapper"
+require ::File::dirname(curpath) + "/../lib/ruby/wrapper/declaration"
 require 'optparse'
 require 'pp'
 
@@ -28,7 +28,7 @@ if ARGV.length == 0 || !File.exists?(ARGV[0]) || dowhat.nil?
 end
 fname = ARGV[0]
 
-riddl = Riddl::File.new(fname)
+riddl = Riddl::Wrapper.new(fname)
 
 unless riddl.declaration?
   puts 'Not a RIDDL declaration.' 

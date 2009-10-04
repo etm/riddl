@@ -1,5 +1,5 @@
 module Riddl
-  class File
+  class Wrapper
     class LayerChecker
       def initialize(doc)
         @doc = doc

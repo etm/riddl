@@ -1,10 +1,10 @@
-require ::File.expand_path(::File.dirname(__FILE__) + '/implementation')
-require ::File.expand_path(::File.dirname(__FILE__) + '/httpparser')
-require ::File.expand_path(::File.dirname(__FILE__) + '/httpgenerator')
-require ::File.expand_path(::File.dirname(__FILE__) + '/header')
-require ::File.expand_path(::File.dirname(__FILE__) + '/parameter')
-require ::File.expand_path(::File.dirname(__FILE__) + '/error')
-require ::File.expand_path(::File.dirname(__FILE__) + '/file')
+require File.expand_path(File.dirname(__FILE__) + '/implementation')
+require File.expand_path(File.dirname(__FILE__) + '/httpparser')
+require File.expand_path(File.dirname(__FILE__) + '/httpgenerator')
+require File.expand_path(File.dirname(__FILE__) + '/header')
+require File.expand_path(File.dirname(__FILE__) + '/parameter')
+require File.expand_path(File.dirname(__FILE__) + '/error')
+require File.expand_path(File.dirname(__FILE__) + '/wrapper')
 require 'pp'
 
 module Riddl
@@ -15,7 +15,7 @@ module Riddl
     attr_reader :env, :req, :res
 
     def initialize(description,cross_site_xhr=false,&blk)
-      @description = Riddl::File::new(description)
+      @description = Riddl::Wrapper::new(description)
       @description.load_necessary_handlers!
       raise SpecificationError, 'No RIDDL description found.' unless @description.description?
       raise SpecificationError, 'RIDDL description does not conform to specification' unless @description.validate!
@@ -84,7 +84,7 @@ module Riddl
     def on(resource, &block)
       @path << (@path == '' ? '/' : resource)
       yield
-      @path = (::File.dirname(@path) + '/').gsub(/\/+/,'/')
+      @path = (File.dirname(@path) + '/').gsub(/\/+/,'/')
     end
 
     def process_out(pout)

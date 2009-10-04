@@ -1,12 +1,12 @@
 module Riddl
-  class File
+  class Wrapper
     class Declaration
 
       class Tile
         #{{
         def initialize
           #{{{
-          @resource = Riddl::File::Description::Resource.new("/")
+          @resource = Riddl::Wrapper::Description::Resource.new("/")
           @base_path = @resource
           #}}}
         end
@@ -77,7 +77,7 @@ module Riddl
           path.split('/').each do |p|
             next if p == ""
             unless pres.resources.has_key?(p)
-              pres.resources[p] = Riddl::File::Description::Resource.new(p)
+              pres.resources[p] = Riddl::Wrapper::Description::Resource.new(p)
             end
             pres = pres.resources[p]
           end

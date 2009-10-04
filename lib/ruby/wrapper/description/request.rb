@@ -1,5 +1,5 @@
 module Riddl
-  class File
+  class Wrapper
     class Description
 
       class RequestBase
@@ -22,8 +22,8 @@ module Riddl
             @in = min
             @out = mout
           else
-            @in = Riddl::File::Description::Message.new(des,min)
-            @out = mout.nil? ? nil : Riddl::File::Description::Message.new(des,mout)
+            @in = Riddl::Wrapper::Description::Message.new(des,min)
+            @out = mout.nil? ? nil : Riddl::Wrapper::Description::Message.new(des,mout)
           end
         end
         def self.new_from_message(min,mout,interface)
@@ -44,7 +44,7 @@ module Riddl
           if des.nil?
             @trans = mtrans
           else  
-            @trans = Riddl::File::Description::Transformation.new(des,mtrans)
+            @trans = Riddl::Wrapper::Description::Transformation.new(des,mtrans)
           end  
           @out = nil
         end
@@ -52,7 +52,7 @@ module Riddl
           tmp = XML::Smart::string("<transformation/>")
           tmp.root.add mtrans1.content.root.children
           tmp.root.add mtrans2.content.root.children
-          RequestTransformation.new(nil,Riddl::File::Description::Transformation.new_from_xml("#{mtrans2.name}_#{mtrans2.name}_merged",tmp),interface)
+          RequestTransformation.new(nil,Riddl::Wrapper::Description::Transformation.new_from_xml("#{mtrans2.name}_#{mtrans2.name}_merged",tmp),interface)
         end
         def transform(min)
           tmp = self.dup
@@ -77,7 +77,7 @@ module Riddl
           if des.nil?
             @out = mout
           else
-            @out = mout.nil? ? nil : Riddl::File::Description::Message.new(des,mout)
+            @out = mout.nil? ? nil : Riddl::Wrapper::Description::Message.new(des,mout)
           end  
         end
         def self.new_from_message(mout,interface)
