@@ -24,11 +24,10 @@ library = Riddl::Client.new("http://localhost:9292/")
 #  Riddl::Parameter::Simple.new("title","12 bottles of beer on the wall")
 #]
 
-main = library.resource("/")
-status,res = main.get
+status,res = library.get
 
-p status
-p res
+puts status
+puts res
 res.each do |r|
   puts r.value.read
 end  

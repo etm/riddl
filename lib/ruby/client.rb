@@ -76,7 +76,6 @@ module Riddl
           bs = Parameter::Tempfile.new("RiddlBody")
           res.read_body(bs)
           bs.rewind
-          p bs.read
 
           response = Riddl::HttpParser.new(
             "",
@@ -100,6 +99,7 @@ module Riddl
   
     class Request < Net::HTTPGenericRequest
       def initialize(method, path, parameters, headers)
+        path = path.strip == '' ? '/' : path
         super method, true, true, path, headers
         tmp = HttpGenerator.new(parameters,self).generate
         self.content_length = tmp.size
