@@ -26,7 +26,7 @@ module Riddl
               end
             end
           end
-          if mode == :facade
+          if mode == :composition
             res.composition.each do |k,v|
               puts "  #{k.upcase}:"
               v.each do |r|
@@ -43,10 +43,10 @@ module Riddl
           #}}}
         end
 
-        def add_description(des,desres,path,index,block,res=@base_path,rel="/")
+        def add_description(des,desres,path,index,interface,block,res=@base_path,rel="/")
           #{{{
           res = add_path(path,res)
-          res.add_requests(des,desres,index)
+          res.add_requests(des,desres,index,interface)
           block.each do |bl|
             bpath = bl.to_s.gsub(/\/+/,'/').gsub(/\/$/,'')
             bpath = (bpath == "" ? "/" : bpath)
@@ -56,7 +56,7 @@ module Riddl
           end  
           desres.find("des:resource").each do |desres|
             cpath = desres.attributes['relative'] || "{}"
-            add_description(des,desres,cpath,index,block,res,(rel+"/"+cpath).gsub(/\/+/,'/'))
+            add_description(des,desres,cpath,index,interface,block,res,(rel+"/"+cpath).gsub(/\/+/,'/'))
           end
           nil
           #}}}

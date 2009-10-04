@@ -10,12 +10,14 @@ module Riddl
         def used?
           @used || false
         end
+        attr_reader :interface
         #}}}
       end
 
       class RequestInOut < RequestBase
         #{{{
-        def initialize(des,min,mout)
+        def initialize(des,min,mout,interface)
+          @interface = interface
           if des.nil?
             @in = min
             @out = mout
@@ -24,8 +26,8 @@ module Riddl
             @out = mout.nil? ? nil : Riddl::File::Description::Message.new(des,mout)
           end
         end
-        def self.new_from_message(min,mout)
-          RequestInOut.new(nil,min,mout)
+        def self.new_from_message(min,mout,interface)
+          RequestInOut.new(nil,min,mout,interface)
         end
         def hash
           @in.hash + (@out.nil? ? 0 : @out.hash)
@@ -37,7 +39,8 @@ module Riddl
 
       class RequestTransformation < RequestBase
         #{{{
-        def initialize(des,mtrans)
+        def initialize(des,mtrans,interface)
+          @interface = interface
           if des.nil?
             @trans = mtrans
           else  
@@ -45,11 +48,11 @@ module Riddl
           end  
           @out = nil
         end
-        def self.new_from_transformation(mtrans1,mtrans2)
+        def self.new_from_transformation(mtrans1,mtrans2,interface)
           tmp = XML::Smart::string("<transformation/>")
           tmp.root.add mtrans1.content.root.children
           tmp.root.add mtrans2.content.root.children
-          RequestTransformation.new(nil,Riddl::File::Description::Transformation.new_from_xml("#{mtrans1.name}_#{mtrans2.name}_merged",tmp))
+          RequestTransformation.new(nil,Riddl::File::Description::Transformation.new_from_xml("#{mtrans2.name}_#{mtrans2.name}_merged",tmp),interface)
         end
         def transform(min)
           tmp = self.dup
@@ -69,15 +72,16 @@ module Riddl
 
       class RequestStarOut < RequestBase
         #{{{
-        def initialize(des,mout)
+        def initialize(des,mout,interface)
+          @interface = interface
           if des.nil?
             @out = mout
           else
             @out = mout.nil? ? nil : Riddl::File::Description::Message.new(des,mout)
           end  
         end
-        def self.new_from_message(mout)
-          RequestStarOut.new(nil,mout)
+        def self.new_from_message(mout,interface)
+          RequestStarOut.new(nil,mout,interface)
         end
         attr_reader :out
         def hash
@@ -89,6 +93,9 @@ module Riddl
 
       class RequestPass < RequestBase
         #{{{
+        def initialize(interface)
+          @interface = interface
+        end  
         def visualize; ""; end
         def hash
           0
