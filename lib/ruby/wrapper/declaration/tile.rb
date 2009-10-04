@@ -74,12 +74,12 @@ module Riddl
         def add_path(path,res)
           #{{{
           pres = res
-          path.split('/').each do |p|
-            next if p == ""
-            unless pres.resources.has_key?(p)
-              pres.resources[p] = Riddl::Wrapper::Description::Resource.new(p)
+          path.split('/').each do |pa|
+            next if pa == ""
+            unless pres.resources.has_key?(pa)
+              pres.resources[pa] = Riddl::Wrapper::Description::Resource.new(pa)
             end
-            pres = pres.resources[p]
+            pres = pres.resources[pa]
           end
           pres
           #}}}
