@@ -3,12 +3,13 @@ module Riddl
     class Description
       
       class Resource
-        def initialize(path=nil)
+        def initialize(path=nil,recursive=false)
           #{{{
           @path = path
           @resources = {}
           @requests = {}
           @composition = {}
+          @recursive = recursive
           #}}}
         end
 
@@ -240,7 +241,7 @@ module Riddl
         private :add_request_pass
         #}}}
 
-        attr_reader :resources,:path,:requests,:composition
+        attr_reader :resources,:path,:requests,:composition,:recursive
       end
 
       Composition = Struct.new(:route,:result)

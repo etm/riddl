@@ -1,25 +1,23 @@
 module Riddl
   class Wrapper
     class MessageParser
-      def initialize(doc,params,headers)
+      def initialize(params,headers)
         #{{{
-        @doc = doc
         @mist = params
         @mistp = 0
         @headers = headers
         #}}}
       end
 
-      def check(name)
+      def check(what)
         #{{{
-        @doc.find("/des:description/des:message[@name='#{name}']").each do |m|
-          m.find("des:header").each do |h|
-            return false unless header h
-          end
-          m.find("des:*[not(name()='header')]").each do |p|
-            return false unless send p.name.to_s, p
-          end
-        end  
+        m  = what.content.root
+        m.find("des:header").each do |h|
+          return false unless header h
+        end
+        m.find("des:*[not(name()='header')]").each do |p|
+          return false unless send p.name.to_s, p
+        end
         true
         #}}}
       end

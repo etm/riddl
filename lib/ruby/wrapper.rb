@@ -1,6 +1,8 @@
 require 'rubygems'
 gem 'ruby-xml-smart', '>= 0.2.0.1'
 require 'xml/smart'
+require File.expand_path(File.dirname(__FILE__) + '/wrapper/description')
+require File.expand_path(File.dirname(__FILE__) + '/wrapper/declaration')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/messageparser')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/resourcechecker')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/layerchecker')
@@ -29,54 +31,57 @@ module Riddl
         'dec' => DECLARATION
       }
       qname = @doc.root.name
-      @description = qname.namespace == DESCRIPTION && qname.name ==  'description'
-      @declaration = qname.namespace == DECLARATION && qname.name ==  'declaration'
+      @is_description = qname.namespace == DESCRIPTION && qname.name ==  'description'
+      @is_declaration = qname.namespace == DECLARATION && qname.name ==  'declaration'
+      if @is_declaration
+        @declaration = Riddl::Wrapper::Declaration.new(@doc)
+      end
+      if @is_description
+        @description = Riddl::Wrapper::Description.new(@doc)
+      end  
       #}}}
     end
 
-    def declaration
-      Riddl::Wrapper::Declaration.new(@doc)
-    end
-    def description
-      Riddl::Wrapper::Description.new(@doc)
-    end
+    attr_reader :description, :declaration
 
     def get_message(path,operation,params,headers)
       #{{{
-      if description?
-        tpath = path == "/" ? '/' : path.gsub(/\/([^{}\/]+)/,"/des:resource[@relative=\"\\1\"]").gsub(/\/\{\}/,"/des:resource[not(@relative)]").gsub(/\/+/,'/')
-        tpath = "/des:description/des:resource" + tpath + "des:" + operation + "|/des:description/des:resource" + tpath + "des:request[@method='#{operation}']"
-        mp = MessageParser.new(@doc,params,headers)
-        @doc.find(tpath + "[@in and not(@in='*')]").each do |o|
-          return o.attributes['in'], o.attributes['out'] if mp.check(o.attributes['in'])
-        end
-        @doc.find(tpath + "[@pass and not(@pass='*')]").each do |o|
-          return o.attributes['pass'], o.attributes['pass'] if mp.check(o.attributes['pass'])
-        end
-        @doc.find(tpath + "[@in and @in='*']").each do |o|
-          return "*", o.attributes['out']
-        end
-        @doc.find(tpath + "[@add or @remove]").each do
-          return "*", "*" # TODO guess structure from input, create new output structure
-        end
-        @doc.find(tpath + "[@pass and @pass='*']").each do
-          return "*", "*"
-        end
-        [nil,nil]
+      if @is_description
+        req = @description.get_resource(path).requests
+        mp = MessageParser.new(params,headers)
+        if req.has_key?(operation)
+          req[operation][0].select{|o|o.class==Riddl::Wrapper::Description::RequestInOut}.each do |o|
+            return o.in, o.out if mp.check(o.in)
+          end
+          req[operation][0].select{|o|o.class==Riddl::Wrapper::Description::RequestStarOut}.each do |o|
+            return Riddl::Wrapper::Description::Star.new, o.out
+          end
+          req[operation][0].select{|o|o.class==Riddl::Wrapper::Description::RequestTransformation}.each do |o|
+            # TODO guess structure from input, create new output structure
+            return Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new
+          end
+          req[operation][0].select{|o|o.class==Riddl::Wrapper::Description::RequestPass}.each do |o|
+            return Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new
+          end
+        end  
+        return [nil,nil]
       end
       nil
       #}}}
     end
 
-    def check_message(params,headers,name)
-      mp = MessageParser.new(@doc,params,headers)
-      mp.check(name)
-    end  
+    def check_message(params,headers,message)
+      #{{{
+      return true if message.class == Riddl::Wrapper::Description::Star
+      mp = MessageParser.new(params,headers)
+      mp.check(message)
+      #}}}
+    end
 
     def validate!
       #{{{
-      return @doc.validate_against(XML::Smart.open(DESCRIPTION_FILE)) if @description
-      return @doc.validate_against(XML::Smart.open(DECLARATION_FILE)) if @declaration
+      return @doc.validate_against(XML::Smart.open(DESCRIPTION_FILE)) if @is_description
+      return @doc.validate_against(XML::Smart.open(DECLARATION_FILE)) if @is_declaration
       nil
       #}}}
     end
@@ -93,36 +98,22 @@ module Riddl
 
     def paths
       #{{{
-      (@description ? get_paths(@doc.find("/des:description/des:resource")) : []).map do |p|
-        [p[0],Regexp.new("^" + p[0].gsub(/\{\}/,"[^/]+") + (p[1] ? '' : '$'))]
+      tmp = []
+      tmp = @description.paths if @is_description 
+      tmp = @declaration.paths if @is_declaration
+      tmp.map do |t|
+        [t[0],Regexp.new("^" + t[0].gsub(/\{\}/,"[^/]+") + (t[1] ? '' : '$'))]
       end
       #}}}
     end
 
-    def get_paths(res,path='')
-      #{{{
-      tpath = []
-      res.each do |res|
-        tpath << xpath = if path == ''
-          ['/',false]
-        else
-          [res.attributes['relative'].nil? ? path.dup << '{}/' : path.dup << res.attributes['relative'] + '/',res.attributes['recursive'].nil? ? false : true]
-        end
-        tpath += get_paths(res.find("des:resource[@relative]"),xpath[0]) 
-        tpath += get_paths(res.find("des:resource[not(@relative)]"),xpath[0]) 
-      end  
-      tpath
-      #}}}
-    end
-    private :get_paths
-
-    def declaration?; @declaration; end
-    def description?; @description; end
+    def declaration?; @is_declaration; end
+    def description?; @is_description; end
     def valid_resources?
-      @description ? ResourceChecker.new(@doc).check : []
+      @is_description ? ResourceChecker.new(@doc).check : []
     end
     def valid_layers?
-      @declaration ? LayerChecker.new(@doc).check : []
+      @is_declaration ? LayerChecker.new(@doc).check : []
     end
   end
 end

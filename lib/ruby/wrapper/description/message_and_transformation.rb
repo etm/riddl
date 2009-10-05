@@ -10,8 +10,18 @@ module Riddl
           if layer.nil?
             @content = content
           else  
-            @content = layer.find("des:#{type}[@name='#{name}']").first.to_doc
-            @content.find("/#{type}/@name").delete_all!
+            temp = layer.find("des:#{type}[@name='#{name}']").first.to_doc
+            layer.namespaces.each do |n|
+              name = "xmlns#{n.prefix.nil? ? '' : ':' + n.prefix}"
+              value = n.href
+              temp.root.attributes[name] = value
+            end
+            temp.root.find("@name").delete_all!
+            @content = temp.root.to_doc
+            @content.namespaces = {
+              'des' => Riddl::Wrapper::DESCRIPTION,
+              'dec' => Riddl::Wrapper::DECLARATION
+            }
           end  
           update_hash!
         end
@@ -115,6 +125,12 @@ module Riddl
           end  
           return ret
         end
+        #}}}
+      end
+
+      class Star
+        #{{{
+        def name; "*"; end
         #}}}
       end
 

@@ -38,9 +38,9 @@ run(
       on resource "books" do
         run BookQuery if method :get => 'book-query'
       end
-    end
-    on resource "about" do
-      run Riddl::Utils::ERBServe, "static/info.txt"  if get
+      on resource "about" do
+        run Riddl::Utils::ERBServe, "static/info.txt"  if get
+      end
     end
   end
 )

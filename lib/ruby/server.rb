@@ -135,7 +135,7 @@ module Riddl
     def delete(min='*'); check(min) && @riddl_method == 'delete' end
     def put(min='*'); check(min) && @riddl_method == 'put' end
     def check(min)
-       @path == @riddl_path[0] && min == @riddl_message_in
+       @path == @riddl_path[0] && min == @riddl_message_in.name
     end
 
     def resource(path=nil); path.nil? ? '{}/' : path + '/' end
