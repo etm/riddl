@@ -5,7 +5,6 @@ while ::File::symlink?(curpath)
 end  
 require 'rubygems'
 require ::File::dirname(curpath) + "/../lib/ruby/wrapper"
-require ::File::dirname(curpath) + "/../lib/ruby/wrapper/declaration"
 require 'optparse'
 require 'pp'
 

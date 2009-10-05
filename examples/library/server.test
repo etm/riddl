@@ -26,11 +26,11 @@ status, res = books.get [
 
 # status,res = library.resource("/books/7").get
 
-#puts status
-#puts res
-#res.each do |r|
-#  puts r.value.read
-#end  
+puts status
+puts res
+res.each do |r|
+  puts r.value.read
+end  
 
 `pkill rackup`
 t.join
