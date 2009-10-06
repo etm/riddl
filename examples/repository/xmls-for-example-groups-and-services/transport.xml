@@ -1,42 +1,108 @@
 <?xml version="1.0"?>
 <properties>
   <static>
-    <element name="longlat">
-      <caption lang="en">Geo-position (long/lat)</caption>
-      <caption lang="de">Ge-Position (Laenge/breite)</caption>
-      <data type="string">
-        <param name="pattern">\d+\.\d+:\d+\.\d+</param>
-      </data>
+    <element name="aircondition">
+      <caption lang="en">Aircondition</caption>
+      <caption lang="de">Klimanalage</caption>
+      <data type="boolean"/>
     </element>
+
+    <element name="restaurants">
+      <caption lang="en">Restaurants</caption>
+      <caption lang="de">Restaurantbetriebe</caption>
+      <data type="boolean"/>
+    </element>
+
   </static>
   <dynamic>
     <queryInput>
-      <element name="from">
-        <caption lang="en">From</caption>
-        <caption lang="de">Ab</caption>
-        <data type="string"/>
-      </element>
-      <element name="to">
-        <caption lang="en">To</caption>
-        <caption lang="de">Nach</caption>
-        <data type="string"/>
-      </element>
+
+<!-- FROM: BEGIN -->
+    <element name="fromStreet">
+      <caption lang="en">Street (from)</caption>
+      <caption lang="de">Straße (ab)</caption>
+      <data type="string"/>
+    </element>
+    <element name="fromHousenumber">
+      <caption lang="en">House number (from)</caption>
+      <caption lang="de">Hausnummer (ab)</caption>
+      <data type="positiveInteger"/>
+    </element>
+    <element name="fromZip">
+      <caption lang="en">ZIP-Code (from)</caption>
+      <caption lang="de">Postleitzahl (ab)</caption>
+      <data type="positiveInteger"/>
+    </element>
+    <element name="fromCity">
+      <caption lang="en">City (from)</caption>
+      <caption lang="de">Stadt (ab)</caption>
+      <data type="string"/>
+    </element>
+    <element name="fromState">
+      <caption lang="en">State (from)</caption>
+      <caption lang="de">Land (ab)</caption>
+      <data type="string"/>
+    </element>
+<!-- FROM: END -->
+
+<!-- TO: BEGIN -->
+    <element name="toStreet">
+      <caption lang="en">Street (To)</caption>
+      <caption lang="de">Straße (nach)</caption>
+      <data type="string"/>
+    </element>
+    <element name="toHousenumber">
+      <caption lang="en">House number (To)</caption>
+      <caption lang="de">Hausnummer (nach)</caption>
+      <data type="positiveInteger"/>
+    </element>
+    <element name="toZip">
+      <caption lang="en">ZIP-Code (To)</caption>
+      <caption lang="de">Postleitzahl (nach)</caption>
+      <data type="positiveInteger"/>
+    </element>
+    <element name="toCity">
+      <caption lang="en">City (To)</caption>
+      <caption lang="de">Stadt (nach)</caption>
+      <data type="string"/>
+    </element>
+    <element name="toState">
+      <caption lang="en">State (To)</caption>
+      <caption lang="de">Land (nach)</caption>
+      <data type="string"/>
+    </element>
+<!-- TO: END -->
       <element name="numberOfSeats">
         <caption lang="en">Number of seats</caption>
         <caption lang="de">Anzahl Sitzplaetze</caption>
         <data type="positiveInteger"/>
       </element>
-      <element name="departureTime">
-        <caption lang="en">Departure time</caption>
-        <caption lang="de">Abfahrtszeit</caption>
+      <element name="preferredArraivelTime">
+        <caption lang="en">Preferred departure time</caption>
+        <caption lang="de">gewünschte Ankunftszeit</caption>
         <data type="date"/>
       </element>
     </queryInput>
 
     <queryOutput>
+      <element name="departureTime">
+        <caption lang="en">Departure time</caption>
+        <caption lang="de">Abfahrtszeit</caption>
+        <data type="time"/>
+      </element>
       <element name="arraivelTime">
         <caption lang="en">Arraivel time</caption>
         <caption lang="de">Ankunftszeit</caption>
+        <data type="time"/>
+      </element>
+      <element name="departureDate">
+        <caption lang="en">Departure date</caption>
+        <caption lang="de">Abfahrtsdatum</caption>
+        <data type="date"/>
+      </element>
+      <element name="arraivelDate">
+        <caption lang="en">Arraivel date</caption>
+        <caption lang="de">Ankunftsdatum</caption>
         <data type="date"/>
       </element>
       <element name="price">
@@ -65,8 +131,41 @@
         <caption lang="de">Reservierungsnummer</caption>
         <data type="string"/>
       </element>
+      <element name="departureTime">
+        <caption lang="en">Departure time</caption>
+        <caption lang="de">Abfahrtszeit</caption>
+        <data type="time"/>
+      </element>
+      <element name="arraivelTime">
+        <caption lang="en">Arraivel time</caption>
+        <caption lang="de">Ankunftszeit</caption>
+        <data type="time"/>
+      </element>
+      <element name="departureDate">
+        <caption lang="en">Departure date</caption>
+        <caption lang="de">Abfahrtsdatum</caption>
+        <data type="date"/>
+      </element>
+      <element name="arraivelDate">
+        <caption lang="en">Arraivel date</caption>
+        <caption lang="de">Ankunftsdatum</caption>
+        <data type="date"/>
+      </element>
+      <element name="price">
+        <caption lang="en">Price per ticket</caption>
+        <caption lang="de">Preis pro Karte</caption>
+        <data type="float"/>
+      </element>
+      <element name="invokeID">
+        <caption lang="en">invokeID</caption>
+        <caption lang="de">invokeID</caption>
+        <data type="string"/>
+      </element>
+      <element name="price">
+        <caption lang="en">Price per Ticket</caption>
+        <caption lang="de">Preis pro Karte</caption>
+        <data type="float"/>
+      </element>
     </invokeOutput>
-
-
   </dynamic>
 </properties>

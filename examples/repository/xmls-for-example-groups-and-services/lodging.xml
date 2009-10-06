@@ -1,13 +1,66 @@
 <?xml version="1.0"?>
 <properties>
   <static>
-    <element name="longlat">
+    <!-- element name="longlat">
       <caption lang="en">Geo-position (long/lat)</caption>
       <caption lang="de">Ge-Position (Laenge/breite)</caption>
       <data type="string">
         <param name="pattern">\d+\.\d+:\d+\.\d+</param>
       </data>
+    </element -->
+<!-- Adress: BEGIN -->
+    <element name="street">
+      <caption lang="en">Street</caption>
+      <caption lang="de">Straße</caption>
+      <data type="string"/>
     </element>
+    <element name="housenumber">
+      <caption lang="en">House number</caption>
+      <caption lang="de">Hausnummer</caption>
+      <data type="positiveInteger"/>
+    </element>
+    <element name="zip">
+      <caption lang="en">ZIP-Code</caption>
+      <caption lang="de">Postleitzahl</caption>
+      <data type="positiveInteger"/>
+    </element>
+    <element name="city">
+      <caption lang="en">City</caption>
+      <caption lang="de">Stadt</caption>
+      <data type="string"/>
+    </element>
+    <element name="state">
+      <caption lang="en">State</caption>
+      <caption lang="de">Land</caption>
+      <data type="string"/>
+    </element>
+<!-- Adress: END -->
+    <element name="aircondition">
+      <caption lang="en">Aircondition</caption>
+      <caption lang="de">Klimanalage</caption>
+      <data type="boolean"/>
+    </element>
+    <element name="restaurants">
+      <caption lang="en">Restaurants</caption>
+      <caption lang="de">Restaurantbetriebe</caption>
+      <data type="boolean"/>
+    </element>
+    <element name="roomservice">
+      <caption lang="en">Room service</caption>
+      <caption lang="de">Zimmerservice</caption>
+      <data type="boolean"/>
+    </element>
+    <element name="carpark">
+      <caption lang="en">Parkingspace</caption>
+      <caption lang="de">Parkplatz</caption>
+      <data type="boolean"/>
+    </element>
+    <element name="shuttleservice">
+      <caption lang="en">Shuttle service</caption>
+      <caption lang="de">Pendelbetrieb</caption>
+      <data type="boolean"/>
+    </element>
+
   </static>
   <dynamic>
     <queryInput>

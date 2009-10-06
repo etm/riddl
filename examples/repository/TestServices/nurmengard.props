@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<static>
+  <street></street>
+  <housenumber><housenumber>
+  <zip></zip>
+  <city></city>
+  <state></state>
+  <aircondition></aircondition>
+  <restaurants></restaurants>
+  <carpark></carpark>
+</static>
