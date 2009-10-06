@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <static>
-  <street></street>
-  <housenumber><housenumber>
-  <zip></zip>
-  <city></city>
-  <state></state>
-  <aircondition></aircondition>
-  <restaurants></restaurants>
-  <carpark></carpark>
+  <street>Cockbill Street</street>
+  <housenumber>139<housenumber>
+  <zip>11236</zip>
+  <city>Ankh-Morprok</city>
+  <state>Discworld</state>
+  <aircondition>false</aircondition>
+  <restaurants>true</restaurants>
+  <carpark>true</carpark>
 </static>

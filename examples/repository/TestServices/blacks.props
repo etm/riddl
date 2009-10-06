@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <static>
-  <street></street>
-  <housenumber><housenumber>
-  <zip></zip>
-  <city></city>
-  <state></state>
-  <aircondition></aircondition>
-  <restaurants></restaurants>
-  <carpark></carpark>
+  <street>Grimmauld Place</street>
+  <housenumber>12<housenumber>
+  <zip>6320</zip>
+  <city>London</city>
+  <state>England</state>
+  <aircondition>true</aircondition>
+  <restaurants>false</restaurants>
+  <carpark>true</carpark>
 </static>

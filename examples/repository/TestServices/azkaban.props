@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <static>
-  <street></street>
-  <housenumber><housenumber>
-  <zip></zip>
-  <city></city>
-  <state></state>
-  <aircondition></aircondition>
-  <restaurants></restaurants>
-  <roomservice></roomservice>
-  <carpark></carpark>
-  <shuttleservice></shuttleservice>
+  <street>not necessary</street>
+  <housenumber>667<housenumber>
+  <zip>6649</zip>
+  <city>In the middle of the north sea</city>
+  <state>England</state>
+  <aircondition>false</aircondition>
+  <restaurants>false</restaurants>
+  <roomservice>true</roomservice>
+  <carpark>false</carpark>
+  <shuttleservice>true</shuttleservice>
 </static>

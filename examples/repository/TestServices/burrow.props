@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <static>
-  <street></street>
-  <housenumber><housenumber>
-  <zip></zip>
-  <city></city>
-  <state></state>
-  <aircondition></aircondition>
-  <restaurants></restaurants>
-  <roomservice></roomservice>
-  <carpark></carpark>
-  <shuttleservice></shuttleservice>
+  <street>Field Street</street>
+  <housenumber>139<housenumber>
+  <zip>6327</zip>
+  <city>Ottery St Catchpole</city>
+  <state>England</state>
+  <aircondition>false</aircondition>
+  <restaurants>true</restaurants>
+  <roomservice>false</roomservice>
+  <carpark>true</carpark>
+  <shuttleservice>true</shuttleservice>
 </static>

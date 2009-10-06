@@ -14,6 +14,6 @@
   <service>
   <!-- URI>http://www.theburrow.co.uk/API</URI -->
   <URI>http://www.pri.univie.ac.at/~ralph/TestServices/burrow</URI>
-  <staticProperties>http://www.theburrow.co.uk/staticProps.xml</staticProperties>
+  <staticProperties>http://www.pri.univie.ac.at/~ralph/TestServices/burrow.props</staticProperties>
   </service>
 </details>

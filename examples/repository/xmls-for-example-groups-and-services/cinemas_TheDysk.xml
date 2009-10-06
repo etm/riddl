@@ -14,6 +14,6 @@
   <service>
     <!-- URI>http://www.thedysk.dw/restAPI</URI -->
   <URI>http://www.pri.univie.ac.at/~ralph/TestServices/dysk</URI>
-    <staticProperties>http://www.thedysk.dw/static.xml</staticProperties>
+    <staticProperties>http://www.pri.univie.ac.at/~ralph/TestServices/dysk.props</staticProperties>
   </service>
 </details>

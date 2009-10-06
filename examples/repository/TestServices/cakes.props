@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <static>
-  <street></street>
-  <housenumber><housenumber>
-  <zip></zip>
-  <city></city>
-  <state></state>
-  <aircondition></aircondition>
-  <restaurants></restaurants>
-  <roomservice></roomservice>
-  <carpark></carpark>
-  <shuttleservice></shuttleservice>
+  <street>Elm Street</street>
+  <housenumber>69<housenumber>
+  <zip>11239</zip>
+  <city>Ankh-Morprok</city>
+  <state>Discworldf</state>
+  <aircondition>false</aircondition>
+  <restaurants>true</restaurants>
+  <roomservice>true</roomservice>
+  <carpark>false</carpark>
+  <shuttleservice>true</shuttleservice>
 </static>

@@ -14,7 +14,7 @@
   <service>
   <!-- URI>http://www.bh.uk/restAPI</URI -->
   <URI>http://www.pri.univie.ac.at/~ralph/TestServices/blacks</URI>
-  <staticProperties>http://www.bh.uk/props/static.xml</staticProperties>
+  <staticProperties>http://www.pri.univie.ac.at/~ralph/TestServices/blacks.props</staticProperties>
   </service>
 </details>
 

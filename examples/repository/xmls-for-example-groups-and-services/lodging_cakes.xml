@@ -14,6 +14,6 @@
   <service>
   <!-- URI>http://www.evadne-cake.dw/booking</URI -->
   <URI>http://www.pri.univie.ac.at/~ralph/TestServices/cakes</URI>
-  <staticProperties>http://www.evadne-cake.dw/prop.xml</staticProperties>
+  <staticProperties>http://www.pri.univie.ac.at/~ralph/TestServices/cakes.props</staticProperties>
   </service>
 </details>

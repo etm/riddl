@@ -14,7 +14,7 @@
   <service>
   <!-- URI>http://www.ggn.uk/restAPI</URI -->
   <URI>http://www.pri.univie.ac.at/~ralph/TestServices/nurmengard</URI>
-  <staticProperties>http://www.ggn.uk/props/static.xml</staticProperties>
+  <staticProperties>http://www.pri.univie.ac.at/~ralph/TestServices/nurmengard.props</staticProperties>
   </service>
 </details>
 
