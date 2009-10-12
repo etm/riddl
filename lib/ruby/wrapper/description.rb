@@ -61,7 +61,7 @@ module Riddl
         desres.find("des:resource").each do |desres|
           cpath = desres.attributes['relative'] || "{}"
           rec = desres.attributes['recursive']
-          add_description(des,res,desres,cpath)
+          add_description(des,res,desres,cpath,rec)
         end
         nil
         #}}}
