@@ -33,20 +33,27 @@ module Riddl
       qname = @doc.root.name
       @is_description = qname.namespace == DESCRIPTION && qname.name ==  'description'
       @is_declaration = qname.namespace == DECLARATION && qname.name ==  'declaration'
-      if @is_declaration
-        @declaration = Riddl::Wrapper::Declaration.new(@doc)
-      end
-      if @is_description
-        @description = Riddl::Wrapper::Description.new(@doc)
-      end  
+      @declaration = @description = nil
       #}}}
     end
 
-    attr_reader :description, :declaration
+    def declaration
+      if @is_declaration
+        @declaration = Riddl::Wrapper::Declaration.new(@doc)
+      end
+      @declaration
+    end
+      
+    def description
+      if @is_description
+        @description = Riddl::Wrapper::Description.new(@doc)
+      end
+    end  
 
     def get_message(path,operation,params,headers)
       #{{{
       if @is_description
+        @description = Riddl::Wrapper::Description.new(@doc) if @description.nil?
         req = @description.get_resource(path).requests
         mp = MessageParser.new(params,headers)
         if req.has_key?(operation)
@@ -99,6 +106,8 @@ module Riddl
     def paths
       #{{{
       tmp = []
+      @description = Riddl::Wrapper::Description.new(@doc) if @description.nil?
+      @declaration = Riddl::Wrapper::Declaration.new(@doc) if @declaration.nil?
       tmp = @description.paths if @is_description 
       tmp = @declaration.paths if @is_declaration
       tmp.map do |t|
