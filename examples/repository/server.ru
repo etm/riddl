@@ -30,6 +30,9 @@ run(
     on resource do
         p 'Processing description ....' if method :riddl => '*'
         run RootGET if method :riddl => '*'
+
+        p 'Processing white information ....' if method :get => 'whiteInformation-request'
+        run WhiteInformationGET if method :get => 'whiteInformation-request'
       
       on resource 'groups' do
         # Generating the ATOM feed with groups
