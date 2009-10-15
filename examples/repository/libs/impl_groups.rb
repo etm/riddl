@@ -14,9 +14,9 @@ class GroupsGET < Riddl::Implementation
 
     Riddl::Parameter::Complex.new("list-of-groups","text/xml") do
       feed__ :xmlns => 'http://www.w3.org/2005/atom' do
-        title_ 'List of groups'
+        title_ "List of groups at #{$url}"
         updated_ File.mtime("repository/#{@r[0]}").xmlschema
-        generator_ 'My Repository at local host', :uri => "#{$url}"
+        generator_ 'RESCUE', :uri => "#{$url}"
         id_ "#{$url}#{@r[0]}/"
         link_ :rel => 'self', :type => 'application/atom+xml', :href => "#{$url}#{@r[0]}/"
         groups.each do |g|
@@ -120,12 +120,10 @@ class GroupProperties < Riddl::Implementation
       @status = 410 # 410: Gone
       return
     end
-    Riddl::Parameter::Complex.new("properties","text/xml") do
-      mystring = ''
-      File.open(fileName, "r") { |f|
-        mystring = f.read
-      }
-      mystring
+    Riddl::Parameter::Complex.new("query-input","text/xml") do
+      xmlFile = XML::Smart::open(fileName)
+      xslt = XML::Smart::open("rngs/static-properties.xsl")
+      xmlFile.transform_with(xslt)
     end
   end
 end

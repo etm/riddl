@@ -7,12 +7,6 @@ class DetailsGET < Riddl::Implementation
       @status = 410 # 410: Gone
       return
     end
-    Riddl::Parameter::Complex.new("details-of-service","text/xml") do
-      mystring = ''
-      File.open("repository/#{@r[0]}/#{@r[1]}/#{@r[2]}/#{@r.last}/details.xml", "r") { |f|
-        mystring = f.read
-      }
-      mystring
-    end
+    Riddl::Parameter::Complex.new("details-of-service","text/xml", File.open("repository/#{@r[0]}/#{@r[1]}/#{@r[2]}/#{@r.last}/details.xml", "r"))
   end
 end

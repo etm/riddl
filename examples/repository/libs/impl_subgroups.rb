@@ -21,23 +21,23 @@ class SubgroupsGET < Riddl::Implementation
     @status = 200 # 200: OK
     Riddl::Parameter::Complex.new("list-of-subgroups","text/xml") do
       feed__ :xmlns => 'http://www.w3.org/2005/atom' do
-        title_ 'List of subgroups in group " ' + @r.last + '"'
+        title_ 'List of subgroups in group "' + @r.last + '"'
         updated_ File.mtime("repository/#{@r[0]}/#{@r.last}").xmlschema
-        generator_ 'My Repository at local host', :uri => "#{$url}"
+        generator_ 'RESCUE', :uri => "#{$url}"
         id_ "#{$url}#{@r[0]}/#{@r.last}/"
-        link_ :rel => 'self', :type => 'application/atom+xml', :href => "#{$url}#{@r[0]}/#{@r.last}/"
+        link_ :rel => 'self', :type => 'application/atom+xml', :href => "#{$url}#{@r.join('/')}/"
        schema_ do
-          properties_ "#{$url}#{@r[0]}/#{@r[1]}?properties.schema"
-          queryInput_ "#{$url}#{@r[0]}/#{@r[1]}?queryInput.schema"
-          queryOutput_ "#{$url}#{@r[0]}/#{@r[1]}?queryOutput.schema"
-          invokeInput_ "#{$url}#{@r[0]}/#{@r[1]}?invokeInput.schema"
-          invokeOutput_ "#{$url}#{@r[0]}/#{@r[1]}?invokeOutput.schema"
+          properties_ "#{$url}#{@r[0]}/#{@r[1]}?properties"
+          queryInput_ "#{$url}#{@r[0]}/#{@r[1]}?queryInput"
+          queryOutput_ "#{$url}#{@r[0]}/#{@r[1]}?queryOutput"
+          invokeInput_ "#{$url}#{@r[0]}/#{@r[1]}?invokeInput"
+          invokeOutput_ "#{$url}#{@r[0]}/#{@r[1]}?invokeOutput"
         end
         groups.each do |g|
           entry_ :lang => 'EN' do
             id_ "#{g}"
-            link_ "#{$url}#{@r[0]}/#{@r.last}/#{g}/"
-            updated_ File.mtime("repository/#{@r[0]}/#{@r.last}/#{g}").xmlschema
+            link_ "#{$url}#{@r.join('/')}/#{g}/"
+            updated_ File.mtime("repository/#{@r.join('/')}/#{g}").xmlschema
           end
         end  
       end

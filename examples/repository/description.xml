@@ -11,6 +11,16 @@
     </parameter>
   </message>
 
+  <message name="whiteInformation-request">
+    <parameter name="whiteInformation" type="string"/>
+  </message>
+
+  <message name="whiteInformation-response">
+    <parameter name="list-of-groups" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rngs/details-of-service.rng"/>
+    </parameter>
+  </message>
+
 <!-- Messages at group level -->
   <message name="list-of-groups">
     <parameter name="list-of-groups" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
@@ -109,6 +119,9 @@
     <request method="riddl" in="*" out="description">
       <ann:label xml:lang="en">Show description</ann:label>
     </request>
+    <get in="whiteInformation-request" out="whiteInformation-response">
+      <ann:label xml:lang="en">Show white information schema</ann:label>
+    </get>
     <resource relative="groups">
       <get in="*" out="list-of-groups"/>
       <post in="create-group"/>
