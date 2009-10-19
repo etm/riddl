@@ -1,0 +1,9 @@
+#!/usr/bin/ruby
+require '../../lib/ruby/client'
+
+test = Riddl::Client.new("declaration0.xml")
+status, res = test.get(
+  Riddl::Parameter::Simple.new("a","1"),
+  Riddl::Parameter::Simple.new("security","mui mui")
+)
+p status, res
