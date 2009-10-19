@@ -24,8 +24,8 @@ module Riddl
       @logger = nil
       @process_out = true 
       @cross_site_xhr = false
-      @blk = blk
-      instance_eval(&@blk)
+      @blk =  nil
+      instance_eval(&blk)
       @norun = false
 
       @paths = @description.paths
@@ -60,7 +60,6 @@ module Riddl
         ).params
         @riddl_method = @env['REQUEST_METHOD'].downcase
 
-        @path = ''
         @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_method,@parameters,@headers)
         if @riddl_message_in.nil? && @riddl_message_out.nil?
           if @env.has_key?('HTTP_ORIGIN') && @cross_site_xhr
@@ -74,6 +73,7 @@ module Riddl
             @res.status = 501 # not implemented?!
           end  
         else
+          @path = '/'
           instance_eval(&@blk)
           if @cross_site_xhr
             @res['Access-Control-Allow-Origin'] = '*'
@@ -89,10 +89,13 @@ module Riddl
     end
   
     def on(resource, &block)
-      return if @norun
-      @path << (@path == '' ? '/' : resource)
-      yield
-      @path = (File.dirname(@path) + '/').gsub(/\/+/,'/')
+      if @norun
+        @blk = block if @blk.nil?
+      else  
+        @path << resource
+        yield
+        @path = (File.dirname(@path) + '/').gsub(/\/+/,'/')
+      end  
     end
 
     def process_out(pout)

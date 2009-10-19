@@ -29,8 +29,7 @@ end
 
 options[:Port] = 9201
 
-run(
-  Riddl::Server.new("main.xml") do
+run Riddl::Server.new("main.xml") {
     process_out false
     logger Riddl::CommonLogger.new("Main","main.log")
     on resource do
@@ -40,4 +39,4 @@ run(
       run S if get '*'
     end
   end
-)
+}
