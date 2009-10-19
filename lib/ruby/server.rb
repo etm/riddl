@@ -5,7 +5,6 @@ require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/parameter')
 require File.expand_path(File.dirname(__FILE__) + '/error')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper')
-require 'pp'
 
 module Riddl
   class Server
@@ -14,15 +13,22 @@ module Riddl
 
     attr_reader :env, :req, :res
 
-    def initialize(description,cross_site_xhr=false,&blk)
+    def initialize(description,&blk)
       @description = Riddl::Wrapper::new(description)
       @description.load_necessary_handlers!
       raise SpecificationError, 'No RIDDL description found.' unless @description.description?
       raise SpecificationError, 'RIDDL description does not conform to specification' unless @description.validate!
       raise SpecificationError, 'RIDDL description contains invalid resources' unless @description.valid_resources?
-      @cross_site_xhr = cross_site_xhr
-      @paths = @description.paths
+      
+      @norun = true
+      @logger = nil
+      @process_out = true 
+      @cross_site_xhr = false
       @blk = blk
+      instance_eval(&@blk)
+      @norun = false
+
+      @paths = @description.paths
     end
 
     def call(env)
@@ -30,8 +36,8 @@ module Riddl
     end
 
     def _call(env)
+      time = Time.now
       @pinfo = (env["PATH_INFO"] + '/').gsub(/\/+/,'/')
-      @process_out = true
       @env = env
       @req = Rack::Request.new(env)
       @res = Rack::Response.new
@@ -67,7 +73,7 @@ module Riddl
             @log.puts "501: the #{@riddl_method} parameters are not matching anything in the description."
             @res.status = 501 # not implemented?!
           end  
-        else  
+        else
           instance_eval(&@blk)
           if @cross_site_xhr
             @res['Access-Control-Allow-Origin'] = '*'
@@ -78,10 +84,12 @@ module Riddl
         @log.puts "404: this resource for sure does not exist."
         @res.status = 404 # client requests wrong path
       end
+      @logger.info(@env,@res,time)
       @res.finish
     end
   
     def on(resource, &block)
+      return if @norun
       @path << (@path == '' ? '/' : resource)
       yield
       @path = (File.dirname(@path) + '/').gsub(/\/+/,'/')
@@ -93,8 +101,12 @@ module Riddl
     def cross_site_xhr(csxhr)
       @cross_site_xhr = csxhr
     end
+    def logger(lgr)
+      @logger = lgr
+    end
 
     def run(what,*args)
+      return if @norun
       return if @path == ''
       if what.class == Class && what.superclass == Riddl::Implementation
         w = what.new(@headers,@parameters,@pinfo.sub(/\//,'').split('/'),@path.sub(/\//,'').split('/'),@env.reject{|k,v| k =~ /^rack\./},args)
@@ -123,6 +135,7 @@ module Riddl
     end
 
     def method(what)
+      return if @norun
       if what.class == Hash
         what.each do |met,min|
           return true if check(min) && @riddl_method == met.to_s.downcase
@@ -130,14 +143,15 @@ module Riddl
       end
       false
     end  
-    def post(min='*'); check(min) && @riddl_method == 'post' end
-    def get(min='*'); check(min) && @riddl_method == 'get' end
-    def delete(min='*'); check(min) && @riddl_method == 'delete' end
-    def put(min='*'); check(min) && @riddl_method == 'put' end
+    def post(min='*'); return if @norun; check(min) && @riddl_method == 'post' end
+    def get(min='*'); return if @norun; check(min) && @riddl_method == 'get' end
+    def delete(min='*'); return if @norun; check(min) && @riddl_method == 'delete' end
+    def put(min='*'); return if @norun; check(min) && @riddl_method == 'put' end
     def check(min)
+       return if @norun
        @path == @riddl_path[0] && min == @riddl_message_in.name
     end
 
-    def resource(path=nil); path.nil? ? '{}/' : path + '/' end
+    def resource(path=nil); return if @norun; path.nil? ? '{}/' : path + '/' end
   end
 end
