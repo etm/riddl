@@ -28,7 +28,6 @@ class S < Riddl::Implementation
 end  
 
 options[:Port] = 9201
-env ='none'
 
 run(
   Riddl::Server.new("main.xml") do
