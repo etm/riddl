@@ -43,6 +43,14 @@
     <parameter name="properties" mimetype="text/xml"/>
   </message>
 
+  <message name="static-properties-of-group-request">
+    <parameter name="static" type="string"/>
+  </message>
+
+  <message name="static-properties-of-group-response">
+    <parameter name="static" mimetype="text/xml"/>
+  </message>
+
   <message name="query-input-of-group-request">
     <parameter name="queryInput" type="string"/>
   </message>
@@ -132,7 +140,10 @@
 
       <resource> <!-- Dynamically: name of the group -->
         <get in="properties-of-group-request" out="properties-of-group-response">
-          <ann:label xml:lang="en">Show Properties</ann:label>
+          <ann:label xml:lang="en">Show all Properties</ann:label>
+        </get>
+        <get in="static-properties-of-group-request" out="static-properties-of-group-response">
+          <ann:label xml:lang="en">Show static Properties</ann:label>
         </get>
         <get in="query-input-of-group-request" out="query-input-of-group-response">
           <ann:label xml:lang="en">Show queryInput</ann:label>
