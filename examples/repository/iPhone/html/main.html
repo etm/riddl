@@ -23,9 +23,7 @@
       $.jQTouch({
         fullScreen: true,
         icon: '../js/custom/app_icon.png',
-        //statusBar: 'black-translucent',
         startupScreen: '../js/custom/app_startup.png',
-        //slideInSelector: 'ul li a[href^=#]',
         cacheGetRequests: false,
         preloadImages: [
             '../js/custom/greenButton.png',
@@ -219,7 +217,7 @@ console.log(url);
 
           $('#wallet').bind('pageTransitionEnd', function(e, info){
             if (info.direction == 'out') { 
-comsol.log("wallet out");
+console.log("wallet out");
 //              $('#queryResultsList').html("<li align=\"center\">Loading ....</li>");
             }
           })
@@ -238,24 +236,27 @@ comsol.log("wallet out");
       </div>
       <div style="vertical-align:middle;background:#006699;">
         <table style="margin: auto;">
-          <tr><td><a href="rescue" class="cube"><img src="../js/custom/rescue_icon.png"/></a></td>
-              <td><a href="wallet" class="cube"><img src="../js/custom/wallet_icon.png"/></a></td>
+          <tr><td><a class="swap" href="rescue"><!-- img src="../js/custom/rescue_icon.png"/ --> Rescue</a></td>
+              <td><a class="swap" href="wallet"><img src="../js/custom/wallet_icon.png"/></a></td>
           </tr>
           <tr><td><p class="infoText">RESCUE</p></td>
               <td><p class="infoText">Wallet</p></td>
           </tr>
-          <tr><td><a href="#preferences" class="cube"><img src="../js/custom/preferences_icon.png"/></a></td>
-              <td><a href="workflows" class="cube"><img src="../js/custom/workflow_icon.png"/></a></td>
+          <tr><td><a class="slideup" href="#preferences"><img src="../js/custom/preferences_icon.png"/></a></td>
+              <td><a class="slideup" href="#workflows"><img src="../js/custom/workflow_icon.png"/></a></td>
           </tr>
           <tr><td><p class="infoText">Preferences</p></td>
               <td><p class="infoText">Workflows</p></td>
           </tr>
+<ul>
+<li><a class="cube" href="rescue">Slide Up</a></li>
+</ul>
         </table>
       </div>
     </div>
 
 
-    <!-- div id="workflows">
+    <div id="workflows">
       <div class="toolbar">
         <h1>Workflows</h1>
         <a class="back button" href="#">Back</a>
@@ -264,7 +265,7 @@ comsol.log("wallet out");
       <ul>
         <li style="text-align:center">Not yet implemented</li>
       </ul>
-    </div -->
+    </div>
 
     <div id="addWorkflow">
       <div class="toolbar">

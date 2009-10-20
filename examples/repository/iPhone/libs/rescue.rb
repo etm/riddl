@@ -29,10 +29,10 @@ class RESCUE < Riddl::Implementation
   end
 
   def generateList( feed )
-    html = div_ :id => 'rescue', :class => "edgetoedge" do
+    div_ :id => 'rescue', :class => "edgetoedge" do
       div_ :class => "toolbar" do
         h1_ @r.last.capitalize
-        a_ "Back", :class => "back button", :href => "#"
+        a_ "Back", :class => "back goback", :href => "#"
         a_ "Main", :class=>"button goback", :id=>"infoButton", :href=>"#main"
       end
       ul_ do
@@ -77,10 +77,11 @@ class RESCUE < Riddl::Implementation
         end  
       end
     end
+
     # Parse feed a second time and generate confirm-div's
     feed.find("//atom:entry").each do |e|
       id = e.find("string(atom:id)")
-      html += div_ :id=>"confirm" + Digest::MD5.hexdigest(@r.join("/")+"/"+id) do
+      div_ :id=>"confirm" + Digest::MD5.hexdigest(@r.join("/")+"/"+id) do
         div_ :class => "toolbar" do
           h1_ "Confirm"
         end
@@ -89,7 +90,7 @@ class RESCUE < Riddl::Implementation
         a_ "Cancel", :href=>"#", :class=>"redButton goback"
       end
     end
-    html
+    __markus_return
   end
  
   def generateDetails( details )
