@@ -15,10 +15,9 @@ module Riddl
 
     def initialize(description,&blk)
       @description = Riddl::Wrapper::new(description)
-      @description.load_necessary_handlers!
       raise SpecificationError, 'No RIDDL description found.' unless @description.description?
       raise SpecificationError, 'RIDDL description does not conform to specification' unless @description.validate!
-      raise SpecificationError, 'RIDDL description contains invalid resources' unless @description.valid_resources?
+      @description.load_necessary_handlers!
       
       @norun = true
       @logger = nil
