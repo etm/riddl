@@ -14,7 +14,7 @@ class RESCUE < Riddl::Implementation
     if status != "200"
       message = "An error occurde on resource: groups/#{@r[2...5].join("/")}"
       p message
-      return Show.new().showPage("Error: RESCUE sever dis not respond as expected", message, status, true)
+      return Show.new().showPage("Error: RESCUE sever did not respond as expected", message, status, true)
     end
 
     html = ""
