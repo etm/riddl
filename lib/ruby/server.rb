@@ -35,7 +35,7 @@ module Riddl
     end
 
     def _call(env)
-      time = Time.now
+      time = Time.now  unless @logger.nil?
       @pinfo = (env["PATH_INFO"] + '/').gsub(/\/+/,'/')
       @env = env
       @req = Rack::Request.new(env)
@@ -83,7 +83,7 @@ module Riddl
         @log.puts "404: this resource for sure does not exist."
         @res.status = 404 # client requests wrong path
       end
-      @logger.info(@env,@res,time)
+      @logger.info(@env,@res,time) unless @logger.nil?
       @res.finish
     end
   
