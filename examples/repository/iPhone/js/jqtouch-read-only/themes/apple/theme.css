@@ -74,6 +74,10 @@ body.landscape .toolbar > h1 {
     -webkit-border-image: url(img/toolButton.png) 0 5 0 5;
 }
 
+.button.active, .back.active, .cancel.active, .add.active {
+    -webkit-border-image: url(img/toolButton.png) 0 5 0 5;	
+}
+
 .blueButton {
     -webkit-border-image: url(img/blueButton.png) 0 5 0 5;
     border-width: 0 5px;
@@ -271,7 +275,7 @@ ul.form li:hover {
     background: #fff;
 }
 
-ul li input[type="text"], ul li input[type="password"], ul li textarea, ul li select {
+ul li input[type="text"], ul li input[type="password"], ul li input[type="tel"], ul li textarea, ul li select {
     color: #777;
     background: #fff url(../.png);
     border: 0;
