@@ -1,3 +1,5 @@
+require 'open-uri'
+
 class ServicesGET < Riddl::Implementation
   include MarkUSModule
 
@@ -48,18 +50,34 @@ class ServicesPOST < Riddl::Implementation
   def response
     begin
       xmlString = @p[1].value.read
-      x = XML::Smart.string(xmlString)
-      if x.validate_against(XML::Smart::open("rngs/details-of-service.rng"))
-        Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
-        # Saving the details of the service into the acording XMl file
-        detailsFile = File.new("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}/details.xml", "w")
-        detailsFile.write(xmlString)
-        detailsFile.close()
-        @status = 201   # 201: Created
-      else
-        @status = 415 # 415: Unsupported Media Type
-        puts "XML doesn't match the RNG schema (details-of-service.rng)"
+      x = XML::Smart::string(xmlString)
+      # Check if provided white information fits to shema
+      valide = true
+      begin
+        valide = false if x.validate_against(XML::Smart::open("rngs/details-of-service.rng")) == false
+        # Check if static properties fits to schema
+        staticURI = x.find("string(/details/service/staticProperties)")
+        staticProps = XML::Smart::string(open(staticURI).read)
+        schema = XML::Smart::open("repository/#{@r[0]}/#{@r[1]}/properties.xml")
+        xslt = XML::Smart::open("rngs/static-properties.xsl")
+        valide = false if staticProps.validate_against(XML::Smart::string(schema.transform_with(xslt))) == false
+      rescue
+        valide = false
       end
+
+      if valide == false
+        @status = 415 # 415: Unsupported Media Type
+        puts "XML doesn't match the RNG schema"
+        return
+      end
+
+      # Create entry if everything is valide
+      Dir.mkdir("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
+      # Saving the details of the service into the acording XMl file
+      detailsFile = File.new("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}/details.xml", "w")
+      detailsFile.write(xmlString)
+      detailsFile.close()
+      @status = 201   # 201: Created
     rescue
       @status = 409 # http ERROR named 'Conflict'
       puts $ERROR_INFO
@@ -78,17 +96,32 @@ class ServicesPUT < Riddl::Implementation
     begin
       xmlString = @p[1].value.read
       x = XML::Smart.string(xmlString)
-      if x.validate_against(XML::Smart::open("rngs/details-of-service.rng"))
-        File.rename("repository/groups/#{@r[1]}/#{@r[2]}/#{@r[3]}","repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
-        # Saving the details of the service into the acording XMl file
-        detailsFile = File.new("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}/details.xml", "w")
-        detailsFile.write(xmlString)
-        detailsFile.close()
-        @staus = 200   # 200: OK
-      else
-        @status = 415 # 415: Unsupported Media Type
-        puts "XML doesn't match the RNG schema (details-of-service.rng)"
+      # Check if provided white information fits to shema
+      valide = true
+      begin
+        valide = false if x.validate_against(XML::Smart::open("rngs/details-of-service.rng")) == false
+        # Check if static properties fits to schema
+        staticURI = x.find("string(/details/service/staticProperties)")
+        staticProps = XML::Smart::string(open(staticURI).read)
+        schema = XML::Smart::open("repository/#{@r[0]}/#{@r[1]}/properties.xml")
+        xslt = XML::Smart::open("rngs/static-properties.xsl")
+        valide = false if staticProps.validate_against(XML::Smart::string(schema.transform_with(xslt))) == false
+      rescue
+        valide = false
       end
+
+      if valide == false
+        @status = 415 # 415: Unsupported Media Type
+        puts "XML doesn't match the RNG schema"
+        return
+      end
+
+      File.rename("repository/groups/#{@r[1]}/#{@r[2]}/#{@r[3]}","repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}")
+      # Saving the details of the service into the acording XMl file
+      detailsFile = File.new("repository/groups/#{@r[1]}/#{@r[2]}/#{@p[0].value}/details.xml", "w")
+      detailsFile.write(xmlString)
+      detailsFile.close()
+      @staus = 200   # 200: OK
     rescue
       @status = 409 # http ERROR named 'Conflict'
       puts $ERROR_INFO

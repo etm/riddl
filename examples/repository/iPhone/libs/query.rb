@@ -26,7 +26,7 @@ class ExecuteQuery < Riddl::Implementation
       return Show.new().showPage("Error: ExecuteQuery", message, status)
     end
     
-    # Read params according to queryInput and RIDDL-them into riddlParams
+    # Read params according to queryInput and write them into riddl-Params
     riddlParams = Array.new();   
     rng = XML::Smart::string(res[0].value.read)
     rng.namespaces = {"rng" => "http://relaxng.org/ns/structure/1.0"}
@@ -71,11 +71,16 @@ class ExecuteQuery < Riddl::Implementation
     # Read params according to queryOutput
     qo = Array.new()
     rng = XML::Smart::string(res[0].value.read)
+puts '-'*50
+puts rng
+puts '-'*50
     rng.namespaces = {"rng" => "http://relaxng.org/ns/structure/1.0"}
     elements = rng.find("//rng:define/rng:element/@name")
     elements.each do |e|
       qo << e.value
     end
+
+    # Find annotations for query-output
 
     # Execute request for services and generate HTML respond
     Riddl::Parameter::Complex.new("html","text/html") do
