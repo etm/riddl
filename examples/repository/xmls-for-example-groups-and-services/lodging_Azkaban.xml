@@ -1,13 +1,13 @@
 <details>
   <vendor>
   <name>Tom Riddle</name>
-  <adress>
+  <address>
     <street>not known</street>
     <housenumber>not necessary</housenumber>
     <ZIP>6649</ZIP>
     <city>In the middle of the North Sea</city>
     <state>England</state>
-  </adress>
+  </address>
   <mail>office@azkaban.co.uk</mail>
   <phone>+44 (20) 555 4711</phone>
   </vendor>

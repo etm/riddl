@@ -56,7 +56,7 @@ module Riddl
             messages += check_fields(tfield,"#{tpath} -> #{mn}","transformation","transformation")
           end  
           h_cfield.each do |mn,cfield|
-            puts "#{tpath} -> #{mn}: more than one catchall (*) operation is not allowed." if cfield > 1
+            messages << "#{tpath} -> #{mn}: more than one catchall (*) operation is not allowed." if cfield > 1
           end
           messages += check_rec_resources(res.find("des:resource"),tpath)
         end

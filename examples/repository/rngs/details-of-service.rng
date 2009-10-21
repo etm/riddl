@@ -5,7 +5,7 @@
   <element name="details">
     <element name="vendor">
       <element name="name"><text/></element>
-      <element name="adress">
+      <element name="address">
         <element name="street"><text/></element>
         <element name="housenumber"><text/></element>
         <element name="ZIP"><text/></element>

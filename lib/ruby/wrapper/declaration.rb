@@ -10,6 +10,21 @@ module Riddl
         @facade.description_xml
       end  
         
+      def get_resource(path)
+        #{{{
+        pres = @facade.resource
+        path.split('/').each do |pa|
+          next if pa == ""
+          if pres.resources.has_key?(pa)
+            pres = pres.resources[pa]
+          else
+            return nil
+          end
+        end
+        pres
+        #}}}
+      end  
+
       def visualize_tiles_and_layers
         #{{{
         @tiles.each_with_index do |til,index|

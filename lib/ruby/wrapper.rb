@@ -22,7 +22,7 @@ module Riddl
     CHECK = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"><data/></element>"
     #}}}
 
-    def initialize(name)
+    def initialize(name,protocol="GET")
       #{{{
       @doc = XML::Smart.open(name)
       @doc.xinclude!
@@ -38,46 +38,56 @@ module Riddl
     end
 
     def declaration
+      #{{{
       if @is_declaration
         @declaration = Riddl::Wrapper::Declaration.new(@doc)
       end
       @declaration
+      #}}}
     end
       
     def description
+      #{{{
       if @is_description
         @description = Riddl::Wrapper::Description.new(@doc)
       end
+      @description
+      #}}}
     end  
 
     def get_message(path,operation,params,headers)
-      #{{{
-      if @is_description
-        @description = Riddl::Wrapper::Description.new(@doc) if @description.nil?
-        req = @description.get_resource(path).requests
-        mp = MessageParser.new(params,headers)
-        if req.has_key?(operation)
-          req[operation][0].select{|o|o.class==Riddl::Wrapper::Description::RequestInOut}.each do |o|
-            return o.in, o.out if mp.check(o.in)
-          end
-          req[operation][0].select{|o|o.class==Riddl::Wrapper::Description::RequestStarOut}.each do |o|
-            return Riddl::Wrapper::Description::Star.new, o.out
-          end
-          req[operation][0].select{|o|o.class==Riddl::Wrapper::Description::RequestTransformation}.each do |o|
-            # TODO guess structure from input, create new output structure
-            return Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new
-          end
-          req[operation][0].select{|o|o.class==Riddl::Wrapper::Description::RequestPass}.each do |o|
-            return Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new
-          end
-        end  
-        return [nil,nil]
-      end
-      nil
+      #{{
+      description
+      declaration
+      
+      req = @description.get_resource(path).requests if @is_description
+      req = @declaration.get_resource(path).composition if @is_declaration
+
+      mp = MessageParser.new(params,headers)
+      if req.has_key?(operation)
+        r = req[operation][0] if @is_description
+        r = req[operation].result if @is_declaration
+        r.select{|o|o.class==Riddl::Wrapper::Description::RequestInOut}.each do |o|
+          return o.in, o.out if mp.check(o.in)
+        end
+        r.select{|o|o.class==Riddl::Wrapper::Description::RequestStarOut}.each do |o|
+          return Riddl::Wrapper::Description::Star.new, o.out
+        end
+        r.select{|o|o.class==Riddl::Wrapper::Description::RequestTransformation}.each do |o|
+          # TODO guess structure from input, create new output structure
+          return Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new
+        end
+        r.select{|o|o.class==Riddl::Wrapper::Description::RequestPass}.each do |o|
+          return Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new
+        end
+      end  
+      return [nil,nil]
       #}}}
     end
 
     def check_message(params,headers,message)
+      description
+      declaration
       #{{{
       return true if message.class == Riddl::Wrapper::Description::Star
       mp = MessageParser.new(params,headers)
@@ -87,8 +97,16 @@ module Riddl
 
     def validate!
       #{{{
-      return @doc.validate_against(XML::Smart.open(DESCRIPTION_FILE)) if @is_description
-      return @doc.validate_against(XML::Smart.open(DECLARATION_FILE)) if @is_declaration
+      if @is_description
+        xval = @doc.validate_against(XML::Smart.open(DESCRIPTION_FILE))
+        xchk = ResourceChecker.new(@doc).check.empty?
+        return xval && xchk
+      end
+      if @is_declaration
+        xval = @doc.validate_against(XML::Smart.open(DECLARATION_FILE))
+        xchk = LayerChecker.new(@doc).check.empty?
+        return xval && xchk
+      end
       nil
       #}}}
     end
@@ -105,9 +123,9 @@ module Riddl
 
     def paths
       #{{{
+      description
+      declaration
       tmp = []
-      @description = Riddl::Wrapper::Description.new(@doc) if @description.nil?
-      @declaration = Riddl::Wrapper::Declaration.new(@doc) if @declaration.nil?
       tmp = @description.paths if @is_description 
       tmp = @declaration.paths if @is_declaration
       tmp.map do |t|
@@ -118,11 +136,5 @@ module Riddl
 
     def declaration?; @is_declaration; end
     def description?; @is_description; end
-    def valid_resources?
-      @is_description ? ResourceChecker.new(@doc).check : []
-    end
-    def valid_layers?
-      @is_declaration ? LayerChecker.new(@doc).check : []
-    end
   end
 end

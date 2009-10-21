@@ -1,30 +1,39 @@
 require 'net/http'
-require File.expand_path(File.dirname(__FILE__) + "/wrapper")
-require File.expand_path(File.dirname(__FILE__) + "/error")
-require File.expand_path(File.dirname(__FILE__) + "/httpgenerator")
+require File.expand_path(File.dirname(__FILE__) + '/wrapper')
+require File.expand_path(File.dirname(__FILE__) + '/error')
+require File.expand_path(File.dirname(__FILE__) + '/httpgenerator')
 require File.expand_path(File.dirname(__FILE__) + '/httpparser')
-require File.expand_path(File.dirname(__FILE__) + "/header")
+require File.expand_path(File.dirname(__FILE__) + '/header')
 
 module Riddl
 
   class Client
-    def initialize(base, riddl=nil)
-      @base = base.gsub(/\/+$/,'')
+    def initialize(base, riddl=nil, protocol='GET')
+      @base = base.nil? ? nil : base.gsub(/\/+$/,'')
       @path = ''
       @rpath = ''
-      @description = nil
+      @wrapper = nil
       unless riddl.nil?
-        @description = Riddl::Wrapper::new(riddl)
-        @description.load_necessary_handlers!
-        raise SpecificationError, 'No RIDDL description found.' unless @description.description?
-        raise SpecificationError, 'RIDDL description does not conform to specification' unless @description.validate!
-        raise SpecificationError, 'RIDDL description contains invalid resources' unless @description.valid_resources?
+        @wrapper = Riddl::Wrapper::new(riddl,protocol)
+        raise SpecificationError, 'No RIDDL description or declaration found.' if !@wrapper.description? && !@wrapper.declaration?
+        raise SpecificationError, 'RIDDL does not conform to specification' unless @wrapper.validate!
+        @wrapper.load_necessary_handlers!
       end
     end
 
+    def self::location(base)
+      new(base)
+    end  
+    def self::interface(base,riddl,protocol='RIDDL')
+      new(base,riddl,protocol)
+    end  
+    def self::facade(riddl,protocol='GET')
+      new(nil,riddl,protocol)
+    end  
+
     def resource(path="")
       @rpath = path.gsub(/\/+/,'/')
-      @path = @description.nil? ? @rpath : @description.paths.find{ |e| e[1] =~ @rpath }
+      @path = @wrapper.nil? ? @rpath : @wrapper.paths.find{ |e| e[1] =~ @rpath }
       if @path.nil?
         raise PathError, 'Path not found.'
       end
@@ -62,8 +71,8 @@ module Riddl
           false
         end  
       end
-      unless @description.nil?
-        riddl_message_in, riddl_message_out = @description.get_message(@path,riddl_method.downcase,parameters,headers)
+      unless @wrapper.nil?
+        riddl_message_in, riddl_message_out = @wrapper.get_message(@path,riddl_method.downcase,parameters,headers)
         if riddl_message_in.nil? && riddl_message_out.nil?
           raise InputError, "Not a valid input to service."
         end
@@ -86,8 +95,8 @@ module Riddl
             res['HTTP-CONTENT-ID'],
             res['RIDDL-TYPE']
           ).params
-          unless @description.nil?
-            unless @description.check_message(response,res,riddl_message_out)
+          unless @wrapper.nil?
+            unless @wrapper.check_message(response,res,riddl_message_out)
               raise OutputError, "Not a valid output from service."
             end 
           end  
@@ -106,7 +115,7 @@ module Riddl
         self.body_stream = tmp
       end
     end
-
+    
   end  
 
 end  

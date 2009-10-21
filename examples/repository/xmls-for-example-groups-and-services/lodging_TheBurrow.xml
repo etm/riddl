@@ -1,13 +1,13 @@
 <details>
   <vendor>
   <name>The Burrow (Weasleys)</name>
-  <adress>
+  <address>
     <street>Field Street</street>
     <housenumber>139</housenumber>
     <ZIP>6327</ZIP>
     <city>Ottery St Catchpole</city>
     <state>England</state>
-  </adress>
+  </address>
   <mail>office@theburrow.co.uk</mail>
   <phone>+44 (20) 555 4711</phone>
   </vendor>
