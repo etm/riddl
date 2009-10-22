@@ -92,11 +92,6 @@ module Riddl
           bs = Parameter::Tempfile.new("RiddlBody")
           res.read_body(bs)
           bs.rewind
-          p res['HTTP-CONTENT-ID']
-          p res['CONTENT-DISPOSITION']
-          p res['RIDDL-TYPE']
-          p res['CONTENT-TYPE']
-          bs.rewind
 
           response = Riddl::HttpParser.new(
             "",
@@ -104,7 +99,7 @@ module Riddl
             res['CONTENT-TYPE'],
             res['CONTENT-LENGTH'],
             res['CONTENT-DISPOSITION'],
-            res['HTTP-CONTENT-ID'],
+            res['CONTENT-ID'],
             res['RIDDL-TYPE']
           ).params
           unless @wrapper.nil?
