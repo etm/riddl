@@ -2,6 +2,7 @@ class ExecuteQuery < Riddl::Implementation
   include MarkUSModule
 
   def response
+
     # Get the queryInput of the group from selected resource
     resource = nil
     if @p[0].name == "selectedResource"
@@ -12,6 +13,7 @@ class ExecuteQuery < Riddl::Implementation
       return Show.new().showPage("Error: ExecuteQuery", message)
     end
     client = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290").resource("/groups/" + resource[0])
+    # Receive queryIput
     begin
       status, res = client.request :get => [Riddl::Parameter::Simple.new("queryInput", "")]
     rescue
@@ -20,8 +22,18 @@ class ExecuteQuery < Riddl::Implementation
       return Show.new().showPage("Error: Connection refused", message, status, true)
     end
 
+    # Receive properties
+    begin
+      status, propP = client.request :get => [Riddl::Parameter::Simple.new("properties", "")]
+      prop = XML::Smart::string(propP[0].value.read)
+    rescue
+      message = "Server (http://sumatra.pri.univie.ac.at:9290) refused connection on resource: /" + resource.join("/") + "?properties"
+      p message
+      return Show.new().showPage("Error: Connection refused", message, status, true)
+    end
+
     if status != "200"
-      message = "Can not receive groups queryInput of " + resource[0]
+      message = "Can not receive groups properties of " + resource[0]
       p message
       return Show.new().showPage("Error: ExecuteQuery", message, status)
     end
@@ -42,23 +54,12 @@ class ExecuteQuery < Riddl::Implementation
     end
     xml += "\t</entry>\n</queryInputMessage>\n"
 
-puts '-'*50
-puts "XML:"
-puts xml
-puts '-'*50
-puts "RNG:"
-puts rng
-puts '-'*50
-
     # Validate if params of request fit to queryInputSchema
     if XML::Smart::string(xml).validate_against(rng) == false
       message = "Some parameters have an illegal value"
       p message
       return Show.new().showPage("Error: Parameter validation", message)
     end
-
-
-puts "TESTETSTSTST"
 
     # Get all services within the selected resource
     services = Array.new()
@@ -82,13 +83,13 @@ puts "TESTETSTSTST"
     # Read params according to queryOutput
     qo = Array.new()
     rng = XML::Smart::string(res[0].value.read)
-puts '-'*50
-puts rng
-puts '-'*50
     rng.namespaces = {"rng" => "http://relaxng.org/ns/structure/1.0"}
     elements = rng.find("//rng:define/rng:element/@name")
     elements.each do |e|
-      qo << e.value
+      xpath = "string(//queryOutput/element[@name='#{e.value}']/caption[@lang='en'])"
+      caption = prop.find(xpath).first
+#      qo << [e.value => caption]
+      qo << caption
     end
 
     # Find annotations for query-output
@@ -154,13 +155,6 @@ puts '-'*50
       return Show.new().showPage("Error: Connection refused", message, status, true)
     end
 
-puts '-'*50
-puts "getServices"
-puts "Link: " + link
-puts "Resource: " + resource
-puts "Received parameter named: " + res[0].name
-puts '-'*50
-
     xml = XML::Smart::string(res[0].value.read)
     if res[0].name == "list-of-subgroups" || res[0].name == "list-of-services"
       xml.namespaces = {"atom" => "http://www.w3.org/2005/atom"}
@@ -223,7 +217,6 @@ class DisposeQuery < Riddl::Implementation
   end
 
   def createInput(name, xml)
-    lang = 
     label =  xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/caption[@lang='en'])")
     type =  xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/data/@type)")
     minS = ""
