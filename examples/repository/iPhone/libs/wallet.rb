@@ -2,9 +2,6 @@ class DeleteFromWallet < Riddl::Implementation
   include MarkUSModule
 
   def response
-    #pp @r
-    #["08c5c293b7c28c0910ebc4848136e058", "wallet"]
-    pp "DELETE: " + @p[0].value
     if File.exists?("user/#{@r.join("/")}/#{@p[0].value}") == false
       puts "Directory: user/#{@r.join("/")}/#{@p[0].value} does not exist" 
       @status = 410 # Gone
@@ -18,9 +15,6 @@ class AddToWallet < Riddl::Implementation
   include MarkUSModule
 
   def response
-    #pp @r
-    #pp @p[0].value
-    #["08c5c293b7c28c0910ebc4848136e058", "wallet"]
     # Create user dir if not exist
     if File.exists?("user/#{@r.join("/")}/#{@p[0].value}/subscribed")
       puts "Directory: user/#{@r.join("/")}/#{@p[0].value} already exists" 
