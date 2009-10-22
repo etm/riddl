@@ -1,3 +1,7 @@
-*) Include "static Properties" into disposeQuery
 *) Implement "assign" for workflows
 
+
+Think about:
+*) two kind of static props? (input able and non-input able)
+*) Wildcards for input, like '*'?
+*) Make it possible to group inputs?
