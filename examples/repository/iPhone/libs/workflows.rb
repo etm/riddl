@@ -8,7 +8,7 @@ class GetWorkflows < Riddl::Implementation
         entries << File::basename(f) 
       end  
     end  
-    html = div_ :id => 'workflows' do  
+    div_ :id => 'workflows' do  
       div_ :class => "toolbar" do
         h1_ "Workflows"
         a_ "Back", :class => "back button", :href => "#"
@@ -24,14 +24,14 @@ class GetWorkflows < Riddl::Implementation
         end
       end
     end
-    html += createConfirm(entries)
-    Riddl::Parameter::Complex.new("html","text/html", html)
+    createConfirm(entries)
+puts __markus_return
+    Riddl::Parameter::Complex.new("html","text/html", __markus_return)
   end
 
   def createConfirm(entries)
-    html = ""
     entries.sort.each do |entry|
-      html = div_ :id=>"confirm" + Digest::MD5.hexdigest(entry) do
+      div_ :id=>"confirm" + Digest::MD5.hexdigest(entry) do
         div_ :class => "toolbar" do
           a_ "Back", :class => "back button", :href => "#"
           h1_ "Res: " + entry
@@ -43,7 +43,6 @@ class GetWorkflows < Riddl::Implementation
         a_ "Back", :href=>"#", :class=>"whiteButton goback"
       end
     end
-    html
   end
 end
 
@@ -52,7 +51,8 @@ end
 class DeleteWorkflow < Riddl::Implementation
   def response
     if File.exists?("user/#{@r.join("/")}")
-      #FileUtils.rm_r "user/#{@r.join("/")}"
+      FileUtils.rm_r "user/#{@r.join("/")}"
+      @status = 200 # OK
     else
       @status = 410 # Gone
     end

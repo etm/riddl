@@ -51,7 +51,6 @@
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
               if (request.status == 409) {
-//   do not delete             alert("Resource (or any subresource) already in your wallet");
               } else if (request.status != 200) {
                 alert("Something unexpected happend. Statuscode: " + request.status);
               }
@@ -63,8 +62,6 @@
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
           request.open('delete', url, true);
-console.log(resource);
-console.log(url);
           request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
           request.send('resource='+$('#p' + resource).text());
           request.onreadystatechange = function() {
@@ -72,7 +69,7 @@ console.log(url);
               if(request.status == 200) {
                 $('#'+resource).remove();
               } else if (request.status == 410) {
-// do not delete                alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
+                //alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
               } else {
                 alert("Something unexpected happend. Statuscode: " + request.status);
               }
@@ -97,7 +94,7 @@ console.log(url);
               if(request.status == 200) {
                 $('#disposeQueryForm').html(request.responseText);
               } else if (request.status == 410) {
-// do not delete                alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
+                //alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
               } else {
                 showQueryErrorPage('#disposeQueryForm', 'Server ' + url + ' did not respond', request.status);
               }
@@ -110,20 +107,6 @@ console.log(url);
 
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
-          
-/* -----------------------------------------------------------------------------
-          // Using "params-as-array"-style
-          var p = new Array();
-          for (i in parameters) {
-            p[parameters[i]] = document.getElementById('input_'+parameters[i]).value;
-          }
-          for (n in p) {
-            console.log(n + " : " + p[n]);
-          }
-          request.open('get', url, true);
-          request.send(p);
-    
------------------------------------------------------------------------------ */
 
           // Using "params-in-url"-style
           var paramString = "";
@@ -155,7 +138,7 @@ console.log(url);
           html = '<div id="disposeQueryForm">' +   
                     '<div class="errorText">' +
                       '<p>' + mes + '</p>' +
-                      '<br/>' + 
+                      '<br>' + 
                       '<p>HTTP-Status: (' + status + ')</p>' +
                     '</div>' +
                  '</div>';
@@ -165,6 +148,7 @@ console.log(url);
 //------------------------------------------------------------------------------
 // Functions for Workflows
 //------------------------------------------------------------------------------
+
         function addWorkflow() {
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
@@ -174,7 +158,7 @@ console.log(url);
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
               if (request.status == 409) {
-//   do not delete             alert("Resource (or any subresource) already in your wallet");
+                alert("A workflow with this name already exists");
               } else if (request.status != 200) {
                 alert("Something unexpected happend. Statuscode: " + request.status);
               }
@@ -191,10 +175,9 @@ console.log(url);
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
               if(request.status == 200) {
-//alert($('#'+id).html());
                 $('#'+id).remove();
               } else if (request.status == 410) {
-// do not delete                alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
+                //alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
               } else {
                 alert("Something unexpected happend. Statuscode: " + request.status);
               }
@@ -215,15 +198,14 @@ console.log(url);
             }
           })
 
-          $('#wallet').bind('pageTransitionEnd', function(e, info){
+// ------------- disposeQuery
+          $('#addWorkflow').bind('pageTransitionEnd', function(e, info){
             if (info.direction == 'out') { 
-console.log("wallet out");
-//              $('#queryResultsList').html("<li align=\"center\">Loading ....</li>");
+              //$('#queryResultsList').html("<li align=\"center\">Loading ....</li>");
+              alert("Add workflow done");
             }
           })
-
-         }); // End of pageTransitions
-
+        }); // End of pageTransitions
 
     </script>
   </head>
@@ -243,7 +225,7 @@ console.log("wallet out");
               <td><p class="infoText">Wallet</p></td>
           </tr>
           <tr><td><a class="slideup" href="#preferences"><img src="../js/custom/preferences_icon.png"/></a></td>
-              <td><a class="slideup" href="#workflows"><img src="../js/custom/workflow_icon.png"/></a></td>
+              <td><a class="slideup" href="workflows"><img src="../js/custom/workflow_icon.png"/></a></td>
           </tr>
           <tr><td><p class="infoText">Preferences</p></td>
               <td><p class="infoText">Workflows</p></td>

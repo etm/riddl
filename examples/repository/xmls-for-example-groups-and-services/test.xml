@@ -1,23 +1,14 @@
 <?xml version="1.0"?>
 <properties>
   <static>
-    <element name="aircondition">
-      <caption lang="en">Aircondition</caption>
-      <caption lang="de">Klimanalage</caption>
+    <element name="bool">
+      <caption lang="en">Boolean</caption>
+      <caption lang="de">Ja/Nein</caption>
       <data type="boolean"/>
-    </element>
-
-    <element name="restaurants">
-      <caption lang="en">Restaurants</caption>
-      <caption lang="de">Restaurantbetriebe</caption>
-      <data type="boolean"/>
-    </element>
-
+      </element>
   </static>
   <dynamic>
     <queryInput>
-
-
       <element name="int1to10">
         <caption lang="en">Int (1 to 10)</caption>
         <caption lang="de">Int (1 bis 10)</caption>
@@ -41,95 +32,29 @@
         <caption lang="de">Zeichenkette</caption>
         <data type="string"/>
       </element>
+    </queryInput>
+
+    <queryOutput>
       <element name="bool">
         <caption lang="en">Boolean</caption>
         <caption lang="de">Ja/Nein</caption>
         <data type="boolean"/>
       </element>
-
-    </queryInput>
-
-    <queryOutput>
-      <element name="departureTime">
-        <caption lang="en">Departure time</caption>
-        <caption lang="de">Abfahrtszeit</caption>
-        <data type="time"/>
-      </element>
-      <element name="arraivelTime">
-        <caption lang="en">Arraivel time</caption>
-        <caption lang="de">Ankunftszeit</caption>
-        <data type="time"/>
-      </element>
-      <element name="departureDate">
-        <caption lang="en">Departure date</caption>
-        <caption lang="de">Abfahrtsdatum</caption>
-        <data type="date"/>
-      </element>
-      <element name="arraivelDate">
-        <caption lang="en">Arraivel date</caption>
-        <caption lang="de">Ankunftsdatum</caption>
-        <data type="date"/>
-      </element>
-      <element name="price">
-        <caption lang="en">Price per Ticket</caption>
-        <caption lang="de">Preis pro Karte</caption>
-        <data type="float"/>
-      </element>
-      <element name="invokeID">
-        <caption lang="en">invokeID</caption>
-        <caption lang="de">invokeID</caption>
-        <data type="string"/>
-      </element>
     </queryOutput>
 
     <invokeInput>
-      <element name="invokeID">
-        <caption lang="en">invokeID</caption>
-        <caption lang="de">invokeID</caption>
-        <data type="string"/>
+      <element name="bool">
+        <caption lang="en">Boolean</caption>
+        <caption lang="de">Ja/Nein</caption>
+        <data type="boolean"/>
       </element>
     </invokeInput>
 
     <invokeOutput>
-      <element name="reservationID">
-        <caption lang="en">Reservation number</caption>
-        <caption lang="de">Reservierungsnummer</caption>
-        <data type="string"/>
-      </element>
-      <element name="departureTime">
-        <caption lang="en">Departure time</caption>
-        <caption lang="de">Abfahrtszeit</caption>
-        <data type="time"/>
-      </element>
-      <element name="arraivelTime">
-        <caption lang="en">Arraivel time</caption>
-        <caption lang="de">Ankunftszeit</caption>
-        <data type="time"/>
-      </element>
-      <element name="departureDate">
-        <caption lang="en">Departure date</caption>
-        <caption lang="de">Abfahrtsdatum</caption>
-        <data type="date"/>
-      </element>
-      <element name="arraivelDate">
-        <caption lang="en">Arraivel date</caption>
-        <caption lang="de">Ankunftsdatum</caption>
-        <data type="date"/>
-      </element>
-      <element name="price">
-        <caption lang="en">Price per ticket</caption>
-        <caption lang="de">Preis pro Karte</caption>
-        <data type="float"/>
-      </element>
-      <element name="invokeID">
-        <caption lang="en">invokeID</caption>
-        <caption lang="de">invokeID</caption>
-        <data type="string"/>
-      </element>
-      <element name="price">
-        <caption lang="en">Price per Ticket</caption>
-        <caption lang="de">Preis pro Karte</caption>
-        <data type="float"/>
+      <element name="bool">
+        <caption lang="en">Boolean</caption>
+        <caption lang="de">Ja/Nein</caption>
+        <data type="boolean"/>
       </element>
     </invokeOutput>
   </dynamic>
