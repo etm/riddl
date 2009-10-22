@@ -42,12 +42,23 @@ class ExecuteQuery < Riddl::Implementation
     end
     xml += "\t</entry>\n</queryInputMessage>\n"
 
+puts '-'*50
+puts "XML:"
+puts xml
+puts '-'*50
+puts "RNG:"
+puts rng
+puts '-'*50
+
     # Validate if params of request fit to queryInputSchema
     if XML::Smart::string(xml).validate_against(rng) == false
       message = "Some parameters have an illegal value"
       p message
       return Show.new().showPage("Error: Parameter validation", message)
     end
+
+
+puts "TESTETSTSTST"
 
     # Get all services within the selected resource
     services = Array.new()
