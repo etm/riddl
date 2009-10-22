@@ -20,6 +20,7 @@
   <optional>
     <element name="schema">
       <element name="properties"><text/></element>
+      <element name="static"><text/></element>
       <element name="queryInput"><text/></element>
       <element name="queryOutput"><text/></element>
       <element name="invokeInput"><text/></element>

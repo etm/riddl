@@ -28,6 +28,7 @@ class SubgroupsGET < Riddl::Implementation
         link_ :rel => 'self', :type => 'application/atom+xml', :href => "#{$url}#{@r.join('/')}/"
        schema_ do
           properties_ "#{$url}#{@r[0]}/#{@r[1]}?properties"
+          static_ "#{$url}#{@r[0]}/#{@r[1]}?static"
           queryInput_ "#{$url}#{@r[0]}/#{@r[1]}?queryInput"
           queryOutput_ "#{$url}#{@r[0]}/#{@r[1]}?queryOutput"
           invokeInput_ "#{$url}#{@r[0]}/#{@r[1]}?invokeInput"

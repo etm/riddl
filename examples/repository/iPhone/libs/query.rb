@@ -134,6 +134,7 @@ puts '-'*50
   
   def getServices( link, resource, services )
     client = Riddl::Client.new(link).resource('/'+resource)
+
     begin
       status, res = client.request :get => []
     rescue
@@ -141,6 +142,13 @@ puts '-'*50
       p message
       return Show.new().showPage("Error: Connection refused", message, status, true)
     end
+
+puts '-'*50
+puts "getServices"
+puts "Link: " + link
+puts "Resource: " + resource
+puts "Received parameter named: " + res[0].name
+puts '-'*50
 
     xml = XML::Smart::string(res[0].value.read)
     if res[0].name == "list-of-subgroups" || res[0].name == "list-of-services"

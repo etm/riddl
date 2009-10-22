@@ -31,7 +31,7 @@
   <xsl:template match="/properties/dynamic/queryInput/element">
     <xsl:element name="element">
       <xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>
-      <xsl:copy-of select="child::data"/>
+      <xsl:copy-of select="child::*"/>
     </xsl:element>
   </xsl:template>
 
