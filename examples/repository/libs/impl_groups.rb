@@ -109,7 +109,7 @@ class GroupDELETE < Riddl::Implementation
 end
 
 
-class GroupProperties < Riddl::Implementation
+class AllGroupProperties < Riddl::Implementation
   include MarkUSModule
 
   
@@ -120,14 +120,28 @@ class GroupProperties < Riddl::Implementation
       @status = 410 # 410: Gone
       return
     end
-    Riddl::Parameter::Complex.new("query-input","text/xml") do
+    Riddl::Parameter::Complex.new("properties-of-group-response","text/xml", File.open(fileName))
+  end
+end
+
+class StaticGroupProperties < Riddl::Implementation
+  include MarkUSModule
+
+  
+  def response
+    fileName = "repository/#{@r[0]}/#{@r[1]}/properties.xml"
+    if File.exist?(fileName) == false
+      puts "Can not read #{fileName}"
+      @status = 410 # 410: Gone
+      return
+    end
+    Riddl::Parameter::Complex.new("static-properties-of-group-response","text/xml") do
       xmlFile = XML::Smart::open(fileName)
       xslt = XML::Smart::open("rngs/static-properties.xsl")
       xmlFile.transform_with(xslt)
     end
   end
 end
-
 
 class GroupQueryInput < Riddl::Implementation
   include MarkUSModule
