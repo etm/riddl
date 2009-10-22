@@ -98,7 +98,7 @@ module Riddl
           end
         end  
       end  
-      return [nil,nil]
+      return nil
       #}}}
     end
 
