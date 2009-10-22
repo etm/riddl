@@ -198,27 +198,39 @@ class DisposeQuery < Riddl::Implementation
 
     Riddl::Parameter::Complex.new("html","text/html") do
       arrayString = "new Array('selectedResource',"
-        div_ :id=>"disposeQueryForm" do
-          p_ "Enter query parameter for resource: #{@p[0].value}", :class=>"infoText"
-          input_ :type=>"hidden", :value=>@p[0].value, :name=>"input_selectedResource", :id=>"input_selectedResource"
-          table_ do
-            xml = XML::Smart::string(prop[0].value.read)
-            qi = xml.find("/properties/dynamic/queryInput/*/@name")
-            qi.each do |e|
-              createInput(e.value, xml)
-              arrayString += "'#{e.value}',"
-            end
+      div_ :id=>"disposeQueryForm" do
+        p_ "Enter query parameter for resource: #{@p[0].value}", :class=>"infoText"
+        input_ :type=>"hidden", :value=>@p[0].value, :name=>"input_selectedResource", :id=>"input_selectedResource"
+        table_ do
+          xml = XML::Smart::string(prop[0].value.read)
+          static = xml.find("/properties/static/*/@name")
+          static.each do |e|
+            createInput(e.value, xml, "static")
+            arrayString += "'#{e.value}',"
+          end
+          qi = xml.find("/properties/dynamic/queryInput/*/@name")
+          qi.each do |e|
+            createInput(e.value, xml, "dynamic")
+            arrayString += "'#{e.value}',"
           end
         end
-        arrayString = arrayString.chop + ")"
-        a_ "Query", :onClick=>"getQueryResult(#{arrayString})", :href=>"#queryResult", :class=>"greenButton slideup", :id=>"queryButton"
-#      end
+      end
+      arrayString = arrayString.chop + ")"
+      a_ "Query", :onClick=>"getQueryResult(#{arrayString})", :href=>"#queryResult", :class=>"greenButton slideup", :id=>"queryButton"
     end
   end
 
-  def createInput(name, xml)
-    label =  xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/caption[@lang='en'])")
-    type =  xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/data/@type)")
+  def createInput(name, xml, type)
+    if type == "dynamic"
+      label =  xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/caption[@lang='en'])")
+      type =  xml.find("string(/properties/dynamic/queryInput/element[@name='#{name}']/data/@type)")
+    elsif type == "static"
+      label =  xml.find("string(/properties/static/element[@name='#{name}']/caption[@lang='en'])")
+      type =  xml.find("string(/properties/static/element[@name='#{name}']/data/@type)")
+    else
+      puts "Wrong input type. Only static and dynamic are possible types here"
+      return
+    end
     minS = ""
     maxS = ""
     if type.downcase.include? "integer"
@@ -272,7 +284,6 @@ class DisposeQuery < Riddl::Implementation
         end end
 
       # Found boolean
-#<span class="toggle"><input type="checkbox" /></span>
       elsif type.downcase.include? "boolean"
         tr_ do td_ do span_ :class=>"toggle" do input_ :style=>"", :type=>"checkbox", :name=>name, :id=>"input_"+name, :class=>"formLabel toggle" end end end
       # Found string or number without any pecification
