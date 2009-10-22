@@ -55,7 +55,7 @@ module Riddl
       #}}}
     end  
 
-    def get_message(path,operation,params,headers)
+    def io_messages(path,operation,params,headers)
       #{{
       description
       declaration
@@ -65,21 +65,38 @@ module Riddl
 
       mp = MessageParser.new(params,headers)
       if req.has_key?(operation)
-        r = req[operation][0] if @is_description
-        r = req[operation].result if @is_declaration
-        r.select{|o|o.class==Riddl::Wrapper::Description::RequestInOut}.each do |o|
-          return o.in, o.out if mp.check(o.in)
-        end
-        r.select{|o|o.class==Riddl::Wrapper::Description::RequestStarOut}.each do |o|
-          return Riddl::Wrapper::Description::Star.new, o.out
-        end
-        r.select{|o|o.class==Riddl::Wrapper::Description::RequestTransformation}.each do |o|
-          # TODO guess structure from input, create new output structure
-          return Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new
-        end
-        r.select{|o|o.class==Riddl::Wrapper::Description::RequestPass}.each do |o|
-          return Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new
-        end
+        if @is_description
+          r = req[operation][0]
+          r.select{|o|o.class==Riddl::Wrapper::Description::RequestInOut}.each do |o|
+            return IOMessages.new(o.in, o.out) if mp.check(o.in)
+          end
+          r.select{|o|o.class==Riddl::Wrapper::Description::RequestTransformation}.each do |o|
+            # TODO guess structure from input, create new output structure
+            return IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new)
+          end
+          r.select{|o|o.class==Riddl::Wrapper::Description::RequestStarOut}.each do |o|
+            return IOMessages.new(Riddl::Wrapper::Description::Star.new, o.out)
+          end
+          r.select{|o|o.class==Riddl::Wrapper::Description::RequestPass}.each do |o|
+            return IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new)
+          end
+        end  
+        if @is_declaration
+          r = req[operation]
+          r.select{|o|o.result.class==Riddl::Wrapper::Description::RequestInOut}.each do |o|
+            return IOMessages.new(o.result.in, o.result.out, o.route) if mp.check(o)
+          end
+          r.select{|o|o.result.class==Riddl::Wrapper::Description::RequestTransformation}.each do |o|
+            # TODO guess structure from input, create new output structure
+            return IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new, o.route)
+          end
+          r.select{|o|o.result.class==Riddl::Wrapper::Description::RequestStarOut}.each do |o|
+            return IOMessages.new(Riddl::Wrapper::Description::Star.new, o.result.out, o.route)
+          end
+          r.select{|o|o.result.class==Riddl::Wrapper::Description::RequestPass}.each do |o|
+            return IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new, o.route)
+          end
+        end  
       end  
       return [nil,nil]
       #}}}
@@ -131,6 +148,20 @@ module Riddl
       tmp.map do |t|
         [t[0],Regexp.new("^" + t[0].gsub(/\{\}/,"[^/]+") + (t[1] ? '' : '$'))]
       end
+      #}}}
+    end
+
+    class IOMessages
+      #{{{
+      def initialize(min,mout,route=nil)
+       @in = min
+       @out = mout
+       @route = route
+      end
+      def route?
+        !(route.nil? || route.empty?)
+      end
+      attr_reader :in, :out, :route
       #}}}
     end
 

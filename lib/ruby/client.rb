@@ -72,11 +72,18 @@ module Riddl
         end  
       end
       unless @wrapper.nil?
-        riddl_message_in, riddl_message_out = @wrapper.get_message(@path,riddl_method.downcase,parameters,headers)
+        riddl_message_in, riddl_message_out = @wrapper.io_messages(@path,riddl_method.downcase,parameters,headers)
         if riddl_message_in.nil? && riddl_message_out.nil?
           raise InputError, "Not a valid input to service."
         end
       end  
+
+      # when description
+      #   uary = @base + @rpath in array
+      # when declaration
+      #   für jeden layer in der composition
+      #     uray = @interface.base + ???
+
       url = URI.parse(@base + @rpath)
       req = Riddl::Client::Request.new(riddl_method,url.path,parameters,headers)
       res = response = nil
