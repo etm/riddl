@@ -22,7 +22,7 @@
       return $this->request;
     }
     function request_path() {
-      return array_key_exists("PATH_INFO",$_SERVER) ? $_SERVER["PATH_INFO"] : "/";
+      return array_key_exists("PATH_INFO",$_SERVER) ? preg_replace('/\/+/','/',$_SERVER["PATH_INFO"]) : "/";
     }
     function request_method() {
       return $_SERVER["REQUEST_METHOD"];
@@ -48,7 +48,7 @@
       }
     }
 
-    function riddl_it($status = 200) {
+    function riddl_it($status = 404) {
       if ($status == 200) {
         if (is_null($this->debug)) {
           $g = new RiddlHttpGenerator($this->headers,$this->params,fopen('php://output','w'),'header');
