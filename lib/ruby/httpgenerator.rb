@@ -55,6 +55,9 @@ module Riddl
       end
       tmp.flush
       tmp.rewind
+      p tmp
+      tmp.rewind
+
       tmp
     end
     private :body

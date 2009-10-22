@@ -72,8 +72,8 @@ module Riddl
         end  
       end
       unless @wrapper.nil?
-        riddl_message_in, riddl_message_out = @wrapper.io_messages(@path,riddl_method.downcase,parameters,headers)
-        if riddl_message_in.nil? && riddl_message_out.nil?
+        riddl_message = @wrapper.io_messages(@path,riddl_method.downcase,parameters,headers)
+        if riddl_message.nil?
           raise InputError, "Not a valid input to service."
         end
       end  
@@ -92,6 +92,11 @@ module Riddl
           bs = Parameter::Tempfile.new("RiddlBody")
           res.read_body(bs)
           bs.rewind
+          p res['HTTP-CONTENT-ID']
+          p res['CONTENT-DISPOSITION']
+          p res['RIDDL-TYPE']
+          p res['CONTENT-TYPE']
+          bs.rewind
 
           response = Riddl::HttpParser.new(
             "",
@@ -103,7 +108,7 @@ module Riddl
             res['RIDDL-TYPE']
           ).params
           unless @wrapper.nil?
-            unless @wrapper.check_message(response,res,riddl_message_out)
+            unless @wrapper.check_message(response,res,riddl_message.out)
               raise OutputError, "Not a valid output from service."
             end 
           end  

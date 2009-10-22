@@ -59,8 +59,8 @@ module Riddl
         ).params
         @riddl_method = @env['REQUEST_METHOD'].downcase
 
-        @riddl_message_in, @riddl_message_out = @description.io_messages(@riddl_path[0],@riddl_method,@parameters,@headers)
-        if @riddl_message_in.nil? && @riddl_message_out.nil?
+        @riddl_message = @description.io_messages(@riddl_path[0],@riddl_method,@parameters,@headers)
+        if @riddl_message.nil?
           if @env.has_key?('HTTP_ORIGIN') && @cross_site_xhr
             @res['Access-Control-Allow-Origin'] = @env['HTTP_ORIGIN']
             @res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
@@ -119,7 +119,7 @@ module Riddl
         response = (response.class == Array ? response : [response])
         headers  = (headers.class == Array ? headers : [headers])
         if @process_out && @res.status == 200
-          unless @description.check_message(response,headers,@riddl_message_out)
+          unless @description.check_message(response,headers,@riddl_message.out)
             @log.puts "500: the return for the #{@riddl_method} is not matching anything in the description."
             @res.status = 500
             return
@@ -151,7 +151,7 @@ module Riddl
     def put(min='*'); return if @norun; check(min) && @riddl_method == 'put' end
     def check(min)
        return if @norun
-       @path == @riddl_path[0] && min == @riddl_message_in.name
+       @path == @riddl_path[0] && min == @riddl_message.in.name
     end
 
     def resource(path=nil); return if @norun; path.nil? ? '{}/' : path + '/' end
