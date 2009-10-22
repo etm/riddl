@@ -59,7 +59,7 @@ module Riddl
         ).params
         @riddl_method = @env['REQUEST_METHOD'].downcase
 
-        @riddl_message_in, @riddl_message_out = @description.get_message(@riddl_path[0],@riddl_method,@parameters,@headers)
+        @riddl_message_in, @riddl_message_out = @description.io_messages(@riddl_path[0],@riddl_method,@parameters,@headers)
         if @riddl_message_in.nil? && @riddl_message_out.nil?
           if @env.has_key?('HTTP_ORIGIN') && @cross_site_xhr
             @res['Access-Control-Allow-Origin'] = @env['HTTP_ORIGIN']
