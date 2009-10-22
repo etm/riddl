@@ -17,76 +17,36 @@
   <dynamic>
     <queryInput>
 
-<!-- FROM: BEGIN -->
-    <element name="fromStreet">
-      <caption lang="en">Street (from)</caption>
-      <caption lang="de">Straße (ab)</caption>
-      <data type="string"/>
-    </element>
-    <element name="fromHousenumber">
-      <caption lang="en">House number (from)</caption>
-      <caption lang="de">Hausnummer (ab)</caption>
-      <data type="positiveInteger"/>
-    </element>
-    <element name="fromZip">
-      <caption lang="en">ZIP-Code (from)</caption>
-      <caption lang="de">Postleitzahl (ab)</caption>
-      <data type="positiveInteger"/>
-    </element>
-    <element name="fromCity">
-      <caption lang="en">City (from)</caption>
-      <caption lang="de">Stadt (ab)</caption>
-      <data type="string"/>
-    </element>
-    <element name="fromState">
-      <caption lang="en">State (from)</caption>
-      <caption lang="de">Land (ab)</caption>
-      <data type="string"/>
-    </element>
-<!-- FROM: END -->
 
-<!-- TO: BEGIN -->
-    <element name="toStreet">
-      <caption lang="en">Street (To)</caption>
-      <caption lang="de">Straße (nach)</caption>
-      <data type="string"/>
-    </element>
-    <element name="toHousenumber">
-      <caption lang="en">House number (To)</caption>
-      <caption lang="de">Hausnummer (nach)</caption>
-      <data type="positiveInteger"/>
-    </element>
-    <element name="toZip">
-      <caption lang="en">ZIP-Code (To)</caption>
-      <caption lang="de">Postleitzahl (nach)</caption>
-      <data type="positiveInteger"/>
-    </element>
-    <element name="toCity">
-      <caption lang="en">City (To)</caption>
-      <caption lang="de">Stadt (nach)</caption>
-      <data type="string"/>
-    </element>
-    <element name="toState">
-      <caption lang="en">State (To)</caption>
-      <caption lang="de">Land (nach)</caption>
-      <data type="string"/>
-    </element>
-<!-- TO: END -->
-      <element name="numberOfSeats">
-        <caption lang="en">Number of seats</caption>
-        <caption lang="de">Anzahl Sitzplaetze</caption>
-        <data type="positiveInteger"/>
+      <element name="int1to10">
+        <caption lang="en">Int (1 to 10)</caption>
+        <caption lang="de">Int (1 bis 10)</caption>
+        <data type="positiveInteger">
+          <param name="minInclusive">1</param>
+          <param name="maxInclusive">10</param>
+        </data>
       </element>
-      <element name="departureDate">
-        <caption lang="en">Departure date</caption>
-        <caption lang="de">gewünschter Abreisetag</caption>
+      <element name="date">
+        <caption lang="en">Date</caption>
+        <caption lang="de">Datum</caption>
         <data type="date"/>
       </element>
-      <element name="departureTime">
-        <caption lang="en">Departure time</caption>
-        <caption lang="de">gewünschter Abreisezeit</caption>
+      <element name="time">
+        <caption lang="en">Time</caption>
+        <caption lang="de">Zeit</caption>
         <data type="time"/>
       </element>
+      <element name="string">
+        <caption lang="en">String</caption>
+        <caption lang="de">Zeichenkette</caption>
+        <data type="string"/>
+      </element>
+      <element name="bool">
+        <caption lang="en">Boolean</caption>
+        <caption lang="de">Ja/Nein</caption>
+        <data type="boolean"/>
+      </element>
+
     </queryInput>
 
     <queryOutput>

@@ -1,5 +1,3 @@
 *) Include "static Properties" into disposeQuery
 *) Implement "assign" for workflows
-*) Implement "Time" into Client
-*) Use caption for queryOutput
 

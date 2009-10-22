@@ -241,19 +241,41 @@ class DisposeQuery < Riddl::Implementation
         end end
       # Found date
       elsif type.downcase.include? "date"
-      # Found string or number without any pecification
         tr_ do td_ do
           select_ :class=>"formLabel", :name=>name, :id=>"input_"+name do
             today = Date.today();
             i=0
             while i <= 356 do
-             xD = (today+i)
-             option_ "#{Date::ABBR_DAYNAMES[xD.wday()]}, %02d. #{Date::ABBR_MONTHNAMES[xD.month()]} #{xD.year()}" % xD.day(), :value=>(today+i).to_s, :class=>"formLabel"
+              xD = (today+i)
+              option_ "#{Date::ABBR_DAYNAMES[xD.wday()]}, %02d. #{Date::ABBR_MONTHNAMES[xD.month()]} #{xD.year()}" % xD.day(), :value=>(today+i).to_s, :class=>"formLabel"
               i = i+1
             end
           end
         end end
-      
+      # Found time
+      elsif type.downcase.include? "time"
+        tr_ do td_ do
+          select_ :class=>"formLabel", :name=>name, :id=>"input_"+name do
+            today = Date.today();
+            i=0
+            while i <= 23 do
+              j = 0
+              hour = '%02d' % i
+              while j <= 59 do
+               minute = '%02d' % j
+               option_ "#{hour}:#{minute}", :value=>"#{hour}:#{minute}:00", :class=>"formLabel"
+               j = j+15
+              end
+              i= i + 1
+            end
+          end
+        end end
+
+      # Found boolean
+#<span class="toggle"><input type="checkbox" /></span>
+      elsif type.downcase.include? "boolean"
+        tr_ do td_ do span_ :class=>"toggle" do input_ :style=>"", :type=>"checkbox", :name=>name, :id=>"input_"+name, :class=>"formLabel toggle" end end end
+      # Found string or number without any pecification
       else
         tr_ do td_ do input_ :style=>"", :type=>"text", :name=>name, :id=>"input_"+name, :class=>"formLabel" end end
       end
