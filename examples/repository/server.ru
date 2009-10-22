@@ -54,9 +54,13 @@ run(
           p 'Processing subgroups ...' if method :get => '*'
           run SubgroupsGET if method :get => '*'
         
-          # Processing group-properties
-          p 'Processing group-properties ...' if method :get => 'properties-of-group-request'
-          run GroupProperties if method :get => 'properties-of-group-request'
+          # Processing static group-properties
+          p 'Processing static group-properties ...' if method :get => 'static-properties-of-group-request'
+          run StaticGroupProperties if method :get => 'static-properties-of-group-request'
+
+          # Processing all group-properties
+          p 'Processing all group-properties ...' if method :get => 'properties-of-group-request'
+          run AllGroupProperties if method :get => 'properties-of-group-request'
 
           # Processing query-input
           p 'Processing query-input ...' if method :get => 'query-input-of-group-request'

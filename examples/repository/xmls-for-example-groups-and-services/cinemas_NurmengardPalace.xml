@@ -1,13 +1,13 @@
 <details >
   <vendor>
   <name>Gellert Grindenwald</name>
-  <adress>
+  <address>
     <street>Nurmengard</street>
     <housenumber>666</housenumber>
     <ZIP>6320</ZIP>
     <city>London</city>
     <state>England</state>
-  </adress>
+  </address>
   <mail>office@ggn.uk</mail>
   <phone>+44 (20) 555 12 56 89</phone>
   </vendor>

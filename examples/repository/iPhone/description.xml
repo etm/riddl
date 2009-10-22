@@ -96,7 +96,7 @@
     </resource>
 
     <resource relative="about2">
-      <get in="*" out="hmtl"/>
+      <get in="*" out="html"/>
     </resource>
     <resource relative="js" recursive="true">
       <get in="*" out="file"/>

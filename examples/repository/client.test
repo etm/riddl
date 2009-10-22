@@ -40,7 +40,7 @@ else
   puts "  Using params: #{params.inspect}"
   puts "  Using files: #{files.inspect}" 
   
-  repos =  Riddl::Client.new("http://localhost:9291/")
+  repos =  Riddl::Client.new("http://localhost:9290/")
   uri = repos.resource(resource)
 
   ps = params.map do |param|
@@ -59,8 +59,8 @@ else
     puts "-" * 50
     puts "Parameter: #{param.name}"
     puts "-" * 50
-    pp param
+    puts param
     puts "Value:\n"
-    pp param.value.read
+    puts param.value.read
   end  
 end
