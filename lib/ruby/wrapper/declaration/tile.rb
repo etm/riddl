@@ -56,7 +56,7 @@ module Riddl
           end  
           desres.find("des:resource").each do |desres|
             cpath = desres.attributes['relative'] || "{}"
-            add_description(des,desres,cpath,index,interface,block,res,(rel+"/"+cpath).gsub(/\/+/,'/'))
+            add_description(des,desres,cpath,index,interface+"/"+cpath,block,res,(rel+"/"+cpath).gsub(/\/+/,'/'))
           end
           nil
           #}}}
@@ -64,6 +64,8 @@ module Riddl
           
         def compose!(res=@base_path)
           #{{{
+          pp res
+          p "-----"
           res.compose!
           res.resources.each do |k,r|
             compose!(r)

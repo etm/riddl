@@ -24,6 +24,17 @@ module Riddl
         pres
         #}}}
       end  
+      
+      def paths(res=@facade.resource,what='')
+        #{{{
+        what += what == '' ? '/' : res.path + '/'
+        ret = [[what,res.recursive]]
+        res.resources.each do |name,r|
+          ret += paths(r,what)
+        end
+        ret
+        #}}}
+      end
 
       def visualize_tiles_and_layers
         #{{{
@@ -77,10 +88,10 @@ module Riddl
             des = riddl.find("/dec:declaration/dec:interface[@name=\"#{lname}\"]/des:description").first
             desres = des.find("des:resource").first
             if apply_to.empty?
-              til.add_description(des,desres,"/",index,lname,block)
+              til.add_description(des,desres,"/",index,"#{lname}:",block)
             else
               apply_to.each do |at|
-                til.add_description(des,desres,at.to_s,index,lname,block)
+                til.add_description(des,desres,at.to_s,index,"#{lname}:",block)
               end
             end
           end

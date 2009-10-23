@@ -32,10 +32,13 @@ module Riddl
     end  
 
     def resource(path="")
-      @rpath = path.gsub(/\/+/,'/')
-      @path = @wrapper.nil? ? @rpath : @wrapper.paths.find{ |e| e[1] =~ @rpath }
-      if @path.nil?
-        raise PathError, 'Path not found.'
+      @rpath = "/#{path}/".gsub(/\/+/,'/')
+      @path = if @wrapper.nil?
+        @rpath
+      else
+        @path = @wrapper.paths.find{ |e| e[1] =~ @rpath }
+        raise PathError, 'Path not found.' if @path.nil?
+        @path = @path[0]
       end
       self
     end  
@@ -77,14 +80,35 @@ module Riddl
           raise InputError, "Not a valid input to service."
         end
       end  
+      
+      if @wrapper.nil? || @wrapper.description?
+        res, response = make_request(@base + @rpath,riddl_method,parameters,headers)
+        unless @wrapper.nil?
+          unless @wrapper.check_message(response,res,riddl_message.out)
+            raise OutputError, "Not a valid output from service."
+          end 
+        end  
+        return res.code, response
+      end
 
-      # when description
-      #   uary = @base + @rpath in array
-      # when declaration
-      #   für jeden layer in der composition
-      #     uray = @interface.base + ???
+      if !wrapper.nil? && @wrapper.declaration?
+        if riddl_message.route.nil?
+          pp riddl_message.out
+          pp
+          res, response = make_request(@rpath,riddl_method,parameters,headers)
+          unless @wrapper.check_message(response,res,riddl_message.out)
+            raise OutputError, "Not a valid output from service."
+          end 
+          return res.code, response
+        else
+          # loop through route
+        end  
+      end  
+    end
+    private :exec_request
 
-      url = URI.parse(@base + @rpath)
+    def make_request(url,riddl_method,parameters,headers)
+      url = URI.parse(url)
       req = Riddl::Client::Request.new(riddl_method,url.path,parameters,headers)
       res = response = nil
       Net::HTTP.start(url.host, url.port) do |http|
@@ -102,16 +126,11 @@ module Riddl
             res['CONTENT-ID'],
             res['RIDDL-TYPE']
           ).params
-          unless @wrapper.nil?
-            unless @wrapper.check_message(response,res,riddl_message.out)
-              raise OutputError, "Not a valid output from service."
-            end 
-          end  
         end  
       end
-      return res.code, response
+      return res, response
     end
-    private :exec_request
+    private :make_request
   
     class Request < Net::HTTPGenericRequest
       def initialize(method, path, parameters, headers)
