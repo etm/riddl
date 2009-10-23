@@ -84,7 +84,7 @@ module Riddl
         if @is_declaration
           r = req[operation]
           r.select{|o|o.result.class==Riddl::Wrapper::Description::RequestInOut}.each do |o|
-            return IOMessages.new(o.result.in, o.result.out, o.route) if mp.check(o)
+            return IOMessages.new(o.result.in, o.result.out, o.route) if mp.check(o.result.in)
           end
           r.select{|o|o.result.class==Riddl::Wrapper::Description::RequestTransformation}.each do |o|
             # TODO guess structure from input, create new output structure
