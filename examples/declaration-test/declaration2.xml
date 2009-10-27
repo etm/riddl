@@ -1,0 +1,25 @@
+<declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <interface name="pre" path="http://localhost:9200">
+    <xi:include href="pre.xml"/>
+  </interface>  
+  <interface name="main" path="http://localhost:9201">
+    <xi:include href="main.xml"/>
+  </interface>  
+  <interface name="post" path="http://localhost:9202">
+    <xi:include href="post.xml"/>
+  </interface>  
+  <interface name="over" path="http://localhost:9203">
+    <xi:include href="over.xml"/>
+  </interface>  
+
+  <facade>
+    <tile>
+      <layer name="over">
+        <apply-to>/foo</apply-to>
+      </layer>  
+      <layer name="main">
+        <block method="get" in="a"/>
+      </layer>
+    </tile>
+  </facade>   
+</declaration>

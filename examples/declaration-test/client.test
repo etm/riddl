@@ -2,9 +2,10 @@
 require '../../lib/ruby/client'
 require 'pp'
 
-test = Riddl::Client.facade("declaration0.xml")
-status, res = test.get [
-  Riddl::Parameter::Simple.new("a","1"),
-  Riddl::Parameter::Simple.new("security","mui mui")
+test = Riddl::Client.facade("declaration2.xml")
+status, res = test.resource("/foo/27").get [
+  #Riddl::Parameter::Simple.new("a","1"),
+  #Riddl::Parameter::Simple.new("security","mui mui")
+  Riddl::Parameter::Simple.new("m","1"),
 ]
 p status, res
