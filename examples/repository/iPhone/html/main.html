@@ -42,6 +42,27 @@
 //------------------------------------------------------------------------------
 // Functions for Wallet
 //------------------------------------------------------------------------------
+        function setParamWalletConfirm(entry) {
+         $('#selectedEntryWallet').val(entry);
+         $('#confirmResource').html(entry);  
+        }
+
+        function loadWalletIndex() {
+          reload = new XMLHttpRequest();
+          reload.open('get', 'wallet', true);
+          reload.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          reload.send();
+          reload.onreadystatechange = function() {
+            if(reload.readyState == 4) { // Request is finished
+              if (reload.status == 200) {
+                $('#walletIndex').html(reload.responseText);
+              } else {
+                alert("Unable to request wallet: " + reload.status);
+              }
+            }
+          }
+        }
+
         function addToWallet(resource, url) {
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
@@ -58,16 +79,16 @@
           }
         }
 
-        function removeFromWallet(resource, url) {
+        function removeFromWallet() {
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
-          request.open('delete', url, true);
+          request.open('delete', 'wallet', true);
           request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-          request.send('resource='+$('#p' + resource).text());
+          request.send('resource=' + $('#selectedEntryWallet').val());
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
               if(request.status == 200) {
-                $('#'+resource).remove();
+                //$('#'+resource).remove();
               } else if (request.status == 410) {
                 //alert("Resource already removed from your wallet.\nThis can only happen with simultanious activity on one account");
               } else {
@@ -81,8 +102,9 @@
 // Functions for Query
 //------------------------------------------------------------------------------
 
-        function generateQueryForm(entryPoint) {
-          var url = 'query?pointOfEntry='+entryPoint;
+        function generateQueryForm() {
+          var url = 'query?pointOfEntry='+$('#selectedEntryWallet').val();
+alert("Generate: " + url);
 
           request = new XMLHttpRequest();
           if(!request) alert("Failure creating XMLHttpRequest-Object");
@@ -155,12 +177,28 @@
           request.open('post', 'workflows', true);
           request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
           request.send('name='+$('#addWorkflowName').val());
+          $('#addWorkflowName').val("");
           request.onreadystatechange = function() {
             if(request.readyState == 4) { // Request is finished
               if (request.status == 409) {
                 alert("A workflow with this name already exists");
-              } else if (request.status != 200) {
+              } else if (request.status != 201) {
                 alert("Something unexpected happend. Statuscode: " + request.status);
+              } else if (request.status == 201) {
+                // Reload WorflowList
+                reload = new XMLHttpRequest();
+                reload.open('get', 'workflows', true);
+                reload.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                reload.send();
+                reload.onreadystatechange = function() {
+                  if(reload.readyState == 4) { // Request is finished
+                    if (reload.status == 200) {
+                      $('#workflows').html(reload.responseText);
+                    } else {
+                      alert("Unable to request workflows: " + reload.status);
+                    }
+                  }
+                }
               }
             }
           }
@@ -192,19 +230,23 @@
 
 
 // ------------- disposeQuery
-          $('#queryResult').bind('pageTransitionEnd', function(e, info){
+          $('#queryResult').bind('pageAnimationEnd', function(e, info){
             if (info.direction == 'out') { 
               $('#queryResultsList').html("<li align=\"center\">Loading ....</li>");
             }
           })
 
-// ------------- disposeQuery
-          $('#addWorkflow').bind('pageTransitionEnd', function(e, info){
+// ------------- Wallet-Index
+          $('#wallet').bind('pageAnimationEnd', function(e, info){
+            if (info.direction == 'in') { 
+              loadWalletIndex();
+            }
             if (info.direction == 'out') { 
-              //$('#queryResultsList').html("<li align=\"center\">Loading ....</li>");
-              alert("Add workflow done");
+              $('#walletIndex').html('<div id="walletIndex"><ul><li align="center">Loading ....</li></ul>');
+//              $('#selectedEntryWallet').val('');
             }
           })
+
         }); // End of pageTransitions
 
     </script>
@@ -219,7 +261,7 @@
       <div style="vertical-align:middle;background:#006699;">
         <table style="margin: auto;">
           <tr><td><a class="swap" href="rescue"><img src="../js/custom/rescue_icon.png"/></a></td>
-              <td><a class="swap" href="wallet"><img src="../js/custom/wallet_icon.png"/></a></td>
+              <td><a class="swap" href="#wallet"><img src="../js/custom/wallet_icon.png"/></a></td>
           </tr>
           <tr><td><p class="infoText">RESCUE</p></td>
               <td><p class="infoText">Wallet</p></td>
@@ -241,10 +283,34 @@
     </div>
 
 
-    <div id="workflows">
+    <div id="wallet">
+      <div class="toolbar">
+        <h1>Wallet</h1>
+        <a class="goback button" href="#">Main</a>
+      </div>
+        <input type="text" id="selectedEntryWallet"/>
+      <div id="walletIndex">
+        <ul>
+          <li align="center">Loading ....</li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="walletConfirm">
+      <div class="toolbar">
+        <h1>Confirm</h1>
+      </div>
+        <p class="infoText">What do you want to do with the resource</p>
+        <p class="infoText" id="confirmResource">&nbsp</p>
+        <a href="#disposeQuery" onClick="generateQueryForm()" class="greenButton slideup">Query</a>
+        <a class="redButton goback" onclick="removeFromWallet()" href="#">Delete</a>
+        <a class="whiteButton goback" href="#" >Back</a>
+     </div>
+
+    <div id="workflows_old">
       <div class="toolbar">
         <h1>Workflows</h1>
-        <a class="back button" href="#">Back</a>
+        <a class="button" href="#">Main</a>
         <a class="button slideup" id="addButton" href="#addWorkflow">New</a>
       </div>
       <ul>
@@ -254,13 +320,12 @@
 
     <div id="addWorkflow">
       <div class="toolbar">
-        <h1>Workflows</h1>
-        <a class="back button" href="#">Back</a>
+        <h1>Add Workflows</h1>
       </div>
       <form method="POST" action="workflows" class="form">
         <p class="formLabel">Enter name for new workflow</p>
         <input class="formLabel" type="text" name="name" id="addWorkflowName"/>
-        <a href="#" class="greenButton" onclick="addWorkflow()">Submit</a>
+        <a href="#" class="goback greenButton" onclick="addWorkflow()">Submit</a>
         <a href="#" class="goback redButton">Cancel</a>
       </form>
     </div>

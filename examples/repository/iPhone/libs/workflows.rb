@@ -11,7 +11,7 @@ class GetWorkflows < Riddl::Implementation
     div_ :id => 'workflows' do  
       div_ :class => "toolbar" do
         h1_ "Workflows"
-        a_ "Back", :class => "back button", :href => "#"
+        a_ "Back", :class => "back button", :href => "/"
         a_ "Add", :class => "slideup button", :href => "#addWorkflow"
       end
       div_ :id => 'workflowIndex', :class => "rounded" do
@@ -25,7 +25,6 @@ class GetWorkflows < Riddl::Implementation
       end
     end
     createConfirm(entries)
-puts __markus_return
     Riddl::Parameter::Complex.new("html","text/html", __markus_return)
   end
 
@@ -33,8 +32,7 @@ puts __markus_return
     entries.sort.each do |entry|
       div_ :id=>"confirm" + Digest::MD5.hexdigest(entry) do
         div_ :class => "toolbar" do
-          a_ "Back", :class => "back button", :href => "#"
-          h1_ "Res: " + entry
+          h1_ entry
         end
         p_ "What do you want to do with the resource", :class=>"infoText"
         p_ entry, :class=>"infoText", :id=>"p" + Digest::MD5.hexdigest(entry)
@@ -69,6 +67,8 @@ class AddWorkflow < Riddl::Implementation
     else
       begin
         FileUtils.mkdir_p("user/#{@r.join("/")}/#{@p[0].value}")
+        puts "Adding a workflow named #{@p[0].value}"
+        @status = 201
       rescue
         p "Resource has been subscribed befor"
       end
