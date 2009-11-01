@@ -25,10 +25,10 @@ module Riddl
 
       def paths(res=@resource,what='')
         #{{{
-        what += what == '' ? '/' : res.path + '/'
+        what += what == '' ? '/' : res.path
         ret = [[what,res.recursive]]
         res.resources.each do |name,r|
-          ret += paths(r,what)
+          ret += paths(r,what == '/' ? what : what + '/')
         end
         ret
         #}}}
