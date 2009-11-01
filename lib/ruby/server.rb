@@ -36,7 +36,7 @@ module Riddl
 
     def _call(env)
       time = Time.now  unless @logger.nil?
-      @pinfo = (env["PATH_INFO"] + '/').gsub(/\/+/,'/')
+      @pinfo = env["PATH_INFO"].gsub(/\/+/,'/')
       @env = env
       @req = Rack::Request.new(env)
       @res = Rack::Response.new
@@ -91,9 +91,9 @@ module Riddl
       if @norun
         @blk = block if @blk.nil?
       else  
-        @path << resource
+        @path << (@path == '/' ? resource : '/' + resource)
         yield
-        @path = (File.dirname(@path) + '/').gsub(/\/+/,'/')
+        @path = File.dirname(@path).gsub(/\/+/,'/')
       end  
     end
 
@@ -154,6 +154,6 @@ module Riddl
        @path == @riddl_path[0] && min == @riddl_message.in.name
     end
 
-    def resource(path=nil); return if @norun; path.nil? ? '{}/' : path + '/' end
+    def resource(path=nil); return if @norun; path.nil? ? '{}' : path end
   end
 end

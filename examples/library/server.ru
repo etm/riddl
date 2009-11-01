@@ -24,23 +24,31 @@ class BookQuery < Riddl::Implementation
   end
 end
 
-class HtmlTest < Riddl::Implementation
+class BookDescription < Riddl::Implementation
   def response
-    @status = 200
+    Riddl::Parameter::Complex.new("book-description","text/xml") do
+      <<-END
+        <book id="1">
+          <title>The Book</title>
+          <author>Agador</author>
+        </book>
+      END
+    end
   end
 end
 
-run(
-  Riddl::Server.new("description.xml") do
-    process_out false
-    on resource do
-      run Riddl::Utils::ERBServe, "static/info.txt"  if get
-      on resource "books" do
-        run BookQuery if method :get => 'book-query'
-      end
-      on resource "about" do
-        run Riddl::Utils::ERBServe, "static/info.txt"  if get
+run Riddl::Server.new("description.xml") {
+  process_out false
+  on resource do
+    run Riddl::Utils::ERBServe, "static/info.txt"  if get
+    on resource "books" do
+      run BookQuery if get 'book-query'
+      on resource '\d+' do
+        run BookDescription if get
       end
     end
+    on resource "about" do
+      run Riddl::Utils::ERBServe, "static/info.txt"  if get
+    end
   end
-)
+}
