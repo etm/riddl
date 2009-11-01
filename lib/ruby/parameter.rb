@@ -3,7 +3,8 @@ require 'tempfile'
 module Riddl
   module Parameter
     class Simple
-      attr_reader :name, :value, :type
+      attr_reader :value, :type
+      attr_accessor :name
       def initialize(name,value,type=:body)
         @name = name
         @value = value
@@ -11,10 +12,11 @@ module Riddl
       end
     end
     class Complex
-      attr_reader :name, :mimetype, :filename, :value, :type, :additional
+      attr_reader :mimetype, :filename, :value, :type, :additional
+      attr_accessor :name
       def initialize(name,mimetype,file=nil,filename=nil,additional=[])
         @name = name
-        @mimetype = mimetype
+        @mimetype = mimetype.gsub(/;.*/,'')
         @filename = filename
         @type = :body
         @additional = additional

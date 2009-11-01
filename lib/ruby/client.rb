@@ -32,13 +32,13 @@ module Riddl
     end  
 
     def resource(path="")
-      @rpath = "/#{path}/".gsub(/\/+/,'/')
+      @rpath = "/#{path}".gsub(/\/+/,'/')
       @path = if @wrapper.nil?
         @rpath
       else
         @path = @wrapper.paths.find{ |e| e[1] =~ @rpath }
         raise PathError, 'Path not found.' if @path.nil?
-        @path = @path[0]
+        @path[0]
       end
       self
     end  

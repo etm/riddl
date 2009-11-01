@@ -108,7 +108,7 @@ module Riddl
       #{{{
       return true if message.class == Riddl::Wrapper::Description::Star
       mp = MessageParser.new(params,headers)
-      mp.check(message)
+      mp.check(message,true)
       #}}}
     end
 

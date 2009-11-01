@@ -6,15 +6,22 @@ module Riddl
         @mist = params
         @mistp = 0
         @headers = headers
+        @numparams = 0
         #}}}
       end
 
-      def check(what)
+      def check(what,ignore_name=false)
         #{{{
         m  = what.content.root
         m.find("des:header").each do |h|
           return false unless header h
         end
+
+        if ignore_name
+          # if only one parameter, ignore the name
+          @numparams = m.find("count(//des:parameter)").to_i
+        end  
+
         m.find("des:*[not(name()='header')]").each do |p|
           return false unless send p.name.to_s, p
         end
@@ -27,12 +34,14 @@ module Riddl
         return false if @mistp >= @mist.length
         b = @mist[@mistp]
         if b.class == Riddl::Parameter::Simple && (a.attributes['fixed'] || a.attributes['type'])
+          b.name = a.attributes['name'] if @numparams == 1
           if b.name == a.attributes['name']
             @mistp += 1
             return match_simple(a,b.value)
           end
         end
         if b.class == Riddl::Parameter::Complex && a.attributes['mimetype']
+          b.name = a.attributes['name'] if @numparams == 1
           if b.name == a.attributes['name'] && (a.attributes['mimetype'] == '*' || b.mimetype == a.attributes['mimetype'])
             if a.attributes['handler']
               if Riddl::Handlers::handlers[a.attributes['handler']]
