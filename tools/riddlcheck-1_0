@@ -32,25 +32,5 @@ else
   exit
 end
 
-unless riddl.validate!
-  puts "Does not conform to specification."
-  exit
-end
-
-if riddl.description?
-  messages = riddl.valid_resources?
-  if messages.empty?
-    puts "RIDDL description looks valid."
-  else  
-    puts messages.join("\n")
-    puts "RIDDL description not valid."
-  end
-elsif riddl.declaration?
-  messages = riddl.valid_layers?
-  if messages.empty?
-    puts "RIDDL declaration looks valid."
-  else  
-    puts messages.join("\n")
-    puts "RIDDL declaration not valid."
-  end
-end
+messages = riddl.validate!
+puts messages ? "RIDDL looks valid." : "RIDDL not valid."
