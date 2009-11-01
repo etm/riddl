@@ -15,7 +15,7 @@
   
   <define name="riddl-datatype-relpath">
     <data type="string">
-      <param name="pattern">\c+(/\c+)*</param>
+      <param name="pattern">[\c+*?.\\]+</param>
     </data>
   </define>
   <define name="riddl-datatype-pathtemplate">
