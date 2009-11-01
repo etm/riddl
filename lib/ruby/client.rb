@@ -136,7 +136,7 @@ module Riddl
       def initialize(method, path, parameters, headers)
         path = path.strip == '' ? '/' : path
         super method, true, true, path, headers
-        tmp = HttpGenerator.new(parameters,self).generate
+        tmp = HttpGenerator.new(parameters,self).generate(:input)
         self.content_length = tmp.size
         self.body_stream = tmp
       end
