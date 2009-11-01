@@ -57,7 +57,7 @@
       <post in="book-description" out="book-id"/>
       <get in="book-query" out="list-of-books"/>
       <!--get in="*" out="list-of-books"/-->
-      <resource>
+      <resource relative="\d+">
         <get in="*" out="book-description"/>
         <put in="book-description"/>
         <delete in="*"/>
