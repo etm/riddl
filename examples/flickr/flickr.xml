@@ -1,0 +1,80 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="update">
+    
+photo
+title (optional)
+    The title of the photo.
+description (optional)
+    A description of the photo. May contain some limited HTML.
+tags (optional)
+    A space-seperated list of tags to apply to the photo.
+    <optional>
+      <parameter name="is_public" type="integer">
+        <choice>
+          <value>0</value> <!-- Yes -->
+          <value>1</value> <!-- No -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="is_friend" type="integer">
+        <choice>
+          <value>0</value> <!-- Yes -->
+          <value>1</value> <!-- No -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="is_family" type="integer">
+        <choice>
+          <value>0</value> <!-- Yes -->
+          <value>1</value> <!-- No -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="safety_level" type="integer">
+        <choice>
+          <value>1</value> <!-- Safe -->
+          <value>2</value> <!-- Moderate -->
+          <value>3</value> <!-- Restricted -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="content_type" type="integer">
+        <choice>
+          <value>1</value> <!-- Photo -->
+          <value>2</value> <!-- Screenshot -->
+          <value>3</value> <!-- Other -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="hidden" type="integer">
+        <choice>
+          <value>1</value> <!-- global search -->
+          <value>2</value> <!-- hide from public search -->
+        </choice>
+      </parameter>
+    </optional>
+  </message>
+
+  <message name="xml">
+    <parameter name="return" mimetype="application/xml">
+      <!-- provide a relaxng of the return -->
+    </parameter>
+  </message>
+
+  <resource>
+    <resource relative="services">
+      <resource relative="upload">
+        <resource relative="\d+\.xml">
+          <get in="*" out="xml"/>
+        </resource>
+      </resource>
+    </resource>
+  </resource>  
+
+</description>
