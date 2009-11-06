@@ -1,0 +1,11 @@
+"gps-latitude",  "51.49473309516907"
+"gps-longitude", "-1.0"
+"gps-altitude",  "71.0" // meters
+"gps-timestamp", "1233744883"
+
+0x013b  Artist  string  IFD0   
+0x9c9b  XPTitle   int8u   IFD0  (tags 0x9c9b-0x9c9f are used by Windows Explorer; special characters in these values are converted to UTF-8 by default, or Windows Latin1 with the -L option. XPTitle is ignored by Windows Explorer if ImageDescription exists)
+0x9c9c  XPComment   int8u   IFD0
+0x9c9d  XPAuthor  int8u   IFD0  (ignored by Windows Explorer if Artist exists)
+0x9c9e  XPKeywords  int8u   IFD0
+0x9c9f  XPSubject   int8u   IFD0

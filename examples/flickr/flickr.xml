@@ -1,14 +1,18 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <message name="update">
-    
-photo
-title (optional)
-    The title of the photo.
-description (optional)
-    A description of the photo. May contain some limited HTML.
-tags (optional)
-    A space-seperated list of tags to apply to the photo.
+  <message name="photodata">
+    <optional>
+      <parameter name="photo" mimetype="image/jpeg"/>
+    </optional>
+    <optional>
+      <parameter name="title" type="string"/>
+    </optional>
+    <optional>
+      <parameter name="description" type="string"/>
+    </optional>
+    <optional>
+      <parameter name="tags" type="string"/>
+    </optional>
     <optional>
       <parameter name="is_public" type="integer">
         <choice>
@@ -61,18 +65,51 @@ tags (optional)
     </optional>
   </message>
 
-  <message name="xml">
-    <parameter name="return" mimetype="application/xml">
-      <!-- provide a relaxng of the return -->
+  <message name="rsp">
+    <parameter name="return" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rngs/rsp.rng"/>
+    </parameter>
+  </message>
+
+  <message name="flickr.auth.getFrob">
+    <parameter name="method" type="string">
+      <choice>
+        <value>flickr.auth.getFrob</value>
+      </choice>
+    </parameter>
+    <parameter name="api_key" type="string">
+      <param name="pattern">[a-f0-9]+</param>
+    </parameter>
+    <parameter name="api_sig" type="string">
+      <param name="pattern">[a-f0-9]+</param>
+    </parameter>
+  </message>
+
+  <message name="flickr.auth.getToken">
+    <parameter name="method" type="string">
+      <choice>
+        <value>flickr.auth.getToken</value>
+      </choice>
+    </parameter>
+    <parameter name="api_key" type="string">
+      <param name="pattern">[a-f0-9]+</param>
+    </parameter>
+    <parameter name="frob" type="string">
+      <param name="pattern">[a-f0-9-]+</param>
+    </parameter>
+    <parameter name="api_sig" type="string">
+      <param name="pattern">[a-f0-9]+</param>
     </parameter>
   </message>
 
   <resource>
     <resource relative="services">
       <resource relative="upload">
-        <resource relative="\d+\.xml">
-          <get in="*" out="xml"/>
-        </resource>
+        <post in="photodata" out="rsp"/>
+      </resource>
+      <resource relative="rest">
+        <get in="flickr.auth.getFrob" out="rsp"/>
+        <get in="flickr.auth.getToken" out="rsp"/>
       </resource>
     </resource>
   </resource>  
