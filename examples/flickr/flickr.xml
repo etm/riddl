@@ -1,9 +1,13 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="photodata">
-    <optional>
-      <parameter name="photo" mimetype="image/jpeg"/>
-    </optional>
+    <parameter name="api_key" type="string">
+      <param name="pattern">[a-f0-9]+</param>
+    </parameter>
+    <parameter name="auth_token" type="string">
+      <param name="pattern">[a-f0-9-]+</param>
+    </parameter>
+    <parameter name="photo" mimetype="*"/>
     <optional>
       <parameter name="title" type="string"/>
     </optional>
@@ -63,15 +67,21 @@
         </choice>
       </parameter>
     </optional>
-  </message>
-
-  <message name="rsp">
-    <parameter name="return" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <xi:include href="rngs/rsp.rng"/>
+    <parameter name="api_sig" type="string">
+      <param name="pattern">[a-f0-9]+</param>
     </parameter>
   </message>
 
+  <message name="rsp">
+    <!--{{{-->
+    <parameter name="return" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rngs/rsp.rng"/>
+    </parameter>
+    <!--}}}-->
+  </message>
+
   <message name="flickr.auth.getFrob">
+    <!--{{{-->
     <parameter name="method" type="string">
       <choice>
         <value>flickr.auth.getFrob</value>
@@ -83,9 +93,11 @@
     <parameter name="api_sig" type="string">
       <param name="pattern">[a-f0-9]+</param>
     </parameter>
+    <!--}}}-->
   </message>
 
   <message name="flickr.auth.getToken">
+    <!--{{{-->
     <parameter name="method" type="string">
       <choice>
         <value>flickr.auth.getToken</value>
@@ -100,6 +112,26 @@
     <parameter name="api_sig" type="string">
       <param name="pattern">[a-f0-9]+</param>
     </parameter>
+    <!--}}}-->
+  </message>
+  
+  <message name="flickr.auth.checkToken">
+    <!--{{{-->
+    <parameter name="method" type="string">
+      <choice>
+        <value>flickr.auth.checkToken</value>
+      </choice>
+    </parameter>
+    <parameter name="api_key" type="string">
+      <param name="pattern">[a-f0-9]+</param>
+    </parameter>
+    <parameter name="auth_token" type="string">
+      <param name="pattern">[a-f0-9-]+</param>
+    </parameter>
+    <parameter name="api_sig" type="string">
+      <param name="pattern">[a-f0-9]+</param>
+    </parameter>
+    <!--}}}-->
   </message>
 
   <resource>
@@ -110,6 +142,7 @@
       <resource relative="rest">
         <get in="flickr.auth.getFrob" out="rsp"/>
         <get in="flickr.auth.getToken" out="rsp"/>
+        <get in="flickr.auth.checkToken" out="rsp"/>
       </resource>
     </resource>
   </resource>  
