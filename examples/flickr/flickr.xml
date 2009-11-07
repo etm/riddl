@@ -1,6 +1,7 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="photodata">
+    <!--{{{-->
     <parameter name="api_key" type="string">
       <param name="pattern">[a-f0-9]+</param>
     </parameter>
@@ -70,6 +71,7 @@
     <parameter name="api_sig" type="string">
       <param name="pattern">[a-f0-9]+</param>
     </parameter>
+    <!--}}}-->
   </message>
 
   <message name="rsp">
