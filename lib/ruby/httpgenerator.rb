@@ -84,20 +84,20 @@ module Riddl
         tmp.write res.join('&')
       else
         if scount + ccount > 0
-          @headers['Content-Type'] = "multipart/mixed; boundary=\"#{BOUNDARY}\""
+          @headers['Content-Type'] = "multipart/#{mode == :input ? 'form-data' : 'mixed'}; boundary=\"#{BOUNDARY}\""
           @params.each do |r|
             case r
               when Riddl::Parameter::Simple
                 tmp.write "--" + BOUNDARY + EOL
                 tmp.write "Riddl-Type: simple" + EOL
-                tmp.write "Content-Disposition: riddl-data; name=\"#{r.name}\"" + EOL
+                tmp.write "Content-Disposition: #{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\"" + EOL
                 tmp.write EOL
                 tmp.write r.value
                 tmp.write EOL
               when Riddl::Parameter::Complex
                 tmp.write "--" +  BOUNDARY + EOL
                 tmp.write "Riddl-Type: complex" + EOL
-                tmp.write "Content-Disposition: riddl-data; name=\"#{r.name}\""
+                tmp.write "Content-Disposition: #{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\""
                 tmp.write r.filename.nil? ? EOL : "; filename=\"#{r.filename}\"" + EOL
                 tmp.write "Content-Transfer-Encoding: binary" + EOL
                 tmp.write "Content-Type: " + r.mimetype + EOL
