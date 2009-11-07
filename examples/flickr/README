@@ -1,3 +1,14 @@
+Exif Server
+==============
+
+Resides in the Exif subdirectory.
+
+
+Flickr Client to Upload Photos
+==============================
+
+Resides in the Flickr subdirectory.
+
 Before you can start using the flickr.rb you have to authenticate this
 application for a certain user:
 
