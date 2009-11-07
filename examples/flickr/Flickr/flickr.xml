@@ -137,15 +137,13 @@
   </message>
 
   <resource>
-    <resource relative="services">
-      <resource relative="upload">
-        <post in="photodata" out="rsp"/>
-      </resource>
-      <resource relative="rest">
-        <get in="flickr.auth.getFrob" out="rsp"/>
-        <get in="flickr.auth.getToken" out="rsp"/>
-        <get in="flickr.auth.checkToken" out="rsp"/>
-      </resource>
+    <resource relative="upload">
+      <post in="photodata" out="rsp"/>
+    </resource>
+    <resource relative="rest">
+      <get in="flickr.auth.getFrob" out="rsp"/>
+      <get in="flickr.auth.getToken" out="rsp"/>
+      <get in="flickr.auth.checkToken" out="rsp"/>
     </resource>
   </resource>  
 

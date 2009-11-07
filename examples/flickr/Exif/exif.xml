@@ -1,0 +1,157 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="jpegdata">
+    <!--{{{-->
+    <parameter name="api_key" type="string">
+      <param name="pattern">[a-f0-9]+</param>
+    </parameter>
+    <parameter name="auth_token" type="string">
+      <param name="pattern">[a-f0-9-]+</param>
+    </parameter>
+    <parameter name="photo" mimetype="image/jpeg"/>
+    <parameter name="author" type="string"/>
+    <parameter name="title" type="string"/>
+    <parameter name="description" type="string"/>
+    <parameter name="tags" type="string"/>
+    <parameter name="longitude" type="float">
+      <param name="minInclusive">-180.0</param>
+      <param name="maxInclusive">180.0</param>
+    </parameter>
+    <parameter name="latitude" type="float">
+      <param name="minInclusive">-90.0</param>
+      <param name="maxInclusive">90.0</param>
+    </parameter>
+    <optional>
+      <parameter name="is_public" type="integer">
+        <choice>
+          <value>0</value> <!-- Yes -->
+          <value>1</value> <!-- No -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="is_friend" type="integer">
+        <choice>
+          <value>0</value> <!-- Yes -->
+          <value>1</value> <!-- No -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="is_family" type="integer">
+        <choice>
+          <value>0</value> <!-- Yes -->
+          <value>1</value> <!-- No -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="safety_level" type="integer">
+        <choice>
+          <value>1</value> <!-- Safe -->
+          <value>2</value> <!-- Moderate -->
+          <value>3</value> <!-- Restricted -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="content_type" type="integer">
+        <choice>
+          <value>1</value> <!-- Photo -->
+          <value>2</value> <!-- Screenshot -->
+          <value>3</value> <!-- Other -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="hidden" type="integer">
+        <choice>
+          <value>1</value> <!-- global search -->
+          <value>2</value> <!-- hide from public search -->
+        </choice>
+      </parameter>
+    </optional>
+    <parameter name="api_sig" type="string">
+      <param name="pattern">[a-f0-9]+</param>
+    </parameter>
+    <!--}}}-->
+  </message>
+  <message name="photodata">
+    <!--{{{-->
+    <parameter name="api_key" type="string">
+      <param name="pattern">[a-f0-9]+</param>
+    </parameter>
+    <parameter name="auth_token" type="string">
+      <param name="pattern">[a-f0-9-]+</param>
+    </parameter>
+    <parameter name="photo" mimetype="*"/>
+    <optional>
+      <parameter name="title" type="string"/>
+    </optional>
+    <optional>
+      <parameter name="description" type="string"/>
+    </optional>
+    <optional>
+      <parameter name="tags" type="string"/>
+    </optional>
+    <optional>
+      <parameter name="is_public" type="integer">
+        <choice>
+          <value>0</value> <!-- Yes -->
+          <value>1</value> <!-- No -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="is_friend" type="integer">
+        <choice>
+          <value>0</value> <!-- Yes -->
+          <value>1</value> <!-- No -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="is_family" type="integer">
+        <choice>
+          <value>0</value> <!-- Yes -->
+          <value>1</value> <!-- No -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="safety_level" type="integer">
+        <choice>
+          <value>1</value> <!-- Safe -->
+          <value>2</value> <!-- Moderate -->
+          <value>3</value> <!-- Restricted -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="content_type" type="integer">
+        <choice>
+          <value>1</value> <!-- Photo -->
+          <value>2</value> <!-- Screenshot -->
+          <value>3</value> <!-- Other -->
+        </choice>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="hidden" type="integer">
+        <choice>
+          <value>1</value> <!-- global search -->
+          <value>2</value> <!-- hide from public search -->
+        </choice>
+      </parameter>
+    </optional>
+    <parameter name="api_sig" type="string">
+      <param name="pattern">[a-f0-9]+</param>
+    </parameter>
+    <!--}}}-->
+  </message>
+
+  <resource>
+    <post in="jpegdata" out="photodata"/>
+  </resource>  
+
+</description>
