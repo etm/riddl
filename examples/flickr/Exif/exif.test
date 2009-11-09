@@ -1,6 +1,9 @@
 #!/usr/bin/ruby
-require '../../lib/ruby/client'
+require 'digest/md5'
 require 'socket'
+require '../../../lib/ruby/client'
+require '../Helpers/flickr.rb'
+require 'pp'
 
 t = Thread.new do
   puts `rackup exif.ru`
@@ -18,37 +21,33 @@ end
 
 exif = Riddl::Client.new("http://localhost:9292/")
 
-key = File.read('../Flickr/flickr.key').strip
-secret = File.read('../Flickr/flickr.secret').strip
-if File.exists?('../Flickr/flickr.token')
-  token = File.read('../Flickr/flickr.token').strip
-else  
-  token = "simulated"
-end
-title     = "RIDDL Logo"
-desc      = "The official RIDDL logo, the first thing created for this project."
-tags      = "RIDDL, REST, Composition, Evolution"
-is_public = "1"
-sig       = Digest::MD5.hexdigest("#{secret}api_key#{key}auth_token#{token}description#{desc}is_public#{is_public}tags#{tags}title#{title}")
+begin
+  fh = FlickrHelper.new("../Flickr/")
+  params = [ 
+    Riddl::Parameter::Simple.new("api_key", fh.api_key),
+    Riddl::Parameter::Simple.new("auth_token", fh.auth_token),
+    Riddl::Parameter::Complex.new("photo","image/jpeg",File.open('riddl.jpg','r'),'riddl.jpg'),
+    Riddl::Parameter::Simple.new("author", "Jürgen Mangler"),
+    Riddl::Parameter::Simple.new("title", "RIDDL Logo"),
+    Riddl::Parameter::Simple.new("description", "The official RIDDL logo, the first thing created for this project."),
+    Riddl::Parameter::Simple.new("tags", "RIDDL, REST, Composition, Evolution"),
+    Riddl::Parameter::Simple.new("longitude", 48.213736),
+    Riddl::Parameter::Simple.new("latitude", 16.357141),
+    Riddl::Parameter::Simple.new("is_public", 1),
+  ]
+  params <<  Riddl::Parameter::Simple.new("api_sig", fh.sign(params))
 
-status, res = exif.post [
-  Riddl::Parameter::Simple.new("api_key", key),
-  Riddl::Parameter::Simple.new("auth_token", token),
-  Riddl::Parameter::Complex.new("photo","image/png",File.open('riddl.png','r'),'riddl.png'),
-  Riddl::Parameter::Simple.new("title", title),
-  Riddl::Parameter::Simple.new("description", desc),
-  Riddl::Parameter::Simple.new("tags", tags),
-  Riddl::Parameter::Simple.new("is_public", is_public),
-  Riddl::Parameter::Simple.new("api_sig", sig)
-]
+  status, res = exif.post params
 
-# status,res = library.resource("/books/7").get
+  puts status
+  pp res
+  if status == 200
+    File.open('riddl.new.jpg','w') do |f|
+      f.write res.detect{ |e| e.name == 'photo' }.value.read
+    end  
+  end  
 
-puts status
-p res
-res.each do |r|
-  puts r.value.read
+ensure
+  `pkill rackup`
+  t.join
 end  
-
-`pkill rackup`
-t.join
