@@ -1,0 +1,33 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <start>
+    <ref name="rsp"/>
+  </start>
+
+  <define name="any">
+    <element>
+      <anyName/>
+      <zeroOrMore>
+        <choice>
+          <attribute>
+            <anyName/>
+          </attribute>
+          <text/>
+          <ref name="any"/>
+        </choice>
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="rsp">
+    <element name="rsp">
+      <attribute name="stat">
+        <choice>
+          <value>ok</value>
+          <value>fail</value>
+        </choice>
+      </attribute>
+      <ref name="any"/>
+    </element>
+  </define>
+
+</grammar>

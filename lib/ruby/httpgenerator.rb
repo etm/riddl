@@ -12,13 +12,12 @@ module Riddl
 
     # Performs URI escaping so that you can construct proper
     # query strings faster.  Use this rather than the cgi.rb
-    # version since it's faster.  (Stolen from Camping).
-    def escape(s)
+    # version since it's faster. (Stolen from Camping).
+    def self.escape(s)
       s.to_s.gsub(/([^ a-zA-Z0-9_.-]+)/n) {
         '%'+$1.unpack('H2'*$1.size).join('%').upcase
       }.tr(' ', '+')
     end
-    private :escape
 
     def generate(mode=:output)
       if @params.class == Array && @params.length == 1
@@ -44,7 +43,7 @@ module Riddl
           end
           if mode == :input
             @headers['Content-Type'] = 'application/x-www-form-urlencoded'
-            tmp.write escape(r.name) + '=' + escape(r.value)
+            tmp.write HttpGenerator::escape(r.name) + '=' + HttpGenerator::escape(r.value)
           end
         when Riddl::Parameter::Complex
           tmp.write(r.value.respond_to?(:read) ? r.value.read : r.value)
@@ -79,26 +78,26 @@ module Riddl
         @params.each do |r|
           case r
             when Riddl::Parameter::Simple
-              res << escape(r.name) + '=' + escape(r.value)
+              res << HttpGenerator::escape(r.name) + '=' + HttpGenerator::escape(r.value)
           end   
         end
         tmp.write res.join('&')
       else
         if scount + ccount > 0
-          @headers['Content-Type'] = "multipart/mixed; boundary=\"#{BOUNDARY}\""
+          @headers['Content-Type'] = "multipart/#{mode == :input ? 'form-data' : 'mixed'}; boundary=\"#{BOUNDARY}\""
           @params.each do |r|
             case r
               when Riddl::Parameter::Simple
                 tmp.write "--" + BOUNDARY + EOL
                 tmp.write "Riddl-Type: simple" + EOL
-                tmp.write "Content-Disposition: riddl-data; name=\"#{r.name}\"" + EOL
+                tmp.write "Content-Disposition: #{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\"" + EOL
                 tmp.write EOL
                 tmp.write r.value
                 tmp.write EOL
               when Riddl::Parameter::Complex
                 tmp.write "--" +  BOUNDARY + EOL
                 tmp.write "Riddl-Type: complex" + EOL
-                tmp.write "Content-Disposition: riddl-data; name=\"#{r.name}\""
+                tmp.write "Content-Disposition: #{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\""
                 tmp.write r.filename.nil? ? EOL : "; filename=\"#{r.filename}\"" + EOL
                 tmp.write "Content-Transfer-Encoding: binary" + EOL
                 tmp.write "Content-Type: " + r.mimetype + EOL

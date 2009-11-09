@@ -12,6 +12,11 @@ module Riddl
 
       def check(what,ignore_name=false)
         #{{{
+        # reset for subsequent calls
+        @mistp = 0
+        @numparams = 0
+
+        # do it
         m  = what.content.root
         m.find("des:header").each do |h|
           return false unless header h
@@ -33,6 +38,7 @@ module Riddl
         #{{{
         return false if @mistp >= @mist.length
         b = @mist[@mistp]
+
         if b.class == Riddl::Parameter::Simple && (a.attributes['fixed'] || a.attributes['type'])
           b.name = a.attributes['name'] if @numparams == 1
           if b.name == a.attributes['name']
