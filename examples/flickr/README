@@ -1,8 +1,16 @@
+Prequisites
+===========
+
+apt-get install libimage-exiftool-perl
+
 Exif Server
 ==============
 
 Resides in the Exif subdirectory.
 
+Takes a jpeg image like the standard Flickr upload with additional paramaters
+Artist, Longitude and Latitude. It then generates an Exif tag for the image and
+outputs it in a format suitable as input for Flickr upload.
 
 Flickr Client to Upload Photos
 ==============================
