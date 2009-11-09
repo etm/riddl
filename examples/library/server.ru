@@ -39,6 +39,7 @@ end
 
 run Riddl::Server.new("description.xml") {
   process_out false
+
   on resource do
     run Riddl::Utils::ERBServe, "static/info.txt"  if get
     on resource "books" do
