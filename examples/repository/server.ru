@@ -27,6 +27,7 @@ run(
   Riddl::Server.new("description.xml") do
   $0 = "RESCUE - Server Port: 9290"
     process_out false
+    cross_site_xhr true
     on resource do
         p 'Processing description ....' if method :riddl => '*'
         run RootGET if method :riddl => '*'
