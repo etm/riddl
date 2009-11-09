@@ -1,1 +1,1 @@
-map <F10> :!./flickr.rb<CR>
+map <F10> :!./exif.test<CR>

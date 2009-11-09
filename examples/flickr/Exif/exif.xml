@@ -76,6 +76,7 @@
     </parameter>
     <!--}}}-->
   </message>
+
   <message name="photodata">
     <!--{{{-->
     <parameter name="api_key" type="string">

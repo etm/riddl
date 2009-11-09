@@ -26,6 +26,13 @@ module Riddl
           raise "ERROR input is not a stream or string"
         end
       end
+      def reopen
+        if @value.class == File || @value.class == Riddl::Parameter::Tempfile
+          pname = @value.path
+          @value.close
+          @value = File.open(pname,'r')
+        end  
+      end
     end
     class Tempfile < ::Tempfile
       def _close
