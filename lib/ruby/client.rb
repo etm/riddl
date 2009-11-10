@@ -159,7 +159,7 @@ module Riddl
     class Request < Net::HTTPGenericRequest
       #{{{
       def initialize(method, path, parameters, headers, qs)
-        path = path.strip == '' ? '/' : path
+        path = (path.strip == '' ? '/' : path)
         path += "?#{qs}" unless qs == ''
         super method, true, true, path, headers
         tmp = HttpGenerator.new(parameters,self).generate(:input)

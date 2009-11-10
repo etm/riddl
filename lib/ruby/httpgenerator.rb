@@ -107,10 +107,10 @@ module Riddl
             end   
           end
           tmp.write "--" + BOUNDARY + EOL
-          tmp.flush
-          tmp.rewind
         end
       end
+      tmp.flush
+      tmp.rewind
       tmp
     end
     private :multipart
