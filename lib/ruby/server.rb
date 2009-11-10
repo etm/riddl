@@ -150,8 +150,8 @@ module Riddl
     def delete(min='*'); return if @norun; check(min) && @riddl_method == 'delete' end
     def put(min='*'); return if @norun; check(min) && @riddl_method == 'put' end
     def check(min)
-       return if @norun
-       @path == @riddl_path[0] && min == @riddl_message.in.name
+      return if @norun
+      @path == @riddl_path[0] && min == @riddl_message.in.name
     end
 
     def resource(path=nil); return if @norun; path.nil? ? '{}' : path end
