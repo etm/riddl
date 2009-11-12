@@ -138,14 +138,6 @@ module Riddl
             bs = Parameter::Tempfile.new("RiddlBody")
             res.read_body(bs)
             bs.rewind
-
-            p bs.read
-            p "---"
-            bs.rewind
-
-            p res['CONTENT-LENGTH']
-            p res['HTTP-CONTENT-LENGTH']
-
             response = Riddl::HttpParser.new(
               "",
               bs,
