@@ -21,6 +21,9 @@ module Riddl
         @type = :body
         @additional = additional
 
+        p file.read
+        file.rewind
+
         @value = block_given? ? yield : file
         unless (@value && (@value.class == String || (file.respond_to?(:read) && file.respond_to?(:rewind))))
           raise "ERROR input is not a stream or string"
