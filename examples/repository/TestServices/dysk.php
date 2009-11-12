@@ -31,5 +31,5 @@
   $ret .= "</queryOutputMessage>";
 
   $s->add(new RiddlParameterComplex("queryOutputMessage","text/xml", $ret));
-  $s->riddl_it();
+  $s->riddl_it(200);
 ?>

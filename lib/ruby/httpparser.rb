@@ -39,15 +39,20 @@ module Riddl
       else
         body = ''
       end
-      
+
       bufsize = 16384
+      puts input.read
+      p "----"
+      input.rewind
+      p content_length
          
       until content_length <= 0
         c = input.read(bufsize < content_length ? bufsize : content_length)
         raise EOFError, "bad content body"  if c.nil? || c.empty?
         body << c
         content_length -= c.size
-      end  
+      end
+      body.rewind
 
       add_to_params(name,body,filename,ctype,nil)
       #}}}
