@@ -95,7 +95,7 @@ module Riddl
               end
             end
           end
-          #til.compose!
+          til.compose!
         end
 
         ### merge tiles into a facade

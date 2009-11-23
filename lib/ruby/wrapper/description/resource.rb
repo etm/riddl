@@ -81,6 +81,8 @@ module Riddl
         def compose!
           #{{{
           @requests.each do |k,v|
+            ### remove all emtpy layers  
+            v.compact!
             case v.size
               when 0:
               when 1:
