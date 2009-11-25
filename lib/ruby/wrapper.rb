@@ -5,6 +5,19 @@ require 'xml/smart'
 module Riddl
   class Wrapper
     class WrapperUtils
+      def get_resource_deep(path,pres)
+        #{{{
+        path.split('/').each do |pa|
+          next if pa == ""
+          if pres.resources.has_key?(pa)
+            pres = pres.resources[pa]
+          else
+            return nil
+          end
+        end
+        pres
+        #}}}
+      end
       def rpaths(res,what)
         #{{{
         what += what == '' ? '/' : res.path
@@ -15,6 +28,7 @@ module Riddl
         ret
         #}}}
       end  
+      protected :rpaths, :get_resource_deep
     end
   end  
 end

@@ -6,28 +6,16 @@ module Riddl
   class Wrapper
     class Declaration < WrapperUtils
         
+      def get_resource(path)
+        get_resource_deep(path,@facade.resource)
+      end  
+      def paths
+        rpaths(@facade.resource,'')
+      end
+      
       def description_xml
         @facade.description_xml
       end  
-        
-      def get_resource(path)
-        #{{{
-        pres = @facade.resource
-        path.split('/').each do |pa|
-          next if pa == ""
-          if pres.resources.has_key?(pa)
-            pres = pres.resources[pa]
-          else
-            return nil
-          end
-        end
-        pres
-        #}}}
-      end  
-      
-      def paths(res=@facade.resource,what='')
-        rpaths(res,what)
-      end
 
       def visualize_tiles_and_layers
         #{{{
@@ -97,6 +85,7 @@ module Riddl
         end
         #}}}
       end
+
     end
   end
 end
