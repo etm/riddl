@@ -4,7 +4,8 @@ require File.expand_path(File.dirname(__FILE__) + '/description/message_and_tran
 
 module Riddl
   class Wrapper
-    class Description
+
+    class Description < WrapperUtils
       def visualize(res=@resource,what='')
         #{{{
         what += res.path
@@ -24,14 +25,7 @@ module Riddl
       end
 
       def paths(res=@resource,what='')
-        #{{{
-        what += what == '' ? '/' : res.path
-        ret = [[what,res.recursive]]
-        res.resources.each do |name,r|
-          ret += paths(r,what == '/' ? what : what + '/')
-        end
-        ret
-        #}}}
+        rpaths(res,what)
       end
 
       def get_resource(path)
