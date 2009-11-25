@@ -43,17 +43,18 @@ module Riddl
     class Resource
       #{{
       def initialize(base,wrapper,path)
+        #{{{
         @base = base
         @wrapper = wrapper
         @rpath = "/#{path}".gsub(/\/+/,'/')
         @path = if @wrapper.nil?
           @rpath
         else
-          pp @wrapper.paths
           @path = @wrapper.paths.find{ |e| e[1] =~ @rpath }
           raise PathError, 'Path not found.' if @path.nil?
           @path[0]
         end
+        #}}}
       end
 
       def get(parameters = [])
@@ -69,15 +70,18 @@ module Riddl
         exec_request('DELETE',parameters)
       end
       def request(what)
+        #{{{
         if what.class == Hash && what.length == 1
           what.each do |method,parameters|
             return exec_request(method.to_s.upcase,parameters)
           end
         end
         raise ArgumentError, "Hash with ONE method => parameters pair required"
+        #}}}
       end
 
-      def exec_request(riddl_method,parameters)
+      def extract_headers(parameters)
+        #{{{
         headers = {}
         parameters.delete_if do |p|
           if p.class == Riddl::Header
@@ -87,14 +91,13 @@ module Riddl
             false
           end
         end
-
-        unless @wrapper.nil?
-          riddl_message = @wrapper.io_messages(@path,riddl_method.downcase,parameters,headers)
-          if riddl_message.nil?
-            raise InputError, "Not a valid input to service."
-          end
-        end
-
+        headers
+        #}}}
+      end
+      private :extract_headers
+      
+      def extract_qparams(parameters)
+        #{{{
         qparams = []
         parameters.delete_if do |p|
           if p.class == Riddl::Parameter::Simple && p.type == :query
@@ -104,6 +107,22 @@ module Riddl
             false
           end
         end
+        qparams
+        #}}}
+      end
+      private :extract_qparams
+
+      def exec_request(riddl_method,parameters)
+        headers = extract_headers(parameters)
+
+        unless @wrapper.nil?
+          riddl_message = @wrapper.io_messages(@path,riddl_method.downcase,parameters,headers)
+          if riddl_message.nil?
+            raise InputError, "Not a valid input to service."
+          end
+        end
+
+        qparams = extract_qparams(parameters)
 
         if @wrapper.nil? || @wrapper.description?
           res, response = make_request(@base + @rpath,riddl_method,parameters,headers,qparams)
@@ -115,7 +134,7 @@ module Riddl
           return res.code.to_i, response
         end
 
-        if !wrapper.nil? && @wrapper.declaration?
+        if !@wrapper.nil? && @wrapper.declaration?
           if riddl_message.route.nil?
             res, response = make_request(@rpath,riddl_method,parameters,headers)
             unless @wrapper.check_message(response,res,riddl_message.out)
@@ -123,14 +142,28 @@ module Riddl
             end
             return res.code.to_i, response
           else
-	    p "hallero"
-            # loop through route
+            tp = parameters
+            th = headers
+            tq = qparams
+            riddl_message.route.each do |m|
+              res, response = make_request(m.interface,riddl_method,tp,th,tq)
+              unless @wrapper.check_message(response,res,m.out)
+                raise OutputError, "Not a valid output from service."
+              end
+              unless m == riddl_message.route.last
+                tp = response
+                th = extract_headers(response)
+                tq = extract_qparams(response)
+              end
+            end
+            return res.code.to_i, response
           end
         end
       end
       private :exec_request
 
       def make_request(url,riddl_method,parameters,headers,qparams)
+        #{{{
         url = URI.parse(url)
         qs = qparams.join('&')
         req = Riddl::Client::Request.new(riddl_method,url.path,parameters,headers,qs)
@@ -152,6 +185,7 @@ module Riddl
           end
         end
         return res, response
+        #}}}
       end
       private :make_request
       #}}}

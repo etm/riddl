@@ -2,7 +2,7 @@
   <interface name="main" path="http://api.flickr.com/services">
     <xi:include href="Flickr/flickr.xml"/>
   </interface>
-  <interface name="exif" path="http://sumatra.pri.univie.ac.at:1311">
+  <interface name="exif" path="http://localhost:9292">
     <xi:include href="Exif/exif.xml"/>
   </interface>
 
