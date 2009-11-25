@@ -1,6 +1,24 @@
 require 'rubygems'
 gem 'ruby-xml-smart', '>= 0.2.0.1'
 require 'xml/smart'
+
+module Riddl
+  class Wrapper
+    class WrapperUtils
+      def rpaths(res,what)
+        #{{{
+        what += what == '' ? '/' : res.path
+        ret = [[what,res.recursive]]
+        res.resources.each do |name,r|
+          ret += rpaths(r,what == '/' ? what : what + '/')
+        end
+        ret
+        #}}}
+      end  
+    end
+  end  
+end
+    
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/description')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/declaration')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/messageparser')
@@ -166,7 +184,7 @@ module Riddl
       attr_reader :in, :out, :route
       #}}}
     end
-
+    
     def declaration?; @is_declaration; end
     def description?; @is_description; end
   end

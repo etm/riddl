@@ -4,7 +4,7 @@ require File.expand_path(File.dirname(__FILE__) + '/declaration/facade')
 
 module Riddl
   class Wrapper
-    class Declaration
+    class Declaration < WrapperUtils
         
       def description_xml
         @facade.description_xml
@@ -26,14 +26,7 @@ module Riddl
       end  
       
       def paths(res=@facade.resource,what='')
-        #{{{
-        what += what == '' ? '/' : res.path + '/'
-        ret = [[what,res.recursive]]
-        res.resources.each do |name,r|
-          ret += paths(r,what)
-        end
-        ret
-        #}}}
+        rpaths(res,what)
       end
 
       def visualize_tiles_and_layers

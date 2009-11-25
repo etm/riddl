@@ -1,6 +1,6 @@
 module Riddl
   class Wrapper
-    class Declaration
+    class Declaration < WrapperUtils
 
       class Facade
         def initialize

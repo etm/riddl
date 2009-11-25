@@ -49,6 +49,7 @@ module Riddl
         @path = if @wrapper.nil?
           @rpath
         else
+          pp @wrapper.paths
           @path = @wrapper.paths.find{ |e| e[1] =~ @rpath }
           raise PathError, 'Path not found.' if @path.nil?
           @path[0]
@@ -122,6 +123,7 @@ module Riddl
             end
             return res.code.to_i, response
           else
+	    p "hallero"
             # loop through route
           end
         end

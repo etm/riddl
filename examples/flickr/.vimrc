@@ -1,1 +1,1 @@
-map <F10> :!./riddlprocess -l declaration.xml<CR>
+map <F10> :!./client.rb<CR>
