@@ -16,11 +16,11 @@ params = [
   Riddl::Parameter::Simple.new("latitude", 16.357141),
   Riddl::Parameter::Simple.new("is_public", 1),
 ]
-params <<  Riddl::Parameter::Simple.new("api_sig", fh.sign(params))
+params <<  Riddl::Parameter::Simple.new("api_sig", fh.sign(params,["api_key","auth_token","title","description","tags","is_public"]))
 
 dflick = Riddl::Client.facade("declaration.xml")
 upload = dflick.resource("/upload")
 status, res = upload.post params
 
 puts status
-pp res
+puts res[0].value.read

@@ -66,13 +66,14 @@ module Riddl
             block = layer.find("dec:block")
 
             lname = layer.attributes['name']
+            lpath = riddl.find("string(/dec:declaration/dec:interface[@name=\"#{lname}\"]/@path)")
             des = riddl.find("/dec:declaration/dec:interface[@name=\"#{lname}\"]/des:description").first
             desres = des.find("des:resource").first
             if apply_to.empty?
-              til.add_description(des,desres,"/",index,"#{lname}:",block)
+              til.add_description(des,desres,"/",index,"#{lpath}",block)
             else
               apply_to.each do |at|
-                til.add_description(des,desres,at.to_s,index,"#{lname}:",block)
+                til.add_description(des,desres,at.to_s,index,"#{lpath}",block)
               end
             end
           end
