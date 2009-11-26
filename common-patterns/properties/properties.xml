@@ -1,0 +1,59 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="value">
+    <choice>
+      <parameter name="value" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+        <xi:include href="rngs/values.rng"/>
+      </parameter>
+      <parameter name="value" type="string"/>
+    </choice>
+  </message>
+
+  <message name="resource-document">
+    <parameter name="document" mimetype="text/xml"/>
+  </message>
+  <message name="resource-document-schema">
+    <parameter name="document-schema" mimetype="text/xml"/>
+  </message>
+
+  <message name="keys">
+    <parameter name="keys" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rngs/keys.rng"/>
+    </parameter>
+  </message>
+  <message name="key-value-pair">
+    <parameter name="key" type="string">
+      <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
+    </parameter>
+    <parameter name="value" type="string"/>
+  </message>
+  <message name="key">
+    <parameter name="key" type="string">
+      <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
+    </parameter>
+  </message>
+
+  <resource>
+    <get in="*" out="resource-document"/>
+    <put in="resource-document"/>
+    <resource relative="query">
+      <get in="query" out="value"/>
+    </resource>
+    <resource relative="schema">
+      <get in="*" out="resource-document-schema"/>
+      <put in="resource-document-schema"/>
+    </resource>
+    <resource relative="values">
+      <get in="*" out="keys"/>
+      <post in="key-value-pair" out="key"/>
+      <delete in="key"/>
+      <resource recursive="true">
+        <get in="*" out="value"/>
+        <delete in="key"/>
+        <post in="key-value-pair" out="key"/>
+        <put in="value"/>
+      </resource>
+    </resource>
+  </resource>  
+
+</description>
