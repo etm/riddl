@@ -1,0 +1,12 @@
+<?xml-stylesheet href="values.xsl" type="text/xsl"?> 
+<properties>
+  <state>running</state>
+  <context>
+    <a>7</a>
+    <b>7</b>
+  </context>
+  <endpoints>
+    <e1>http://www.heise.de</e1>
+    <e2>http://www.univie.ac.at</e2>
+  </endpoints>  
+</properties>
