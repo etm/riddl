@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/declaration/1.0">
-  <include href="description-1_0.rng">
+  <include href="../../description/1.0/description.rng">
     <start>
       <ref name="declaration"/>
     </start>
