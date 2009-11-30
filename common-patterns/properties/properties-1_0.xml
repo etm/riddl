@@ -32,13 +32,14 @@
       <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
     </parameter>
   </message>
+  <message name="query">
+    <parameter name="query" type="string"/>
+  </message>
 
   <resource>
     <get in="*" out="resource-document"/>
+    <get in="query" out="value"/>
     <put in="resource-document"/>
-    <resource relative="query">
-      <get in="query" out="value"/>
-    </resource>
     <resource relative="schema">
       <get in="*" out="resource-document-schema"/>
       <put in="resource-document-schema"/>

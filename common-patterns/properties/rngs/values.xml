@@ -1,5 +1,5 @@
 <?xml-stylesheet href="values.xsl" type="text/xsl"?> 
-<properties>
+<properties xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
   <state>running</state>
   <context>
     <a>7</a>
