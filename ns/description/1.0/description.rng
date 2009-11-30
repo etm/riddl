@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/description/1.0">
-  <include href="relaxng-modular.rng"/>
-  <include href="datatypes-1_0.rng"/>
+  <include href="../../common/relaxng-modular.rng"/>
+  <include href="../../common/datatypes-1_0.rng"/>
 
   <start>
     <element name="description">
