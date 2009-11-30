@@ -1,12 +1,13 @@
 module Riddl
   class Implementation
-    def initialize(headers,parameters,relative,match,env,args)
-      @h = headers                    # incoming riddl headers
-      @p = parameters                 # incoming riddl parameters
-      @a = args                       # args to run command
-      @m = @matching_resource = match # the path of the branch matching, important for recursive
-      @r = @relative = relative       # the matching path
-      @e = @env = env                 # environment (all headers)
+    def initialize(headers,parameters,relative,match,env,args,method)
+      @h = headers                        # incoming riddl headers
+      @p = parameters                     # incoming riddl parameters
+      @a = args                           # args to run command
+      @m = method                         # get, put, post, ...
+      @r = @relative = relative           # the matching path
+      @match = @matching_resource = match # the path of the branch matching, important for recursive
+      @env = env                          # environment (all headers)
 
       @headers = []
     end

@@ -5,7 +5,7 @@ module Riddl
   module Utils
     class FileServe < Riddl::Implementation
       def response
-        path = File.file?(@a[0]) ? @a[0] : "#{@a[0]}/#{@r[@m.length..-1].join('/')}".gsub(/\/+/,'/')
+        path = File.file?(@a[0]) ? @a[0] : "#{@a[0]}/#{@r[@match.length..-1].join('/')}".gsub(/\/+/,'/')
         if File.directory?(path)
           @status = 404
           return []

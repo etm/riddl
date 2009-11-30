@@ -1,14 +1,29 @@
 <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
   <start>
-    <element name="properties">
-      <oneOrMore>
-        <choice>
-          <ref name="value"/>
-          <ref name="value-list"/>
-        </choice>
-      </oneOrMore>  
-   	</element>
+    <choice>
+      <element name="values">
+        <ref name="content"/>
+      </element>
+      <element name="value">
+        <ref name="content"/>
+      </element>
+      <element name="properties">
+        <ref name="content"/>
+      </element>
+      <element name="not_existing">
+        <empty/>
+      </element>  
+    </choice>
   </start>
+
+  <define name="content">
+    <oneOrMore>
+      <choice>
+        <ref name="value"/>
+        <ref name="value-list"/>
+      </choice>
+    </oneOrMore>
+  </define>
 
   <define name="value">
     <element>

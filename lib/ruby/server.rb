@@ -111,7 +111,7 @@ module Riddl
       return if @norun
       return if @path == ''
       if what.class == Class && what.superclass == Riddl::Implementation
-        w = what.new(@headers,@parameters,@pinfo.sub(/\//,'').split('/'),@path.sub(/\//,'').split('/'),@env.reject{|k,v| k =~ /^rack\./},args)
+        w = what.new(@headers,@parameters,@pinfo.sub(/\//,'').split('/'),@path.sub(/\//,'').split('/'),@env.reject{|k,v| k =~ /^rack\./},args,@riddl_method)
         response    = w.response
         headers     = w.headers
         @res.status = w.status
