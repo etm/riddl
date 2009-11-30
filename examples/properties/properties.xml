@@ -1,4 +1,3 @@
-<?xml-stylesheet href="values.xsl" type="text/xsl"?> 
 <properties xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
   <state>running</state>
   <context-variables>
@@ -9,5 +8,4 @@
     <e1>http://www.heise.de</e1>
     <e2>http://www.univie.ac.at</e2>
   </endpoints>  
-  <monitors/>
 </properties>
