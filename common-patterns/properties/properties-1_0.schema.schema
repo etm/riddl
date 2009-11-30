@@ -1,0 +1,66 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://relaxng.org/ns/structure/1.0">
+  <include href="ns/relaxng-modular.rng"/>
+
+  <start>
+    <ref name="metastart"/>
+  </start>  
+
+  <define name="metastart">
+    <element name="element">
+      <attribute name="name">
+        <data type="string"/>
+      </attribute>  
+      <attribute name="datatypeLibrary">
+        <data type="string"/>
+      </attribute>  
+      <attribute name="ns">
+        <data type="string"/>
+      </attribute>  
+
+      <oneOrMore>
+        <choice>
+          <ref name="element"/>
+          <ref name="optional"/>
+        </choice>  
+      </oneOrMore>  
+    </element>  
+  </define>
+
+  <define name="element">
+    <element name="element">
+      <attribute name="name">
+        <data type="QName"/>
+      </attribute>
+      <choice>
+        <element name="choice">
+          <oneOrMore>
+            <element name="value">
+              <data type="string"/>
+            </element>
+          </oneOrMore>  
+        </element>  
+        <element name="value">
+          <data type="string"/>
+        </element>  
+        <element name="text">
+          <empty/>
+        </element>  
+        <element name="data">
+          <ref name="data"/>
+        </element>  
+        <element name="externalRef">
+          <attribute name="href"> 
+            <value>http://riddl.org/ns/common-patterns/properties/1.0/map.rng</value>
+          </attribute>
+        </element>  
+      </choice>  
+    </element>
+  </define>
+
+  <define name="optional">
+    <element name="optional">
+      <ref name="element"/>
+    </element>
+  </define>
+
+</grammar>

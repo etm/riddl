@@ -1,0 +1,32 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+  <start>
+    <element name="properties">
+      <oneOrMore>
+        <choice>
+          <ref name="value"/>
+          <ref name="value-list"/>
+        </choice>
+      </oneOrMore>  
+   	</element>
+  </start>
+
+  <define name="value">
+    <element>
+      <anyName/>
+      <data type="string"/>
+    </element>
+  </define>  
+         
+  <define name="value-list">
+    <element>
+      <anyName/>
+      <oneOrMore>
+        <choice>
+          <ref name="value"/>
+          <ref name="value-list"/>
+        </choice>
+      </oneOrMore>
+    </element>
+  </define>
+
+</grammar>
