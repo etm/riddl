@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <properties xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
   <state>running</state>
   <context-variables>
@@ -7,5 +8,9 @@
   <endpoints>
     <e1>http://www.heise.de</e1>
     <e2>http://www.univie.ac.at</e2>
-  </endpoints>  
+  </endpoints>
+  <monitors xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
+    <m1>a</m1>
+    <m2>d</m2>
+  </monitors>
 </properties>
