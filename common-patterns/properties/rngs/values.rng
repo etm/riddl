@@ -10,7 +10,7 @@
       <element name="properties">
         <ref name="content"/>
       </element>
-      <element name="not_existing">
+      <element name="not-existing">
         <empty/>
       </element>  
     </choice>

@@ -1,5 +1,5 @@
 <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://relaxng.org/ns/structure/1.0">
-  <include href="ns/relaxng-modular.rng"/>
+  <include href="../../../common/relaxng-modular.rng"/>
 
   <start>
     <ref name="metastart"/>
@@ -17,12 +17,14 @@
         <data type="string"/>
       </attribute>  
 
-      <oneOrMore>
-        <choice>
-          <ref name="element"/>
-          <ref name="optional"/>
-        </choice>  
-      </oneOrMore>  
+      <element name="interleave">
+        <oneOrMore>
+          <choice>
+            <ref name="element"/>
+            <ref name="optional"/>
+          </choice>  
+        </oneOrMore>  
+      </element>  
     </element>  
   </define>
 

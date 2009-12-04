@@ -1,21 +1,23 @@
 <element name="properties" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" ns="http://riddl.org/ns/common-patterns/properties/1.0">
-  <element name="state">
-    <choice>
-      <value>ready</value>
-      <value>running</value>
-      <value>stopped</value>
-      <value>finished</value>
-    </choice>
-  </element>  
-  <element name="context-variables">
-    <externalRef href="http://riddl.org/ns/common-patterns/properties/1.0/map.rng"/>
-  </element>  
-  <element name="endpoints">
-    <externalRef href="http://riddl.org/ns/common-patterns/properties/1.0/map.rng"/>
-  </element>
-  <optional>
-    <element name="monitors">
+  <interleave>
+    <element name="state">
+      <choice>
+        <value>ready</value>
+        <value>running</value>
+        <value>stopped</value>
+        <value>finished</value>
+      </choice>
+    </element>  
+    <element name="context-variables">
       <externalRef href="http://riddl.org/ns/common-patterns/properties/1.0/map.rng"/>
     </element>  
-  </optional>  
+    <element name="endpoints">
+      <externalRef href="http://riddl.org/ns/common-patterns/properties/1.0/map.rng"/>
+    </element>
+    <optional>
+      <element name="monitors">
+        <externalRef href="http://riddl.org/ns/common-patterns/properties/1.0/map.rng"/>
+      </element>  
+    </optional>  
+  </interleave>  
 </element>

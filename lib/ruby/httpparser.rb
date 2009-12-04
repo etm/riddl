@@ -47,7 +47,7 @@ module Riddl
         body << c
         content_length -= c.size
       end
-      body.rewind
+      body.rewind if body.respond_to?(:binmode)
 
       add_to_params(name,body,filename,ctype,nil)
       #}}}

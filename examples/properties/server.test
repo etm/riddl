@@ -18,13 +18,21 @@ until up
 end
 
 begin
-  library = Riddl::Client.new("http://localhost:9292/","description.xml")
-  books = library.resource("/schema")
-  status, res = books.get
+  props = Riddl::Client.new("http://localhost:9292/","description.xml")
+  test = props.resource("/values")
+  status, res = test.post [
+    Riddl::Parameter::Simple.new("key","monitors"),
+    Riddl::Parameter::Simple.new("value","<m1>a</m1><m2>d</m2>"),
+  ]
+  test = props.resource("/values/monitors")
+  status, res = test.get
 
   puts status
+  p "----"
+  p res
+  p "----"
   res.each do |r|
-    puts r.value.read
+    puts r.value.read if r.value.respond_to?(:read)
   end  
 ensure  
   `pkill rackup`
