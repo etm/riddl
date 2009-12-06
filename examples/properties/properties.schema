@@ -1,5 +1,18 @@
 <element name="properties" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://relaxng.org/ns/structure/1.0" ns="http://riddl.org/ns/common-patterns/properties/1.0">
   <interleave>
+    <element name="name">
+      <data type="string">
+        <param name="pattern">\c+</param>
+      </data>
+    </element>
+    <element name="description">
+      <externalRef href="http://riddl.org/ns/common-patterns/properties/1.0/arbitrary.rng"/>
+    </element>
+    <optional>
+      <element name="transformation">
+        <externalRef href="http://riddl.org/ns/common-patterns/properties/1.0/arbitrary.rng"/>
+      </element>
+    </optional>  
     <element name="state">
       <choice>
         <value>ready</value>
@@ -14,10 +27,8 @@
     <element name="endpoints">
       <externalRef href="http://riddl.org/ns/common-patterns/properties/1.0/map.rng"/>
     </element>
-    <optional>
-      <element name="monitors">
-        <externalRef href="http://riddl.org/ns/common-patterns/properties/1.0/map.rng"/>
-      </element>  
-    </optional>  
+    <element name="handlers">
+      <externalRef href="http://riddl.org/ns/common-patterns/properties/1.0/map.rng"/>
+    </element>  
   </interleave>  
 </element>

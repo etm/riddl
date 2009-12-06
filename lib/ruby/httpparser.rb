@@ -29,6 +29,9 @@ module Riddl
 
     def parse_content(input,ctype,content_length,content_disposition,content_id,riddl_type)
       #{{{
+      # fixing for chunked?
+      return if content_length == 0  
+
       ctype = nil if riddl_type == 'simple'
       filename = content_disposition[/ filename="?([^\";]*)"?/ni, 1]
       name = content_disposition[/ name="?([^\";]*)"?/ni, 1] || content_id
