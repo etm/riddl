@@ -3,9 +3,9 @@ require '../../lib/ruby/client'
 require 'socket'
 require 'pp'
 
-t = Thread.new do
-  puts `rackup server.ru`
-end
+#t = Thread.new do
+#  puts `rackup server.ru`
+#end
 
 up = false
 until up
@@ -27,6 +27,14 @@ begin
   test = props.resource("/values/monitors")
   status, res = test.get
 
+  test = props.resource("/values")
+  status, res = test.delete [
+    Riddl::Parameter::Simple.new("key","monitors"),
+  ]  
+
+  test = props.resource("/values/monitors")
+  status, res = test.get
+
   puts status
   p "----"
   p res
@@ -35,6 +43,6 @@ begin
     puts r.value.read if r.value.respond_to?(:read)
   end  
 ensure  
-  `pkill rackup`
-  t.join
+  #`pkill rackup`
+  #t.join
 end

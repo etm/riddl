@@ -139,6 +139,7 @@ module Riddl
       declaration
       #{{{
       return true if message.class == Riddl::Wrapper::Description::Star
+      return true if message.nil? && params == []
       mp = MessageParser.new(params,headers)
       mp.check(message,true)
       #}}}

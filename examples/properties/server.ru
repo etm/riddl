@@ -10,6 +10,7 @@ require 'lib/all'
 require 'lib/keys'
 require 'lib/values'
 require 'lib/addpair'
+require 'lib/delete'
 
 use Rack::ShowStatus
 
@@ -30,6 +31,7 @@ run Riddl::Server.new("description.xml") {
     on resource 'values' do
       run Keys, properties, schema if get
       run AddPair, properties, schema if post 'key-value-pair'
+      run Delete, properties, schema if delete 'key'
       on resource do
         run Values, properties, schema if get
       end

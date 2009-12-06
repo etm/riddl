@@ -4,7 +4,11 @@ class Values < Riddl::Implementation
   def response
     properties = @a[0]
     schema = @a[1]
-    extract_values(properties,schema,@r[1],@r[2])
+    if ret = extract_values(properties,schema,@r[1],@r[2])
+      ret 
+    else
+      @status = 404
+    end  
   end  
 
 end  

@@ -126,7 +126,7 @@ module Riddl
 
         if @wrapper.nil? || @wrapper.description?
           res, response = make_request(@base + @rpath,riddl_method,parameters,headers,qparams)
-          unless @wrapper.nil?
+          if !@wrapper.nil? && res.code.to_i == 200
             unless @wrapper.check_message(response,res,riddl_message.out)
               raise OutputError, "Not a valid output from service."
             end
@@ -137,9 +137,11 @@ module Riddl
         if !@wrapper.nil? && @wrapper.declaration?
           if riddl_message.route.nil?
             res, response = make_request(@rpath,riddl_method,parameters,headers)
-            unless @wrapper.check_message(response,res,riddl_message.out)
-              raise OutputError, "Not a valid output from service."
-            end
+            if res.code.to_i == 200
+              unless @wrapper.check_message(response,res,riddl_message.out)
+                raise OutputError, "Not a valid output from service."
+              end
+            end  
             return res.code.to_i, response
           else
             tp = parameters
@@ -147,7 +149,7 @@ module Riddl
             tq = qparams
             riddl_message.route.each do |m|
               res, response = make_request(m.interface,riddl_method,tp,th,tq)
-              unless @wrapper.check_message(response,res,m.out)
+              if res.code.to_i != 200 || !@wrapper.check_message(response,res,m.out)
                 raise OutputError, "Not a valid output from service."
               end
               unless m == riddl_message.route.last
