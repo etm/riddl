@@ -43,14 +43,19 @@
     <resource relative="schema">
       <get in="*" out="resource-document-schema"/>
       <put in="resource-document-schema"/>
+      <resource relative="rng">
+        <get in="*" out="resource-document-schema"/>
+      </resource>  
+      <resource relative="xsd">
+        <get in="*" out="resource-document-schema"/>
+      </resource>
     </resource>
     <resource relative="values">
       <get in="*" out="keys"/>
       <post in="key-value-pair" out="key"/>
-      <delete in="key"/>
       <resource recursive="true">
         <get in="*" out="value"/>
-        <delete in="key"/>
+        <delete in="*"/>
         <post in="key-value-pair" out="key"/>
         <put in="value"/>
       </resource>

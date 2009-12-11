@@ -73,6 +73,7 @@ module Riddl
           end  
         else
           @riddl_path = '/'
+          @riddl_res.status = 404
           instance_eval(&@riddl_blk)
           if @riddl_cross_site_xhr
             @riddl_res['Access-Control-Allow-Origin'] = '*'
@@ -129,8 +130,8 @@ module Riddl
             :a => args
           }
         )
-        response    = w.response
-        headers     = w.headers
+        response          = w.response
+        headers           = w.headers
         @riddl_res.status = w.status
 
         response = (response.class == Array ? response : [response])
