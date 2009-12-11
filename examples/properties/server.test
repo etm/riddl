@@ -3,9 +3,9 @@ require '../../lib/ruby/client'
 require 'socket'
 require 'pp'
 
-#t = Thread.new do
-#  puts `rackup server.ru`
-#end
+t = Thread.new do
+  puts `rackup server.ru`
+end
 
 up = false
 until up
@@ -19,20 +19,13 @@ end
 
 begin
   props = Riddl::Client.new("http://localhost:9292/","description.xml")
-  test = props.resource("/values")
-  status, res = test.post [
-    Riddl::Parameter::Simple.new("key","monitors"),
-    Riddl::Parameter::Simple.new("value","<m1>a</m1><m2>d</m2>"),
-  ]
-  test = props.resource("/values/monitors")
-  status, res = test.get
+  test = props.resource("/values/transformation")
+  status, res = test.delete
 
-  test = props.resource("/values")
-  status, res = test.delete [
-    Riddl::Parameter::Simple.new("key","monitors"),
-  ]  
-
-  test = props.resource("/values/monitors")
+  #status, res = test.put [
+  #  Riddl::Parameter::Simple.new("value","asdsdyra")
+  #]
+  test = props.resource("/values/transformation")
   status, res = test.get
 
   puts status
@@ -43,6 +36,6 @@ begin
     puts r.value.read if r.value.respond_to?(:read)
   end  
 ensure  
-  #`pkill rackup`
-  #t.join
+  `pkill rackup`
+  t.join
 end

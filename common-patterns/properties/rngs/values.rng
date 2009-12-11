@@ -26,10 +26,12 @@
   </define>
 
   <define name="value">
-    <element>
-      <anyName/>
-      <data type="string"/>
-    </element>
+    <zeroOrMore>
+      <choice>
+        <text/>
+        <ref name="any"/>
+      </choice>
+    </zeroOrMore>
   </define>  
          
   <define name="value-list">
@@ -41,6 +43,21 @@
           <ref name="value-list"/>
         </choice>
       </oneOrMore>
+    </element>
+  </define>
+  
+  <define name="any">
+    <element>
+      <anyName/>
+      <zeroOrMore>
+        <choice>
+          <attribute>
+            <anyName/>
+          </attribute>
+          <text/>
+          <ref name="any"/>
+        </choice>
+      </zeroOrMore>
     </element>
   </define>
 

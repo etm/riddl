@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <properties xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
   <name/>
-  <description/>
   <state>ready</state>
   <context-variables>
     <a>7</a>
@@ -9,10 +8,8 @@
   </context-variables>
   <endpoints>
     <e1>http://www.heise.de</e1>
-    <e2>http://www.univie.ac.at</e2>
+    <e2 xmlns="http://riddl.org/ns/common-patterns/properties/1.0">mager</e2>
   </endpoints>
-  <handlers>
-    <e1>http://www.heise.de</e1>
-    <e2>http://www.univie.ac.at</e2>
-  </handlers>
+  <handlers/>
+  <description xmlns="http://riddl.org/ns/common-patterns/properties/1.0">asss</description>
 </properties>

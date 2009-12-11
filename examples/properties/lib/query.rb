@@ -1,11 +1,10 @@
 class Query < Riddl::Implementation
-
   def response
     properties = @a[0]
     schema = @a[1]
     xml = File::read(properties).gsub(/properties xmlns="[^"]+"|properties xmlns='[^']+'/,'properties')
     e = XML::Smart::string(xml).root.find(@p[0].value)
-    prop = XML::Smart::string("<values xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+    prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
     if e.class == XML::Smart::Dom::NodeSet
       if e.any?
         t = e.first
