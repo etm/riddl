@@ -14,7 +14,7 @@ module Riddl
           mtime = File.mtime(path)
           @headers << Riddl::Header.new("Last-Modified",mtime.httpdate)
           @headers << Riddl::Header.new("ETag",Digest::MD5.hexdigest(mtime.httpdate))
-          htime = @e["HTTP_IF_MODIFIED_SINCE"].nil? ? Time.at(0) : Time.parse(@e["HTTP_IF_MODIFIED_SINCE"])
+          htime = @env["HTTP_IF_MODIFIED_SINCE"].nil? ? Time.at(0) : Time.parse(@env["HTTP_IF_MODIFIED_SINCE"])
           if htime == mtime
             @headers << Riddl::Header.new("Connection","close")
             @status = 304 # Not modified
