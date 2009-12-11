@@ -168,7 +168,6 @@ module Riddl
     def delete(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'delete' end
     def put(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'put' end
     def check(min)
-      return if @riddl_norun
       @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name
     end
 

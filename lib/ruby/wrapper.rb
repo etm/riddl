@@ -25,6 +25,7 @@ module Riddl
         res.resources.each do |name,r|
           ret += rpaths(r,what == '/' ? what : what + '/')
         end
+        ret.sort!
         ret
         #}}}
       end  
