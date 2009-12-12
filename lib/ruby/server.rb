@@ -136,6 +136,10 @@ module Riddl
 
         response = (response.class == Array ? response : [response])
         headers  = (headers.class == Array ? headers : [headers])
+        response.delete_if do |r|
+          r.class != Riddl::Parameter::Simple && r.class != Riddl::Parameter::Complex
+        end
+        response.compact!
         if @riddl_process_out && @riddl_res.status == 200
           unless @riddl_description.check_message(response,headers,@riddl_message.out)
             @riddl_log.puts "500: the return for the #{@riddl_method} is not matching anything in the description."
