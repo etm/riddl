@@ -4,7 +4,15 @@ require File.expand_path(File.dirname(__FILE__) + '/description/message_and_tran
 
 module Riddl
   class Wrapper
-    class Description
+    class Description < WrapperUtils
+
+      def paths(res=@resource,what='')
+        rpaths(res,what)
+      end
+      def get_resource(path)
+        get_resource_deep(path,@resource)
+      end  
+      
       def visualize(res=@resource,what='')
         #{{{
         what += res.path
@@ -22,32 +30,6 @@ module Riddl
         end
         #}}}
       end
-
-      def paths(res=@resource,what='')
-        #{{{
-        what += what == '' ? '/' : res.path
-        ret = [[what,res.recursive]]
-        res.resources.each do |name,r|
-          ret += paths(r,what == '/' ? what : what + '/')
-        end
-        ret
-        #}}}
-      end
-
-      def get_resource(path)
-        #{{{
-        pres = @resource
-        path.split('/').each do |pa|
-          next if pa == ""
-          if pres.resources.has_key?(pa)
-            pres = pres.resources[pa]
-          else
-            return nil
-          end
-        end
-        pres
-        #}}}
-      end  
 
       def add_description(des,res,desres,path=nil,rec=nil)
         #{{{
@@ -76,7 +58,7 @@ module Riddl
         add_description(des,@resource,desres)
         #}}}
       end
-    end
 
+    end
   end
 end

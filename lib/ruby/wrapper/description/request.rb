@@ -1,6 +1,6 @@
 module Riddl
   class Wrapper
-    class Description
+    class Description < WrapperUtils
 
       class RequestBase
         #{{{

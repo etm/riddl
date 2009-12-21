@@ -1,0 +1,22 @@
+<properties xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
+  <name type="value">
+    <data type="string">
+      <param name="pattern">\c*</param>
+    </data>
+  </name>
+  <description type="content"/>
+  <optional>
+    <transformation type="content"/>
+  </optional>  
+  <state type="value">
+    <choice>
+      <value>ready</value>
+      <value>running</value>
+      <value>stopped</value>
+      <value>finished</value>
+    </choice>
+  </state>  
+  <context-variables type="map"/>
+  <endpoints type="map"/>
+  <handlers type="map"/>
+</properties>

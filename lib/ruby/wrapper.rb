@@ -1,6 +1,39 @@
 require 'rubygems'
 gem 'ruby-xml-smart', '>= 0.2.0.1'
 require 'xml/smart'
+
+module Riddl
+  class Wrapper
+    class WrapperUtils
+      def get_resource_deep(path,pres)
+        #{{{
+        path.split('/').each do |pa|
+          next if pa == ""
+          if pres.resources.has_key?(pa)
+            pres = pres.resources[pa]
+          else
+            return nil
+          end
+        end
+        pres
+        #}}}
+      end
+      def rpaths(res,what)
+        #{{{
+        what += what == '' ? '/' : res.path
+        ret = [[what,res.recursive]]
+        res.resources.each do |name,r|
+          ret += rpaths(r,what == '/' ? what : what + '/')
+        end
+        ret.sort!
+        ret
+        #}}}
+      end  
+      protected :rpaths, :get_resource_deep
+    end
+  end  
+end
+    
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/description')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/declaration')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/messageparser')
@@ -16,8 +49,8 @@ module Riddl
     VERSION = "#{VERSION_MAJOR}.#{VERSION_MINOR}"
     DESCRIPTION = "http://riddl.org/ns/description/#{VERSION}"
     DECLARATION = "http://riddl.org/ns/declaration/#{VERSION}"
-    DESCRIPTION_FILE = "#{File.dirname(__FILE__)}/ns/description-#{VERSION_MAJOR}_#{VERSION_MINOR}.rng"
-    DECLARATION_FILE = "#{File.dirname(__FILE__)}/ns/declaration-#{VERSION_MAJOR}_#{VERSION_MINOR}.rng"
+    DESCRIPTION_FILE = "#{File.dirname(__FILE__)}/ns/description/#{VERSION_MAJOR}.#{VERSION_MINOR}/description.rng"
+    DECLARATION_FILE = "#{File.dirname(__FILE__)}/ns/declaration/#{VERSION_MAJOR}.#{VERSION_MINOR}/declaration.rng"
     COMMON = "datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"#{DESCRIPTION}\" xmlns:xi=\"http://www.w3.org/2001/XInclude\""
     CHECK = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"><data/></element>"
     #}}}
@@ -107,6 +140,7 @@ module Riddl
       declaration
       #{{{
       return true if message.class == Riddl::Wrapper::Description::Star
+      return true if message.nil? && params == []
       mp = MessageParser.new(params,headers)
       mp.check(message,true)
       #}}}
@@ -148,7 +182,7 @@ module Riddl
       tmp = @description.paths if @is_description 
       tmp = @declaration.paths if @is_declaration
       tmp.map do |t|
-        [t[0],Regexp.new("^" + t[0].gsub(/\{\}/,"[^/]+") + (t[1] ? '' : '$'))]
+        [t[0],Regexp.new("^" + t[0].gsub(/\{\}/,"[^/]+") + (t[1] ? '\/?' : '\/?$'))]
       end
       #}}}
     end
@@ -166,7 +200,7 @@ module Riddl
       attr_reader :in, :out, :route
       #}}}
     end
-
+    
     def declaration?; @is_declaration; end
     def description?; @is_description; end
   end
