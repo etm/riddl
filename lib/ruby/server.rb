@@ -14,20 +14,20 @@ module Riddl
     attr_reader :env, :req, :res
 
     def initialize(description,&blk)
-      @description = Riddl::Wrapper::new(description)
-      raise SpecificationError, 'No RIDDL description found.' unless @description.description?
-      raise SpecificationError, 'RIDDL description does not conform to specification' unless @description.validate!
-      @description.load_necessary_handlers!
+      @riddl_description = Riddl::Wrapper::new(description)
+      raise SpecificationError, 'No RIDDL description found.' unless @riddl_description.description?
+      raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl_description.validate!
+      @riddl_description.load_necessary_handlers!
       
-      @norun = true
-      @logger = nil
-      @process_out = true 
-      @cross_site_xhr = false
-      @blk =  nil
+      @riddl_norun = true
+      @riddl_logger = nil
+      @riddl_process_out = true 
+      @riddl_cross_site_xhr = false
+      @riddl_blk =  nil
       instance_eval(&blk)
-      @norun = false
+      @riddl_norun = false
 
-      @paths = @description.paths
+      @riddl_paths = @riddl_description.paths
     end
 
     def call(env)
@@ -35,109 +35,131 @@ module Riddl
     end
 
     def _call(env)
-      time = Time.now  unless @logger.nil?
-      @pinfo = env["PATH_INFO"].gsub(/\/+/,'/')
-      @env = env
-      @req = Rack::Request.new(env)
-      @res = Rack::Response.new
-      @log = @env['rack.errors']
-      @riddl_path = @paths.find{ |e| e[1] =~ @pinfo }
+      time = Time.now  unless @riddl_logger.nil?
+      @riddl_pinfo = env["PATH_INFO"].gsub(/\/+/,'/')
+      @riddl_env = env
+      @riddl_req = Rack::Request.new(env)
+      @riddl_res = Rack::Response.new
+      @riddl_log = @riddl_env['rack.errors']
+      @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
 
-      if @riddl_path
-        @headers = {}
-        @env.each do |h,v|
-          @headers[$1] = v if h =~ /^HTTP_(.*)$/
+      if @riddl_matching_path
+        @riddl_headers = {}
+        @riddl_env.each do |h,v|
+          @riddl_headers[$1] = v if h =~ /^HTTP_(.*)$/
         end
-        @parameters = Riddl::HttpParser.new(
-          @env['QUERY_STRING'],
-          @env['rack.input'],
-          @env['CONTENT_TYPE'],
-          @env['CONTENT_LENGTH'],
-          @env['HTTP_CONTENT_DISPOSITION'],
-          @env['HTTP_CONTENT_ID'],
-          @env['HTTP_RIDDL_TYPE']
+        @riddl_parameters = Riddl::HttpParser.new(
+          @riddl_env['QUERY_STRING'],
+          @riddl_env['rack.input'],
+          @riddl_env['CONTENT_TYPE'],
+          @riddl_env['CONTENT_LENGTH'],
+          @riddl_env['HTTP_CONTENT_DISPOSITION'],
+          @riddl_env['HTTP_CONTENT_ID'],
+          @riddl_env['HTTP_RIDDL_TYPE']
         ).params
-        @riddl_method = @env['REQUEST_METHOD'].downcase
+        @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
 
-        @riddl_message = @description.io_messages(@riddl_path[0],@riddl_method,@parameters,@headers)
+        @riddl_message = @riddl_description.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
         if @riddl_message.nil?
-          if @env.has_key?('HTTP_ORIGIN') && @cross_site_xhr
-            @res['Access-Control-Allow-Origin'] = @env['HTTP_ORIGIN']
-            @res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-            @res['Access-Control-Max-Age'] = '0'
-            @res['Content-Length'] = '0'
-            @res.status = 200
+          if @riddl_env.has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
+            @riddl_res['Access-Control-Allow-Origin'] = @riddl_env['HTTP_ORIGIN']
+            @riddl_res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            @riddl_res['Access-Control-Max-Age'] = '0'
+            @riddl_res['Content-Length'] = '0'
+            @riddl_res.status = 200
           else
-            @log.puts "501: the #{@riddl_method} parameters are not matching anything in the description."
-            @res.status = 501 # not implemented?!
+            @riddl_log.puts "501: the #{@riddl_method} parameters are not matching anything in the description."
+            @riddl_res.status = 501 # not implemented?!
           end  
         else
-          @path = '/'
-          instance_eval(&@blk)
-          if @cross_site_xhr
-            @res['Access-Control-Allow-Origin'] = '*'
-            @res['Access-Control-Max-Age'] = '0'
+          @riddl_path = '/'
+          @riddl_res.status = 404
+          instance_eval(&@riddl_blk)
+          if @riddl_cross_site_xhr
+            @riddl_res['Access-Control-Allow-Origin'] = '*'
+            @riddl_res['Access-Control-Max-Age'] = '0'
           end
         end  
       else
-        @log.puts "404: this resource for sure does not exist."
-        @res.status = 404 # client requests wrong path
+        @riddl_log.puts "404: this resource for sure does not exist."
+        @riddl_res.status = 404 # client requests wrong path
       end
-      @logger.info(@env,@res,time) unless @logger.nil?
-      @res.finish
+      @riddl_logger.info(@riddl_env,@riddl_res,time) unless @riddl_logger.nil?
+      @riddl_res.finish
     end
   
     def on(resource, &block)
-      if @norun
-        @blk = block if @blk.nil?
+      if @riddl_norun
+        @riddl_blk = block if @riddl_blk.nil?
       else  
-        @path << (@path == '/' ? resource : '/' + resource)
-        yield
-        @path = File.dirname(@path).gsub(/\/+/,'/')
+        @riddl_path << (@riddl_path == '/' ? resource : '/' + resource)
+        block.call(
+          { :h => @riddl_headers, 
+            :p => @riddl_parameters, 
+            :r => @riddl_pinfo.sub(/\//,'').split('/'), 
+            :m => @riddl_method, 
+            :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
+            :match => @riddl_path.sub(/\//,'').split('/') 
+          }
+        )
+        @riddl_path = File.dirname(@riddl_path).gsub(/\/+/,'/')
       end  
     end
 
     def process_out(pout)
-      @process_out = pout
+      @riddl_process_out = pout
     end
     def cross_site_xhr(csxhr)
-      @cross_site_xhr = csxhr
+      @riddl_cross_site_xhr = csxhr
     end
     def logger(lgr)
-      @logger = lgr
+      @riddl_logger = lgr
     end
 
     def run(what,*args)
-      return if @norun
-      return if @path == ''
+      return if @riddl_norun
+      return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::Implementation
-        w = what.new(@headers,@parameters,@pinfo.sub(/\//,'').split('/'),@path.sub(/\//,'').split('/'),@env.reject{|k,v| k =~ /^rack\./},args)
-        response    = w.response
-        headers     = w.headers
-        @res.status = w.status
+        w = what.new(
+          { :h => @riddl_headers, 
+            :p => @riddl_parameters, 
+            :r => @riddl_pinfo.sub(/\//,'').split('/'), 
+            :m => @riddl_method, 
+            :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
+            :match => @riddl_path.sub(/\//,'').split('/'),
+            :a => args
+          }
+        )
+        response          = w.response
+        headers           = w.headers
+        @riddl_res.status = w.status
 
         response = (response.class == Array ? response : [response])
         headers  = (headers.class == Array ? headers : [headers])
-        if @process_out && @res.status == 200
-          unless @description.check_message(response,headers,@riddl_message.out)
-            @log.puts "500: the return for the #{@riddl_method} is not matching anything in the description."
-            @res.status = 500
+        response.delete_if do |r|
+          r.class != Riddl::Parameter::Simple && r.class != Riddl::Parameter::Complex
+        end
+        response.compact!
+        if @riddl_process_out && @riddl_res.status == 200
+          unless @riddl_description.check_message(response,headers,@riddl_message.out)
+            @riddl_log.puts "500: the return for the #{@riddl_method} is not matching anything in the description."
+            @riddl_res.status = 500
             return
           end  
         end
-        if @res.status == 200
-          @res.write HttpGenerator.new(response,@res).generate.read
+        if @riddl_res.status == 200
+          @riddl_res.write HttpGenerator.new(response,@riddl_res).generate.read
         end  
         headers.each do |h|
           if h.class == Riddl::Header
-            @res[h.name] = h.value
+            @riddl_res[h.name] = h.value
           end  
         end
       end
     end
 
     def method(what)
-      return if @norun
+      return if @riddl_norun
       if what.class == Hash
         what.each do |met,min|
           return true if check(min) && @riddl_method == met.to_s.downcase
@@ -145,15 +167,14 @@ module Riddl
       end
       false
     end  
-    def post(min='*'); return if @norun; check(min) && @riddl_method == 'post' end
-    def get(min='*'); return if @norun; check(min) && @riddl_method == 'get' end
-    def delete(min='*'); return if @norun; check(min) && @riddl_method == 'delete' end
-    def put(min='*'); return if @norun; check(min) && @riddl_method == 'put' end
+    def post(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'post' end
+    def get(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'get' end
+    def delete(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'delete' end
+    def put(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'put' end
     def check(min)
-       return if @norun
-       @path == @riddl_path[0] && min == @riddl_message.in.name
+      @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name
     end
 
-    def resource(path=nil); return if @norun; path.nil? ? '{}' : path end
+    def resource(path=nil); return if @riddl_norun; path.nil? ? '{}' : path end
   end
 end

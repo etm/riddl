@@ -4,37 +4,18 @@ require File.expand_path(File.dirname(__FILE__) + '/declaration/facade')
 
 module Riddl
   class Wrapper
-    class Declaration
+    class Declaration < WrapperUtils
         
+      def get_resource(path)
+        get_resource_deep(path,@facade.resource)
+      end  
+      def paths
+        rpaths(@facade.resource,'')
+      end
+      
       def description_xml
         @facade.description_xml
       end  
-        
-      def get_resource(path)
-        #{{{
-        pres = @facade.resource
-        path.split('/').each do |pa|
-          next if pa == ""
-          if pres.resources.has_key?(pa)
-            pres = pres.resources[pa]
-          else
-            return nil
-          end
-        end
-        pres
-        #}}}
-      end  
-      
-      def paths(res=@facade.resource,what='')
-        #{{{
-        what += what == '' ? '/' : res.path + '/'
-        ret = [[what,res.recursive]]
-        res.resources.each do |name,r|
-          ret += paths(r,what)
-        end
-        ret
-        #}}}
-      end
 
       def visualize_tiles_and_layers
         #{{{
@@ -85,13 +66,14 @@ module Riddl
             block = layer.find("dec:block")
 
             lname = layer.attributes['name']
+            lpath = riddl.find("string(/dec:declaration/dec:interface[@name=\"#{lname}\"]/@path)")
             des = riddl.find("/dec:declaration/dec:interface[@name=\"#{lname}\"]/des:description").first
             desres = des.find("des:resource").first
             if apply_to.empty?
-              til.add_description(des,desres,"/",index,"#{lname}:",block)
+              til.add_description(des,desres,"/",index,"#{lpath}",block)
             else
               apply_to.each do |at|
-                til.add_description(des,desres,at.to_s,index,"#{lname}:",block)
+                til.add_description(des,desres,at.to_s,index,"#{lpath}",block)
               end
             end
           end
@@ -104,6 +86,7 @@ module Riddl
         end
         #}}}
       end
+
     end
   end
 end

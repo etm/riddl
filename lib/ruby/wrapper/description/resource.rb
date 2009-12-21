@@ -1,6 +1,6 @@
 module Riddl
   class Wrapper
-    class Description
+    class Description < WrapperUtils
       
       class Resource
         def initialize(path=nil,recursive=false)
@@ -81,6 +81,8 @@ module Riddl
         def compose!
           #{{{
           @requests.each do |k,v|
+            ### remove all emtpy layers  
+            v.compact!
             case v.size
               when 0:
               when 1:

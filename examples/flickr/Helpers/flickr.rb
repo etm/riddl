@@ -13,10 +13,16 @@ class FlickrHelper
 
   attr_reader :api_key, :api_secret, :auth_token
 
-  def sign(ary)
+  def sign(ary,names=[])
     sig = @api_secret
     ary.sort{|a,b|a.name<=>b.name}.each do |e|
-      sig += "#{e.name}#{e.value}" if e.class == Riddl::Parameter::Simple
+      if e.class == Riddl::Parameter::Simple
+        if names.empty?
+          sig += "#{e.name}#{e.value}"
+        else  
+          sig += "#{e.name}#{e.value}" if names.include?(e.name)
+        end  
+      end  
     end
     Digest::MD5.hexdigest(sig)
   end

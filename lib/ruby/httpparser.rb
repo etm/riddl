@@ -29,6 +29,9 @@ module Riddl
 
     def parse_content(input,ctype,content_length,content_disposition,content_id,riddl_type)
       #{{{
+      # fixing for chunked?
+      return if content_length == 0  
+
       ctype = nil if riddl_type == 'simple'
       filename = content_disposition[/ filename="?([^\";]*)"?/ni, 1]
       name = content_disposition[/ name="?([^\";]*)"?/ni, 1] || content_id
@@ -39,15 +42,15 @@ module Riddl
       else
         body = ''
       end
-      
+
       bufsize = 16384
-         
       until content_length <= 0
         c = input.read(bufsize < content_length ? bufsize : content_length)
         raise EOFError, "bad content body"  if c.nil? || c.empty?
         body << c
         content_length -= c.size
-      end  
+      end
+      body.rewind if body.respond_to?(:binmode)
 
       add_to_params(name,body,filename,ctype,nil)
       #}}}

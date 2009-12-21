@@ -1,0 +1,69 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+  <include href="../../../common/relaxng-modular.rng"/>
+
+  <start>
+    <ref name="metastart"/>
+  </start>  
+
+  <define name="metastart">
+    <element name="properties">
+      <oneOrMore>
+        <choice>
+          <ref name="element"/>
+          <ref name="optional"/>
+        </choice>  
+      </oneOrMore>  
+    </element>  
+  </define>
+
+  <define name="element">
+    <element>
+      <anyName/>
+      <attribute name="type">
+        <choice>
+          <value>content</value>
+          <value>value</value>
+          <value>map</value>
+          <value>list</value>
+        </choice>
+      </attribute>
+      <optional>
+        <choice>
+          <element name="choice">
+            <ref name="common-atts"/>
+            <oneOrMore>
+              <element name="value">
+                <optional>
+                  <attribute name="type">
+                    <data type="NCName"/>
+                  </attribute>
+                </optional>
+                <ref name="common-atts"/>
+                <text/>
+              </element>
+            </oneOrMore>
+          </element>  
+          <element name="text"><empty/></element>
+          <element name="data">
+            <ref name="common-atts"/>
+            <ref name="data"/>
+          </element>
+          <element name="externalRef">
+            <attribute name="href">
+              <data type="anyURI"/>
+            </attribute>
+            <ref name="common-atts"/>
+            <ref name="other"/>
+          </element>
+        </choice>  
+      </optional>  
+    </element>
+  </define>
+
+  <define name="optional">
+    <element name="optional">
+      <ref name="element"/>
+    </element>
+  </define>
+
+</grammar>

@@ -1,6 +1,6 @@
 module Riddl
   class Wrapper
-    class Declaration
+    class Declaration < WrapperUtils
 
       class Tile
         #{{
@@ -22,7 +22,7 @@ module Riddl
                 puts "    Layer #{i}:"
                 l.each do |r|
                   puts "      #{r.class.name.gsub(/[^\:]+::/,'')}: #{r.visualize}"
-                end
+                end unless l.nil?
               end
             end
           end
@@ -53,7 +53,7 @@ module Riddl
             if rel == bpath
               res.remove_requests(des,bl.attributes)
             end  
-          end  
+          end
           desres.find("des:resource").each do |desres|
             cpath = desres.attributes['relative'] || "{}"
             add_description(des,desres,cpath,index,interface+"/"+cpath,block,res,(rel+"/"+cpath).gsub(/\/+/,'/'))
@@ -64,8 +64,6 @@ module Riddl
           
         def compose!(res=@base_path)
           #{{{
-          pp res
-          p "-----"
           res.compose!
           res.resources.each do |k,r|
             compose!(r)
