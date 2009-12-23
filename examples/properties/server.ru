@@ -18,13 +18,13 @@ use Rack::ShowStatus
 
 run Riddl::Server.new("description.xml") {
   process_out false
-  on resource do
-    properties = "properties.xml"
-    schema     = "properties.schema"
-    if !File.exists?(properties) || !File.exists?(schema)
-      raise "properties or schema file not found"
-    end
+  properties = "properties.xml"
+  schema     = "properties.schema"
+  if !File.exists?(properties) || !File.exists?(schema)
+    raise "properties or schema file not found"
+  end
 
+  on resource do
     run All, properties, schema if get
     run Query, properties, schema if get 'query'
     on resource 'schema' do
@@ -36,7 +36,7 @@ run Riddl::Server.new("description.xml") {
     on resource 'values' do
       run Keys, properties, schema if get
       run AddPair, properties, schema if post 'key-value-pair'
-      on resource do
+      on resource do |res|
         run AddPair, properties, schema if post 'key-value-pair'
         run Values, properties, schema if get
         run Delete, properties, schema if delete
