@@ -5,7 +5,7 @@ class ServicesGET < Riddl::Implementation
 
 
   def response
-    $url = "http://" + @e['HTTP_HOST'] + "/"
+    $url = "http://" + @env['HTTP_HOST'] + "/"
     if File.exist?("repository/#{@r[0]}/#{@r[1]}/#{@r.last}") == false
       @status = 410 # 410: Gone
       puts "Subgroup not found"
