@@ -1,12 +1,7 @@
 #!/usr/bin/ruby
 require '../../lib/ruby/client'
 
-library = Riddl::Client.new("http://localhost:9292/")
-books = library.resource("/books")
+library = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/")
+books = library.resource("/groups")
 
-status, res = books.request :get => [
-  #Riddl::Header.new("Library",7),
-  Riddl::Parameter::Simple.new("author","mangler"),
-  Riddl::Parameter::Simple.new("title","12")
-]
-p status, res
+status, res = books.request :get => []

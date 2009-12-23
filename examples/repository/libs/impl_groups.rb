@@ -4,7 +4,7 @@ class GroupsGET < Riddl::Implementation
 
   
   def response
-    $url = "http://" + @e['HTTP_HOST'] + "/"
+    $url = "http://" + @env['HTTP_HOST'] + "/"
     groups = []
     Dir["repository/#{@r[0]}/*"].sort.each do |f|
       if File::directory? f
