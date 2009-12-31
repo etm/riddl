@@ -19,13 +19,11 @@ end
 
 begin
   props = Riddl::Client.new("http://localhost:9292/","description.xml")
-  test = props.resource("/values/transformation")
-  status, res = test.delete
 
-  #status, res = test.put [
-  #  Riddl::Parameter::Simple.new("value","asdsdyra")
-  #]
-  test = props.resource("/values/transformation")
+  test = props.resource("/values/name")
+  status, res = test.put [
+    Riddl::Parameter::Simple.new("value","lala")
+  ]
   status, res = test.get
 
   puts status
