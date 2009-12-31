@@ -3,7 +3,7 @@
   <message name="value">
     <choice>
       <parameter name="value" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-        <xi:include href="rngs/values.rng"/>
+        <xi:include href="properties.rngs/values.rng"/>
       </parameter>
       <parameter name="value" type="string"/>
     </choice>
@@ -18,7 +18,7 @@
 
   <message name="keys">
     <parameter name="keys" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <xi:include href="rngs/keys.rng"/>
+      <xi:include href="properties.rngs/keys.rng"/>
     </parameter>
   </message>
   <message name="key-value-pair">
