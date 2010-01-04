@@ -74,7 +74,17 @@ module Riddl
         else
           @riddl_path = '/'
           @riddl_res.status = 404
-          instance_eval(&@riddl_blk)
+          instance_exec(
+            {
+              :h => @riddl_headers, 
+              :p => @riddl_parameters, 
+              :r => @riddl_pinfo.sub(/\//,'').split('/'), 
+              :m => @riddl_method, 
+              :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
+              :match => @riddl_path.sub(/\//,'').split('/') 
+            },
+            &@riddl_blk
+          )  
           if @riddl_cross_site_xhr
             @riddl_res['Access-Control-Allow-Origin'] = '*'
             @riddl_res['Access-Control-Max-Age'] = '0'
