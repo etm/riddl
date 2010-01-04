@@ -18,7 +18,24 @@ module Riddl
           result
         end
       end #}}} 
+      
+      def self::helper(fdeclaration,include_description)
+        riddl = Riddl::Wrapper.new(fdeclaration)
+        unless riddl.declaration?
+          puts 'Not a RIDDL declaration.' 
+          exit
+        end
+        unless riddl.validate!
+          puts "Does not conform to specification."
+          exit
+        end
 
+        d = riddl.declaration
+        s = d.description_xml(true)
+
+        [riddl,s]
+      end
+        
     end
   end
 end
