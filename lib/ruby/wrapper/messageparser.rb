@@ -21,7 +21,7 @@ module Riddl
         m.find("des:header").each do |h|
           return false unless header h
         end
-
+        
         if ignore_name
           # if only one parameter, ignore the name
           @numparams = m.find("count(//des:parameter)").to_i

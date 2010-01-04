@@ -1,5 +1,6 @@
 require 'rubygems'
-gem 'ruby-xml-smart', '>= 0.2.0.1'
+require 'open-uri'
+gem 'ruby-xml-smart', '>= 0.2.2.1'
 require 'xml/smart'
 
 module Riddl
@@ -55,9 +56,20 @@ module Riddl
     CHECK = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"><data/></element>"
     #}}}
 
-    def initialize(name,protocol="GET")
+    def initialize(name)
       #{{{
-      @doc = XML::Smart.open(name)
+      @doc = nil
+      begin
+        fh = name.respond_to?(:read) ? name : File.open(name)
+        @doc = XML::Smart.string(fh.read)
+        fh.close
+      rescue
+        begin
+          @doc = XML::Smart.string(name)
+        rescue
+          raise SpecificationError, 'No RIDDL description or declaration found (neither a file, url or string).'
+        end
+      end  
       @doc.xinclude!
       @doc.namespaces = {
         'des' => DESCRIPTION,
@@ -117,17 +129,17 @@ module Riddl
         if @is_declaration
           r = req[operation]
           r.select{|o|o.result.class==Riddl::Wrapper::Description::RequestInOut}.each do |o|
-            return IOMessages.new(o.result.in, o.result.out, o.route) if mp.check(o.result.in)
+            return IOMessages.new(o.result.in, o.result.out, o.route, o.result.interface) if mp.check(o.result.in)
           end
           r.select{|o|o.result.class==Riddl::Wrapper::Description::RequestTransformation}.each do |o|
             # TODO guess structure from input, create new output structure
-            return IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new, o.route)
+            return IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new, o.route, o.result.interface)
           end
           r.select{|o|o.result.class==Riddl::Wrapper::Description::RequestStarOut}.each do |o|
-            return IOMessages.new(Riddl::Wrapper::Description::Star.new, o.result.out, o.route)
+            return IOMessages.new(Riddl::Wrapper::Description::Star.new, o.result.out, o.route, o.result.interface)
           end
           r.select{|o|o.result.class==Riddl::Wrapper::Description::RequestPass}.each do |o|
-            return IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new, o.route)
+            return IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new, o.route, o.result.interface)
           end
         end  
       end  
@@ -189,15 +201,16 @@ module Riddl
 
     class IOMessages
       #{{{
-      def initialize(min,mout,route=nil)
+      def initialize(min,mout,route=nil,interface=nil)
        @in = min
        @out = mout
        @route = route
+       @interface = interface
       end
       def route?
         !(route.nil? || route.empty?)
       end
-      attr_reader :in, :out, :route
+      attr_reader :in, :out, :route, :interface
       #}}}
     end
     
