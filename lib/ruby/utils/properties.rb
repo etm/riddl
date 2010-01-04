@@ -10,7 +10,29 @@ module Riddl
         def self::modifiable?(schema,property)
           schema.find("boolean(/p:properties/p:#{property}[@modifiable='true'])")
         end
-      end #}}} 
+
+        def self::schema(fschema)
+          fschema  = fschema.gsub(/^\/+/,'/')
+          unless File.exists?(fschema)
+            raise "schema file not found"
+          end
+          schema      = XML::Smart::open(fschema)
+          schema.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+          if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
+            raise "properties schema transformation file not found"
+          end  
+          strans = schema.transform_with(XML::Smart::open(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))
+          [schema,strans]
+        end
+        
+        def self::properties(fproperties)
+          properties  = fproperties.gsub(/^\/+/,'/')
+          unless File.exists?(properties)
+            raise "properties file not found"
+          end
+          properties
+        end
+      end #}}}
 
       class All < Riddl::Implementation #{{{
         def response

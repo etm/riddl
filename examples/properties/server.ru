@@ -9,17 +9,8 @@ use Rack::ShowStatus
 run Riddl::Server.new("description.xml") {
   process_out false
 
-  properties  = "properties.xml"
-  fschema     = "properties.schema"
-  if !File.exists?(properties) || !File.exists?(fschema)
-    raise "properties or schema file not found"
-  end
-  schema      = XML::Smart::open(fschema)
-  schema.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
-  if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
-    raise "properties schema transformation file not found"
-  end  
-  strans = schema.transform_with(XML::Smart::open(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))
+  schema, strans = Riddl::Utils::Properties::Helper::schema(File.dirname(__FILE__) + '/properties.schema')
+  properties = Riddl::Utils::Properties::Helper::properties(File.dirname(__FILE__) + '/properties.xml')
 
   on resource do
     run Riddl::Utils::Properties::All, properties, schema, strans if get
