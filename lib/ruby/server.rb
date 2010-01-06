@@ -115,6 +115,10 @@ module Riddl
         @riddl_path = File.dirname(@riddl_path).gsub(/\/+/,'/')
       end  
     end
+    
+    def use(blk,*args)
+      instance_eval(&blk)
+    end
 
     def process_out(pout)
       @riddl_process_out = pout
