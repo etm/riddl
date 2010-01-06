@@ -6,33 +6,54 @@ module Riddl
       VERSION_MINOR = 0
       PROPERTIES_SCHEMA_XSL_RNG = "#{File.dirname(__FILE__)}/../ns/common-patterns/properties/#{VERSION_MAJOR}.#{VERSION_MINOR}/properties.schema.xsl"
 
-      module Helper #{{{
-        def self::modifiable?(schema,property)
-          schema.find("boolean(/p:properties/p:#{property}[@modifiable='true'])")
-        end
-
-        def self::schema(fschema)
-          fschema  = fschema.gsub(/^\/+/,'/')
-          unless File.exists?(fschema)
-            raise "schema file not found"
+      def self::implementation(properties,schema,strans)
+        lambda {
+          run Riddl::Utils::Properties::All, properties, schema, strans if get
+          run Riddl::Utils::Properties::Query, properties, schema, strans if get 'query'
+          on resource 'schema' do
+            run Riddl::Utils::Properties::Schema, properties, schema, strans if get
+            on resource 'rng' do
+              run Riddl::Utils::Properties::RngSchema, properties, schema, strans if get
+            end  
           end
-          schema      = XML::Smart::open(fschema)
-          schema.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
-          if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
-            raise "properties schema transformation file not found"
+          on resource 'values' do
+            run Riddl::Utils::Properties::Keys, properties, schema, strans if get
+            run Riddl::Utils::Properties::AddPair, properties, schema, strans if post 'key-value-pair'
+            on resource do |res|
+              run Riddl::Utils::Properties::AddPair, properties, schema, strans if post 'key-value-pair'
+              run Riddl::Utils::Properties::Values, properties, schema, strans if get
+              run Riddl::Utils::Properties::Delete, properties, schema, strans if delete
+              run Riddl::Utils::Properties::Put, properties, schema, strans if put 'value'
+            end
           end  
-          strans = schema.transform_with(XML::Smart::open(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))
-          [schema,strans]
+        }
+      end  
+
+      def self::schema(fschema)
+        fschema  = fschema.gsub(/^\/+/,'/')
+        unless File.exists?(fschema)
+          raise "schema file not found"
         end
-        
-        def self::properties(fproperties)
-          properties  = fproperties.gsub(/^\/+/,'/')
-          unless File.exists?(properties)
-            raise "properties file not found"
-          end
-          properties
+        schema      = XML::Smart::open(fschema)
+        schema.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+        if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
+          raise "properties schema transformation file not found"
+        end  
+        strans = schema.transform_with(XML::Smart::open(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))
+        [schema,strans]
+      end
+      
+      def self::file(fproperties)
+        properties  = fproperties.gsub(/^\/+/,'/')
+        unless File.exists?(properties)
+          raise "properties file not found"
         end
-      end #}}}
+        properties
+      end
+
+      def self::modifiable?(schema,property)
+        schema.find("boolean(/p:properties/p:#{property}[@modifiable='true'])")
+      end
 
       class All < Riddl::Implementation #{{{
         def response
@@ -171,7 +192,7 @@ module Riddl
           value = @p.detect{|p| p.name == 'value'}.value
           property = @r[1]
             
-          unless Helper::modifiable?(schema,property.nil? ? key : property)
+          unless modifiable?(schema,property.nil? ? key : property)
             @status = 500
             return # change properties.schema
           end
@@ -223,7 +244,7 @@ module Riddl
           key = @r[1]
           property = @r[2]
 
-          unless Helper::modifiable?(schema,key)
+          unless modifiable?(schema,key)
             @status = 500
             return # change properties.schema
           end
@@ -262,7 +283,7 @@ module Riddl
           value = @p.detect{|p| p.name == 'value'}.value
           property = @r[2]
 
-          unless Helper::modifiable?(schema,key)
+          unless modifiable?(schema,key)
             @status = 500
             return # change properties.schema
           end
