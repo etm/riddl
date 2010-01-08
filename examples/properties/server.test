@@ -22,9 +22,9 @@ begin
 
   test = props.resource("/values/state")
   status, res = test.put [
-    Riddl::Parameter::Simple.new("value","running")
+    Riddl::Parameter::Simple.new("value","stopped")
   ]
-#  status, res = test.get
+  status, res = test.get
 
   puts status
   p "----"
