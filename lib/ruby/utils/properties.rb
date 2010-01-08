@@ -54,6 +54,12 @@ module Riddl
       def self::modifiable?(schema,property)
         schema.find("boolean(/p:properties/p:#{property}[@modifiable='true'])")
       end
+      def self::valid_state?(schema,property,current,new)
+        schema.find("boolean(/p:properties/p:#{property}/p:#{current}/p:#{new}[@putable='true'])")
+      end
+      def self::is_state?(schema,property)
+        schema.find("boolean(/p:properties/p:#{property}[@type='state'])")
+      end
 
       class All < Riddl::Implementation #{{{
         def response
@@ -146,7 +152,7 @@ module Riddl
                   prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
                 end
                 return Riddl::Parameter::Complex.new("value","text/xml",prop.to_s)
-              when :value
+              when :value, :state
                 res = pdoc.find("string(/p:properties/*[name()=\"#{property}\"]#{add})")
                 return Riddl::Parameter::Simple.new("value",res.to_s)
               when :content
@@ -192,7 +198,7 @@ module Riddl
           value = @p.detect{|p| p.name == 'value'}.value
           property = @r[1]
             
-          unless modifiable?(schema,property.nil? ? key : property)
+          unless Riddl::Utils::Properties::modifiable?(schema,property.nil? ? key : property)
             @status = 500
             return # change properties.schema
           end
@@ -244,7 +250,7 @@ module Riddl
           key = @r[1]
           property = @r[2]
 
-          unless modifiable?(schema,key)
+          unless Riddl::Utils::Properties::modifiable?(schema,key)
             @status = 500
             return # change properties.schema
           end
@@ -283,7 +289,7 @@ module Riddl
           value = @p.detect{|p| p.name == 'value'}.value
           property = @r[2]
 
-          unless modifiable?(schema,key)
+          unless Riddl::Utils::Properties::modifiable?(schema,key)
             @status = 500
             return # change properties.schema
           end
@@ -291,7 +297,7 @@ module Riddl
           path = "p:#{key}" + (property.nil? ? '' : "/p:#{property}")
           pname = property.nil? ? key : property
 
-          newstuff = XML::Smart.string("<#{pname} xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\">#{value}</#{pname}>")
+          newstuff = XML::Smart.string("<#{pname} xmlns='http://riddl.org/ns/common-patterns/properties/1.0'>#{value}</#{pname}>")
           XML::Smart::open(properties) do |doc|
             doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
             nodes = doc.root.find(path)
@@ -299,6 +305,12 @@ module Riddl
               @status = 404
               return # this property does not exist
             end
+            if Riddl::Utils::Properties::is_state?(schema,key)
+              unless Riddl::Utils::Properties::valid_state?(schema,key,nodes.first.to_s,value)
+                @status = 404
+                return # not a valid state from here on
+              end
+            end  
             parent = nodes.first.parent
             nodes.delete_all!
             parent.add(newstuff.root)

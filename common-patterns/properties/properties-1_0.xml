@@ -36,13 +36,12 @@
     <parameter name="query" type="string"/>
   </message>
 
-  <resource>
+  <resource pattern="http://riddl.org/ns/common-patterns/properties/1.0">
     <get in="*" out="resource-document"/>
     <get in="query" out="value"/>
     <put in="resource-document"/>
     <resource relative="schema">
       <get in="*" out="resource-document-schema"/>
-      <put in="resource-document-schema"/>
       <resource relative="rng">
         <get in="*" out="resource-document-schema"/>
       </resource>  
