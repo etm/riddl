@@ -8,7 +8,7 @@
 
   <define name="declaration">
     <element name="declaration">
-      <ref name="riddl-common-atts"/>
+      <ref name="riddl-declaration-other-atts"/>
       <oneOrMore>
         <ref name="riddl-interface"/>
       </oneOrMore>
@@ -81,5 +81,32 @@
       </element>
     </choice>   
   </define>
+  
+  <define name="riddl-declaration-others">
+    <ref name="other"/>
+    <zeroOrMore>
+      <attribute>
+        <anyName>
+          <except>
+            <nsName/>
+            <nsName ns=""/>
+          </except>
+        </anyName>
+      </attribute>
+    </zeroOrMore>
+  </define>  
+
+  <define name="riddl-declaration-other-atts">
+    <zeroOrMore>
+      <attribute>
+        <anyName>
+          <except>
+            <nsName/>
+            <nsName ns=""/>
+          </except>
+        </anyName>
+      </attribute>
+    </zeroOrMore>
+  </define>  
 
 </grammar>
