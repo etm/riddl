@@ -74,6 +74,14 @@
         <ref name="arbitrary"/>
       </xsl:if>
 
+      <xsl:if test="@type='state'">
+        <choice>
+          <xsl:for-each select='*'>
+            <value><xsl:value-of select='name()'/></value>
+          </xsl:for-each>
+        </choice>
+      </xsl:if>
+
       <xsl:if test="@type='value'">
         <xsl:apply-templates mode="copy-no-ns"/>
       </xsl:if>

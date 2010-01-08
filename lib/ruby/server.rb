@@ -74,17 +74,7 @@ module Riddl
         else
           @riddl_path = '/'
           @riddl_res.status = 404
-          instance_exec(
-            {
-              :h => @riddl_headers, 
-              :p => @riddl_parameters, 
-              :r => @riddl_pinfo.sub(/\//,'').split('/'), 
-              :m => @riddl_method, 
-              :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
-              :match => @riddl_path.sub(/\//,'').split('/') 
-            },
-            &@riddl_blk
-          )  
+          instance_exec(info, &@riddl_blk)  
           if @riddl_cross_site_xhr
             @riddl_res['Access-Control-Allow-Origin'] = '*'
             @riddl_res['Access-Control-Max-Age'] = '0'
@@ -103,15 +93,7 @@ module Riddl
         @riddl_blk = block if @riddl_blk.nil?
       else  
         @riddl_path << (@riddl_path == '/' ? resource : '/' + resource)
-        block.call(
-          { :h => @riddl_headers, 
-            :p => @riddl_parameters, 
-            :r => @riddl_pinfo.sub(/\//,'').split('/'), 
-            :m => @riddl_method, 
-            :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
-            :match => @riddl_path.sub(/\//,'').split('/') 
-          }
-        )
+        block.call(info)
         @riddl_path = File.dirname(@riddl_path).gsub(/\/+/,'/')
       end  
     end
@@ -134,16 +116,7 @@ module Riddl
       return if @riddl_norun
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::Implementation
-        w = what.new(
-          { :h => @riddl_headers, 
-            :p => @riddl_parameters, 
-            :r => @riddl_pinfo.sub(/\//,'').split('/'), 
-            :m => @riddl_method, 
-            :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
-            :match => @riddl_path.sub(/\//,'').split('/'),
-            :a => args
-          }
-        )
+        w = what.new(info(:a => args))
         response          = w.response
         headers           = w.headers
         @riddl_res.status = w.status
@@ -190,5 +163,15 @@ module Riddl
     end
 
     def resource(path=nil); return if @riddl_norun; path.nil? ? '{}' : path end
+
+    def info(other={})
+      { :h => @riddl_headers, 
+        :p => @riddl_parameters, 
+        :r => @riddl_pinfo.sub(/\//,'').split('/'), 
+        :m => @riddl_method, 
+        :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
+        :match => @riddl_path.sub(/\//,'').split('/') 
+      }.merge(other)
+    end
   end
 end

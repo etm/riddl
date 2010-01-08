@@ -61,6 +61,30 @@
         </attribute>
         <ref name="other-inside"/>
       </element>
+      <element>
+        <anyName/>
+        <ref name="modifiable"/>
+        <attribute name="type">
+          <choice>
+            <value>state</value>
+          </choice>
+        </attribute>
+        <oneOrMore>
+          <element>
+            <anyName/>
+            <zeroOrMore>
+              <element>
+                <anyName/>
+                <optional>
+                  <attribute name="putable">
+                    <data type="boolean"/>
+                  </attribute>  
+                </optional>  
+              </element>
+            </zeroOrMore>
+          </element>
+        </oneOrMore>
+      </element>
     </choice>
   </define>
 

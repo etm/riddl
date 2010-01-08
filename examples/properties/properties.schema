@@ -8,13 +8,18 @@
   <optional>
     <transformation type="content" modifiable="true"/>
   </optional>  
-  <state type="value" modifiable="true">
-    <choice>
-      <value>ready</value>
-      <value>running</value>
-      <value>stopped</value>
-      <value>finished</value>
-    </choice>
+  <state type="state" modifiable="true">
+    <ready>
+      <running putable="true"/>
+    </ready>  
+    <running>
+      <stopped putable="true"/>
+      <finished putable="false"/>
+    </running>
+    <stopped>
+      <running putable="true"/>
+    </stopped>  
+    <finished/>
   </state>  
   <context-variables type="map" modifiable="true"/>
   <endpoints type="map" modifiable="true"/>

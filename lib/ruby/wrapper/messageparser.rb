@@ -16,6 +16,9 @@ module Riddl
         @mistp = 0
         @numparams = 0
 
+        # out not available
+        return true if what.nil? && @mist.empty?
+
         # do it
         m  = what.content.root
         m.find("des:header").each do |h|
