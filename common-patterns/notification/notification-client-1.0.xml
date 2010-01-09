@@ -1,0 +1,143 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="value">
+    <choice>
+      <parameter name="value" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+        <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+          <start>
+            <choice>
+              <element name="values">
+                <ref name="content"/>
+              </element>
+              <element name="value">
+                <ref name="content"/>
+              </element>
+              <element name="properties">
+                <ref name="content"/>
+              </element>
+              <element name="not-existing">
+                <empty/>
+              </element>  
+            </choice>
+          </start>
+
+          <define name="content">
+            <oneOrMore>
+              <choice>
+                <ref name="value"/>
+                <ref name="value-list"/>
+              </choice>
+            </oneOrMore>
+          </define>
+
+          <define name="value">
+            <zeroOrMore>
+              <choice>
+                <text/>
+                <ref name="any"/>
+              </choice>
+            </zeroOrMore>
+          </define>  
+                 
+          <define name="value-list">
+            <element>
+              <anyName/>
+              <oneOrMore>
+                <choice>
+                  <ref name="value"/>
+                  <ref name="value-list"/>
+                </choice>
+              </oneOrMore>
+            </element>
+          </define>
+          
+          <define name="any">
+            <element>
+              <anyName/>
+              <zeroOrMore>
+                <choice>
+                  <attribute>
+                    <anyName/>
+                  </attribute>
+                  <text/>
+                  <ref name="any"/>
+                </choice>
+              </zeroOrMore>
+            </element>
+          </define>
+
+        </grammar>
+      </parameter>
+      <parameter name="value" type="string"/>
+    </choice>
+  </message>
+
+  <message name="resource-document">
+    <parameter name="document" mimetype="text/xml"/>
+  </message>
+  <message name="resource-document-schema">
+    <parameter name="document-schema" mimetype="text/xml"/>
+  </message>
+
+  <message name="keys">
+    <parameter name="keys" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+        <start>
+          <element name="keys">
+            <zeroOrMore>
+              <ref name="key"/>
+            </zeroOrMore>  
+          </element>
+        </start>
+
+        <define name="key">
+          <element>
+            <anyName/>
+            <data type="string"/>
+          </element>
+        </define>  
+
+      </grammar>
+    </parameter>
+  </message>
+  <message name="key-value-pair">
+    <parameter name="key" type="string">
+      <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
+    </parameter>
+    <parameter name="value" type="string"/>
+  </message>
+  <message name="key">
+    <parameter name="key" type="string">
+      <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
+    </parameter>
+  </message>
+  <message name="query">
+    <parameter name="query" type="string"/>
+  </message>
+
+  <resource pattern="http://riddl.org/ns/common-patterns/properties/1.0">
+    <get in="*" out="resource-document"/>
+    <get in="query" out="value"/>
+    <put in="resource-document"/>
+    <resource relative="schema">
+      <get in="*" out="resource-document-schema"/>
+      <resource relative="rng">
+        <get in="*" out="resource-document-schema"/>
+      </resource>  
+      <resource relative="xsd">
+        <get in="*" out="resource-document-schema"/>
+      </resource>
+    </resource>
+    <resource relative="values">
+      <get in="*" out="keys"/>
+      <post in="key-value-pair" out="key"/>
+      <resource recursive="true">
+        <get in="*" out="value"/>
+        <delete in="*"/>
+        <post in="key-value-pair" out="key"/>
+        <put in="value"/>
+      </resource>
+    </resource>
+  </resource>  
+
+</description>
