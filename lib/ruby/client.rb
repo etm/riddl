@@ -10,7 +10,7 @@ module Riddl
   class Client
     #{{{
     def initialize(base, riddl=nil)
-      @base = base.nil? ? nil : base.gsub(/\/+$/,'')
+      @base = base.nil? ? '' : base.gsub(/\/+$/,'')
       @wrapper = nil
       unless riddl.nil?
         @wrapper = (riddl.class == Riddl::Wrapper ? riddl : Riddl::Wrapper::new(riddl))
@@ -116,7 +116,8 @@ module Riddl
         t = int.top.sub(/^\/*/,'').split('/')
         real = real.sub(/^\/*/,'').split('/')
         real = real[t.length..-1]
-        int.base + '/' + real.join('/')
+        base = int.base == '' ? @base : int.base
+        base + '/' + real.join('/')
       end
       private :merge_paths
 
