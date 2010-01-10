@@ -20,9 +20,11 @@
 
   <define name="riddl-interface">
     <element name="interface">
-      <attribute name="path">
-        <data type="anyURI"/>
-      </attribute>
+      <optional>
+        <attribute name="location">
+          <data type="anyURI"/>
+        </attribute>
+      </optional>  
       <attribute name="name">
         <ref name="riddl-datatype-name"/>
       </attribute>

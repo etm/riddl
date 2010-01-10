@@ -1,98 +1,18 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <message name="value">
-    <choice>
-      <parameter name="value" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-        <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
-          <start>
-            <choice>
-              <element name="values">
-                <ref name="content"/>
-              </element>
-              <element name="value">
-                <ref name="content"/>
-              </element>
-              <element name="properties">
-                <ref name="content"/>
-              </element>
-              <element name="not-existing">
-                <empty/>
-              </element>  
-            </choice>
-          </start>
-
-          <define name="content">
-            <oneOrMore>
-              <choice>
-                <ref name="value"/>
-                <ref name="value-list"/>
-              </choice>
-            </oneOrMore>
-          </define>
-
-          <define name="value">
-            <zeroOrMore>
-              <choice>
-                <text/>
-                <ref name="any"/>
-              </choice>
-            </zeroOrMore>
-          </define>  
-                 
-          <define name="value-list">
-            <element>
-              <anyName/>
-              <oneOrMore>
-                <choice>
-                  <ref name="value"/>
-                  <ref name="value-list"/>
-                </choice>
-              </oneOrMore>
-            </element>
-          </define>
-          
-          <define name="any">
-            <element>
-              <anyName/>
-              <zeroOrMore>
-                <choice>
-                  <attribute>
-                    <anyName/>
-                  </attribute>
-                  <text/>
-                  <ref name="any"/>
-                </choice>
-              </zeroOrMore>
-            </element>
-          </define>
-
-        </grammar>
-      </parameter>
-      <parameter name="value" type="string"/>
-    </choice>
-  </message>
-
-  <message name="resource-document">
-    <parameter name="document" mimetype="text/xml"/>
-  </message>
-  <message name="resource-document-schema">
-    <parameter name="document-schema" mimetype="text/xml"/>
-  </message>
-
-  <message name="keys">
-    <parameter name="keys" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+  <message name="topics">
+    <parameter name="topics" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
         <start>
-          <element name="keys">
+          <element name="topics">
             <zeroOrMore>
-              <ref name="key"/>
+              <ref name="topic"/>
             </zeroOrMore>  
           </element>
         </start>
 
-        <define name="key">
-          <element>
-            <anyName/>
+        <define name="topic">
+          <element name="topic">
             <data type="string"/>
           </element>
         </define>  
@@ -100,39 +20,115 @@
       </grammar>
     </parameter>
   </message>
-  <message name="key-value-pair">
-    <parameter name="key" type="string">
-      <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
+  
+  <message name="subscriptions">
+    <parameter name="subscriptions" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+        <start>
+          <element name="subscriptions">
+            <attribute name="information">
+              <choice>
+                <value>full (insecure)</value>
+                <value>details (verbose client)</value>
+                <value>scarce (verbose server)</value>
+                <value>production</value>
+              </choice>  
+            </attribute>
+            <zeroOrMore>
+              <ref name="subscription"/>
+            </zeroOrMore>  
+          </element>
+        </start>
+
+        <define name="subscription">
+          <element name="subscription">
+            <attribute name="id">
+              <data type="string"/>
+            </attribute>
+            <attribute name="url">
+              <data type="string"/>
+            </attribute>
+            <attribute name="secret">
+              <data type="string"/>
+            </attribute>
+            <zeroOrMore>
+              <element name="topic">
+                <data type="string"/>
+              </element>
+            </zeroOrMore>
+          </element>
+        </define>
+
+      </grammar>
     </parameter>
-    <parameter name="value" type="string"/>
   </message>
-  <message name="key">
-    <parameter name="key" type="string">
-      <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
+  
+  <message name="subscription">
+    <parameter name="subscription" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+        <start>
+          <element name="subscription">
+            <attribute name="information">
+              <choice>
+                <value>full (insecure)</value>
+                <value>production</value>
+              </choice>  
+            </attribute>
+            <ref name="subscription"/>
+          </element>
+        </start>
+
+        <define name="subscription">
+          <element name="subscription">
+            <attribute name="url">
+              <data type="string"/>
+            </attribute>
+            <attribute name="secret">
+              <data type="string"/>
+            </attribute>
+            <oneOrMore>
+              <element name="topic">
+                <data type="string"/>
+              </element>
+            </oneOrMore>
+          </element>
+        </define>
+
+      </grammar>
     </parameter>
-  </message>
-  <message name="query">
-    <parameter name="query" type="string"/>
   </message>
 
-  <resource pattern="http://riddl.org/ns/common-patterns/properties/1.0">
-    <resource relative="topics">
-      <get in="*" out="resource-document-schema"/>
-      <resource relative="rng">
-        <get in="*" out="resource-document-schema"/>
-      </resource>  
-      <resource relative="xsd">
-        <get in="*" out="resource-document-schema"/>
+  <message name="subscribe">
+    <parameter name="url" type="string"/>
+    <oneOrMore>
+      <parameter name="topic" type="string"/>
+    </oneOrMore>
+    <parameter name="public-key" type="string"/>
+  </message>  
+  <message name="details">
+    <parameter name="url" type="string"/>
+    <oneOrMore>
+      <parameter name="topic" type="string"/>
+    </oneOrMore>
+  </message>  
+  <message name="acknowledgment">
+    <parameter name="key" type="string"/>
+    <parameter name="secret" type="string"/>
+  </message>
+
+  <resource pattern="http://riddl.org/ns/common-patterns/notification-producer/1.0">
+    <resource relative="notifications">
+      <resource name="topics">
+        <get in="*" out="topics"/>
       </resource>
-    </resource>
-    <resource relative="values">
-      <get in="*" out="keys"/>
-      <post in="key-value-pair" out="key"/>
-      <resource recursive="true">
-        <get in="*" out="value"/>
-        <delete in="*"/>
-        <post in="key-value-pair" out="key"/>
-        <put in="value"/>
+      <resource name="subscriptions">
+        <get in="*" out="subscriptions"/>
+        <post in="subscribe" out="acknowledgment"/>
+        <resource>
+          <get in="*" out="subscription"/>
+          <put in="details"/>
+          <delete in="*"/>
+        </resource>
       </resource>
     </resource>
   </resource>  
