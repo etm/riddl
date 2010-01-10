@@ -118,10 +118,10 @@
 
   <resource pattern="http://riddl.org/ns/common-patterns/notification-producer/1.0">
     <resource relative="notifications">
-      <resource name="topics">
+      <resource relative="topics">
         <get in="*" out="topics"/>
       </resource>
-      <resource name="subscriptions">
+      <resource relative="subscriptions">
         <get in="*" out="subscriptions"/>
         <post in="subscribe" out="acknowledgment"/>
         <resource>

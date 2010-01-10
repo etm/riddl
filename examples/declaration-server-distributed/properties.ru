@@ -6,7 +6,7 @@ require '../../lib/ruby/utils/properties'
 use Rack::ShowStatus
 $0 = "dsd-properties"
 
-run Riddl::Server.new(File.dirname(__FILE__) + '/properties-1_0.xml') {
+run Riddl::Server.new(File.dirname(__FILE__) + '/properties.xml') {
   schema, strans = Riddl::Utils::Properties::schema(File.dirname(__FILE__) + '/instances/properties.schema')
 
   on resource do |r|
