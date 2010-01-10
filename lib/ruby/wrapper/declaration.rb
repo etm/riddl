@@ -67,7 +67,7 @@ module Riddl
             block = layer.find("dec:block")
 
             lname = layer.attributes['name']
-            lpath = riddl.find("string(/dec:declaration/dec:interface[@name=\"#{lname}\"]/@path)")
+            lpath = riddl.find("string(/dec:declaration/dec:interface[@name=\"#{lname}\"]/@location)")
             des = riddl.find("/dec:declaration/dec:interface[@name=\"#{lname}\"]/des:description").first
             desres = des.find("des:resource").first
             if apply_to.empty?

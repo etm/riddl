@@ -20,7 +20,7 @@ module Riddl
             @status = 304 # Not modified
             return []
           else 
-            return Riddl::Parameter::Complex.new("file",MIME::Types.type_for(path).to_s,File.open(path,'r'))
+            return Riddl::Parameter::Complex.new("file",MIME::Types.type_for(path).first.to_s,File.open(path,'r'))
           end  
         end
         @status = 404
