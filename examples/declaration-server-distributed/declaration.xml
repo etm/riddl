@@ -3,7 +3,7 @@
     <xi:include href="main.xml"/>
   </interface>
   <interface name="properties" location="http://localhost:9295">
-    <xi:include href="properties-1_0.xml"/>
+    <xi:include href="properties.xml"/>
   </interface>
 
   <facade>
