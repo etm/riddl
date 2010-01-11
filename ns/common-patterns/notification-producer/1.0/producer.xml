@@ -28,9 +28,7 @@
           <element name="subscriptions">
             <attribute name="information">
               <choice>
-                <value>full (insecure)</value>
-                <value>details (verbose client)</value>
-                <value>scarce (verbose server)</value>
+                <value>full</value>
                 <value>production</value>
               </choice>  
             </attribute>
@@ -45,17 +43,6 @@
             <attribute name="id">
               <data type="string"/>
             </attribute>
-            <attribute name="url">
-              <data type="string"/>
-            </attribute>
-            <attribute name="secret">
-              <data type="string"/>
-            </attribute>
-            <zeroOrMore>
-              <element name="topic">
-                <data type="string"/>
-              </element>
-            </zeroOrMore>
           </element>
         </define>
 
@@ -68,23 +55,20 @@
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notification-producer/1.0">
         <start>
           <element name="subscription">
-            <attribute name="information">
-              <choice>
-                <value>full (insecure)</value>
-                <value>production</value>
-              </choice>  
-            </attribute>
-            <ref name="subscription"/>
-          </element>
-        </start>
-
-        <define name="subscription">
-          <element name="subscription">
             <attribute name="url">
               <data type="string"/>
             </attribute>
-            <attribute name="secret">
-              <data type="string"/>
+            <attribute name="request-secret">
+              <choice>
+                <value>valid</value>
+                <value>invalid</value>
+              </choice>
+            </attribute>
+            <attribute name="response-secret">
+              <choice>
+                <value>valid</value>
+                <value>invalid</value>
+              </choice>
             </attribute>
             <oneOrMore>
               <element name="topic">
@@ -92,32 +76,57 @@
               </element>
             </oneOrMore>
           </element>
-        </define>
-
+        </start>
       </grammar>
     </parameter>
+  </message>
+  
+  <message name="request">
+    <parameter name="request-secret" type="string"/>
   </message>
 
   <message name="subscribe">
     <parameter name="url" type="string"/>
     <oneOrMore>
+      <parameter name="event" type="string">
+         <param name="pattern">(create)?,?(read)?,?(update)?,?(delete)?</param>
+      </parameter>
       <parameter name="topic" type="string"/>
     </oneOrMore>
     <parameter name="public-key" type="string"/>
   </message>  
+  <message name="acknowledgment">
+    <parameter name="key" type="string"/>
+    <parameter name="request-secret" type="string"/>
+    <parameter name="response-secret" type="string"/>
+    <parameter name="change-secret" type="string"/>
+  </message>
+
   <message name="details">
     <parameter name="url" type="string"/>
     <oneOrMore>
+      <parameter name="event" type="string">
+         <param name="pattern">(create)?,?(read)?,?(update)?,?(delete)?</param>
+      </parameter>
       <parameter name="topic" type="string"/>
     </oneOrMore>
+    <parameter name="request-secret" type="string"/>
+  </message>
+
+  <message name="new-secrets">
+    <parameter name="request-secret" type="string"/>
+    <parameter name="response-secret" type="string"/>
+    <parameter name="change-secret" type="string"/>
   </message>  
-  <message name="acknowledgment">
-    <parameter name="key" type="string"/>
-    <parameter name="secret" type="string"/>
+  <message name="change-secrets">
+    <parameter name="change-secret" type="string"/>
   </message>
 
   <resource pattern="http://riddl.org/ns/common-patterns/notification-producer/1.0">
     <resource relative="notifications">
+      <resource relative="secret">
+        <post in="change-secrets" out="new-secrets"/>
+      </resource>
       <resource relative="topics">
         <get in="*" out="topics"/>
       </resource>
@@ -127,7 +136,7 @@
         <resource>
           <get in="*" out="subscription"/>
           <put in="details"/>
-          <delete in="*"/>
+          <delete in="request"/>
         </resource>
       </resource>
     </resource>
