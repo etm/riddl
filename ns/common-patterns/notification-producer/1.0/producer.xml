@@ -13,7 +13,16 @@
 
         <define name="topic">
           <element name="topic">
-            <data type="string"/>
+            <attribute name="id">
+              <data type="string"/>
+            </attribute>  
+            <oneOrMore>
+              <element name="event">
+                <data type="string">
+                  <param name="pattern">(\w*,)*(\w*)</param>
+                </data>
+              </element>  
+            </oneOrMore>
           </element>
         </define>  
 
@@ -89,7 +98,7 @@
     <parameter name="url" type="string"/>
     <oneOrMore>
       <parameter name="event" type="string">
-         <param name="pattern">(create)?,?(read)?,?(update)?,?(delete)?</param>
+         <param name="pattern">(\w*,)*(\w*)</param>
       </parameter>
       <parameter name="topic" type="string"/>
     </oneOrMore>
