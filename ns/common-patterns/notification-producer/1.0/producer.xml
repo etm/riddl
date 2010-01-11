@@ -2,7 +2,7 @@
 
   <message name="topics">
     <parameter name="topics" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notification-producer/1.0">
         <start>
           <element name="topics">
             <zeroOrMore>
@@ -23,7 +23,7 @@
   
   <message name="subscriptions">
     <parameter name="subscriptions" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notification-producer/1.0">
         <start>
           <element name="subscriptions">
             <attribute name="information">
@@ -65,7 +65,7 @@
   
   <message name="subscription">
     <parameter name="subscription" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notification-producer/1.0">
         <start>
           <element name="subscription">
             <attribute name="information">
