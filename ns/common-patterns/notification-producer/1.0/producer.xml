@@ -115,7 +115,7 @@
     <parameter name="url" type="string"/>
     <oneOrMore>
       <parameter name="event" type="string">
-         <param name="pattern">(create)?,?(read)?,?(update)?,?(delete)?</param>
+         <param name="pattern">(\w*,)*(\w*)</param>
       </parameter>
       <parameter name="topic" type="string"/>
     </oneOrMore>
@@ -131,8 +131,32 @@
     <parameter name="change-secret" type="string"/>
   </message>
 
+  <message name="overview">
+    <parameter name="overview" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notification-producer/1.0">
+        <start>
+          <element name="info">
+            <attribute name='instance'>
+              <data type="integer"/>
+            </attribute>
+            <element name="secret">
+              <empty/>
+            </element>
+            <element name="topics">
+              <empty/>
+            </element>
+            <element name="subscriptions">
+              <empty/>
+            </element>
+          </element>
+        </start>
+      </grammar>
+    </parameter>
+  </message>
+
   <resource pattern="http://riddl.org/ns/common-patterns/notification-producer/1.0">
     <resource relative="notifications">
+      <get in="*" out="overview"/>
       <resource relative="secret">
         <post in="change-secrets" out="new-secrets"/>
       </resource>
