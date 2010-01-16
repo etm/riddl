@@ -67,17 +67,14 @@
             <attribute name="url">
               <data type="string"/>
             </attribute>
-            <attribute name="request-secret">
-              <choice>
-                <value>valid</value>
-                <value>invalid</value>
-              </choice>
+            <attribute name="secure">
+              <data type="boolean"/>
             </attribute>
-            <attribute name="response-secret">
-              <choice>
-                <value>valid</value>
-                <value>invalid</value>
-              </choice>
+            <attribute name="last-producer-id">
+              <data type="integer"/>
+            </attribute>
+            <attribute name="last-consumer-id">
+              <data type="integer"/>
             </attribute>
             <oneOrMore>
               <element name="topic">
@@ -88,14 +85,26 @@
         </start>
       </grammar>
     </parameter>
+    <optional>
+      <parameter name="producer-id" type="integer"/>
+      <parameter name="fingerprint-with-producer-secret" type="string"/>
+    </optional>  
   </message>
   
+  <message name="delete">
+    <parameter name="producer-id" type="integer"/>
+    <parameter name="fingerprint-with-producer-secret" type="string"/>
+  </message>
   <message name="request">
-    <parameter name="request-secret" type="string"/>
+    <optional>
+      <parameter name="producer-id" type="integer"/>
+      <parameter name="fingerprint-with-producer-secret" type="string"/>
+    </optional>  
   </message>
 
   <message name="subscribe">
     <parameter name="url" type="string"/>
+    <parameter name="secure" type="boolean"/>
     <oneOrMore>
       <parameter name="event" type="string">
          <param name="pattern">(\w*,)*(\w*)</param>
@@ -106,29 +115,23 @@
   </message>  
   <message name="acknowledgment">
     <parameter name="key" type="string"/>
-    <parameter name="request-secret" type="string"/>
-    <parameter name="response-secret" type="string"/>
-    <parameter name="change-secret" type="string"/>
+    <parameter name="public-key" type="string"/>
+    <parameter name="producer-secret" type="string"/>
+    <parameter name="consumer-secret" type="string"/>
+    <parameter name="fingerprint" type="string"/>
   </message>
 
   <message name="details">
+    <parameter name="producer-id" type="integer"/>
     <parameter name="url" type="string"/>
+    <parameter name="secure" type="boolean"/>
     <oneOrMore>
       <parameter name="event" type="string">
          <param name="pattern">(\w*,)*(\w*)</param>
       </parameter>
       <parameter name="topic" type="string"/>
     </oneOrMore>
-    <parameter name="request-secret" type="string"/>
-  </message>
-
-  <message name="new-secrets">
-    <parameter name="request-secret" type="string"/>
-    <parameter name="response-secret" type="string"/>
-    <parameter name="change-secret" type="string"/>
-  </message>  
-  <message name="change-secrets">
-    <parameter name="change-secret" type="string"/>
+    <parameter name="fingerprint-with-producer-secret" type="string"/>
   </message>
 
   <message name="overview">
@@ -139,9 +142,6 @@
             <attribute name='instance'>
               <data type="integer"/>
             </attribute>
-            <element name="secret">
-              <empty/>
-            </element>
             <element name="topics">
               <empty/>
             </element>
@@ -157,9 +157,6 @@
   <resource pattern="http://riddl.org/ns/common-patterns/notification-producer/1.0">
     <resource relative="notifications">
       <get in="*" out="overview"/>
-      <resource relative="secret">
-        <post in="change-secrets" out="new-secrets"/>
-      </resource>
       <resource relative="topics">
         <get in="*" out="topics"/>
       </resource>
@@ -167,9 +164,9 @@
         <get in="*" out="subscriptions"/>
         <post in="subscribe" out="acknowledgment"/>
         <resource>
-          <get in="*" out="subscription"/>
-          <put in="details"/>
-          <delete in="request"/>
+          <get    in="request" out="subscription"/>
+          <put    in="details"/>
+          <delete in="delete"/>
         </resource>
       </resource>
     </resource>
