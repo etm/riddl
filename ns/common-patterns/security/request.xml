@@ -1,0 +1,23 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <transformation name="ras_request">
+    <add_as_last>
+      <parameter name="ras_own-public-key" type="string"/>
+      <parameter name="ras_fingerprint" type="string"/>
+    </add_as_last>
+  </transformation>
+
+  <!--
+    * fingerprint: hash all parameters, sign with own private key
+    * Append own public key of sender to message
+    * Append fingerprint to message
+  -->
+
+  <resource>
+    <get transformation="ras_request"/>
+    <post transformation="ras_request"/>
+    <put transformation="ras_request"/>
+    <delete transformation="ras_request"/>
+  </resource>  
+
+</description>

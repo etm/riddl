@@ -82,7 +82,7 @@
   <message name="acknowledgment">
     <optional>
       <parameter name="producer-id" type="integer"/>
-      <parameter name="fingerprint-with-producer-secret" type="string"/>
+      <parameter name="fingerprint-with-consumer-secret" type="string"/>
     </optional>  
   </message>
 

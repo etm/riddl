@@ -1,4 +1,4 @@
-#\ -p 9295
+#\ -p 9291
 require 'pp'
 require '../../lib/ruby/server'
 require '../../lib/ruby/utils/fileserve'
@@ -6,11 +6,11 @@ require '../../lib/ruby/utils/notification_provider'
 
 use Rack::ShowStatus
 
-
+p options
 
 run Riddl::Server.new(::File.dirname(__FILE__) + '/producer-declaration.xml') {
   process_out false
-  ndir = File.dirname(__FILE__) + 'notifications/'
+  ndir = ::File.dirname(__FILE__) + 'notifications/'
   xsls = {
     :overview => '/xsls/overview.xsl'
   }

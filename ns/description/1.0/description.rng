@@ -46,21 +46,31 @@
     <oneOrMore>
       <choice>
         <element name="add_header">
-          <ref name="riddl-header"/>
+          <oneOrMore>
+            <ref name="riddl-header"/>
+          </oneOrMore>  
         </element>  
         <element name="add_as_first">
-          <ref name="riddl-parameter"/>
+          <oneOrMore>
+            <ref name="riddl-parameter"/>
+          </oneOrMore>  
         </element>  
         <element name="add_as_last">
-          <ref name="riddl-parameter"/>
+          <oneOrMore>
+            <ref name="riddl-parameter"/>
+          </oneOrMore>  
         </element>  
         <element name="add_before">
           <ref name="riddl-att-name-star"/>
-          <ref name="riddl-parameter"/>
+          <oneOrMore>
+            <ref name="riddl-parameter"/>
+          </oneOrMore>  
         </element>
         <element name="add_after">
           <ref name="riddl-att-name-star"/>
-          <ref name="riddl-parameter"/>
+          <oneOrMore>
+            <ref name="riddl-parameter"/>
+          </oneOrMore>  
         </element>
         <element name="remove_each">
           <ref name="riddl-att-col-remove"/>

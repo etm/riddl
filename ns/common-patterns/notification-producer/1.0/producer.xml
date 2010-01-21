@@ -111,14 +111,11 @@
       </parameter>
       <parameter name="topic" type="string"/>
     </oneOrMore>
-    <parameter name="public-key" type="string"/>
   </message>  
   <message name="acknowledgment">
     <parameter name="key" type="string"/>
-    <parameter name="public-key" type="string"/>
     <parameter name="producer-secret" type="string"/>
     <parameter name="consumer-secret" type="string"/>
-    <parameter name="fingerprint" type="string"/>
   </message>
 
   <message name="details">
