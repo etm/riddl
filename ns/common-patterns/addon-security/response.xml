@@ -1,4 +1,6 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  
+  <!-- RAS - Riddl Addon Security -->
 
   <transformation name="ras_response">
     <remove_each name="ras_remote-public-key"/>
