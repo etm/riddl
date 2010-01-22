@@ -19,7 +19,7 @@
             <oneOrMore>
               <element name="event">
                 <data type="string">
-                  <param name="pattern">(\w*,)*(\w*)</param>
+                  <param name="pattern">\w+</param>
                 </data>
               </element>  
             </oneOrMore>
@@ -67,9 +67,6 @@
             <attribute name="url">
               <data type="string"/>
             </attribute>
-            <attribute name="secure">
-              <data type="boolean"/>
-            </attribute>
             <attribute name="last-producer-id">
               <data type="integer"/>
             </attribute>
@@ -104,10 +101,9 @@
 
   <message name="subscribe">
     <parameter name="url" type="string"/>
-    <parameter name="secure" type="boolean"/>
     <oneOrMore>
       <parameter name="event" type="string">
-         <param name="pattern">(\w*,)*(\w*)</param>
+         <param name="pattern">(\w+,)*(\w+)</param>
       </parameter>
       <parameter name="topic" type="string"/>
     </oneOrMore>
@@ -121,10 +117,9 @@
   <message name="details">
     <parameter name="producer-id" type="integer"/>
     <parameter name="url" type="string"/>
-    <parameter name="secure" type="boolean"/>
     <oneOrMore>
       <parameter name="event" type="string">
-         <param name="pattern">(\w*,)*(\w*)</param>
+         <param name="pattern">(\w+,)*(\w+)</param>
       </parameter>
       <parameter name="topic" type="string"/>
     </oneOrMore>
@@ -135,10 +130,7 @@
     <parameter name="overview" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notification-producer/1.0">
         <start>
-          <element name="info">
-            <attribute name='instance'>
-              <data type="integer"/>
-            </attribute>
+          <element name="overview">
             <element name="topics">
               <empty/>
             </element>
