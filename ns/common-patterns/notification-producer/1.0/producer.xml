@@ -75,7 +75,16 @@
             </attribute>
             <oneOrMore>
               <element name="topic">
-                <data type="string"/>
+                <attribute name="id">
+                  <data type="string"/>
+                </attribute>  
+                <oneOrMore>
+                  <element name="event">
+                    <data type="string">
+                      <param name="pattern">\w+</param>
+                    </data>
+                  </element>  
+                </oneOrMore>
               </element>
             </oneOrMore>
           </element>
@@ -102,10 +111,10 @@
   <message name="subscribe">
     <parameter name="url" type="string"/>
     <oneOrMore>
+      <parameter name="topic" type="string"/>
       <parameter name="event" type="string">
          <param name="pattern">(\w+,)*(\w+)</param>
       </parameter>
-      <parameter name="topic" type="string"/>
     </oneOrMore>
   </message>  
   <message name="acknowledgment">
@@ -118,10 +127,10 @@
     <parameter name="producer-id" type="integer"/>
     <parameter name="url" type="string"/>
     <oneOrMore>
+      <parameter name="topic" type="string"/>
       <parameter name="event" type="string">
          <param name="pattern">(\w+,)*(\w+)</param>
       </parameter>
-      <parameter name="topic" type="string"/>
     </oneOrMore>
     <parameter name="fingerprint-with-producer-secret" type="string"/>
   </message>

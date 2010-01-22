@@ -9,7 +9,8 @@ use Rack::ShowStatus
 run Riddl::Server.new(::File.dirname(__FILE__) + '/producer-declaration.xml') {
   ndir = ::File.dirname(__FILE__) + '/notifications/'
   xsls = {
-    :overview => '/xsls/overview.xsl'
+    :overview => '/xsls/overview.xsl',
+    :subscriptions => '/xsls/subscriptions.xsl'
   }
 
   on resource do
