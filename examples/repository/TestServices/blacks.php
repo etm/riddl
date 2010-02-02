@@ -1,7 +1,6 @@
 <?
   $includes = realpath(dirname(__FILE__));
   require_once($includes . "/../../../lib/php/serversimple.php");
-
   $s = new RiddlServerSimple();
   $params = $s->request();
   foreach($params as $p) {
@@ -9,7 +8,8 @@
     if($p->name() == "date") $date = $p->value();
   }
  
-  $ret  = "<queryOutputMessage>\n";
+
+ $ret  = "<queryOutputMessage>\n";
   $ret .= "<entry>";
   $ret .= "<movieID>BLACK-".$title."-".rand(10,59)."</movieID>";
   $ret .= "<date>" . $date ."</date>";
@@ -25,5 +25,5 @@
   $ret .= "</queryOutputMessage>";
 
   $s->add(new RiddlParameterComplex("queryOutputMessage","text/xml", $ret));
-  $s->riddl_it();
+  $s->riddl_it(200);
 ?>
