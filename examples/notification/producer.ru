@@ -2,11 +2,13 @@
 require 'pp'
 require '../../lib/ruby/server'
 require '../../lib/ruby/utils/fileserve'
+require '../../lib/ruby/utils/declaration'
 require '../../lib/ruby/utils/notification_provider'
 
 use Rack::ShowStatus
 
 run Riddl::Server.new(::File.dirname(__FILE__) + '/producer-declaration.xml') {
+  accessible_description true
   ndir = ::File.dirname(__FILE__) + '/notifications/'
   xsls = {
     :overview => '/xsls/overview.xsl',
@@ -14,6 +16,7 @@ run Riddl::Server.new(::File.dirname(__FILE__) + '/producer-declaration.xml') {
   }
 
   on resource do
+    run Riddl::Utils::Declaration::Description, description_string if get 'riddl-description-request'
     run Riddl::Utils::FileServe, "implementation/index.html" if get
     on resource 'oliver' do
       run Riddl::Utils::FileServe, "implementation/oliver.html" if get
