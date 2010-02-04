@@ -16,6 +16,11 @@ module Riddl
             on resource "subscriptions" do
               run Riddl::Utils::Notification::Provider::Subscriptions, data, xsls[:subscriptions], details if get
               run Riddl::Utils::Notification::Provider::CreateSubscription, data if post
+              on resource do
+                run Riddl::Utils::Notification::Provider::Subscription, data, xsls[:subscriptions], details if get
+                run Riddl::Utils::Notification::Provider::UpdateSubscription, data if put
+                run Riddl::Utils::Notification::Provider::DeleteSubscription, data if delete
+              end
             end
           }
         end  
@@ -106,6 +111,66 @@ module Riddl
           end
         end #}}}
 
+        class Subscription < Riddl::Implementation #{{{
+          def response
+            data    = @a[0]
+            xsl     = @a[1]
+            details = @a[2]
+            Riddl::Parameter::Complex.new("subscriptions","text/xml") do
+              ret = XML::Smart::string <<-END
+                #{xsl ? "<?xml-stylesheet href=\"#{xsl}\" type=\"text/xsl\"?>" : ''}
+                <subscriptions information='#{details}' xmlns='http://riddl.org/ns/common-patterns/notification-producer/1.0'/>
+              END
+              Dir[data + "/*"].each do |d|
+                if File.directory?(d)
+                  ret.root.add('subscription', :id => File.basename(d))
+                end  
+              end
+              ret.to_s
+            end
+          end
+        end #}}}
+        
+        class UpdateSubscription < Riddl::Implementation #{{{
+          def response
+            data    = @a[0]
+            xsl     = @a[1]
+            details = @a[2]
+            Riddl::Parameter::Complex.new("subscriptions","text/xml") do
+              ret = XML::Smart::string <<-END
+                #{xsl ? "<?xml-stylesheet href=\"#{xsl}\" type=\"text/xsl\"?>" : ''}
+                <subscriptions information='#{details}' xmlns='http://riddl.org/ns/common-patterns/notification-producer/1.0'/>
+              END
+              Dir[data + "/*"].each do |d|
+                if File.directory?(d)
+                  ret.root.add('subscription', :id => File.basename(d))
+                end  
+              end
+              ret.to_s
+            end
+          end
+        end #}}}
+        
+        class DeleteSubscription < Riddl::Implementation #{{{
+          def response
+            data    = @a[0]
+            xsl     = @a[1]
+            details = @a[2]
+            Riddl::Parameter::Complex.new("subscriptions","text/xml") do
+              ret = XML::Smart::string <<-END
+                #{xsl ? "<?xml-stylesheet href=\"#{xsl}\" type=\"text/xsl\"?>" : ''}
+                <subscriptions information='#{details}' xmlns='http://riddl.org/ns/common-patterns/notification-producer/1.0'/>
+              END
+              Dir[data + "/*"].each do |d|
+                if File.directory?(d)
+                  ret.root.add('subscription', :id => File.basename(d))
+                end  
+              end
+              ret.to_s
+            end
+          end
+        end #}}}
+        
       end  
 
     end

@@ -59,8 +59,10 @@ module Riddl
     def initialize(name)
       #{{{
       @doc = nil
+      p name
+      File.open("test","w"){|f|f.write name}
       begin
-        fh = name.respond_to?(:read) ? name : File.open(name)
+        fh = name.respond_to?(:read) ? name : open(name)
         @doc = XML::Smart.string(fh.read)
         fh.close
       rescue
