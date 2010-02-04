@@ -59,7 +59,6 @@ module Riddl
     def initialize(name)
       #{{{
       @doc = nil
-      p name
       File.open("test","w"){|f|f.write name}
       begin
         fh = name.respond_to?(:read) ? name : open(name)
