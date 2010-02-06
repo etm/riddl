@@ -5,7 +5,7 @@
     <parameter name="topic" type="string"/>
     <parameter name="event" type="string"/>
     <parameter name="notification" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notification-consumer/1.0">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-consumer/1.0">
         <start>
           <element name="notification">
             <zeroOrMore>
@@ -82,7 +82,7 @@
     <parameter name="fingerprint-with-consumer-secret" type="string"/>
   </message>
 
-  <resource pattern="http://riddl.org/ns/common-patterns/notification-consumer/1.0">
+  <resource pattern="http://riddl.org/ns/common-patterns/notifications-consumer/1.0">
     <post in="notification" out="acknowledgment"/>
   </resource>  
 

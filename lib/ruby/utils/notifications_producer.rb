@@ -1,36 +1,50 @@
 module Riddl
   module Utils
-    module Notification
+    module Notifications
 
-      module Provider
+      module Producer
       
-        def self::implementation(data,xsls,details=:production) 
+        def self::implementation(data,xsls,handler,details=:production) 
+          unless what.class == Class && what.superclass == Riddl::Utils::Notifications::Producer::HandlerBase
+            raise "handler not a subclass of HandlerBase"
+          end
           if !File.exists?(data) || !File.directory?(data)
             raise "data directory #{data} no found"
           end
           lambda {
-            run Riddl::Utils::Notification::Provider::Overview, xsls[:overview] if get
+            run Riddl::Utils::Notifications::Producer::Overview, xsls[:overview] if get
             on resource "topics" do
-              run Riddl::Utils::Notification::Provider::Topics, data, xsls[:topics] if get
+              run Riddl::Utils::Notifications::Producer::Topics, data, xsls[:topics] if get
             end
             on resource "subscriptions" do
-              run Riddl::Utils::Notification::Provider::Subscriptions, data, xsls[:subscriptions], details if get
-              run Riddl::Utils::Notification::Provider::CreateSubscription, data if post 'subscribe'
+              run Riddl::Utils::Notifications::Producer::Subscriptions, data, xsls[:subscriptions], details if get
+              run Riddl::Utils::Notifications::Producer::CreateSubscription, data, handler if post 'subscribe'
               on resource do
-                run Riddl::Utils::Notification::Provider::Subscription, data, xsls[:subscription], details if get 'request'
-                run Riddl::Utils::Notification::Provider::UpdateSubscription, data if put
-                run Riddl::Utils::Notification::Provider::DeleteSubscription, data if delete
+                run Riddl::Utils::Notifications::Producer::Subscription, data, xsls[:subscription], details if get 'request'
+                run Riddl::Utils::Notifications::Producer::UpdateSubscription, data, handler if put
+                run Riddl::Utils::Notifications::Producer::DeleteSubscription, data, handler if delete
               end
             end
           }
         end  
+      
+        class HandlerBase
+          def initialize(notifications,key,topics)
+            @notifications = notifications
+            @key = key
+            @topics = topics
+          end
+          def add; end
+          def delete; end
+          def change; end
+        end
 
         class Overview < Riddl::Implementation #{{{ 
           def response
             Riddl::Parameter::Complex.new("overview","text/xml") do
               ret = XML::Smart::string <<-END
                 #{@a[0] ? "<?xml-stylesheet href=\"#{@a[0]}\" type=\"text/xsl\"?>" : ''}
-                <overview xmlns='http://riddl.org/ns/common-patterns/notification-producer/1.0'>
+                <overview xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'>
                   <topics/>
                   <subscriptions/>
                 </overview>
@@ -59,7 +73,7 @@ module Riddl
             Riddl::Parameter::Complex.new("subscriptions","text/xml") do
               ret = XML::Smart::string <<-END
                 #{xsl ? "<?xml-stylesheet href=\"#{xsl}\" type=\"text/xsl\"?>" : ''}
-                <subscriptions information='#{details}' xmlns='http://riddl.org/ns/common-patterns/notification-producer/1.0'/>
+                <subscriptions information='#{details}' xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>
               END
               Dir[data + "/*"].each do |d|
                 if File.directory?(d)
@@ -71,9 +85,23 @@ module Riddl
           end
         end #}}}
        
+        class Subscription < Riddl::Implementation #{{{
+          def response
+            data    = @a[0]
+            xsl     = @a[1]
+            details = @a[2]
+            Riddl::Parameter::Complex.new("subscription","text/xml") do
+              ret  = XML::Smart::open(data + "/" + @r.last + "/subscription.xml").to_s
+              xsl ? ret.sub(/\?>\s*\r?\n/,"?>\n<?xml-stylesheet href=\"xsl\" type=\"text/xsl\"?>\n") : ret
+            end
+          end
+        end #}}}
+        
        class CreateSubscription < Riddl::Implementation #{{{
           def response
-            data = @a[0]
+            data    = @a[0]
+            handler = @a[1]
+
             url  = @p.shift.value
             key  = nil
             begin
@@ -88,18 +116,22 @@ module Riddl
             File.open(data + '/' + key + '/consumer-secret','w') { |f| f.write consumer_secret }
 
             xml = <<-END
-              <subscription url='#{url}' last-producer-id='0' last-consumer-id='0' xmlns='http://riddl.org/ns/common-patterns/notification-producer/1.0'/>
+              <subscription url='#{url}' last-producer-id='0' last-consumer-id='0' xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>
             END
+            topics = []
             XML::Smart::modify(data + '/' + key + '/subscription.xml',xml) do |doc|
               while @p.length > 0
                 topic = @p.shift.value
                 events = @p.shift.value.split(',')
+                topics << topic
                 t = doc.root.add('topic', :id => topic)
                 events.each do |e|
                   t.add('event', e)
                 end
               end
             end  
+
+            handler.new(data,key,topics).add
             [
               Riddl::Parameter::Simple.new('key',key),
               Riddl::Parameter::Simple.new('producer-secret',producer_secret),
@@ -108,25 +140,23 @@ module Riddl
           end
         end #}}}
 
-        class Subscription < Riddl::Implementation #{{{
+        class DeleteSubscription < Riddl::Implementation #{{{
           def response
             data    = @a[0]
-            xsl     = @a[1]
-            details = @a[2]
-            Riddl::Parameter::Complex.new("subscription","text/xml") do
-              ret  = XML::Smart::open(data + "/" + @r.last + "/subscription.xml").to_s
-              xsl ? ret.sub(/\?>\s*\r?\n/,"?>\n<?xml-stylesheet href=\"xsl\" type=\"text/xsl\"?>\n") : ret
-            end
+            handler = @a[1]
+
+            topics = []
+            handler.new(notifications,key,topics).delete
           end
         end #}}}
         
         class UpdateSubscription < Riddl::Implementation #{{{
           def response
-          end
-        end #}}}
-        
-        class DeleteSubscription < Riddl::Implementation #{{{
-          def response
+            data    = @a[0]
+            handler = @a[1]
+
+            topics = []
+            handler.new(notifications,key,topics).change
           end
         end #}}}
         
