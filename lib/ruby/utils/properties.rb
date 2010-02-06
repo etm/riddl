@@ -6,9 +6,9 @@ module Riddl
       VERSION_MINOR = 0
       PROPERTIES_SCHEMA_XSL_RNG = "#{File.dirname(__FILE__)}/../ns/common-patterns/properties/#{VERSION_MAJOR}.#{VERSION_MINOR}/properties.schema.xsl"
 
-      def self::implementation(properties,schema,strans)
+      def self::implementation(properties,schema,strans,level)
         lambda {
-          run Riddl::Utils::Properties::All, properties, schema, strans if get
+          run Riddl::Utils::Properties::All,   properties, schema, strans if get
           run Riddl::Utils::Properties::Query, properties, schema, strans if get 'query'
           on resource 'schema' do
             run Riddl::Utils::Properties::Schema, properties, schema, strans if get
@@ -17,13 +17,13 @@ module Riddl
             end  
           end
           on resource 'values' do
-            run Riddl::Utils::Properties::Keys, properties, schema, strans if get
+            run Riddl::Utils::Properties::Keys,    properties, schema, strans if get
             run Riddl::Utils::Properties::AddPair, properties, schema, strans if post 'key-value-pair'
-            on resource do |res|
-              run Riddl::Utils::Properties::AddPair, properties, schema, strans if post 'key-value-pair'
-              run Riddl::Utils::Properties::Values, properties, schema, strans if get
-              run Riddl::Utils::Properties::Delete, properties, schema, strans if delete
-              run Riddl::Utils::Properties::Put, properties, schema, strans if put 'value'
+            on resource do
+              run Riddl::Utils::Properties::AddPair, properties, schema, strans, level if post 'key-value-pair'
+              run Riddl::Utils::Properties::Values,  properties, schema,         level if get
+              run Riddl::Utils::Properties::Delete,  properties, schema, strans, level if delete
+              run Riddl::Utils::Properties::Put,     properties, schema, strans, level if put 'value'
             end
           end  
         }
@@ -122,8 +122,10 @@ module Riddl
       class Values < Riddl::Implementation #{{{
         def response
           properties = @a[0]
-          schema = @a[1]
-          if ret = extract_values(properties,schema,@r[1],@r[2])
+          schema     = @a[1]
+          level      = @a[2]
+          relpath    = @r[level..-1]
+          if ret = extract_values(properties,schema,relpath[1],relpath[2])
             ret
           else
             @status = 404
@@ -191,12 +193,14 @@ module Riddl
       class AddPair < Riddl::Implementation #{{{
         def response
           properties = @a[0]
-          schema = @a[1]
-          strans = @a[2]
+          schema     = @a[1]
+          strans     = @a[2]
+          level      = @a[3]
+          relpath    = @r[level..-1]
 
           key = @p.detect{|p| p.name == 'key'}.value
           value = @p.detect{|p| p.name == 'value'}.value
-          property = @r[1]
+          property = relpath[1]
             
           unless Riddl::Utils::Properties::modifiable?(schema,property.nil? ? key : property)
             @status = 500
@@ -244,11 +248,13 @@ module Riddl
       class Delete < Riddl::Implementation #{{{
         def response
           properties = @a[0]
-          schema = @a[1]
-          strans = @a[2]
+          schema     = @a[1]
+          strans     = @a[2]
+          level      = @a[3]
+          relpath    = @r[level..-1]
 
-          key = @r[1]
-          property = @r[2]
+          key      = relpath[1]
+          property = relpath[2]
 
           unless Riddl::Utils::Properties::modifiable?(schema,key)
             @status = 500
@@ -282,12 +288,14 @@ module Riddl
       class Put < Riddl::Implementation #{{{
         def response
           properties = @a[0]
-          schema = @a[1]
-          strans = @a[2]
+          schema     = @a[1]
+          strans     = @a[2]
+          level      = @a[3]
+          relpath    = @r[level..-1]
 
-          key = @r[1]
+          key   = relpath[1]
           value = @p.detect{|p| p.name == 'value'}.value
-          property = @r[2]
+          property = relpath[2]
 
           unless Riddl::Utils::Properties::modifiable?(schema,key)
             @status = 500
