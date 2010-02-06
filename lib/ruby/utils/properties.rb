@@ -6,24 +6,27 @@ module Riddl
       VERSION_MINOR = 0
       PROPERTIES_SCHEMA_XSL_RNG = "#{File.dirname(__FILE__)}/../ns/common-patterns/properties/#{VERSION_MAJOR}.#{VERSION_MINOR}/properties.schema.xsl"
 
-      def self::implementation(properties,schema,strans,level)
+      def self::implementation(properties,schema,strans,handler,level)
+        unless handler.class == Class && handler.superclass == Riddl::Utils::Properties::HandlerBase
+          raise "handler not a subclass of HandlerBase"
+        end
         lambda {
-          run Riddl::Utils::Properties::All,   properties, schema, strans if get
-          run Riddl::Utils::Properties::Query, properties, schema, strans if get 'query'
+          run     Riddl::Utils::Properties::All,       properties, schema, strans                 if get
+          run     Riddl::Utils::Properties::Query,     properties, schema, strans                 if get    'query'
           on resource 'schema' do
-            run Riddl::Utils::Properties::Schema, properties, schema, strans if get
+            run   Riddl::Utils::Properties::Schema,    properties, schema, strans                 if get
             on resource 'rng' do
-              run Riddl::Utils::Properties::RngSchema, properties, schema, strans if get
+              run Riddl::Utils::Properties::RngSchema, properties, schema, strans                 if get
             end  
           end
           on resource 'values' do
-            run Riddl::Utils::Properties::Keys,    properties, schema, strans if get
-            run Riddl::Utils::Properties::AddPair, properties, schema, strans if post 'key-value-pair'
+            run   Riddl::Utils::Properties::Keys,      properties, schema, strans                 if get
+            run   Riddl::Utils::Properties::AddPair,   properties, schema, strans, handler, level if post   'key-value-pair'
             on resource do
-              run Riddl::Utils::Properties::AddPair, properties, schema, strans, level if post 'key-value-pair'
-              run Riddl::Utils::Properties::Values,  properties, schema,         level if get
-              run Riddl::Utils::Properties::Delete,  properties, schema, strans, level if delete
-              run Riddl::Utils::Properties::Put,     properties, schema, strans, level if put 'value'
+              run Riddl::Utils::Properties::AddPair,   properties, schema, strans, handler, level if post   'key-value-pair'
+              run Riddl::Utils::Properties::Values,    properties, schema,                  level if get
+              run Riddl::Utils::Properties::Delete,    properties, schema, strans, handler, level if delete
+              run Riddl::Utils::Properties::Put,       properties, schema, strans, handler, level if put    'value'
             end
           end  
         }
@@ -59,6 +62,16 @@ module Riddl
       end
       def self::is_state?(schema,property)
         schema.find("boolean(/p:properties/p:#{property}[@type='state'])")
+      end
+
+      class HandlerBase
+        def initialize(properties,property)
+          @properties = properties 
+          @property = property
+        end
+        def add; end
+        def delete; end
+        def change; end
       end
 
       class All < Riddl::Implementation #{{{
@@ -195,11 +208,12 @@ module Riddl
           properties = @a[0]
           schema     = @a[1]
           strans     = @a[2]
-          level      = @a[3]
+          handler    = @a[3]
+          level      = @a[4]
           relpath    = @r[level..-1]
 
-          key = @p.detect{|p| p.name == 'key'}.value
-          value = @p.detect{|p| p.name == 'value'}.value
+          key      = @p.detect{|p| p.name == 'key'}.value
+          value    = @p.detect{|p| p.name == 'value'}.value
           property = relpath[1]
             
           unless Riddl::Utils::Properties::modifiable?(schema,property.nil? ? key : property)
@@ -241,6 +255,8 @@ module Riddl
             node = property.nil? ? doc.root : doc.find("/p:properties/p:#{property}").first
             node.add newstuff.root
           end
+
+          handler.new(properties,property).add
           return Riddl::Parameter::Simple.new("key",key)
         end
       end #}}}
@@ -250,7 +266,8 @@ module Riddl
           properties = @a[0]
           schema     = @a[1]
           strans     = @a[2]
-          level      = @a[3]
+          handler    = @a[3]
+          level      = @a[4]
           relpath    = @r[level..-1]
 
           key      = relpath[1]
@@ -281,6 +298,8 @@ module Riddl
             doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
             doc.root.find(path).delete_all!
           end
+
+          handler.new(properties,property).delete
           return
         end
       end #}}} 
@@ -290,11 +309,12 @@ module Riddl
           properties = @a[0]
           schema     = @a[1]
           strans     = @a[2]
-          level      = @a[3]
+          handler    = @a[3]
+          level      = @a[4]
           relpath    = @r[level..-1]
 
-          key   = relpath[1]
-          value = @p.detect{|p| p.name == 'value'}.value
+          key      = relpath[1]
+          value    = @p.detect{|p| p.name == 'value'}.value
           property = relpath[2]
 
           unless Riddl::Utils::Properties::modifiable?(schema,key)
@@ -335,6 +355,8 @@ module Riddl
             doc.root.find(path).delete_all!
             parent.add(newstuff.root)
           end
+          
+          handler.new(properties,property).change
           return
         end
       end #}}}
