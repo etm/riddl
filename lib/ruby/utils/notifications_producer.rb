@@ -34,9 +34,9 @@ module Riddl
             @key = key
             @topics = topics
           end
-          def add; end
+          def create; end
           def delete; end
-          def change; end
+          def update; end
         end
 
         class Overview < Riddl::Implementation #{{{ 

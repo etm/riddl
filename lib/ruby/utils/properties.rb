@@ -11,8 +11,8 @@ module Riddl
           raise "handler not a subclass of HandlerBase"
         end
         lambda {
-          run     Riddl::Utils::Properties::All,       properties, schema, strans                 if get
-          run     Riddl::Utils::Properties::Query,     properties, schema, strans                 if get    'query'
+          run     Riddl::Utils::Properties::All,       properties,                 handler        if get
+          run     Riddl::Utils::Properties::Query,     properties,                 handler        if get    'query'
           on resource 'schema' do
             run   Riddl::Utils::Properties::Schema,    properties, schema, strans                 if get
             on resource 'rng' do
@@ -20,11 +20,11 @@ module Riddl
             end  
           end
           on resource 'values' do
-            run   Riddl::Utils::Properties::Keys,      properties, schema, strans                 if get
+            run   Riddl::Utils::Properties::Keys,      properties, schema,         handler        if get
             run   Riddl::Utils::Properties::AddPair,   properties, schema, strans, handler, level if post   'key-value-pair'
             on resource do
               run Riddl::Utils::Properties::AddPair,   properties, schema, strans, handler, level if post   'key-value-pair'
-              run Riddl::Utils::Properties::Values,    properties, schema,                  level if get
+              run Riddl::Utils::Properties::Values,    properties, schema,         handler, level if get
               run Riddl::Utils::Properties::Delete,    properties, schema, strans, handler, level if delete
               run Riddl::Utils::Properties::Put,       properties, schema, strans, handler, level if put    'value'
             end
@@ -69,14 +69,17 @@ module Riddl
           @properties = properties 
           @property = property
         end
-        def add; end
+        def create; end
+        def read;   end
+        def update; end
         def delete; end
-        def change; end
       end
 
       class All < Riddl::Implementation #{{{
         def response
           properties = @a[0]
+          handler    = @a[1]
+          handler.new(properties,nil).read
           return Riddl::Parameter::Complex.new("document","text/xml",File::open(properties))
         end
       end #}}}
@@ -84,7 +87,9 @@ module Riddl
       class Keys < Riddl::Implementation #{{{
         def response
           properties = @a[0]
-          schema = @a[1]
+          schema     = @a[1]
+          handler    = @a[2]
+          handler.new(properties,nil).read
 
           ret = XML::Smart.string("<keys xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
           schema.find("/p:properties/*[name()!='optional']|/p:properties/p:optional/*").each do |r|
@@ -97,6 +102,9 @@ module Riddl
       class Query < Riddl::Implementation #{{{
         def response
           properties = @a[0]
+          handler    = @a[1]
+          handler.new(properties,nil).read
+
           xml = File::read(properties).gsub(/properties xmlns="[^"]+"|properties xmlns='[^']+'/,'properties')
           e = XML::Smart::string(xml).root.find(@p[0].value)
           prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
@@ -136,8 +144,10 @@ module Riddl
         def response
           properties = @a[0]
           schema     = @a[1]
-          level      = @a[2]
+          handler    = @a[2]
+          level      = @a[3]
           relpath    = @r[level..-1]
+          handler.new(properties,relpath[1]).read
           if ret = extract_values(properties,schema,relpath[1],relpath[2])
             ret
           else
@@ -256,7 +266,7 @@ module Riddl
             node.add newstuff.root
           end
 
-          handler.new(properties,property).add
+          handler.new(properties,property).create
           return Riddl::Parameter::Simple.new("key",key)
         end
       end #}}}
@@ -299,7 +309,7 @@ module Riddl
             doc.root.find(path).delete_all!
           end
 
-          handler.new(properties,property).delete
+          handler.new(properties,key).delete
           return
         end
       end #}}} 
@@ -356,7 +366,7 @@ module Riddl
             parent.add(newstuff.root)
           end
           
-          handler.new(properties,property).change
+          handler.new(properties,key).update
           return
         end
       end #}}}
