@@ -72,7 +72,8 @@ module Riddl
             desres = des.find("des:resource").first
             if apply_to.empty?
               int = Interface.new("/",lpath,"/")
-              til.add_description(des,desres,"/",index,int,block)
+              rec = desres.attributes['recursive']
+              til.add_description(des,desres,"/",index,int,block,rec)
             else
               apply_to.each do |at|
                 int = Interface.new(at.to_s,lpath,"/")

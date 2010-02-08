@@ -41,7 +41,10 @@ module Riddl
           #{{{
           s = "  " * (level + 1)
           t = "  " * (level + 2)
-          result << s + "<resource#{res.path != '/' && res.path != '{}' ? " relative=\"#{res.path}\"" : ''}>\n"
+          p res.path
+          p res.recursive
+          p "------"
+          result << s + "<resource#{res.path != '/' && res.path != '{}' ? " relative=\"#{res.path}\"" : ''}#{res.recursive ? " recursive=\"true\"" : ''}>\n"
           if get_description
             result << t + "<get in='riddl-description-request' out='riddl-description-response'/>\n"
           end  
