@@ -148,6 +148,8 @@ module Riddl
           level      = @a[3]
           relpath    = @r[level..-1]
           handler.new(properties,relpath[1]).read
+
+          p relpath
           if ret = extract_values(properties,schema,relpath[1],relpath[2])
             ret
           else
