@@ -5,7 +5,7 @@ module Riddl
       module Producer
       
         def self::implementation(data,xsls,handler,details=:production) 
-          unless what.class == Class && what.superclass == Riddl::Utils::Notifications::Producer::HandlerBase
+          unless handler.class == Class && handler.superclass == Riddl::Utils::Notifications::Producer::HandlerBase
             raise "handler not a subclass of HandlerBase"
           end
           if !File.exists?(data) || !File.directory?(data)
@@ -131,7 +131,7 @@ module Riddl
               end
             end  
 
-            handler.new(data,key,topics).add
+            handler.new(data,key,topics).create
             [
               Riddl::Parameter::Simple.new('key',key),
               Riddl::Parameter::Simple.new('producer-secret',producer_secret),
@@ -156,7 +156,7 @@ module Riddl
             handler = @a[1]
 
             topics = []
-            handler.new(notifications,key,topics).change
+            handler.new(notifications,key,topics).update
           end
         end #}}}
         
