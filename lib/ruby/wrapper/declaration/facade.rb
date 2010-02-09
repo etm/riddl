@@ -97,7 +97,7 @@ module Riddl
           end  
           res.resources.each do |path,r|
             unless fac.resources.has_key?(path)
-              fac.resources[path] = Riddl::Wrapper::Description::Resource.new(path)
+              fac.resources[path] = Riddl::Wrapper::Description::Resource.new(path,r.recursive)
             end  
             merge_tiles(r,fac.resources[path])
           end
