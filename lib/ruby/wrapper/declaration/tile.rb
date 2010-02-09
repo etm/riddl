@@ -75,7 +75,6 @@ module Riddl
 
         def add_path(path,res,rec=nil)
           #{{{
-          p rec
           pres = res
           path.split('/').each do |pa|
             next if pa == ""
