@@ -1,14 +1,21 @@
 module Riddl
   class Wrapper
     class MessageParser
-      def initialize(params,headers)
+      def initialize(params,heads)
         #{{{
         @mist = params
         @mistp = 0
-        @headers = headers
+        @headp = {}
+        heads.each do |k,v|
+          @headp[k.upcase.sub(/\-/,'_')] = v
+        end
+        @headers = []
+
         @numparams = 0
         #}}}
       end
+
+      attr_reader :headers
 
       def check(what,ignore_name=false)
         #{{{
@@ -21,6 +28,7 @@ module Riddl
 
         # do it
         m  = what.content.root
+
         m.find("des:header").each do |h|
           return false unless header h
         end
@@ -141,8 +149,10 @@ module Riddl
       def header(a)
         #{{{
         name = a.attributes['name'].upcase.sub(/\-/,'_')
-        if @headers.has_key?(name)
-          return match_simple(a,@headers[name])
+        if @headp[name]
+          re =  match_simple(a,@headp[name])
+          @headers << Riddl::Header.new(name,@headp[name]) if re
+          return re
         end
         false
         #}}}
