@@ -7,7 +7,11 @@ module Riddl
         @mistp = 0
         @headp = {}
         heads.each do |k,v|
-          @headp[k.upcase.sub(/\-/,'_')] = v
+          if v.nil?
+            @headp[k.name.upcase.sub(/\-/,'_')] = v
+          else  
+            @headp[k.upcase.sub(/\-/,'_')] = v
+          end  
         end
         @headers = []
 
