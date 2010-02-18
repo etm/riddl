@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" 
+          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+<include href="relaxng-modular.rng"/>
+
+<define name="property">
+  <element name="element">
+    <attribute name="name"><text/></attribute>
+    <optional><attribute name="hidden"/></optional>
+    <oneOrMore>
+      <element name="caption"><text/>
+        <attribute name="lang"><data type="language"/></attribute>
+      </element>
+    </oneOrMore>
+    <optional>
+      <element name="description"><text/></element>
+    <optional>
+    <element name="data">
+      <ref name="data"/>
+    </element>
+  </element>
+</define>
+
+<define name="operation">
+    <attribute name="short"><text/></attribute>
+    <optional>
+      <element name="description"><text/></element>
+    </optional>
+    <element name="input">
+      <ref name="message"/>
+    </element>
+    <element name="output">
+      <ref name="message"/>
+    </element>
+</define>
+
+<define name="message">
+  <zeroOrMore>
+    <ref name="property"/>
+  </zeroOrMore>
+</define>
+
+<start>
+  <element name="interface">
+    <optional>  <!-- Is a group without static properties imaginable? -->
+      <element name="properties">
+        <oneOrMore>
+          <ref name="property"/>
+        </oneOrMore>
+      </element>
+    </optional>
+    <element name="operations">
+      <optional>
+        <element name="read">
+          <ref name="operation"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="create">
+          <ref name="operation"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="upadte">
+          <ref name="operation"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="delete">
+          <ref name="operation"/>
+        </element>
+      </optional>
+    </element>
+  </element>
+</start>
+</grammar>
