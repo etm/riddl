@@ -1,0 +1,82 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" 
+             xmlns="http://riddl.org/ns/description/1.0" 
+             xmlns:ann="http://riddl.org/ns/annotation/1.0" 
+             xmlns:xi="http://www.w3.org/2001/XInclude">
+
+<!-- Messages -->
+<!--{{{-->
+  <message name="description">
+    <parameter name="description" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="../../ns/description/1.0/description.rng"/>
+    </parameter>
+  </message>
+
+  <message name="xml">
+    <parameter name="feed" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng"/>
+  </message>
+<!-- Messages at group level -->
+<!-- {{{ -->
+  <message name="atom-feed">
+    <parameter name="feed" mimetype="application/atom+xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <!-- xi:include href="http://www.atompub.org/2005/08/17/atom.rnc"/ -->
+    </parameter>
+  </message>
+
+  <message name="input">
+    <parameter name="input" type="string"/>
+  </message>
+  <message name="output">
+    <parameter name="output" type="string"/>
+  </message>
+  <message name="properties">
+    <parameter name="properties" type="string"/>
+  </message>
+  <message name="serviceSchema">
+    <parameter name="serviceSchema" type="string"/>
+  </message>
+
+  <message name="schema">
+    <parameter name="schema" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng"/>
+  </message>
+
+<!--}}}-->
+
+
+<!--}}}-->
+<!-- Resources -->
+<!-- {{{ -->
+  <resource>
+    <request method="riddl" in="*" out="description">
+      <ann:label xml:lang="en">Show description</ann:label>
+    </request>
+    <resource relative="groups">
+<!-- {{{ -->
+      <get in="*" out="atom-feed"/>
+<!--}}}-->
+      <resource> <!-- Group-level -->
+<!-- {{{ -->
+        <get in="*" out="atom-feed"/>
+        <get in="properties" out="schema"/>
+        <get in="serviceSchema" out="schema"/>
+        <resource relative="operations">
+          <resource>
+            <get in="input" out="schema"/>
+            <get in="output" out="schema"/>
+          </resource>
+        </resource>
+<!--}}}-->
+        <resource> <!-- Subgroup-level -->
+<!-- {{{ -->
+          <get in="*" out="atom-feed"/>
+          <resource> <!-- Service-level -->
+<!-- {{{ -->
+            <get in="properties" out="xml"/>
+<!--}}}-->
+          </resource>  
+<!--}}}-->
+        </resource>  
+      </resource>  
+    </resource>  
+  </resource>  
+<!-- }}} -->
+</description>

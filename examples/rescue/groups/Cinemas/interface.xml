@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+
+<interface>
+  <properties>
+<!-- {{{ -->
+    <element name="longitude">
+      <caption lang="en">Longitude</caption>
+      <caption lang="de">Längengrad</caption>
+      <data type="positiveInteger"/>
+    </element>
+    <element name="latitude">
+      <caption lang="en">Latitude</caption>
+      <caption lang="de">Breitengrad</caption>
+      <data type="positiveInteger"/>
+    </element>
+  </properties>
+<!-- }}} -->
+  <operations>
+    <read short="search for movies">
+<!-- {{{ -->
+      <input>
+        <element name="title">
+          <caption lang="en">Title</caption>
+          <caption lang="de">Titel</caption>
+          <data type="string"/>
+        </element>
+        <element name="date">
+          <caption lang="en">Date</caption>
+          <caption lang="de">Datum</caption>
+          <data type="date"/>
+        </element>
+        <element name="preferred-time">
+          <caption lang="en">preferred time</caption>
+          <caption lang="de">bevorzugte Zeit</caption>
+          <data type="time"/>
+        </element>
+      </input>
+      <output>
+        <element name="movie-title">
+          <caption lang="en">Movietitle</caption>
+          <caption lang="de">Filmtitel</caption>
+          <data type="string"/>
+        </element>
+        <element name="show-id" hidden="true">
+          <caption lang="en">ShowID</caption>
+          <caption lang="de">VorstellungsID</caption>
+          <data type="string"/>
+        </element>
+        <element name="starting-time">
+          <caption lang="en">Starting time</caption>
+          <caption lang="de">Beginzeit</caption>
+          <data type="time"/>
+        </element>
+        <element name="hall">
+          <caption lang="en">Hall</caption>
+          <caption lang="de">Saal</caption>
+          <data type="positiveInteger"/>
+        </element>
+      </output>
+    </read>
+<!-- }}} -->
+    <create short="book-tickets for a movie">
+<!-- {{{ -->
+      <input>
+        <element name="show-id" hidden="true">
+          <caption lang="en">ShowID</caption>
+          <caption lang="de">VorstellungsID</caption>
+          <data type="string"/>
+        </element>
+        <element name="number-of-seats">
+          <caption lang="en">Number of seats</caption>
+          <caption lang="de">Anzahl Plaetze</caption>
+          <data type="positiveInteger"/>
+        </element>
+        <element name="username">
+          <caption lang="en">Username</caption>
+          <caption lang="de">Benutzername</caption>
+          <data type="string"/>
+        </element>
+        <element name="password">
+          <caption lang="en">Password</caption>
+          <caption lang="de">Passwort</caption>
+          <data type="string"/>
+        </element>
+      </input>
+      <output>
+        <element name="reservation-id" hidden="true">
+          <caption lang="en">Reservation ID</caption>
+          <caption lang="de">Reservierungsnummer</caption>
+          <data type="string"/>
+        </element>
+      </output>
+    </create>
+<!-- }}} -->
+    <delete short="cancel already booked tickets">
+<!-- {{{ -->
+      <input>
+        <element name="username">
+          <caption lang="en">Username</caption>
+          <caption lang="de">Benutzername</caption>
+          <data type="string"/>
+        </element>
+        <element name="password">
+          <caption lang="en">Password</caption>
+          <caption lang="de">Passwort</caption>
+          <data type="string"/>
+        </element>
+        <element name="reservation-id" hidden="true">
+          <caption lang="en">ReservationID</caption>
+          <caption lang="de">Reservierungsnummer</caption>
+          <data type="string"/>
+        </element>
+      </input>
+      <output>
+      </output>
+    </delete>
+<!-- }}} -->
+  </operations>
+</interface>
+
