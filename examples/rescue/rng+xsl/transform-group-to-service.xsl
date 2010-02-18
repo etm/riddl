@@ -37,15 +37,18 @@
               <xsl:element name="value">delete</xsl:element>
             </xsl:element>
         </xsl:element>
+        <xsl:call-template name="in-out"/>
         <xsl:element name="zeroOrMore">
           <xsl:element name="element"><xsl:attribute name="name">pre</xsl:attribute>
             <xsl:element name="attribute"><xsl:attribute name="name">uri</xsl:attribute></xsl:element>
+            <xsl:element name="attribute"><xsl:attribute name="name">http-method</xsl:attribute></xsl:element>
             <xsl:call-template name="in-out"/>
           </xsl:element>
         </xsl:element>
         <xsl:element name="zeroOrMore">
           <xsl:element name="element"><xsl:attribute name="name">post</xsl:attribute>
             <xsl:element name="attribute"><xsl:attribute name="name">uri</xsl:attribute></xsl:element>
+            <xsl:element name="attribute"><xsl:attribute name="name">http-method</xsl:attribute></xsl:element>
             <xsl:call-template name="in-out"/>
           </xsl:element>
         </xsl:element>
@@ -63,12 +66,18 @@
   <xsl:template name="in-out">
     <xsl:element name="zeroOrMore">
       <xsl:element name="element"><xsl:attribute name="name">input</xsl:attribute>
-        <xsl:element name="attribute"><xsl:attribute name="name">parameter-name</xsl:attribute></xsl:element>
+        <xsl:element name="choice">
+          <xsl:element name="attribute"><xsl:attribute name="name">name</xsl:attribute></xsl:element>
+          <xsl:element name="group">
+            <xsl:element name="attribute"><xsl:attribute name="name">name</xsl:attribute></xsl:element>
+            <xsl:element name="attribute"><xsl:attribute name="name">value</xsl:attribute></xsl:element>
+          </xsl:element>
+        </xsl:element>
       </xsl:element>
     </xsl:element>
     <xsl:element name="zeroOrMore">
       <xsl:element name="element"><xsl:attribute name="name">output</xsl:attribute>
-        <xsl:element name="attribute"><xsl:attribute name="name">parameter-name</xsl:attribute></xsl:element>
+        <xsl:element name="attribute"><xsl:attribute name="name">name</xsl:attribute></xsl:element>
       </xsl:element>
     </xsl:element>
   </xsl:template>

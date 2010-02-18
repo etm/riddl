@@ -15,7 +15,7 @@
     </oneOrMore>
     <optional>
       <element name="description"><text/></element>
-    <optional>
+    </optional>
     <element name="data">
       <ref name="data"/>
     </element>
