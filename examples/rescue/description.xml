@@ -12,14 +12,10 @@
   </message>
 
   <message name="xml">
-    <parameter name="feed" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng"/>
+    <parameter name="xml" mimetype="text/xml"/>
   </message>
-<!-- Messages at group level -->
-<!-- {{{ -->
   <message name="atom-feed">
-    <parameter name="feed" mimetype="application/atom+xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <!-- xi:include href="http://www.atompub.org/2005/08/17/atom.rnc"/ -->
-    </parameter>
+    <parameter name="feed" mimetype="application/atom+xml"/>
   </message>
 
   <message name="input">
@@ -39,8 +35,30 @@
     <parameter name="schema" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng"/>
   </message>
 
-<!--}}}-->
+  <message name="group">
+    <parameter name="group-name" type="string"/>
+    <parameter name="interface" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rng+xsl/group.rng"/>
+    </parameter>
+  </message>
 
+  <message name="rename">
+    <parameter name="new-name" type="string"/>
+  </message>
+
+  <message name="subgroup">
+    <parameter name="subgroup-name" type="string"/>
+  </message>
+
+
+  <message name="service">
+    <parameter name="service-name" type="string"/>
+    <parameter name="properties" mimetype="text/xml"/>
+  </message>
+
+  <message name="service-properties">
+    <parameter name="properties" mimetype="text/xml"/>
+  </message>
 
 <!--}}}-->
 <!-- Resources -->
@@ -52,12 +70,16 @@
     <resource relative="groups">
 <!-- {{{ -->
       <get in="*" out="atom-feed"/>
+      <post in="group"/>
 <!--}}}-->
       <resource> <!-- Group-level -->
 <!-- {{{ -->
         <get in="*" out="atom-feed"/>
         <get in="properties" out="schema"/>
         <get in="serviceSchema" out="schema"/>
+        <put in="rename"/>
+        <post in="subgroup"/>
+        <delete in="*"/>
         <resource relative="operations">
           <resource>
             <get in="input" out="schema"/>
@@ -68,12 +90,19 @@
         <resource> <!-- Subgroup-level -->
 <!-- {{{ -->
           <get in="*" out="atom-feed"/>
+          <delete in="*"/>
+          <put in="rename"/>
+          <post in="service"/>
+<!--}}}-->
           <resource> <!-- Service-level -->
 <!-- {{{ -->
-            <get in="properties" out="xml"/>
+            <get in="*" out="xml"/>
+            <put in="rename"/>
+            <put in="service-properties"/>
+            <delete in="*"/>
 <!--}}}-->
           </resource>  
-<!--}}}-->
+
         </resource>  
       </resource>  
     </resource>  

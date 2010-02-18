@@ -10,10 +10,7 @@ require 'fileutils'
 #require 'logger'
 
 
-require 'lib/root'
-require 'lib/group'
-require 'lib/subgroup'
-require 'lib/service'
+require 'lib/rescue'
 
 use Rack::ShowStatus
 
@@ -33,11 +30,16 @@ run(
       on resource 'groups' do
         # Generating the ATOM feed with groups
         run GenerateFeed if method :get => '*'
+        run AddResource if method :post => 'group'
 
         on resource do # Group-level
           run GenerateFeed if method :get => '*'
           run GetInterface if method :get => 'properties'
           run GetServiceInterface if method :get => 'serviceSchema'
+          run UpdateResource if method :put => 'rename'
+          run DeleteResource if method :delete => '*'
+          run AddResource if method :post => 'subgroup'
+
           on resource 'operations' do
             on resource do
               run GetInterface if method :get => 'input'
@@ -46,8 +48,15 @@ run(
           end
           on resource do # Subgroup-level
             run GenerateFeed if method :get => '*'
+            run DeleteResource if method :delete => '*'
+            run UpdateResource if method :put => 'rename'
+            run AddResource if method :post => 'service'
   
             on resource do # Service-level
+              run GetServiceDescription if method :get => '*'
+              run UpdateResource if method :put => 'rename'
+              run UpdateResource if method :put => 'service-properties'
+              run DeleteResource if method :delete => '*'
             end      
           end      
         end      

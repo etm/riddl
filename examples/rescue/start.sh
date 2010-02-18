@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rackup server.ru -p 9090
+rackup server.ru -p 9290
