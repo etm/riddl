@@ -36,12 +36,16 @@ class UpdateResource < Riddl::Implementation
   def response
     begin
       if @p[0].name == "new-name"
-        File.rename("#{@r.join("/")}", "#{@r[0..-2].join("/")}/#{@p[0].value}")
+        begin
+          File.rename("#{@r.join("/")}", "#{@r[0..-2].join("/")}/#{@p[0].value}")
+        rescue
+          @status = 409
+          return
+        end
       elsif @p[0].name == "properties"
         xml = XML::Smart.string(@p[0].value.read)
         group = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
         schema = XML::Smart.string(group.transform_with(XML::Smart.open("rng+xsl/transform-group-to-service.xsl")))
-        puts xml.validate_against(schema)
         if xml.validate_against(schema) == false
           @status = 415 # Media-Type not supprted
           return
@@ -51,7 +55,7 @@ class UpdateResource < Riddl::Implementation
         f.close()
       end
     rescue
-      @status = 500 # http ERROR named 'Conflict'
+      @status = 500 # Something that should not happen, happend 
       puts $ERROR_INFO
     end
   end
@@ -62,7 +66,7 @@ class GetInterface < Riddl::Implementation
   def response
     schema = RNGSchema.new
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-    p = xml.find("/interface/properties/*") if @p[0].name == "properties"
+    p = xml.find("/interface/properties") if @p[0].name == "properties"
     p = xml.find("/interface/operations/#{@r[3]}/input/*") if @p[0].name == "input"
     p = xml.find("/interface/operations/#{@r[3]}/output/*") if @p[0].name == "output"
     p.each do |e|
@@ -86,6 +90,7 @@ end
 class RNGSchema
   @__schema = nil
   @__start_node = nil
+
   def initialize()
     @__schema = XML::Smart.string("<grammar/>")
     @__schema.root.attributes.add("xmlns", "http://relaxng.org/ns/structure/1.0")
@@ -95,6 +100,8 @@ class RNGSchema
   end
 
   def append_schemablock(schema_block)
+    captions = schema_block.find("//caption")
+    captions.delete_if!{true }
     @__start_node.add(schema_block)
   end
 

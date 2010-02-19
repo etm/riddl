@@ -7,6 +7,7 @@
     <xsl:element name="grammar">
       <xsl:attribute name="xmlns">http://relaxng.org/ns/structure/1.0</xsl:attribute>
       <xsl:attribute name="datatypeLibrary">http://www.w3.org/2001/XMLSchema-datatypes</xsl:attribute>
+      <!-- xsl:element name="include"><xsl:attribute name="href">relaxng-modular.rng</xsl:attribute></xsl:element -->
       <xsl:element name="start">
         <xsl:element name="element"><xsl:attribute name="name">service-details</xsl:attribute>
           <xsl:element name="element"><xsl:attribute name="name">properties</xsl:attribute>
