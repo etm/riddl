@@ -83,7 +83,7 @@ class GetServiceInterface < Riddl::Implementation
     schema = RNGSchema.new
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     xsl = XML::Smart.open("rng+xsl/transform-group-to-service.xsl")
-    Riddl::Parameter::Complex.new("atom-feed","text/xml",xml.transform_with(xsl))
+    Riddl::Parameter::Complex.new("schema","text/xml",xml.transform_with(xsl))
   end
 end
 
