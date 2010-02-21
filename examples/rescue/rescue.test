@@ -38,7 +38,6 @@ puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
 
-
 expectation = 201
 test = "Creating subgroup (expected status: #{expectation})"
 # {{{
@@ -56,7 +55,6 @@ status, response = client.resource("groups/testclient-group").post [
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
-
 
 
 expectation = 415
@@ -90,6 +88,8 @@ puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
 
+
+
 # Testcases for requesting reources
 expectation = 200
 test = "Validating serviceSchema against service-properties"
@@ -100,7 +100,9 @@ puts test + " failed during requesting properties schema with status-code: #{sta
 status, response = client.resource("groups/testclient-group/testclient-subgroup/testclient-service").get []
 xml = XML::Smart.string(response[0].value.read)
 
+puts "--------------------- SCHEMA -------------------------"
 puts schema
+puts "----------------------- XML --------------------------"
 puts xml
 
 puts test + " failed during requesting service-properties with status-code: #{status}" if status != 200
@@ -111,13 +113,10 @@ x = XML::Smart.open("service.xml")
 puts "Validation #{ x.validate_against(rng)}"
 #}}}
 
+
+
+
 # Testcases for updating
-expectation = 501
-test = "Updating group with invalide XMl (expected status: #{expectation})"
-
-expectation = 200
-test = "Updating group with valide XML (expeted status: #{expectation})"
-
 expectation = 415
 test = "Updating service with invalide XML (expected status: #{expectation})"
 # {{{
@@ -135,6 +134,9 @@ status, response = client.resource("groups/testclient-group/testclient-subgroup/
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
+
+
+
 
 # Testcases for renaming resources
 expectation = 200
@@ -192,6 +194,8 @@ puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
 
+
+
 # Testcases for deleting resources
 expectation = 200
 test= "Deleting service (expected status: #{expectation})"
@@ -213,10 +217,3 @@ test= "Deleting group (expected status: #{expectation})"
 status, response = client.resource("groups/testclient-group-renamed").delete []
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
-
-
-
-
-
-
-
