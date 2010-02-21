@@ -7,183 +7,211 @@ require 'xml/smart'
 client = Riddl::Client.new("http://localhost:9290")
 
 # Testcases for adding resources
-test = "Creating group with a invalide XML (expected status: 501)"
+expectation = 501
+test = "Creating group with a invalide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups").post [
       Riddl::Parameter::Simple.new("group-name", "testclient-group-invalide-xml"),
       Riddl::Parameter::Complex.new("interface", "text/xml", File.open("rng+xsl/examples/service.xml", "r"))
       ]
-puts test + " failed with error: #{status}" if status != 501
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test= "Creating group with valide XML (expected status: 201)"
+expectation = 201
+test= "Creating group with valide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups").post [
       Riddl::Parameter::Simple.new("group-name", "testclient-group"),
       Riddl::Parameter::Complex.new("interface", "text/xml", File.open("rng+xsl/examples/group.xml", "r"))
       ]
-puts test + " failed with error: #{status}" if status != 201
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test = "Creating group with a name that already exists (expected status: 409)"
+expectation = 409
+test = "Creating group with a name that already exists (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups").post [
       Riddl::Parameter::Simple.new("group-name", "testclient-group"),
       Riddl::Parameter::Complex.new("interface", "text/xml", File.open("rng+xsl/examples/group.xml", "r"))
       ]
-puts test + " failed with error: #{status}" if status != 409
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
 
 
-test = "Creating subgroup (expected status: 201)"
+expectation = 201
+test = "Creating subgroup (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group").post [
       Riddl::Parameter::Simple.new("subgroup-name", "testclient-subgroup")
       ]
-puts test + " failed with error: #{status}" if status != 201
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test = "Creating subgroup with a name that already exists (expected status: 409)"
+expectation = 409
+test = "Creating subgroup with a name that already exists (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group").post [
       Riddl::Parameter::Simple.new("subgroup-name", "testclient-subgroup")
       ]
-puts test + " failed with error: #{status}" if status != 409
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
 
 
-test = "Creating service with invalide XML (expected status: 415)"
+expectation = 415
+test = "Creating service with invalide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group/testclient-subgroup/").post [
       Riddl::Parameter::Simple.new("service-name", "testclient-service-invalide-xml"),
       Riddl::Parameter::Complex.new("properties", "text/xml", File.open("rng+xsl/examples/group.xml", "r"))
       ]
-puts test + " failed with error: #{status}" if status != 415
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test = "Creating service with valide XML (expected status: 201)"
+expectation = 201
+test = "Creating service with valide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group/testclient-subgroup").post [
       Riddl::Parameter::Simple.new("service-name", "testclient-service"),
       Riddl::Parameter::Complex.new("properties", "text/xml", File.open("rng+xsl/examples/service.xml", "r"))
       ]
-puts test + " failed with error: #{status}" if status != 201
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test = "Creating service with a name that already exists (expected status: 409)"
+expectation = 409
+test = "Creating service with a name that already exists (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group/testclient-subgroup").post [
       Riddl::Parameter::Simple.new("service-name", "testclient-service"),
       Riddl::Parameter::Complex.new("properties", "text/xml", File.open("rng+xsl/examples/service.xml", "r"))
       ]
-puts test + " failed with error: #{status}" if status != 409
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
 
 # Testcases for requesting reources
-test = "Validating serviceInterface against service-properties"
+expectation = 200
+test = "Validating serviceSchema against service-properties"
 # {{{
 status, response = client.resource("groups/testclient-group").get [Riddl::Parameter::Simple.new("serviceSchema","")]
 schema = XML::Smart.string(response[0].value.read)
 puts test + " failed during requesting properties schema with status-code: #{status}" if status != 200
 status, response = client.resource("groups/testclient-group/testclient-subgroup/testclient-service").get []
 xml = XML::Smart.string(response[0].value.read)
+
+puts schema
+puts xml
+
 puts test + " failed during requesting service-properties with status-code: #{status}" if status != 200
-puts "Validation of properties against group-schema failed" if xml.validate_against(schema)
+puts test + " failed because schema does not match against xml"  if xml.validate_against(schema)
+
+rng = XML::Smart.open("transformed.rng")
+x = XML::Smart.open("service.xml")
+puts "Validation #{ x.validate_against(rng)}"
 #}}}
 
-
 # Testcases for updating
-test = "Updating group with invalide XMl (expected status: 501)"
+expectation = 501
+test = "Updating group with invalide XMl (expected status: #{expectation})"
 
-test = "Updating group with valide XML (expeted status: 200)"
+expectation = 200
+test = "Updating group with valide XML (expeted status: #{expectation})"
 
-test = "Updating service with invalide XML (expected status: 415)"
+expectation = 415
+test = "Updating service with invalide XML (expected status: #{expectation})"
 # {{{
-status, response = client.resource("groups/testclient-group-rename/testclient-subgroup-rename/testclient-service-rename").put [
+status, response = client.resource("groups/testclient-group/testclient-subgroup/testclient-service").put [
       Riddl::Parameter::Complex.new("properties", "text/xml", File.open("rng+xsl/examples/group.xml", "r"))
       ]
-puts test + " failed with error: #{status}" if status != 415
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test = "Updating service with valide XML (expected status: 200)"
+expectation = 200
+test = "Updating service with valide XML (expected status: #{expectation})"
+# {{{
+status, response = client.resource("groups/testclient-group/testclient-subgroup/testclient-service").put [
+      Riddl::Parameter::Complex.new("properties", "text/xml", File.open("rng+xsl/examples/service.xml", "r"))
+      ]
+puts test + " failed with error: #{status}" if status != expectation
+# }}}
 
 # Testcases for renaming resources
-test = "Renaming group (expected status: 200)"
+expectation = 200
+test = "Renaming group (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group/").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-group-renamed")
       ]
-puts test + " failed with error: #{status}" if status != 200
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test = "Renaming subggroup (expected status: 200)"
+expectation = 200
+test = "Renaming subggroup (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-subgroup-renamed")
       ]
-puts test + " failed with error: #{status}" if status != 200
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test = "Renaming service (expected status: 200)"
+expectation = 200
+test = "Renaming service (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup-renamed/testclient-service").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-service-renamed")
       ]
-puts test + " failed with error: #{status}" if status != 200
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test = "Renaming group with a name that already exists (expected status: 409)"
+expectation = 409
+test = "Renaming group with a name that already exists (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group/").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-group-renamed")
       ]
-puts test + " failed with error: #{status}" if status != 409
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test = "Renaming subggroup with a name that already exists (expected status: 409)"
+expectation = 409
+test = "Renaming subggroup with a name that already exists (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-subgroup-renamed")
       ]
-puts test + " failed with error: #{status}" if status != 409
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test = "Renaming service with a name that already exists (expected status: 409)"
+expectation = 409
+test = "Renaming service with a name that already exists (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup-renamed/testclient-service").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-service-renamed")
       ]
-puts test + " failed with error: #{status}" if status != 409
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test = "Updating service with invalide XML (expected status: 415)"
-# {{{
-status, response = client.resource("groups/testclient-group-rename/testclient-subgroup-rename/testclient-service-rename").put [
-      Riddl::Parameter::Complex.new("properties", "text/xml", File.open("rng+xsl/examples/group.xml", "r"))
-      ]
-puts test + " failed with error: #{status}" if status != 415
-# }}}
 
 # Testcases for deleting resources
-test= "Deleting service (expected status: 200)"
+expectation = 200
+test= "Deleting service (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup-renamed/testclient-service-renamed").delete []
-puts test + " failed with error: #{status}" if status != 200
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test= "Deleting subgroup (expected status: 200)"
+expectation = 200
+test= "Deleting subgroup (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup-renamed").delete []
-puts test + " failed with error: #{status}" if status != 200
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
-test= "Deleting group (expected status: 200)"
+expectation = 200
+test= "Deleting group (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group-renamed").delete []
-puts test + " failed with error: #{status}" if status != 200
+puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
 

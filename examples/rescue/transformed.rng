@@ -1,0 +1,237 @@
+<?xml version="1.0"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <start>
+    <element name="service-details">
+      <element name="properties">
+        <element name="longitude">
+          <data type="positiveInteger"/>
+        </element>
+        <element name="latitude">
+          <data type="positiveInteger"/>
+        </element>
+      </element>
+      <element name="operations">
+        <element name="read">
+          <attribute name="uri">
+            <text/>
+          </attribute>
+          <attribute name="http-method">
+            <choice>
+              <value>get</value>
+              <value>put</value>
+              <value>post</value>
+              <value>delete</value>
+            </choice>
+          </attribute>
+          <zeroOrMore>
+            <element name="input">
+              <choice>
+                <attribute name="name"/>
+                <group>
+                  <attribute name="name"/>
+                  <attribute name="value"/>
+                </group>
+              </choice>
+            </element>
+          </zeroOrMore>
+          <zeroOrMore>
+            <element name="output">
+              <attribute name="name"/>
+            </element>
+          </zeroOrMore>
+          <zeroOrMore>
+            <element name="pre">
+              <attribute name="uri"/>
+              <attribute name="http-method"/>
+              <zeroOrMore>
+                <element name="input">
+                  <choice>
+                    <attribute name="name"/>
+                    <group>
+                      <attribute name="name"/>
+                      <attribute name="value"/>
+                    </group>
+                  </choice>
+                </element>
+              </zeroOrMore>
+              <zeroOrMore>
+                <element name="output">
+                  <attribute name="name"/>
+                </element>
+              </zeroOrMore>
+            </element>
+          </zeroOrMore>
+          <zeroOrMore>
+            <element name="post">
+              <attribute name="uri"/>
+              <attribute name="http-method"/>
+              <zeroOrMore>
+                <element name="input">
+                  <choice>
+                    <attribute name="name"/>
+                    <group>
+                      <attribute name="name"/>
+                      <attribute name="value"/>
+                    </group>
+                  </choice>
+                </element>
+              </zeroOrMore>
+              <zeroOrMore>
+                <element name="output">
+                  <attribute name="name"/>
+                </element>
+              </zeroOrMore>
+            </element>
+          </zeroOrMore>
+        </element>
+        <element name="create">
+          <attribute name="uri">
+            <text/>
+          </attribute>
+          <attribute name="http-method">
+            <choice>
+              <value>get</value>
+              <value>put</value>
+              <value>post</value>
+              <value>delete</value>
+            </choice>
+          </attribute>
+          <zeroOrMore>
+            <element name="input">
+              <choice>
+                <attribute name="name"/>
+                <group>
+                  <attribute name="name"/>
+                  <attribute name="value"/>
+                </group>
+              </choice>
+            </element>
+          </zeroOrMore>
+          <zeroOrMore>
+            <element name="output">
+              <attribute name="name"/>
+            </element>
+          </zeroOrMore>
+          <zeroOrMore>
+            <element name="pre">
+              <attribute name="uri"/>
+              <attribute name="http-method"/>
+              <zeroOrMore>
+                <element name="input">
+                  <choice>
+                    <attribute name="name"/>
+                    <group>
+                      <attribute name="name"/>
+                      <attribute name="value"/>
+                    </group>
+                  </choice>
+                </element>
+              </zeroOrMore>
+              <zeroOrMore>
+                <element name="output">
+                  <attribute name="name"/>
+                </element>
+              </zeroOrMore>
+            </element>
+          </zeroOrMore>
+          <zeroOrMore>
+            <element name="post">
+              <attribute name="uri"/>
+              <attribute name="http-method"/>
+              <zeroOrMore>
+                <element name="input">
+                  <choice>
+                    <attribute name="name"/>
+                    <group>
+                      <attribute name="name"/>
+                      <attribute name="value"/>
+                    </group>
+                  </choice>
+                </element>
+              </zeroOrMore>
+              <zeroOrMore>
+                <element name="output">
+                  <attribute name="name"/>
+                </element>
+              </zeroOrMore>
+            </element>
+          </zeroOrMore>
+        </element>
+        <element name="delete">
+          <attribute name="uri">
+            <text/>
+          </attribute>
+          <attribute name="http-method">
+            <choice>
+              <value>get</value>
+              <value>put</value>
+              <value>post</value>
+              <value>delete</value>
+            </choice>
+          </attribute>
+          <zeroOrMore>
+            <element name="input">
+              <choice>
+                <attribute name="name"/>
+                <group>
+                  <attribute name="name"/>
+                  <attribute name="value"/>
+                </group>
+              </choice>
+            </element>
+          </zeroOrMore>
+          <zeroOrMore>
+            <element name="output">
+              <attribute name="name"/>
+            </element>
+          </zeroOrMore>
+          <zeroOrMore>
+            <element name="pre">
+              <attribute name="uri"/>
+              <attribute name="http-method"/>
+              <zeroOrMore>
+                <element name="input">
+                  <choice>
+                    <attribute name="name"/>
+                    <group>
+                      <attribute name="name"/>
+                      <attribute name="value"/>
+                    </group>
+                  </choice>
+                </element>
+              </zeroOrMore>
+              <zeroOrMore>
+                <element name="output">
+                  <attribute name="name"/>
+                </element>
+              </zeroOrMore>
+            </element>
+          </zeroOrMore>
+          <zeroOrMore>
+            <element name="post">
+              <attribute name="uri"/>
+              <attribute name="http-method"/>
+              <zeroOrMore>
+                <element name="input">
+                  <choice>
+                    <attribute name="name"/>
+                    <group>
+                      <attribute name="name"/>
+                      <attribute name="value"/>
+                    </group>
+                  </choice>
+                </element>
+              </zeroOrMore>
+              <zeroOrMore>
+                <element name="output">
+                  <attribute name="name"/>
+                </element>
+              </zeroOrMore>
+            </element>
+          </zeroOrMore>
+        </element>
+      </element>
+    </element>
+  </start>
+</grammar>
+
