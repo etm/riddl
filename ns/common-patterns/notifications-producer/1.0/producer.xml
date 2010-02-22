@@ -81,7 +81,7 @@
                 <oneOrMore>
                   <element name="event">
                     <data type="string">
-                      <param name="pattern">\w+</param>
+                      <param name="pattern">[\w_]+</param>
                     </data>
                   </element>  
                 </oneOrMore>
