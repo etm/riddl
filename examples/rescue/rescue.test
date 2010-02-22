@@ -106,7 +106,7 @@ puts "----------------------- XML --------------------------"
 puts xml
 
 puts test + " failed during requesting service-properties with status-code: #{status}" if status != 200
-puts test + " failed because schema does not match against xml"  if xml.validate_against(schema)
+puts test + " failed because schema does not match against xml"  if xml.validate_against(schema) == false
 
 rng = XML::Smart.open("transformed.rng")
 x = XML::Smart.open("service.xml")
