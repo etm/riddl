@@ -190,6 +190,10 @@ end
 
 class GetServiceDescription <  Riddl::Implementation
   def response
+    if File.exist?("#{@r.join("/")}/properties.xml") == false
+      @status = 410
+      return
+    end
     Riddl::Parameter::Complex.new("service","text/xml",File.open("#{@r.join("/")}/properties.xml", "r"))
   end
 end
