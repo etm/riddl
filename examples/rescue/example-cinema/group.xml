@@ -16,7 +16,7 @@
   </properties>
 <!-- }}} -->
   <operations>
-    <read short="search for movies">
+    <query short="search for movies">
 <!-- {{{ -->
       <input>
         <element name="title">
@@ -57,9 +57,9 @@
           <data type="positiveInteger"/>
         </element>
       </output>
-    </read>
+    </query>
 <!-- }}} -->
-    <create short="book-tickets for a movie">
+    <invoke short="book-tickets for a movie">
 <!-- {{{ -->
       <input>
         <element name="show-id" hidden="true">
@@ -90,9 +90,9 @@
           <data type="string"/>
         </element>
       </output>
-    </create>
+    </invoke>
 <!-- }}} -->
-    <delete short="cancel already booked tickets">
+    <undo short="cancel already booked tickets">
 <!-- {{{ -->
       <input>
         <element name="username">
@@ -111,9 +111,7 @@
           <data type="string"/>
         </element>
       </input>
-      <output>
-      </output>
-    </delete>
+    </undo>
 <!-- }}} -->
   </operations>
 </interface>

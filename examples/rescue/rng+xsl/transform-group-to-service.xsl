@@ -24,7 +24,6 @@
 
   <xsl:template match="/interface/operations/*">
     <xsl:text>&#10;</xsl:text>
-    <!-- xsl:element name="optional" -->
       <xsl:element name="element"><xsl:attribute name="name"><xsl:value-of select="name()"/></xsl:attribute><xsl:text>&#10;</xsl:text>
         <xsl:element name="attribute"><xsl:attribute name="name">uri</xsl:attribute>
           <xsl:element name="text"/>
@@ -38,25 +37,41 @@
               <xsl:element name="value">delete</xsl:element>
             </xsl:element>
         </xsl:element>
-        <xsl:call-template name="in-out"/>
-        <xsl:element name="zeroOrMore">
-          <xsl:element name="element"><xsl:attribute name="name">pre</xsl:attribute>
-            <xsl:element name="attribute"><xsl:attribute name="name">uri</xsl:attribute></xsl:element>
-            <xsl:element name="attribute"><xsl:attribute name="name">http-method</xsl:attribute></xsl:element>
-            <xsl:call-template name="in-out"/>
+        <xsl:element name="optional">
+          <xsl:element name="element">
+            <xsl:attribute name="name">input</xsl:attribute>
+            <xsl:call-template name="pre-post"/>
           </xsl:element>
         </xsl:element>
-        <xsl:element name="zeroOrMore">
-          <xsl:element name="element"><xsl:attribute name="name">post</xsl:attribute>
-            <xsl:element name="attribute"><xsl:attribute name="name">uri</xsl:attribute></xsl:element>
-            <xsl:element name="attribute"><xsl:attribute name="name">http-method</xsl:attribute></xsl:element>
-            <xsl:call-template name="in-out"/>
+        <xsl:element name="optional">
+          <xsl:element name="element">
+            <xsl:attribute name="name">output</xsl:attribute>
+            <xsl:call-template name="pre-post"/>
           </xsl:element>
         </xsl:element>
       </xsl:element>
-      <xsl:text>&#10;</xsl:text>
-    <!-- /xsl:element -->
+    <xsl:text>&#10;</xsl:text>
   </xsl:template>
+
+  <xsl:template name="pre-post">
+    <xsl:element name="zeroOrMore">
+      <xsl:element name="element">
+        <xsl:attribute name="name">pre</xsl:attribute>
+        <xsl:element name="attribute"><xsl:attribute name="name">uri</xsl:attribute></xsl:element>
+        <xsl:element name="attribute"><xsl:attribute name="name">http-method</xsl:attribute></xsl:element>
+        <xsl:call-template name="in-out"/>
+      </xsl:element>
+    </xsl:element>
+    <xsl:element name="zeroOrMore">
+      <xsl:element name="element">
+        <xsl:attribute name="name">post</xsl:attribute>
+        <xsl:element name="attribute"><xsl:attribute name="name">uri</xsl:attribute></xsl:element>
+        <xsl:element name="attribute"><xsl:attribute name="name">http-method</xsl:attribute></xsl:element>
+        <xsl:call-template name="in-out"/>
+      </xsl:element>
+    </xsl:element>
+  </xsl:template>
+
 
   <xsl:template match="/interface/properties/element">
     <xsl:element name="element"><xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>

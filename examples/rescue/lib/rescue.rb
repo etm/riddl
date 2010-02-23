@@ -65,10 +65,13 @@ class GetInterface < Riddl::Implementation
 
   def response
     schema = RNGSchema.new
+    p = nil
+
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     p = xml.find("/interface/properties") if @p[0].name == "properties"
-    p = xml.find("/interface/operations/#{@r[3]}/input/*") if @p[0].name == "input"
-    p = xml.find("/interface/operations/#{@r[3]}/output/*") if @p[0].name == "output"
+    p = XML::Smart.string(xml.transform_with(XML::Smart.open("rng+xsl/generate-messages-schema.xsl"))) if @p[0].name != "properties"
+    p = p.root.find("//rng:element[@name='#{@r[3]}-input-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0"}) if @p[0].name == "input"
+    p = p.root.find("//rng:element[@name='#{@r[3]}-output-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0"}) if @p[0].name == "output"
     p.each do |e|
       schema.append_schemablock(e)
     end
@@ -80,7 +83,6 @@ end
 class GetServiceInterface < Riddl::Implementation
 
   def response
-    schema = RNGSchema.new
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     xsl = XML::Smart.open("rng+xsl/transform-group-to-service.xsl")
     Riddl::Parameter::Complex.new("schema","text/xml",xml.transform_with(xsl))
@@ -94,15 +96,20 @@ class RNGSchema
   def initialize()
     @__schema = XML::Smart.string("<grammar/>")
     @__schema.root.attributes.add("xmlns", "http://relaxng.org/ns/structure/1.0")
-    @__schema.root.attributes.add("typeLibrary", "http://www.w3.org/2001/XMLSchema-datatypes")
+    @__schema.root.attributes.add("datatypeLibrary", "http://www.w3.org/2001/XMLSchema-datatypes")
     @__schema.root.add("start")
     @__start_node = @__schema.root.children[0] 
   end
 
   def append_schemablock(schema_block)
     captions = schema_block.find("//caption")
-    captions.delete_if!{true }
+    captions.delete_if!{true}
     @__start_node.add(schema_block)
+  end
+
+  def add_wrapper_node(wrapper_node_name)
+    @__start_node.add("element", { "name" => wrapper_node_name})
+    @__start_node = @__start_node.children[0]
   end
 
   def to_s()

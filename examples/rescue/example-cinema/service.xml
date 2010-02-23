@@ -6,22 +6,22 @@
     <latitude>0815</latitude>
   </properties>
   <operations>
-    <read uri="super-kino.at/film" http-method="get">
+    <query uri="super-kino.at/film" http-method="get">
       <input name="op" value="serach"/>
-    </read>
-    <create uri="super-kino/film" http-method="post">
+    </query>
+    <invoke uri="super-kino/film" http-method="post">
       <input name="op" value="book"/>
       <pre uri="super-kino.at/login" http-method="get">
         <input name="username"/>
         <input name="password"/>
         <output name="login-id"/>
       </pre>
-    </create>
-    <delete uri="super-kino/reservations/{reservation-id}" http-method="delete">
+    </invoke>
+    <undo uri="super-kino/reservations/{reservation-id}" http-method="delete">
       <output name="survey-id"/>
       <post uri="super-kino.at/survey" http-method="post">
         <input name="survey-id"/>
       </post>
-    </delete>
+    </undo>
   </operations>
 </service-details>
