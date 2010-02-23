@@ -1,22 +1,22 @@
 <xsl:stylesheet version="1.0"
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:group="http://rescue.org/ns/group/0.2"
+  xmlns="http://relaxng.org/ns/structure/1.0"
+  xmlns:rng="http://relaxng.org/ns/structure/1.0"
+  >
 
  <xsl:output method="xml"/>
 
   <xsl:template match="/">
-    <xsl:element name="grammar">
-      <xsl:attribute name="xmlns">http://relaxng.org/ns/structure/1.0</xsl:attribute>
-      <xsl:attribute name="datatypeLibrary">http://www.w3.org/2001/XMLSchema-datatypes</xsl:attribute>
-      <!-- xsl:element name="include"><xsl:attribute name="href">relaxng-modular.rng</xsl:attribute></xsl:element -->
-      <xsl:element name="start">
-        <xsl:apply-templates select="/interface/operations/*"/>
-      </xsl:element>
-    </xsl:element>
+    <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"><xsl:text>&#10;</xsl:text>
+      <start><xsl:text>&#10;</xsl:text>
+        <xsl:for-each select="/group:interface/group:operations/group:*/*">
+        <xsl:call-template name="message"/>
+        </xsl:for-each>
+      </start><xsl:text>&#10;</xsl:text>
+    </grammar>
   </xsl:template>
 
-  <xsl:template match="/interface/operations/*/*">
-    <xsl:call-template name="message"/>
-  </xsl:template>
   
   <xsl:template name="message">
     <xsl:element name="element">
@@ -24,7 +24,6 @@
         <xsl:value-of select="name(parent::*)"/>
         <xsl:text>-</xsl:text>
         <xsl:value-of select="name()"/>
-        <xsl:text>-message</xsl:text>
       </xsl:attribute>
     <xsl:call-template name="params"/>
     </xsl:element>
@@ -34,7 +33,7 @@
     <xsl:for-each select="*">
       <xsl:element name="element">
         <xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>
-        <xsl:copy-of select="./data"/>
+        <xsl:copy-of select="./rng:data"/>
       </xsl:element>
     </xsl:for-each>
   </xsl:template>

@@ -66,9 +66,8 @@ class GetInterface < Riddl::Implementation
   def response
     schema = RNGSchema.new
     p = nil
-
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-    p = xml.find("/interface/properties") if @p[0].name == "properties"
+    p = xml.find("/group:interface/group:properties", {"group" => "http://rescue.org/ns/group/0.2"}) if @p[0].name == "properties"
     p = XML::Smart.string(xml.transform_with(XML::Smart.open("rng+xsl/generate-messages-schema.xsl"))) if @p[0].name != "properties"
     p = p.root.find("//rng:element[@name='#{@r[3]}-input-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0"}) if @p[0].name == "input"
     p = p.root.find("//rng:element[@name='#{@r[3]}-output-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0"}) if @p[0].name == "output"
