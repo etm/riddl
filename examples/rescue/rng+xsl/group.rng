@@ -27,12 +27,16 @@
     <optional>
       <element name="description"><text/></element>
     </optional>
-    <element name="input">
-      <ref name="message"/>
-    </element>
-    <element name="output">
-      <ref name="message"/>
-    </element>
+    <optional>
+      <element name="input">
+        <ref name="message"/>
+      </element>
+    </optional>
+    <optional>
+      <element name="output">
+        <ref name="message"/>
+      </element>
+    </optional>
 </define>
 
 <define name="message">
@@ -52,12 +56,12 @@
     </optional>
     <element name="operations">
       <optional>
-        <element name="read">
+        <element name="query">
           <ref name="operation"/>
         </element>
       </optional>
       <optional>
-        <element name="create">
+        <element name="invoke">
           <ref name="operation"/>
         </element>
       </optional>
@@ -67,7 +71,7 @@
         </element>
       </optional>
       <optional>
-        <element name="delete">
+        <element name="undo">
           <ref name="operation"/>
         </element>
       </optional>

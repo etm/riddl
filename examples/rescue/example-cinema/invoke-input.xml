@@ -1,0 +1,6 @@
+<invoke-input-message>
+  <show-id>4711</show-id>
+  <number-of-seats>3</number-of-seats>
+  <username>ralph</username>
+  <password>password</password>
+</invoke-input-message>
