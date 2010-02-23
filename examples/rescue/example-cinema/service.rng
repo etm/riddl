@@ -1,15 +1,190 @@
 <?xml version="1.0"?>
-<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"><start><element name="service-details"><element name="properties"><element name="longitude"><data type="positiveInteger"/></element><element name="latitude"><data type="positiveInteger"/></element></element>
-<element name="operations">
-<element name="read">
-<attribute name="uri"><text/></attribute>
-<attribute name="http-method"><choice><value>get</value><value>put</value><value>post</value><value>delete</value></choice></attribute><zeroOrMore><element name="input"><choice><attribute name="name"/><group><attribute name="name"/><attribute name="value"/></group></choice></element></zeroOrMore><zeroOrMore><element name="output"><attribute name="name"/></element></zeroOrMore><zeroOrMore><element name="pre"><attribute name="uri"/><attribute name="http-method"/><zeroOrMore><element name="input"><choice><attribute name="name"/><group><attribute name="name"/><attribute name="value"/></group></choice></element></zeroOrMore><zeroOrMore><element name="output"><attribute name="name"/></element></zeroOrMore></element></zeroOrMore><zeroOrMore><element name="post"><attribute name="uri"/><attribute name="http-method"/><zeroOrMore><element name="input"><choice><attribute name="name"/><group><attribute name="name"/><attribute name="value"/></group></choice></element></zeroOrMore><zeroOrMore><element name="output"><attribute name="name"/></element></zeroOrMore></element></zeroOrMore></element>
-
-<element name="create">
-<attribute name="uri"><text/></attribute>
-<attribute name="http-method"><choice><value>get</value><value>put</value><value>post</value><value>delete</value></choice></attribute><zeroOrMore><element name="input"><choice><attribute name="name"/><group><attribute name="name"/><attribute name="value"/></group></choice></element></zeroOrMore><zeroOrMore><element name="output"><attribute name="name"/></element></zeroOrMore><zeroOrMore><element name="pre"><attribute name="uri"/><attribute name="http-method"/><zeroOrMore><element name="input"><choice><attribute name="name"/><group><attribute name="name"/><attribute name="value"/></group></choice></element></zeroOrMore><zeroOrMore><element name="output"><attribute name="name"/></element></zeroOrMore></element></zeroOrMore><zeroOrMore><element name="post"><attribute name="uri"/><attribute name="http-method"/><zeroOrMore><element name="input"><choice><attribute name="name"/><group><attribute name="name"/><attribute name="value"/></group></choice></element></zeroOrMore><zeroOrMore><element name="output"><attribute name="name"/></element></zeroOrMore></element></zeroOrMore></element>
-
-<element name="delete">
-<attribute name="uri"><text/></attribute>
-<attribute name="http-method"><choice><value>get</value><value>put</value><value>post</value><value>delete</value></choice></attribute><zeroOrMore><element name="input"><choice><attribute name="name"/><group><attribute name="name"/><attribute name="value"/></group></choice></element></zeroOrMore><zeroOrMore><element name="output"><attribute name="name"/></element></zeroOrMore><zeroOrMore><element name="pre"><attribute name="uri"/><attribute name="http-method"/><zeroOrMore><element name="input"><choice><attribute name="name"/><group><attribute name="name"/><attribute name="value"/></group></choice></element></zeroOrMore><zeroOrMore><element name="output"><attribute name="name"/></element></zeroOrMore></element></zeroOrMore><zeroOrMore><element name="post"><attribute name="uri"/><attribute name="http-method"/><zeroOrMore><element name="input"><choice><attribute name="name"/><group><attribute name="name"/><attribute name="value"/></group></choice></element></zeroOrMore><zeroOrMore><element name="output"><attribute name="name"/></element></zeroOrMore></element></zeroOrMore></element>
-</element></element></start></grammar>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:service="http://rescue.org/ns/service/0.2" xmlns:group="http://rescue.org/ns/group/0.2" xmlns:rng="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"><start><element name="service:service-details">
+<element name="service:properties">
+<element name="service:longitude"><rng:data xmlns="http://rescue.org/ns/group/0.2" type="positiveInteger"/></element>
+<element name="service:latitude"><rng:data xmlns="http://rescue.org/ns/group/0.2" type="positiveInteger"/></element>
+</element>
+<element name="service:operations">
+<element name="service:query"><attribute name="uri"/><attribute name="http-method">
+<choice><value>get</value><value>put</value><value>post</value><value>delete</value></choice></attribute>
+<zeroOrMore>
+<element name="service:pre-call"><attribute name="uri"/><attribute name="http-method"/>
+<optional><element name="service:call-input-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional><optional><element name="service:call-output-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional>
+</element>
+</zeroOrMore>
+<zeroOrMore>
+<element name="service:input-message-extension"><attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</element>
+</zeroOrMore>
+<zeroOrMore>
+<element name="service:output-message-extension"><attribute name="name"/>
+</element>
+</zeroOrMore>
+<zeroOrMore>
+<element name="service:post-call">
+<attribute name="uri"/><attribute name="http-method"/>
+<optional><element name="service:call-input-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional><optional><element name="service:call-output-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional>
+</element>
+</zeroOrMore></element>
+<element name="service:invoke"><attribute name="uri"/><attribute name="http-method">
+<choice><value>get</value><value>put</value><value>post</value><value>delete</value></choice></attribute>
+<zeroOrMore>
+<element name="service:pre-call"><attribute name="uri"/><attribute name="http-method"/>
+<optional><element name="service:call-input-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional><optional><element name="service:call-output-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional>
+</element>
+</zeroOrMore>
+<zeroOrMore>
+<element name="service:input-message-extension"><attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</element>
+</zeroOrMore>
+<zeroOrMore>
+<element name="service:output-message-extension"><attribute name="name"/>
+</element>
+</zeroOrMore>
+<zeroOrMore>
+<element name="service:post-call">
+<attribute name="uri"/><attribute name="http-method"/>
+<optional><element name="service:call-input-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional><optional><element name="service:call-output-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional>
+</element>
+</zeroOrMore></element>
+<element name="service:undo"><attribute name="uri"/><attribute name="http-method">
+<choice><value>get</value><value>put</value><value>post</value><value>delete</value></choice></attribute>
+<zeroOrMore>
+<element name="service:pre-call"><attribute name="uri"/><attribute name="http-method"/>
+<optional><element name="service:call-input-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional><optional><element name="service:call-output-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional>
+</element>
+</zeroOrMore>
+<zeroOrMore>
+<element name="service:input-message-extension"><attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</element>
+</zeroOrMore>
+<zeroOrMore>
+<element name="service:output-message-extension"><attribute name="name"/>
+</element>
+</zeroOrMore>
+<zeroOrMore>
+<element name="service:post-call">
+<attribute name="uri"/><attribute name="http-method"/>
+<optional><element name="service:call-input-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional><optional><element name="service:call-output-message"><zeroOrMore>
+<element name="service:parameter"><choice>
+<attribute name="name"/>
+<optional>
+<attribute name="value"/>
+</optional>
+</choice>
+</element>
+</zeroOrMore>
+</element></optional>
+</element>
+</zeroOrMore></element>
+</element>
+</element>
+</start></grammar>
