@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<grammar  xmlns="http://relaxng.org/ns/structure/1.0"
+          xmlns:wf="http://rescue.org/ns/workflow/0.2"
+          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+<include href="relaxng-modular.rng"/>
+
+<define name="context">
+  <element name="wf:context">
+    <attribute name="id"/>
+    <text/>
+  </element> 
+</define>
+
+<define name="endpoint">
+  <element name="wf:endpoint">
+    <attribute name="id"/>
+    <text/>
+  </element> 
+</define>
+
+<define name="activity">
+  <element name="wf:activity">
+    <attribute name="id"/>
+    <attribute name="endpoint"/>
+    <attribute name="http-method"> 
+      <choice>
+        <value>get</value>
+        <value>put</value>
+        <value>post</value>
+        <value>delete</value>
+      </choice>
+    </attribute> 
+    <zeroOrMore>
+      <element name="wf:input">
+        <attribute name="name"/> 
+        <choice>
+          <attribute name="context"/> 
+          <attribute name="message-parameter"/> 
+        </choice>
+      </element> 
+    </zeroOrMore> 
+    <zeroOrMore>
+      <element name="wf:output">
+        <attribute name="name"/> 
+        <choice>
+          <attribute name="context"/> 
+          <attribute name="message-parameter"/> 
+        </choice>
+      </element> 
+    </zeroOrMore>
+  </element>
+</define>
+
+<start>
+  <element name="wf:workflow">
+    <zeroOrMore>
+      <choice> 
+        <ref name="context"/> 
+        <ref name="endpoint"/> 
+        <ref name="activity"/> 
+      </choice>
+    </zeroOrMore>
+  </element>
+</start>
+</grammar>

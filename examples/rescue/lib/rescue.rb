@@ -1,3 +1,17 @@
+class Workflow
+  @@error_message = ""
+  def self.check_syntax(xml)
+    # Cheking if any input-message-parameter is referred as input for an activity that is not part of the input-message
+    # Cheking if every output-message-parameter is used at least once as an output of an activity
+    # Checking if any place-holder is used within a service-uri that is not defined either in the input-message or as a context-variable
+    true
+  end
+
+  def self.error()
+    @@error_message
+  end
+end
+
 class AddResource < Riddl::Implementation
   def response
     begin
@@ -17,6 +31,10 @@ class AddResource < Riddl::Implementation
           FileUtils.rm_r "#{@r.join("/")}/#{@p[0].value}"
           @status = 415 # Media-Type not supprted
           return
+        end
+        if Workflow::check_syntax(xml) == false
+          @status = 415 # Media-Type not supprted
+          return Riddl::Parameter::Simple.new("message", Workflow::error)
         end
         f = File.new("#{@r.join("/")}/#{@p[0].value}/properties.xml", "w")
       end
@@ -39,6 +57,7 @@ class UpdateResource < Riddl::Implementation
         begin
           File.rename("#{@r.join("/")}", "#{@r[0..-2].join("/")}/#{@p[0].value}")
         rescue
+          puts $ERROR_INFO
           @status = 409
           return
         end
@@ -50,6 +69,10 @@ class UpdateResource < Riddl::Implementation
           @status = 415 # Media-Type not supprted
           return
         end
+        if Workflow::check_syntax(xml) == false
+          @status = 415 # Media-Type not supprted
+          return Riddl::Parameter::Simple.new("message", Workflow::error)
+        end
         f = File.new("#{@r.join("/")}/properties.xml", "w")
         f.write(xml)
         f.close()
@@ -58,6 +81,19 @@ class UpdateResource < Riddl::Implementation
       @status = 500 # Something that should not happen, happend 
       puts $ERROR_INFO
     end
+  end
+end
+
+class GetOperationWorkflow < Riddl::Implementation
+
+  def response
+    xml = XML::Smart.open("#{@r[0..-2].join("/")}/properties.xml")
+    wf = xml.find("/service:service-details/service:operations/service:#{@r[-1]}", {"service" => "http://rescue.org/ns/service/0.2"}).first
+    if wf == nil
+      @status = 404 # not found
+      return
+    end
+    Riddl::Parameter::Complex.new("workflow","text/xml", wf.dump)
   end
 end
 
@@ -71,6 +107,10 @@ class GetInterface < Riddl::Implementation
     p = XML::Smart.string(xml.transform_with(XML::Smart.open("rng+xsl/generate-messages-schema.xsl"))) if @p[0].name != "properties"
     p = p.root.find("//rng:element[@name='#{@r[3]}-input-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0"}) if @p[0].name == "input"
     p = p.root.find("//rng:element[@name='#{@r[3]}-output-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0"}) if @p[0].name == "output"
+    if p.first == nil
+      @status = 404 # not found
+      return
+    end
     p.each do |e|
       schema.append_schemablock(e)
     end
@@ -82,9 +122,14 @@ end
 class GetServiceInterface < Riddl::Implementation
 
   def response
-    xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-    xsl = XML::Smart.open("rng+xsl/transform-group-to-service.xsl")
-    Riddl::Parameter::Complex.new("schema","text/xml",xml.transform_with(xsl))
+    begin
+      xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
+      xsl = XML::Smart.open("rng+xsl/transform-group-to-service.xsl")
+      Riddl::Parameter::Complex.new("schema","text/xml",xml.transform_with(xsl))
+    rescue
+      @status = 410 # Gone
+      puts $ERROR_INFO
+    end
   end
 end
 
