@@ -57,6 +57,9 @@ run(
               run UpdateResource if method :put => 'rename'
               run UpdateResource if method :put => 'service-properties'
               run DeleteResource if method :delete => '*'
+              on resource do # operations of service
+                run GetOperationWorkflow if method :get => '*'
+              end
             end      
           end      
         end      

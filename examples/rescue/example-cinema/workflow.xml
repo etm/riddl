@@ -1,0 +1,20 @@
+<workflow xmlns="http://rescue.org/ns/workflow/0.2">
+  <endpoint id="anmelden">super-kino.at/login</endpoint>
+  <endpoint id="buchen">super-kino.at/web-api</endpoint>
+
+  <context id="operation">buchen</context>
+  <context id="sitzungsID"/>
+
+  <activity id="login" endpoint="anmelden" http-method="get">
+    <input name="name" message-parameter="username"/>
+    <input name="pwd" message-parameter="password"/>
+    <output name="id" context="sitzungsID"/>
+  </activity>
+
+  <activity id="buchen" endpoint="buchen" http-method="post">
+    <input name="vorstellung" message-parameter="show-id"/>
+    <input name="anzahl" message-parameter="numberOfSeats"/>
+    <input name="id" context="sitzungsID"/>
+    <output name="reservierungsnummer" message-parameter="reservation-id"/>
+  </activity>
+</workflow>

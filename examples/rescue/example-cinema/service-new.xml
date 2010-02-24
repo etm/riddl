@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<service-details xmlns="http://rescue.org/ns/service/0.2">
+  <properties>
+    <longitude>4711</longitude>
+    <latitude>0815</latitude>
+  </properties>
+  <operations>
+    <query>
+      <workflow xmlns="http://rescue.org/ns/workflow/0.2""">
+        <endpoint id="search">super-kino.at/web-api</endpoint>
+        <context id="operation">suchen</context>
+        <activity id="search" endppoint="search" http-method="get">
+          <input name="op" context="search-operation"/>
+          <input name="titel" message-parameter="title"/>
+          <input name="datum" message-parameter="date"/>
+          <input name="zeit" message-parameter="preferred-time"/>
+          <output name="titel" message-parameter="movie-title"/>
+          <output name="id" message-parameter="show-id"/>
+          <output name="start" message-parameter="starting-time"/>
+          <output name="saal" message-parameter="hall"/>
+        </activity>
+      </workflow>
+    </query>
+    <invoke>
+      <workflow xmlns="http://rescue.org/ns/workflow/0.2""">
+        <endpoint id="anmelden">super-kino.at/login</endpoint>
+        <endpoint id="buchen">super-kino.at/web-api</endpoint>
+        <context id="operation">buchen</context>
+        <context id="sitzungsID"/>
+        <activity id="login" endppoint="anmelden" http-method="get">
+          <input name="name" message-parameter="username"/>
+          <input name="pwd" message-parameter="password"/>
+          <output name="id" context="sitzungsID"/>
+        </activity>
+        <activity id="buchen" endpoint="buchen" http-method="post">
+          <input name="vorstellung" message-parameter="show-id"/>
+          <input name="anzahl" message-parameter="numberOfSeats"/>
+          <input name="id" context="sitzungsID"/>
+          <output name="reservierungsnummer" message-parameter="reservation-id"/>
+        </activity>
+      </workflow>
+    </invoke>
+    <undo>
+      <workflow xmlns="http://rescue.org/ns/workflow/0.2""">
+        <endpoint id="anmelden">super-kino.at/login</endpoint>
+        <endpoint id="abbestellen">super-kino.at/{username}/{reservation-id}</endpoint>
+        <context id="sitzungsID"/>
+        <activity id="login" endppoint="anmelden" http-method="get">
+          <input name="name" message-parameter="username"/>
+          <input name="pwd" message-parameter="password"/>
+          <output name="id" context="sitzungsID"/>
+        </activity>
+        <activity id="buchen" endpoint="buchen" http-method="delete">
+          <input name="id" context="sitzungsID"/>
+        </activity>
+        </workflow>
+    </undo>
+  </operations>
+</service-details>
