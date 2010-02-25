@@ -52,8 +52,7 @@
   </element>
 </define>
 
-<start>
-  <element name="wf:workflow">
+<define name="workflow">
     <zeroOrMore>
       <choice> 
         <ref name="context"/> 
@@ -61,6 +60,11 @@
         <ref name="activity"/> 
       </choice>
     </zeroOrMore>
+</define>
+
+<start>
+  <element name="wf:workflow">
+    <ref name="workflow"/>
   </element>
 </start>
 </grammar>

@@ -6,28 +6,55 @@
     <latitude>0815</latitude>
   </properties>
   <operations>
-    <query uri="super-kino.at/film" http-method="get">
-      <input-message-extension name="op" value="search"/>
+    <query>
+      <execution xmlns="http://rescue.org/ns/workflow/0.2">
+        <endpoint id="search">super-kino.at/web-api</endpoint>
+        <context id="operation">suchen</context>
+        <activity id="search" endpoint="search" http-method="get">
+          <input name="op" context="search-operation"/>
+          <input name="titel" message-parameter="title"/>
+          <input name="datum" message-parameter="date"/>
+          <input name="zeit" message-parameter="preferred-time"/>
+          <output name="titel" message-parameter="movie-title"/>
+          <output name="id" message-parameter="show-id"/>
+          <output name="start" message-parameter="starting-time"/>
+          <output name="saal" message-parameter="hall"/>
+        </activity>
+      </execution>
     </query>
-    <invoke uri="super-kino/film" http-method="post">
-      <pre-call uri="super-kino.at/login" http-method="get">
-        <call-input-message>
-          <parameter name="username"/>
-          <parameter name="password"/>
-        </call-input-message>
-        <call-output-message>
-          <parameter name="login-id"/>
-        </call-output-message>
-      </pre-call>
-      <input-message-extension name="op" value="book"/>
+    <invoke>
+      <execution xmlns="http://rescue.org/ns/workflow/0.2">
+        <endpoint id="anmelden">super-kino.at/login</endpoint>
+        <endpoint id="buchen">super-kino.at/web-api</endpoint>
+        <context id="operation">buchen</context>
+        <context id="sitzungsID"/>
+        <activity id="login" endpoint="anmelden" http-method="get">
+          <input name="name" message-parameter="username"/>
+          <input name="pwd" message-parameter="password"/>
+          <output name="id" context="sitzungsID"/>
+        </activity>
+        <activity id="buchen" endpoint="buchen" http-method="post">
+          <input name="vorstellung" message-parameter="show-id"/>
+          <input name="anzahl" message-parameter="numberOfSeats"/>
+          <input name="id" context="sitzungsID"/>
+          <output name="reservierungsnummer" message-parameter="reservation-id"/>
+        </activity>
+      </execution>
     </invoke>
-    <undo uri="super-kino/reservations/{reservation-id}" http-method="delete">
-      <output-message-extension name="survey-id"/>
-      <post-call uri="super-kino.at/survey" http-method="post">
-        <call-input-message>
-          <parameter name="survey-id"/>
-        </call-input-message>
-      </post-call>
+    <undo>
+      <execution xmlns="http://rescue.org/ns/workflow/0.2">
+        <endpoint id="anmelden">super-kino.at/login</endpoint>
+        <endpoint id="abbestellen">super-kino.at/{username}/{reservation-id}</endpoint>
+        <context id="sitzungsID"/>
+        <activity id="login" endpoint="anmelden" http-method="get">
+          <input name="name" message-parameter="username"/>
+          <input name="pwd" message-parameter="password"/>
+          <output name="id" context="sitzungsID"/>
+        </activity>
+        <activity id="buchen" endpoint="buchen" http-method="delete">
+          <input name="id" context="sitzungsID"/>
+        </activity>
+      </execution>
     </undo>
   </operations>
 </service-details>

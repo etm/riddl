@@ -7,10 +7,10 @@
   </properties>
   <operations>
     <query>
-      <workflow xmlns="http://rescue.org/ns/workflow/0.2""">
+      <execution xmlns="http://rescue.org/ns/workflow/0.2">
         <endpoint id="search">super-kino.at/web-api</endpoint>
         <context id="operation">suchen</context>
-        <activity id="search" endppoint="search" http-method="get">
+        <activity id="search" endpoint="search" http-method="get">
           <input name="op" context="search-operation"/>
           <input name="titel" message-parameter="title"/>
           <input name="datum" message-parameter="date"/>
@@ -20,15 +20,15 @@
           <output name="start" message-parameter="starting-time"/>
           <output name="saal" message-parameter="hall"/>
         </activity>
-      </workflow>
+      </execution>
     </query>
     <invoke>
-      <workflow xmlns="http://rescue.org/ns/workflow/0.2""">
+      <execution xmlns="http://rescue.org/ns/workflow/0.2">
         <endpoint id="anmelden">super-kino.at/login</endpoint>
         <endpoint id="buchen">super-kino.at/web-api</endpoint>
         <context id="operation">buchen</context>
         <context id="sitzungsID"/>
-        <activity id="login" endppoint="anmelden" http-method="get">
+        <activity id="login" endpoint="anmelden" http-method="get">
           <input name="name" message-parameter="username"/>
           <input name="pwd" message-parameter="password"/>
           <output name="id" context="sitzungsID"/>
@@ -39,14 +39,14 @@
           <input name="id" context="sitzungsID"/>
           <output name="reservierungsnummer" message-parameter="reservation-id"/>
         </activity>
-      </workflow>
+      </execution>
     </invoke>
     <undo>
-      <workflow xmlns="http://rescue.org/ns/workflow/0.2""">
+      <execution xmlns="http://rescue.org/ns/workflow/0.2">
         <endpoint id="anmelden">super-kino.at/login</endpoint>
         <endpoint id="abbestellen">super-kino.at/{username}/{reservation-id}</endpoint>
         <context id="sitzungsID"/>
-        <activity id="login" endppoint="anmelden" http-method="get">
+        <activity id="login" endpoint="anmelden" http-method="get">
           <input name="name" message-parameter="username"/>
           <input name="pwd" message-parameter="password"/>
           <output name="id" context="sitzungsID"/>
@@ -54,7 +54,7 @@
         <activity id="buchen" endpoint="buchen" http-method="delete">
           <input name="id" context="sitzungsID"/>
         </activity>
-        </workflow>
+      </execution>
     </undo>
   </operations>
 </service-details>
