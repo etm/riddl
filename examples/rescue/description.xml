@@ -50,6 +50,10 @@
     <parameter name="subgroup-name" type="string"/>
   </message>
 
+  <message name="riddl-description">
+    <parameter name="riddl-descritpion" type="string"/>
+  </message>
+
 
   <message name="service">
     <parameter name="service-name" type="string"/>
@@ -64,7 +68,7 @@
 <!-- Resources -->
 <!-- {{{ -->
   <resource>
-    <request method="riddl" in="*" out="description">
+    <request method="get" in="riddl-description" out="description">
       <ann:label xml:lang="en">Show description</ann:label>
     </request>
     <resource relative="groups">

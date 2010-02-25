@@ -3,12 +3,19 @@
   xmlns:group="http://rescue.org/ns/group/0.2"
   xmlns="http://relaxng.org/ns/structure/1.0"
   xmlns:rng="http://relaxng.org/ns/structure/1.0"
-  xmlns:service="http://rescue.org/ns/service/0.2">
+  xmlns:service="http://rescue.org/ns/service/0.2"
+  xmlns:wf="http://rescue.org/ns/workflow/0.2">
 
- <xsl:output method="xml"/>
+  <xsl:output method="xml"/>
 
   <xsl:template match="/">
-    <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns:service="http://rescue.org/ns/service/0.2">
+    <grammar xmlns="http://relaxng.org/ns/structure/1.0" 
+              datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" 
+              xmlns:service="http://rescue.org/ns/service/0.2" 
+              xmlns:wf="http://rescue.org/ns/workflow/0.2">
+      <xsl:copy-of select="document('workflow.rng')/rng:grammar/rng:define[@name='context']"/>
+      <xsl:copy-of select="document('workflow.rng')/rng:grammar/rng:define[@name='endpoint']"/>
+      <xsl:copy-of select="document('workflow.rng')/rng:grammar/rng:define[@name='activity']"/>
       <start>
         <element name="service:service-details"><xsl:text>&#10;</xsl:text>
           <element name="service:properties"><xsl:text>&#10;</xsl:text>
@@ -24,44 +31,12 @@
   </xsl:template>
 
   <xsl:template match="/group:interface/group:operations/group:*">
-      <xsl:element name="element"><xsl:attribute name="name"><xsl:text>service:</xsl:text><xsl:value-of select="name()"/></xsl:attribute>
-        <attribute name="uri"/>
-        <attribute name="http-method"><xsl:text>&#10;</xsl:text>
-          <choice>
-            <value>get</value>
-            <value>put</value>
-            <value>post</value>
-            <value>delete</value>
-          </choice>
-        </attribute><xsl:text>&#10;</xsl:text>
-        <zeroOrMore><xsl:text>&#10;</xsl:text>
-          <element name="service:pre-call">
-            <attribute name="uri"/>
-            <attribute name="http-method"/><xsl:text>&#10;</xsl:text>
-            <xsl:call-template name="in-out"/><xsl:text>&#10;</xsl:text>
-          </element><xsl:text>&#10;</xsl:text>
-        </zeroOrMore><xsl:text>&#10;</xsl:text>
-        <zeroOrMore><xsl:text>&#10;</xsl:text>
-          <element name="service:input-message-extension">
-            <attribute name="name"/><xsl:text>&#10;</xsl:text>
-            <optional><xsl:text>&#10;</xsl:text>
-              <attribute name="value"/><xsl:text>&#10;</xsl:text>
-            </optional><xsl:text>&#10;</xsl:text>
-          </element><xsl:text>&#10;</xsl:text>
-        </zeroOrMore><xsl:text>&#10;</xsl:text>
-        <zeroOrMore><xsl:text>&#10;</xsl:text>
-          <element name="service:output-message-extension">
-            <attribute name="name"/><xsl:text>&#10;</xsl:text>
-          </element><xsl:text>&#10;</xsl:text>
-        </zeroOrMore><xsl:text>&#10;</xsl:text>
-        <zeroOrMore><xsl:text>&#10;</xsl:text>
-          <element name="service:post-call"><xsl:text>&#10;</xsl:text>
-            <attribute name="uri"/>
-            <attribute name="http-method"/><xsl:text>&#10;</xsl:text>
-            <xsl:call-template name="in-out"/><xsl:text>&#10;</xsl:text>
-          </element><xsl:text>&#10;</xsl:text>
-        </zeroOrMore>
-      </xsl:element><xsl:text>&#10;</xsl:text>
+    <xsl:element name="element"><xsl:attribute name="name"><xsl:text>service:</xsl:text><xsl:value-of select="name()"/></xsl:attribute>
+      <!-- here should the workflow.rng be included -->
+      <element name="wf:execution">
+        <xsl:copy-of select="document('workflow.rng')/rng:grammar/rng:define[@name='workflow']/*" />
+      </element>
+    </xsl:element><xsl:text>&#10;</xsl:text>
   </xsl:template>
 
 
