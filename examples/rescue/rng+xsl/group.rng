@@ -8,7 +8,7 @@
 <define name="property">
   <element name="element" ns="http://relaxng.org/ns/structure/1.0">
     <attribute name="name"/>
-    <optional><attribute name="hidden"/></optional>
+    <optional><attribute name="hidden"><value>true</value></attribute></optional>
     <oneOrMore>
       <element name="rescue:caption"><text/>
         <attribute name="lang"><data type="language"/></attribute>
@@ -35,6 +35,13 @@
     </optional>
     <optional>
       <element name="rescue:output-message">
+        <choice>
+          <group>
+            <attribute name="type"><value>list</value></attribute>
+            <attribute name="result-path"/>
+          </group>
+          <attribute name="type"><value>single</value></attribute>
+        </choice>
         <ref name="message"/>
       </element>
     </optional>

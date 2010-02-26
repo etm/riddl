@@ -36,7 +36,7 @@
           <rng:data type="time"/>
         </rng:element>
       </input-message>
-      <output-message>
+      <output-message type="list" result-path="list/show">
         <rng:element name="movie-title">
           <caption lang="en">Movietitle</caption>
           <caption lang="de">Filmtitel</caption>
@@ -84,7 +84,7 @@
           <rng:data type="string"/>
         </rng:element>
       </input-message>
-      <output-message>
+      <output-message type="single">
         <rng:element name="reservation-id" hidden="true">
           <caption lang="en">Reservation ID</caption>
           <caption lang="de">Reservierungsnummer</caption>

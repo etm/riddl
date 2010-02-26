@@ -63,16 +63,22 @@
     </optional>
     <optional>
       <element name="service:call-output-message">
-        <zeroOrMore><xsl:text>&#10;</xsl:text>
-          <element name="service:parameter">
-            <choice><xsl:text>&#10;</xsl:text>
-              <attribute name="name"/><xsl:text>&#10;</xsl:text>
-              <optional><xsl:text>&#10;</xsl:text>
-                <attribute name="value"/><xsl:text>&#10;</xsl:text>
-              </optional><xsl:text>&#10;</xsl:text>
-            </choice><xsl:text>&#10;</xsl:text>
-          </element><xsl:text>&#10;</xsl:text>
-        </zeroOrMore><xsl:text>&#10;</xsl:text>
+        <xsl:choose>
+          <xsl:when test="@type=single">
+            <zeroOrMore><xsl:text>&#10;</xsl:text>
+              <element name="service:parameter">
+                <choice><xsl:text>&#10;</xsl:text>
+                  <attribute name="name"/><xsl:text>&#10;</xsl:text>
+                  <optional><xsl:text>&#10;</xsl:text>
+                    <attribute name="value"/><xsl:text>&#10;</xsl:text>
+                  </optional><xsl:text>&#10;</xsl:text>
+                </choice><xsl:text>&#10;</xsl:text>
+              </element><xsl:text>&#10;</xsl:text>
+            </zeroOrMore><xsl:text>&#10;</xsl:text>
+          </xsl:when>
+          <xsl:when test="@name=list">
+          </xsl:when>
+        </xsl:choose>
       </element>
     </optional>
   </xsl:template>
