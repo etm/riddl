@@ -1,0 +1,45 @@
+<workflow xmlns="http://rescue.org/ns/workflow/0.2">
+  <context id="title">Alice in Wonderland</context>
+  <context id="preferred-starting-time">20:00:00</context>
+  <context id="cinema-date">2010-02-26</conext>
+  <context id="cinema-reservation-id"/>
+  <context id="number-of-persons"/>
+  <context id="cinema-time"/>
+  <context id="departure">2010-02-27</context>
+  <context id="reservation-lodging"/>
+  <context id="car-park">yes</context>
+  <context id="stars">3</context>
+  <context id="longitutde">234</context>
+  <context id="latitude">789</context>
+
+
+  <task id="go-to-the-movies" resource-path="Cinemas/Arthouse" operation="book" selector-uri="http://localhost:9292">
+    <properties>
+      <constraint class="geo-location">
+        <property name="longitude" context="longitude"/>
+        <property name="latitude" context="latitude"/>
+      </constraint>
+    </properties>
+    <input name="title" context="title"/>
+    <input name="preferred-time" context="preferred-starting-time"/>
+    <input name="date" context="cinema-date"/>
+    <input name="number-of-persons" contex="number-of-persons"/>
+    <output name="reservation-id" context="reservation-id"/>
+    <output name="starting-time" context="cinema-time"/> 
+  <task>
+
+  <task id="find-a-place-to-sleep" resource-path="Lodging/Fancy" operation="book" selector-uri="http://waehle-mein-hotel.at">
+    <properties>
+      <constraint class="exact-match">
+        <property name="car-park" context="carpark"/>
+        <property name="city" task="go-to-the-movies" property="city"/>
+      </constraint>
+      <constraint class="greater-than">
+        <property name="stars" context="stars"/>
+      </constraint>
+    </properties>
+    <input name="aravial" context="cinema-date"/>
+    <input name="departure" context="departure"/>
+    <output name="reservation-id" context="reservation-lodging"/>
+  </task>
+</workflow>
