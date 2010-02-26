@@ -38,7 +38,7 @@
         <choice>
           <group>
             <attribute name="type"><value>list</value></attribute>
-            <attribute name="result-path"/>
+            <attribute name="item-name"/>
           </group>
           <attribute name="type"><value>single</value></attribute>
         </choice>
