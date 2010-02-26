@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<grammar  xmlns="http://relaxng.org/ns/structure/1.0"
+          xmlns:rescue="http://rescue.org/ns/group/0.2"
+          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+<include href="relaxng-modular.rng"/>
+
+<define name="property">
+  <element name="element" ns="http://relaxng.org/ns/structure/1.0">
+    <attribute name="name"/>
+    <optional><attribute name="hidden"><value>true</value></attribute></optional>
+    <oneOrMore>
+      <element name="rescue:caption"><text/>
+        <attribute name="lang"><data type="language"/></attribute>
+      </element>
+    </oneOrMore>
+    <optional>
+      <element name="rescue:description"><text/></element>
+    </optional>
+    <element name="data">
+      <ref name="data"/>
+    </element>
+  </element>
+</define>
+
+<define name="operation">
+    <attribute name="short"><text/></attribute>
+    <optional>
+      <element name="rescue:description"><text/></element>
+    </optional>
+    <optional>
+      <element name="rescue:input-message">
+        <ref name="message"/>
+      </element>
+    </optional>
+    <optional>
+      <element name="rescue:output-message">
+        <choice>
+          <group>
+            <attribute name="type"><value>list</value></attribute>
+            <attribute name="item-name"/>
+          </group>
+          <attribute name="type"><value>single</value></attribute>
+        </choice>
+        <ref name="message"/>
+      </element>
+    </optional>
+</define>
+
+<define name="message">
+  <zeroOrMore>
+    <ref name="property"/>
+  </zeroOrMore>
+</define>
+
+<start>
+  <element name="rescue:interface">
+    <optional>  <!-- Is a group without static properties imaginable? -->
+      <element name="rescue:properties">
+        <zeroOrMore>
+          <ref name="property"/>
+        </zeroOrMore>
+      </element>
+    </optional>
+    <element name="rescue:operations">
+      <optional>
+        <element name="rescue:query">
+          <ref name="operation"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="rescue:invoke">
+          <ref name="operation"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="rescue:upadte">
+          <ref name="operation"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="rescue:undo">
+          <ref name="operation"/>
+        </element>
+      </optional>
+    </element>
+  </element>
+</start>
+</grammar>
