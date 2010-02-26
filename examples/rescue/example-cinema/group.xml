@@ -14,8 +14,8 @@
       <caption lang="de">Breitengrad</caption>
       <rng:data type="positiveInteger"/>
     </rng:element>
-  </properties>
 <!-- }}} -->
+  </properties>
   <operations>
     <query short="search for movies">
 <!-- {{{ -->
@@ -36,7 +36,7 @@
           <rng:data type="time"/>
         </rng:element>
       </input-message>
-      <output-message type="list" result-path="list/show">
+      <output-message type="list" item-name="show">
         <rng:element name="movie-title">
           <caption lang="en">Movietitle</caption>
           <caption lang="de">Filmtitel</caption>

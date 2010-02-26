@@ -32,7 +32,6 @@
 
   <xsl:template match="/group:interface/group:operations/group:*">
     <xsl:element name="element"><xsl:attribute name="name"><xsl:text>service:</xsl:text><xsl:value-of select="name()"/></xsl:attribute>
-      <!-- here should the workflow.rng be included -->
       <element name="wf:execution">
         <xsl:copy-of select="document('workflow.rng')/rng:grammar/rng:define[@name='workflow']/*" />
       </element>
@@ -63,22 +62,16 @@
     </optional>
     <optional>
       <element name="service:call-output-message">
-        <xsl:choose>
-          <xsl:when test="@type=single">
-            <zeroOrMore><xsl:text>&#10;</xsl:text>
-              <element name="service:parameter">
-                <choice><xsl:text>&#10;</xsl:text>
-                  <attribute name="name"/><xsl:text>&#10;</xsl:text>
-                  <optional><xsl:text>&#10;</xsl:text>
-                    <attribute name="value"/><xsl:text>&#10;</xsl:text>
-                  </optional><xsl:text>&#10;</xsl:text>
-                </choice><xsl:text>&#10;</xsl:text>
-              </element><xsl:text>&#10;</xsl:text>
-            </zeroOrMore><xsl:text>&#10;</xsl:text>
-          </xsl:when>
-          <xsl:when test="@name=list">
-          </xsl:when>
-        </xsl:choose>
+        <zeroOrMore><xsl:text>&#10;</xsl:text>
+          <element name="service:parameter">
+            <choice><xsl:text>&#10;</xsl:text>
+              <attribute name="name"/><xsl:text>&#10;</xsl:text>
+              <optional><xsl:text>&#10;</xsl:text>
+                <attribute name="value"/><xsl:text>&#10;</xsl:text>
+              </optional><xsl:text>&#10;</xsl:text>
+            </choice><xsl:text>&#10;</xsl:text>
+          </element><xsl:text>&#10;</xsl:text>
+        </zeroOrMore><xsl:text>&#10;</xsl:text>
       </element>
     </optional>
   </xsl:template>

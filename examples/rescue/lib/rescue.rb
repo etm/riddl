@@ -151,10 +151,10 @@ class RNGSchema
     @__start_node.add(schema_block)
   end
 
-  def add_wrapper_node(wrapper_node_name)
-    @__start_node.add("element", { "name" => wrapper_node_name})
+  def add_wrapper_node(name, attributes, value)
+    @__start_node.add(name, attributes, value)
     @__start_node = @__start_node.children[0]
-  end
+  end 
 
   def to_s()
     @__schema.root.dump
