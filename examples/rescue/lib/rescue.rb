@@ -26,7 +26,7 @@ class AddResource < Riddl::Implementation
         # Check if parameter matches the schema generate for this group
         xml = XML::Smart.string(c)
         group = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-        schema = XML::Smart.string(group.transform_with(XML::Smart.open("rng+xsl/transform-group-to-service.xsl")))
+        schema = XML::Smart.string(group.transform_with(XML::Smart.open("rng+xsl/generate-service-schema.xsl")))
         if xml.validate_against(schema) == false
           FileUtils.rm_r "#{@r.join("/")}/#{@p[0].value}"
           @status = 415 # Media-Type not supprted
@@ -64,7 +64,7 @@ class UpdateResource < Riddl::Implementation
       elsif @p[0].name == "properties"
         xml = XML::Smart.string(@p[0].value.read)
         group = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-        schema = XML::Smart.string(group.transform_with(XML::Smart.open("rng+xsl/transform-group-to-service.xsl")))
+        schema = XML::Smart.string(group.transform_with(XML::Smart.open("rng+xsl/generate-service-schema.xsl")))
         if xml.validate_against(schema) == false
           @status = 415 # Media-Type not supprted
           return
@@ -124,7 +124,7 @@ class GetServiceInterface < Riddl::Implementation
   def response
     begin
       xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-      xsl = XML::Smart.open("rng+xsl/transform-group-to-service.xsl")
+      xsl = XML::Smart.open("rng+xsl/generate-service-schema.xsl")
       Riddl::Parameter::Complex.new("schema","text/xml",xml.transform_with(xsl))
     rescue
       @status = 410 # Gone

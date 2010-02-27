@@ -23,8 +23,9 @@
   </element>
 </define>
 
-<define name="operation">
-    <attribute name="short"><text/></attribute>
+<define name="method">
+  <element name="rescue:method">
+    <attribute name="name"/>
     <optional>
       <element name="rescue:description"><text/></element>
     </optional>
@@ -45,12 +46,55 @@
         <ref name="message"/>
       </element>
     </optional>
+  </element>
 </define>
 
 <define name="message">
   <zeroOrMore>
     <ref name="property"/>
   </zeroOrMore>
+</define>
+
+<define name="execute">
+  <element name="rescue:execute">
+    <attribute name="name"/>
+    <attribute name="method"/>
+    <choice>
+      <attribute name="request">
+        <value>multiple</value>
+      </attribute>
+      <group>
+        <attribute name="request">
+          <value>particular</value>
+        </attribute>
+        <attribute name="selector"/>
+      </group>
+    </choice>
+  </element>
+</define>
+
+<define name="operation">
+  <element name="rescue:operation">
+    <attribute name="name"/>
+    <attribute name="short"><text/></attribute>
+    <oneOrMore>
+      <choice>
+        <ref name="execute"/>
+        <element name="rescue:selection">
+          <attribute name="name"/>
+          <attribute name="resultset"/>
+          <oneOrMore>
+            <choice>
+              <element name="rescue:key">
+                <attribute name="parameter-name"/>
+              </element>
+              <ref name="execute"/>
+            </choice>
+          </oneOrMore>
+        </element>
+      </choice>
+    </oneOrMore>
+  </element>
 </define>
 
 <start>
@@ -63,26 +107,14 @@
       </element>
     </optional>
     <element name="rescue:operations">
-      <optional>
-        <element name="rescue:query">
-          <ref name="operation"/>
-        </element>
-      </optional>
-      <optional>
-        <element name="rescue:invoke">
-          <ref name="operation"/>
-        </element>
-      </optional>
-      <optional>
-        <element name="rescue:upadte">
-          <ref name="operation"/>
-        </element>
-      </optional>
-      <optional>
-        <element name="rescue:undo">
-          <ref name="operation"/>
-        </element>
-      </optional>
+      <oneOrMore>
+        <ref name="operation"/>
+      </oneOrMore>
+    </element>
+    <element name="rescue:methods">
+      <oneOrMore>
+        <ref name="method"/>
+      </oneOrMore>
     </element>
   </element>
 </start>

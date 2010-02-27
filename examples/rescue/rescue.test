@@ -114,7 +114,6 @@ if validate
 puts "Starting validation-test"
 # {{{
 test = "Validating serviceSchema against service-properties"
-# {{{
 status, response = client.resource("groups/testclient-group").get [Riddl::Parameter::Simple.new("serviceSchema","")]
 schema = XML::Smart.string(response[0].value.read)
 puts test + " failed during requesting properties schema with status-code: #{status}" if status != 200
@@ -125,7 +124,7 @@ puts test + " failed during requesting service-properties with status-code: #{st
 puts test + " failed because schema does not match against xml"  if xml.validate_against(schema) == false
 
 # Looping through each operation and check if messages are valid
-operations = schema.find("//rng:element[@name='service:operations']/rng:element", {"rng" => "http://relaxng.org/ns/structure/1.0"})
+operations = schema.find("//rng:element[@name='service:methods']/rng:element", {"rng" => "http://relaxng.org/ns/structure/1.0"})
 
 operations.each do |o|
   operation =  o.attributes.get_attr("name").value.split(":")[1]
@@ -146,7 +145,6 @@ operations.each do |o|
     puts message + " failed" if xml.validate_against(schema) == false
   end
 end
-#}}}
 end
 # }}}
 
