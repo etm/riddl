@@ -21,9 +21,7 @@
   <xsl:template name="message">
     <xsl:element name="element">
       <xsl:attribute name="name">
-        <xsl:value-of select="name(parent::*)"/>
-        <xsl:text>-</xsl:text>
-        <xsl:value-of select="name()"/>
+        <xsl:value-of select="@name"/>
       </xsl:attribute>
       <xsl:choose>
         <xsl:when test="contains(name(), 'input') or (contains(name(), 'output') and @type='single')">
@@ -41,7 +39,7 @@
   </xsl:template>
 
   <xsl:template name="params">
-    <xsl:for-each select="*">
+    <xsl:for-each select="/group:interface/group:methods/group:method[@name='.@name']">
       <xsl:element name="element">
         <xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>
         <xsl:copy-of select="./rng:data"/>

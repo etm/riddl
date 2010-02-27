@@ -1,20 +1,45 @@
 <workflow xmlns="http://rescue.org/ns/workflow/0.2">
-  <endpoint id="anmelden">super-kino.at/login</endpoint>
-  <endpoint id="buchen">super-kino.at/web-api</endpoint>
+  <context id="title">Alice in Wonderland</context>
+  <context id="preferred-starting-time">20:00:00</context>
+  <context id="cinema-date">2010-02-26</context>
+  <context id="cinema-reservation-id"/>
+  <context id="number-of-persons"/>
+  <context id="cinema-time"/>
+  <context id="departure">2010-02-27</context>
+  <context id="reservation-lodging"/>
+  <context id="car-park">yes</context>
+  <context id="stars">3</context>
+  <context id="longitutde">234</context>
+  <context id="latitude">789</context>
 
-  <context id="operation">buchen</context>
-  <context id="sitzungsID"/>
 
-  <activity id="login" endpoint="anmelden" http-method="get">
-    <input name="name" message-parameter="username"/>
-    <input name="pwd" message-parameter="password"/>
-    <output name="id" context="sitzungsID"/>
-  </activity>
+  <task id="go-to-the-movies" resource-path="Cinemas/Arthouse" operation="book" selector-uri="http://localhost:9292">
+    <properties>
+      <constraint class="geo-location">
+        <property name="longitude" context="longitude"/>
+        <property name="latitude" context="latitude"/>
+      </constraint>
+    </properties>
+    <input message-parameter="title" context="title"/>
+    <input message-parameter="preferred-time" context="preferred-starting-time"/>
+    <input message-parameter="date" context="cinema-date"/>
+    <input message-parameter="number-of-persons" context="number-of-persons"/>
+    <output message-parameter="reservation-id" context="reservation-id"/>
+    <output message-parameter="starting-time" context="cinema-time"/> 
+  </task>
 
-  <activity id="buchen" endpoint="buchen" http-method="post">
-    <input name="vorstellung" message-parameter="show-id"/>
-    <input name="anzahl" message-parameter="numberOfSeats"/>
-    <input name="id" context="sitzungsID"/>
-    <output name="reservierungsnummer" message-parameter="reservation-id"/>
-  </activity>
+  <task id="find-a-place-to-sleep" resource-path="Lodging/Fancy" operation="book" selector-uri="http://waehle-mein-hotel.at">
+    <properties>
+      <constraint class="exact-match">
+        <property name="car-park" context="carpark"/>
+        <property name="city" task-id="go-to-the-movies" service-property="city"/>
+      </constraint>
+      <constraint class="greater-than">
+        <property name="stars" context="stars"/>
+      </constraint>
+    </properties>
+    <input message-parameter="aravial" context="cinema-date"/>
+    <input message-parameter="departure" context="departure"/>
+    <output message-parameter="reservation-id" context="reservation-lodging"/>
+  </task>
 </workflow>

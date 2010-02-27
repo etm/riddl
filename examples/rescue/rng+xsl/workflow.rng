@@ -12,54 +12,56 @@
   </element> 
 </define>
 
-<define name="endpoint">
-  <element name="wf:endpoint">
-    <attribute name="id"/>
-    <text/>
-  </element> 
-</define>
 
-<define name="activity">
-  <element name="wf:activity">
+<define name="task">
+  <element name="wf:task">
     <attribute name="id"/>
-    <attribute name="endpoint"/>
-    <attribute name="http-method"> 
-      <choice>
-        <value>get</value>
-        <value>put</value>
-        <value>post</value>
-        <value>delete</value>
-      </choice>
-    </attribute> 
+    <attribute name="resource-path"/>
+    <attribute name="operation"/>
+    <attribute name="selector-uri"/>
+    <optional>
+      <element name="wf:properties">
+        <oneOrMore>
+          <element name="wf:constraint">
+            <attribute name="class"/>
+            <oneOrMore>
+              <element name="wf:property">
+                <attribute name="name"/>
+                <choice>
+                  <attribute name="context"/>
+                  <group>
+                    <attribute name="task-id"/>
+                    <attribute name="service-property"/>
+                  </group>
+                </choice>
+              </element>
+            </oneOrMore>
+          </element>
+        </oneOrMore>
+      </element>
+    </optional>
     <zeroOrMore>
       <element name="wf:input">
-        <attribute name="name"/> 
-        <choice>
-          <attribute name="context"/> 
-          <attribute name="message-parameter"/> 
-        </choice>
-      </element> 
-    </zeroOrMore> 
+        <attribute name="message-parameter"/>
+        <attribute name="context"/>
+      </element>
+    </zeroOrMore>
     <zeroOrMore>
       <element name="wf:output">
-        <attribute name="name"/> 
-        <choice>
-          <attribute name="context"/> 
-          <attribute name="message-parameter"/> 
-        </choice>
-      </element> 
+        <attribute name="message-parameter"/>
+        <attribute name="context"/>
+      </element>
     </zeroOrMore>
   </element>
 </define>
 
 <define name="workflow">
-    <zeroOrMore>
-      <choice> 
-        <ref name="context"/> 
-        <ref name="endpoint"/> 
-        <ref name="activity"/> 
-      </choice>
-    </zeroOrMore>
+  <oneOrMore>
+    <choice> 
+      <ref name="context"/> 
+      <ref name="task"/> 
+    </choice>
+  </oneOrMore>
 </define>
 
 <start>

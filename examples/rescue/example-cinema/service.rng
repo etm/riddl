@@ -1,43 +1,43 @@
 <?xml version="1.0"?>
-<grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:service="http://rescue.org/ns/service/0.2" xmlns:wf="http://rescue.org/ns/workflow/0.2" xmlns:group="http://rescue.org/ns/group/0.2" xmlns:rng="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"><define name="context">
-  <element name="wf:context">
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:service="http://rescue.org/ns/service/0.2" xmlns:exec="http://rescue.org/ns/execution/0.2" xmlns:group="http://rescue.org/ns/group/0.2" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:wf="http://rescue.org/ns/workflow/0.2" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"><define name="context">
+  <element name="exec:context">
     <attribute name="id"/>
     <text/>
   </element> 
 </define><define name="endpoint">
-  <element name="wf:endpoint">
+  <element name="exec:endpoint">
     <attribute name="id"/>
     <text/>
-  </element> 
-</define><define name="activity">
-  <element name="wf:activity">
-    <attribute name="id"/>
+  </element>
+</define><define name="call">
+  <element name="exec:call">
     <attribute name="endpoint"/>
-    <attribute name="http-method"> 
+    <attribute name="id"/>
+    <attribute name="http-method">
       <choice>
         <value>get</value>
         <value>put</value>
         <value>post</value>
         <value>delete</value>
       </choice>
-    </attribute> 
+    </attribute>
     <zeroOrMore>
-      <element name="wf:input">
-        <attribute name="name"/> 
+      <element name="exec:input">
+        <attribute name="name"/>
         <choice>
-          <attribute name="context"/> 
-          <attribute name="message-parameter"/> 
+          <attribute name="message-parameter"/>
+          <attribute name="context"/>
         </choice>
-      </element> 
-    </zeroOrMore> 
+      </element>
+    </zeroOrMore>
     <zeroOrMore>
-      <element name="wf:output">
-        <attribute name="name"/> 
+      <element name="exec:output">
+        <attribute name="name"/>
         <choice>
-          <attribute name="context"/> 
-          <attribute name="message-parameter"/> 
+          <attribute name="message-parameter"/>
+          <attribute name="context"/>
         </choice>
-      </element> 
+      </element>
     </zeroOrMore>
   </element>
 </define><start><element name="service:service-details">
@@ -45,26 +45,26 @@
 <element name="service:longitude"><rng:data xmlns="http://rescue.org/ns/group/0.2" type="positiveInteger"/></element>
 <element name="service:latitude"><rng:data xmlns="http://rescue.org/ns/group/0.2" type="positiveInteger"/></element>
 </element>
-<element name="service:operations">
-<element name="service:query"><element name="wf:execution"><zeroOrMore>
-      <choice> 
-        <ref name="context"/> 
-        <ref name="endpoint"/> 
-        <ref name="activity"/> 
+<element name="service:methods">
+<element name="service:query"><element name="service:execution"><zeroOrMore>
+      <choice>
+        <ref name="context"/>
+        <ref name="call"/>
+        <ref name="endpoint"/>
       </choice>
     </zeroOrMore></element></element>
-<element name="service:invoke"><element name="wf:execution"><zeroOrMore>
-      <choice> 
-        <ref name="context"/> 
-        <ref name="endpoint"/> 
-        <ref name="activity"/> 
+<element name="service:invoke"><element name="service:execution"><zeroOrMore>
+      <choice>
+        <ref name="context"/>
+        <ref name="call"/>
+        <ref name="endpoint"/>
       </choice>
     </zeroOrMore></element></element>
-<element name="service:undo"><element name="wf:execution"><zeroOrMore>
-      <choice> 
-        <ref name="context"/> 
-        <ref name="endpoint"/> 
-        <ref name="activity"/> 
+<element name="service:undo"><element name="service:execution"><zeroOrMore>
+      <choice>
+        <ref name="context"/>
+        <ref name="call"/>
+        <ref name="endpoint"/>
       </choice>
     </zeroOrMore></element></element>
 </element>

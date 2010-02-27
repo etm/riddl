@@ -17,7 +17,27 @@
 <!-- }}} -->
   </properties>
   <operations>
-    <query short="search for movies">
+<!-- {{{ -->
+    <operation name="search" short="search for movies">
+      <execute name="find" method="query" request="multiple"/>
+    </operation>
+    <operation name="book" short="select show and book tickets">
+      <selection name="show" resultset="search-show">
+        <key parameter-name="show-id"/>
+        <execute name="search-show" method="query" request="multiple"/>
+      </selection>
+      <execute name="book-tickets" method="invoke" request="particular" selector="show"/>
+    </operation>
+    <operation name="cancel" short="cancel reservation">
+      <selection name="reservation" resultset="input-message">
+        <key parameter-name="reservation-id"/>
+      </selection>
+      <execute name="cancel-reservation" method="undo" request="particular" selector="reservation"/>
+    </operation>
+<!-- }}} -->
+  </operations>
+  <methods>
+    <method name="query">
 <!-- {{{ -->
       <input-message>
         <rng:element name="title">
@@ -58,9 +78,9 @@
           <rng:data type="positiveInteger"/>
         </rng:element>
       </output-message>
-    </query>
+    </method>
 <!-- }}} -->
-    <invoke short="book-tickets for a movie">
+    <method name="invoke">
 <!-- {{{ -->
       <input-message>
         <rng:element name="show-id" hidden="true">
@@ -91,9 +111,9 @@
           <rng:data type="string"/>
         </rng:element>
       </output-message>
-    </invoke>
+    </method>
 <!-- }}} -->
-    <undo short="cancel already booked tickets">
+    <method name="undo">
 <!-- {{{ -->
       <input-message>
         <rng:element name="username">
@@ -112,8 +132,8 @@
           <rng:data type="string"/>
         </rng:element>
       </input-message>
-    </undo>
-<!-- }}} -->
-  </operations>
+    </method>
+ <!-- }}} -->
+  </methods>
 </interface>
 

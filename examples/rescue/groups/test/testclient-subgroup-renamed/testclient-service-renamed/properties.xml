@@ -1,59 +1,59 @@
 <?xml version="1.0"?>
-<service-details xmlns="http://rescue.org/ns/service/0.2">
+<service-details xmlns="http://rescue.org/ns/service/0.2" xmlns:exec="http://rescue.org/ns/execution/0.2">
   <properties>
     <longitude>4711</longitude>
     <latitude>0815</latitude>
   </properties>
-  <operations>
+  <methods>
     <query>
-      <execution xmlns="http://rescue.org/ns/workflow/0.2">
-        <endpoint id="search">super-kino.at/web-api</endpoint>
-        <context id="operation">suchen</context>
-        <activity id="search" endpoint="search" http-method="get">
-          <input name="op" context="search-operation"/>
-          <input name="titel" message-parameter="title"/>
-          <input name="datum" message-parameter="date"/>
-          <input name="zeit" message-parameter="preferred-time"/>
-          <output name="titel" message-parameter="movie-title"/>
-          <output name="id" message-parameter="show-id"/>
-          <output name="start" message-parameter="starting-time"/>
-          <output name="saal" message-parameter="hall"/>
-        </activity>
+      <execution>
+        <exec:endpoint id="search">super-kino.at/web-api</exec:endpoint>
+        <exec:context id="operation">suchen</exec:context>
+        <exec:call id="search" endpoint="search" http-method="get">
+          <exec:input name="op" context="search-operation"/>
+          <exec:input name="titel" message-parameter="title"/>
+          <exec:input name="datum" message-parameter="date"/>
+          <exec:input name="zeit" message-parameter="preferred-time"/>
+          <exec:output name="titel" message-parameter="movie-title"/>
+          <exec:output name="id" message-parameter="show-id"/>
+          <exec:output name="start" message-parameter="starting-time"/>
+          <exec:output name="saal" message-parameter="hall"/>
+        </exec:call>
       </execution>
     </query>
     <invoke>
-      <execution xmlns="http://rescue.org/ns/workflow/0.2">
-        <endpoint id="anmelden">super-kino.at/login</endpoint>
-        <endpoint id="buchen">super-kino.at/web-api</endpoint>
-        <context id="operation">buchen</context>
-        <context id="sitzungsID"/>
-        <activity id="login" endpoint="anmelden" http-method="get">
-          <input name="name" message-parameter="username"/>
-          <input name="pwd" message-parameter="password"/>
-          <output name="id" context="sitzungsID"/>
-        </activity>
-        <activity id="buchen" endpoint="buchen" http-method="post">
-          <input name="vorstellung" message-parameter="show-id"/>
-          <input name="anzahl" message-parameter="numberOfSeats"/>
-          <input name="id" context="sitzungsID"/>
-          <output name="reservierungsnummer" message-parameter="reservation-id"/>
-        </activity>
+      <execution>
+        <exec:endpoint id="anmelden">super-kino.at/login</exec:endpoint>
+        <exec:endpoint id="buchen">super-kino.at/web-api</exec:endpoint>
+        <exec:context id="operation">buchen</exec:context>
+        <exec:context id="sitzungsID"/>
+        <exec:call id="login" endpoint="anmelden" http-method="get">
+          <exec:input name="name" message-parameter="username"/>
+          <exec:input name="pwd" message-parameter="password"/>
+          <exec:output name="id" context="sitzungsID"/>
+        </exec:call>
+        <exec:call id="buchen" endpoint="buchen" http-method="post">
+          <exec:input name="vorstellung" message-parameter="show-id"/>
+          <exec:input name="anzahl" message-parameter="numberOfSeats"/>
+          <exec:input name="id" context="sitzungsID"/>
+          <exec:output name="reservierungsnummer" message-parameter="reservation-id"/>
+        </exec:call>
       </execution>
     </invoke>
     <undo>
-      <execution xmlns="http://rescue.org/ns/workflow/0.2">
-        <endpoint id="anmelden">super-kino.at/login</endpoint>
-        <endpoint id="abbestellen">super-kino.at/{username}/{reservation-id}</endpoint>
-        <context id="sitzungsID"/>
-        <activity id="login" endpoint="anmelden" http-method="get">
-          <input name="name" message-parameter="username"/>
-          <input name="pwd" message-parameter="password"/>
-          <output name="id" context="sitzungsID"/>
-        </activity>
-        <activity id="buchen" endpoint="buchen" http-method="delete">
-          <input name="id" context="sitzungsID"/>
-        </activity>
+      <execution>
+        <exec:endpoint id="anmelden">super-kino.at/login</exec:endpoint>
+        <exec:endpoint id="abbestellen">super-kino.at/{username}/{reservation-id}</exec:endpoint>
+        <exec:context id="sitzungsID"/>
+        <exec:call id="login" endpoint="anmelden" http-method="get">
+          <exec:input name="name" message-parameter="username"/>
+          <exec:input name="pwd" message-parameter="password"/>
+          <exec:output name="id" context="sitzungsID"/>
+        </exec:call>
+        <exec:call id="buchen" endpoint="buchen" http-method="delete">
+          <exec:input name="id" context="sitzungsID"/>
+        </exec:call>
       </execution>
     </undo>
-  </operations>
+  </methods>
 </service-details>

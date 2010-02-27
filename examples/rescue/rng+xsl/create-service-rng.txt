@@ -1,3 +1,0 @@
-(xsltproc transform-group-to-service.xsl examples/service.xml > examples/service.rng
-xmllint examples/service.xml --relaxng examples/service.rng
-
