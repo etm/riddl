@@ -1,5 +1,5 @@
-<undo-input-message>
+<input-message>
   <username>ralph</username>
   <password>password</password>
   <reservation-id>0815</reservation-id>
-</undo-input-message>
+</input-message>
