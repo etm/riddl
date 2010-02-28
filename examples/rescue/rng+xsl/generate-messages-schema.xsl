@@ -15,6 +15,7 @@
             <element name="input-message"><xsl:text>&#10;</xsl:text>
               <xsl:for-each select=".//descendant::group:execute">
               <xsl:variable name="m" select="@method"/>
+              <!-- Select each input that is not an output of any preceding execute - but the line below doesn't work as it schould-->
                 <xsl:apply-templates select ="//group:method[@name=$m]/group:input-message/rng:element[not(@name=//group:output-message/rng:element/@name)]"/>
               </xsl:for-each>
             </element><xsl:text>&#10;</xsl:text>
@@ -22,22 +23,22 @@
             <element name="output-message"><xsl:text>&#10;</xsl:text>
               <xsl:for-each select=".//descendant::group:execute">
               <xsl:variable name="m" select="@method"/>
-              <xsl:value-of select="name(parent::group:*)"/>
                 <xsl:choose>
                   <xsl:when test="(//group:method[@name=$m]/group:output-message[@type='single'])">
-                    <xsl:apply-templates select ="//group:method[@name=$m]/group:output-message/rng:element"/>
+              <!-- Select each output that is not an input of any following execute - but the line below doesn't work as it schould-->
+                    <xsl:apply-templates select ="//group:method[@name=$m]/group:output-message/rng:element[not(@name=//group:input-message/rng:element/@name)]"/>
                   </xsl:when>
-                  <!-- Comparioson wont work with smart-xml --->
                   <xsl:when test="(//group:method[@name=$m]/group:output-message[@type='list']) and (name(parent::group:*) = 'operation')">
                     <zeroOrMore><xsl:text>&#10;</xsl:text>
                       <xsl:element name="element">
                         <xsl:attribute name="name"><xsl:value-of select="//group:method[@name=$m]/group:output-message/@item-name"/></xsl:attribute><xsl:text>&#10;</xsl:text>
+              <!-- Select each output that is not an input of any following execute - but the line below doesn't work as it schould-->
                         <xsl:apply-templates select ="//group:method[@name=$m]/group:output-message/rng:element"/>
                       </xsl:element><xsl:text>&#10;</xsl:text>
                     </zeroOrMore><xsl:text>&#10;</xsl:text>
                   </xsl:when>
-                  <!-- Comparioson wont work with smart-xml --->
                   <xsl:when test="(//group:method[@name=$m]/group:output-message[@type='list']) and (name(parent::group:*) = 'selection')">
+              <!-- Select each output that is not an input of any following execute - but the line below doesn't work as it schould-->
                     <xsl:apply-templates select ="//group:method[@name=$m]/group:output-message/rng:element"/>
                   </xsl:when>
                 </xsl:choose>

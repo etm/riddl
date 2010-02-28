@@ -22,9 +22,9 @@
       <execute name="find" method="query" request="multiple"/>
     </operation>
     <operation name="book" short="select show and book tickets">
-      <execute name="search-show" method="query" request="multiple"/>
       <selection name="show" resultset="search-show">
         <key parameter-name="show-id"/>
+        <execute name="search-show" method="query" request="multiple"/>
       </selection>
       <execute name="book-tickets" method="invoke" request="particular" selector="show"/>
     </operation>

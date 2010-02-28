@@ -1,4 +1,4 @@
-<query-output-message>
+<output-message>
   <show>
     <movie-title>Alice in Wonderland 3D</movie-title>
     <show-id>1147</show-id>
@@ -17,4 +17,4 @@
     <starting-time>22:15:00</starting-time>
     <hall>3</hall>
   </show>
-</query-output-message>
+</output-message>
