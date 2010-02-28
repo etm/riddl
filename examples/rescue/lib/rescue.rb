@@ -105,8 +105,8 @@ class GetInterface < Riddl::Implementation
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     p = xml.find("/group:interface/group:properties", {"group" => "http://rescue.org/ns/group/0.2"}) if @p[0].name == "properties"
     p = XML::Smart.string(xml.transform_with(XML::Smart.open("rng+xsl/generate-messages-schema.xsl"))) if @p[0].name != "properties"
-    p = p.root.find("//rng:element[@name='#{@r[3]}-input-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0"}) if @p[0].name == "input"
-    p = p.root.find("//rng:element[@name='#{@r[3]}-output-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0"}) if @p[0].name == "output"
+    p = p.root.find("//group:#{@r[3]}/rng:element[@name='input-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0", "group" => "http://rescue.org/ns/group/0.2"}) if @p[0].name == "input"
+    p = p.root.find("//group:#{@r[3]}/rng:element[@name='output-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0", "group" => "http://rescue.org/ns/group/0.2"}) if @p[0].name == "output"
     if p.first == nil
       @status = 404 # not found
       return

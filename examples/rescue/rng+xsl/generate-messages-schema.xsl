@@ -10,41 +10,51 @@
   <xsl:template match="/">
     <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"><xsl:text>&#10;</xsl:text>
       <start><xsl:text>&#10;</xsl:text>
-        <xsl:for-each select="/group:interface/group:operations/group:*/*">
-          <xsl:call-template name="message"/>
+        <xsl:for-each select="/group:interface/group:operations/group:operation">
+          <xsl:element name="group:{@name}"><xsl:text>&#10;</xsl:text>
+            <element name="input-message"><xsl:text>&#10;</xsl:text>
+              <xsl:for-each select=".//descendant::group:execute">
+              <xsl:variable name="m" select="@method"/>
+                <xsl:apply-templates select ="//group:method[@name=$m]/group:input-message/rng:element[not(@name=//group:output-message/rng:element/@name)]"/>
+              </xsl:for-each>
+            </element><xsl:text>&#10;</xsl:text>
+            
+            <element name="output-message"><xsl:text>&#10;</xsl:text>
+              <xsl:for-each select=".//descendant::group:execute">
+              <xsl:variable name="m" select="@method"/>
+              <xsl:value-of select="name(parent::group:*)"/>
+                <xsl:choose>
+                  <xsl:when test="(//group:method[@name=$m]/group:output-message[@type='single'])">
+                    <xsl:apply-templates select ="//group:method[@name=$m]/group:output-message/rng:element"/>
+                  </xsl:when>
+                  <!-- Comparioson wont work with smart-xml --->
+                  <xsl:when test="(//group:method[@name=$m]/group:output-message[@type='list']) and (name(parent::group:*) = 'operation')">
+                    <zeroOrMore><xsl:text>&#10;</xsl:text>
+                      <xsl:element name="element">
+                        <xsl:attribute name="name"><xsl:value-of select="//group:method[@name=$m]/group:output-message/@item-name"/></xsl:attribute><xsl:text>&#10;</xsl:text>
+                        <xsl:apply-templates select ="//group:method[@name=$m]/group:output-message/rng:element"/>
+                      </xsl:element><xsl:text>&#10;</xsl:text>
+                    </zeroOrMore><xsl:text>&#10;</xsl:text>
+                  </xsl:when>
+                  <!-- Comparioson wont work with smart-xml --->
+                  <xsl:when test="(//group:method[@name=$m]/group:output-message[@type='list']) and (name(parent::group:*) = 'selection')">
+                    <xsl:apply-templates select ="//group:method[@name=$m]/group:output-message/rng:element"/>
+                  </xsl:when>
+                </xsl:choose>
+              </xsl:for-each>
+            </element><xsl:text>&#10;</xsl:text>
+          </xsl:element><xsl:text>&#10;</xsl:text>
         </xsl:for-each>
       </start><xsl:text>&#10;</xsl:text>
     </grammar>
   </xsl:template>
 
-  
-  <xsl:template name="message">
-    <xsl:element name="element">
-      <xsl:attribute name="name">
-        <xsl:value-of select="@name"/>
-      </xsl:attribute>
-      <xsl:choose>
-        <xsl:when test="contains(name(), 'input') or (contains(name(), 'output') and @type='single')">
-          <xsl:call-template name="params"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <zeroOrMore>
-            <xsl:element name="element"><xsl:attribute name="name"><xsl:value-of select="@item-name"/></xsl:attribute>
-              <xsl:call-template name="params"/>
-            </xsl:element>
-          </zeroOrMore>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:element>
-  </xsl:template>
 
-  <xsl:template name="params">
-    <xsl:for-each select="/group:interface/group:methods/group:method[@name='.@name']">
-      <xsl:element name="element">
-        <xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>
-        <xsl:copy-of select="./rng:data"/>
-      </xsl:element>
-    </xsl:for-each>
+  <xsl:template match="//rng:element">
+    <xsl:element name="rng:element">
+      <xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>
+      <xsl:copy-of select="./rng:data"/>
+    </xsl:element><xsl:text>&#10;</xsl:text>
   </xsl:template>
 
 </xsl:stylesheet>
