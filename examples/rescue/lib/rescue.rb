@@ -12,6 +12,15 @@ class Workflow
   end
 end
 
+class GetOperations < Riddl::Implementation
+  def response
+    xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
+    schema = RNGSchema.new
+
+    schema.append_schemablock(xml.find("/group:interface/group:operations", {"group"=>"http://rescue.org/ns/group/0.2"}).first)
+    Riddl::Parameter::Complex.new("xml","text/xml", schema.to_s)
+  end
+end
 class AddResource < Riddl::Implementation
   def response
     begin
@@ -84,7 +93,7 @@ class UpdateResource < Riddl::Implementation
   end
 end
 
-class GetOperationWorkflow < Riddl::Implementation
+class GetMethod < Riddl::Implementation
 
   def response
     xml = XML::Smart.open("#{@r[0..-2].join("/")}/properties.xml")
@@ -103,18 +112,55 @@ class GetInterface < Riddl::Implementation
     schema = RNGSchema.new
     p = nil
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-    p = xml.find("/group:interface/group:properties", {"group" => "http://rescue.org/ns/group/0.2"}) if @p[0].name == "properties"
-    p = XML::Smart.string(xml.transform_with(XML::Smart.open("rng+xsl/generate-messages-schema.xsl"))) if @p[0].name != "properties"
-    p = p.root.find("//group:#{@r[3]}/rng:element[@name='input-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0", "group" => "http://rescue.org/ns/group/0.2"}) if @p[0].name == "input"
-    p = p.root.find("//group:#{@r[3]}/rng:element[@name='output-message']",  {"rng" => "http://relaxng.org/ns/structure/1.0", "group" => "http://rescue.org/ns/group/0.2"}) if @p[0].name == "output"
-    if p.first == nil
-      @status = 404 # not found
-      return
+
+    schema.append_schemablock(xml.find("/group:interface/group:properties", {"group" => "http://rescue.org/ns/group/0.2"}).first) if @p[0].name == "properties"
+    schema.append_schemablock(generate_input(@r[3], xml)) if @p[0].name == "input"
+    schema.append_schemablock(generate_output(@r[3], xml)) if @p[0].name == "output"
+    Riddl::Parameter::Complex.new("xml","text/xml", schema.to_s)
+  end
+
+  def generate_input(operation_name, xml)
+    params = Hash.new
+    xml.find("//group:operation[@name='#{operation_name}']/group:execute", {"group" => "http://rescue.org/ns/group/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |e|
+      # Find all inputs for the given operation
+      xml.find("//group:method[@name='#{e.attributes.get_attr("method")}']/group:input-message/rng:element", {"group" => "http://rescue.org/ns/group/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |p|
+        params[p.attributes.get_attr("name").value] = p
+        # Remove all inputs that are output of any preceding-sibling
+      end
+      e.find("preceding-sibling::group:execute", {"group" => "http://rescue.org/ns/group/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |pre|
+        # Remove all inputs that are output of any preceding-sibling
+        xml.find("//group:method[@name='#{pre.attributes.get_attr("method")}']/group:output-message/descendant::rng:element", {"group" => "http://rescue.org/ns/group/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |p|
+          params.delete(p.attributes.get_attr("name").value) if p.attributes.include?("name")
+        end
+      end
     end
-    p.each do |e|
-      schema.append_schemablock(e)
+    s = XML::Smart.string("<rng:element name='input-message'/>")
+    params.each do |k,v|
+      s.root.add(v)
     end
-    Riddl::Parameter::Complex.new("atom-feed","text/xml", schema.to_s)
+    s.root
+  end
+
+  def generate_output(operation_name, xml)
+    params = Hash.new
+    xml.find("//group:operation[@name='#{operation_name}']/group:execute", {"group" => "http://rescue.org/ns/group/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |e|
+      # Find all outputs for the given operation
+      if e.children? # Execution has an selection
+        xml.find("//group:method[@name='#{e.attributes.get_attr("method")}']/group:output-message/rng:zeroOrMore/rng:element/rng:element", {"group" => "http://rescue.org/ns/group/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |p|
+        params[p.attributes.get_attr("name").value] = p if p.attributes.include?("name")
+        end
+      else # no selection for this execution found
+        xml.find("//group:method[@name='#{e.attributes.get_attr("method")}']/group:output-message/*", {"group" => "http://rescue.org/ns/group/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |p|
+          params["ZoM" + p.children[0].attributes.get_attr("name").value] = p if p.children[0].name.name == "element" # use zeroOrMore-block
+          params[ p.attributes.get_attr("name").value] = p if p.attributes.include?("name") # use element
+        end
+      end
+    end
+    s = XML::Smart.string("<rng:element name='output-message'/>")
+    params.each do |k,v|
+      s.root.add(v)
+    end
+    s.root
   end
 end
 
@@ -140,14 +186,18 @@ class RNGSchema
   def initialize()
     @__schema = XML::Smart.string("<grammar/>")
     @__schema.root.attributes.add("xmlns", "http://relaxng.org/ns/structure/1.0")
+    @__schema.root.attributes.add("xmlns:group", "http://rescue.org/ns/group/0.2")
+    @__schema.root.attributes.add("xmlns:service", "http://rescue.org/ns/service/0.2")
+    @__schema.root.attributes.add("xmlns:exec", "http://rescue.org/ns/execution/0.2")
+    @__schema.root.attributes.add("xmlns:wf", "http://rescue.org/ns/workflow/0.2")
     @__schema.root.attributes.add("datatypeLibrary", "http://www.w3.org/2001/XMLSchema-datatypes")
     @__schema.root.add("start")
     @__start_node = @__schema.root.children[0] 
   end
 
   def append_schemablock(schema_block)
-    captions = schema_block.find("//caption")
-    captions.delete_if!{true}
+    captions = schema_block.find("//group:caption", {"group" => "http://rescue.org/ns/group/0.2"})
+    captions.delete_if!{true} if captions != nil
     @__start_node.add(schema_block)
   end
 

@@ -1,8 +1,8 @@
 <input-message>
   <title>Alice in Wonderland</title>
-  <date>2010-03-06</date>
   <preferred-time>20:00:00</preferred-time>
-  <number-of-seats>3</number-of-seats>
   <username>ralph</username>
+  <date>2010-03-06</date>
+  <number-of-seats>3</number-of-seats>
   <password>password</password>
 </input-message>

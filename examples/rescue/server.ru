@@ -6,7 +6,7 @@ require '../../lib/ruby/server'
 require 'lib/MarkUS_V3.0'
 require 'xml/smart'
 require 'fileutils'
-
+require 'pp'
 #require 'logger'
 
 
@@ -41,6 +41,7 @@ run(
           run AddResource if method :post => 'subgroup'
 
           on resource 'operations' do
+            run GetOperations if method :get => "*"
             on resource do
               run GetInterface if method :get => 'input'
               run GetInterface if method :get => 'output'
@@ -57,8 +58,8 @@ run(
               run UpdateResource if method :put => 'rename'
               run UpdateResource if method :put => 'service-properties'
               run DeleteResource if method :delete => '*'
-              on resource do # operations of service
-                run GetOperationWorkflow if method :get => '*'
+              on resource do # methods of service
+                run GetMethod if method :get => 'method'
               end
             end      
           end      

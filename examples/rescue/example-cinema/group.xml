@@ -22,17 +22,13 @@
       <execute name="find" method="query" request="multiple"/>
     </operation>
     <operation name="book" short="select show and book tickets">
-      <selection name="show" resultset="search-show">
-        <key parameter-name="show-id"/>
-        <execute name="search-show" method="query" request="multiple"/>
-      </selection>
+      <execute name="search-show" method="query" request="multiple">
+        <selection name="show"/>
+      </execute>
       <execute name="book-tickets" method="invoke" request="particular" selector="show"/>
     </operation>
     <operation name="cancel" short="cancel reservation">
-      <selection name="reservation" resultset="input-message">
-        <key parameter-name="reservation-id"/>
-      </selection>
-      <execute name="cancel-reservation" method="undo" request="particular" selector="reservation"/>
+      <execute name="cancel-reservation" method="undo" request="particular" selector="input-message"/>
     </operation>
 <!-- }}} -->
   </operations>
@@ -56,34 +52,38 @@
           <rng:data type="time"/>
         </rng:element>
       </input-message>
-      <output-message type="list" item-name="show">
-        <rng:element name="movie-title">
-          <caption lang="en">Movietitle</caption>
-          <caption lang="de">Filmtitel</caption>
-          <rng:data type="string"/>
-        </rng:element>
-        <rng:element name="show-id" hidden="true">
-          <caption lang="en">ShowID</caption>
-          <caption lang="de">VorstellungsID</caption>
-          <rng:data type="string"/>
-        </rng:element>
-        <rng:element name="starting-time">
-          <caption lang="en">Starting time</caption>
-          <caption lang="de">Beginzeit</caption>
-          <rng:data type="time"/>
-        </rng:element>
-        <rng:element name="hall">
-          <caption lang="en">Hall</caption>
-          <caption lang="de">Saal</caption>
-          <rng:data type="positiveInteger"/>
-        </rng:element>
+      <output-message>
+        <rng:zeroOrMore>
+          <rng:element name="show">
+            <rng:element name="movie-title">
+              <caption lang="en">Movietitle</caption>
+              <caption lang="de">Filmtitel</caption>
+              <rng:data type="string"/>
+            </rng:element>
+            <rng:element name="show-id">
+              <caption lang="en">ShowID</caption>
+              <caption lang="de">VorstellungsID</caption>
+              <rng:data type="string"/>
+            </rng:element>
+            <rng:element name="starting-time">
+              <caption lang="en">Starting time</caption>
+              <caption lang="de">Beginzeit</caption>
+              <rng:data type="time"/>
+            </rng:element>
+            <rng:element name="hall">
+              <caption lang="en">Hall</caption>
+              <caption lang="de">Saal</caption>
+              <rng:data type="positiveInteger"/>
+            </rng:element>
+          </rng:element>
+        </rng:zeroOrMore>
       </output-message>
     </method>
 <!-- }}} -->
     <method name="invoke">
 <!-- {{{ -->
       <input-message>
-        <rng:element name="show-id" hidden="true">
+        <rng:element name="show-id">
           <caption lang="en">ShowID</caption>
           <caption lang="de">VorstellungsID</caption>
           <rng:data type="string"/>
@@ -104,8 +104,8 @@
           <rng:data type="string"/>
         </rng:element>
       </input-message>
-      <output-message type="single">
-        <rng:element name="reservation-id" hidden="true">
+      <output-message>
+        <rng:element name="reservation-id">
           <caption lang="en">Reservation ID</caption>
           <caption lang="de">Reservierungsnummer</caption>
           <rng:data type="string"/>
@@ -126,12 +126,19 @@
           <caption lang="de">Passwort</caption>
           <rng:data type="string"/>
         </rng:element>
-        <rng:element name="reservation-id" hidden="true">
+        <rng:element name="reservation-id">
           <caption lang="en">ReservationID</caption>
           <caption lang="de">Reservierungsnummer</caption>
           <rng:data type="string"/>
         </rng:element>
       </input-message>
+      <output-message>
+        <rng:element name="cancelation-costs">
+          <caption lang="en">Stornokosten</caption>
+          <caption lang="de">Cancelation costs</caption>
+          <rng:data type="float"/>
+        </rng:element>
+      </output-message>
     </method>
  <!-- }}} -->
   </methods>

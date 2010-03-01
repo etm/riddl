@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <grammar  xmlns="http://relaxng.org/ns/structure/1.0"
-          xmlns:rescue="http://rescue.org/ns/group/0.2"
+          xmlns:group="http://rescue.org/ns/group/0.2"
           datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
 
 <include href="relaxng-modular.rng"/>
@@ -8,14 +8,13 @@
 <define name="property">
   <element name="element" ns="http://relaxng.org/ns/structure/1.0">
     <attribute name="name"/>
-    <optional><attribute name="hidden"><value>true</value></attribute></optional>
     <oneOrMore>
-      <element name="rescue:caption"><text/>
+      <element name="group:caption"><text/>
         <attribute name="lang"><data type="language"/></attribute>
       </element>
     </oneOrMore>
     <optional>
-      <element name="rescue:description"><text/></element>
+      <element name="group:description"><text/></element>
     </optional>
     <element name="data">
       <ref name="data"/>
@@ -24,25 +23,18 @@
 </define>
 
 <define name="method">
-  <element name="rescue:method">
+  <element name="group:method">
     <attribute name="name"/>
     <optional>
-      <element name="rescue:description"><text/></element>
+      <element name="group:description"><text/></element>
     </optional>
     <optional>
-      <element name="rescue:input-message">
+      <element name="group:input-message">
         <ref name="message"/>
       </element>
     </optional>
     <optional>
-      <element name="rescue:output-message">
-        <choice>
-          <group>
-            <attribute name="type"><value>list</value></attribute>
-            <attribute name="item-name"/>
-          </group>
-          <attribute name="type"><value>single</value></attribute>
-        </choice>
+      <element name="group:output-message">
         <ref name="message"/>
       </element>
     </optional>
@@ -50,19 +42,36 @@
 </define>
 
 <define name="message">
-  <zeroOrMore>
-    <ref name="property"/>
-  </zeroOrMore>
+  <choice>
+    <element name="zeroOrMore" ns="http://relaxng.org/ns/structure/1.0">
+      <element name="element" ns="http://relaxng.org/ns/structure/1.0">
+        <attribute name="name"/>
+        <zeroOrMore>
+          <ref name="property"/>
+        </zeroOrMore>
+      </element>
+    </element>
+    <zeroOrMore>
+      <ref name="property"/>
+    </zeroOrMore>
+  </choice>
 </define>
 
 <define name="execute">
-  <element name="rescue:execute">
+  <element name="group:execute">
     <attribute name="name"/>
     <attribute name="method"/>
     <choice>
-      <attribute name="request">
-        <value>multiple</value>
-      </attribute>
+      <group>
+        <attribute name="request">
+          <value>multiple</value>
+        </attribute>
+        <optional>
+          <element name="group:selection">
+            <attribute name="name"/>
+          </element>
+        </optional>
+      </group>
       <group>
         <attribute name="request">
           <value>particular</value>
@@ -74,44 +83,32 @@
 </define>
 
 <define name="operation">
-  <element name="rescue:operation">
+  <element name="group:operation">
     <attribute name="name"/>
     <attribute name="short"><text/></attribute>
     <oneOrMore>
       <choice>
         <ref name="execute"/>
-        <element name="rescue:selection">
-          <attribute name="name"/>
-          <attribute name="resultset"/>
-          <oneOrMore>
-            <choice>
-              <element name="rescue:key">
-                <attribute name="parameter-name"/>
-              </element>
-              <ref name="execute"/>
-            </choice>
-          </oneOrMore>
-        </element>
       </choice>
     </oneOrMore>
   </element>
 </define>
 
 <start>
-  <element name="rescue:interface">
+  <element name="group:interface">
     <optional>  <!-- Is a group without static properties imaginable? -->
-      <element name="rescue:properties">
+      <element name="group:properties">
         <zeroOrMore>
           <ref name="property"/>
         </zeroOrMore>
       </element>
     </optional>
-    <element name="rescue:operations">
+    <element name="group:operations">
       <oneOrMore>
         <ref name="operation"/>
       </oneOrMore>
     </element>
-    <element name="rescue:methods">
+    <element name="group:methods">
       <oneOrMore>
         <ref name="method"/>
       </oneOrMore>
