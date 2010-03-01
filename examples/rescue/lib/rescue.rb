@@ -1,26 +1,13 @@
-class Workflow
-  @@error_message = ""
-  def self.check_syntax(xml)
-    # Cheking if any input-message-parameter is referred as input for an activity that is not part of the input-message
-    # Cheking if every output-message-parameter is used at least once as an output of an activity
-    # Checking if any place-holder is used within a service-uri that is not defined either in the input-message or as a context-variable
-    true
-  end
-
-  def self.error()
-    @@error_message
-  end
-end
-
 class GetOperations < Riddl::Implementation
   def response
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     schema = RNGSchema.new
 
-    schema.append_schemablock(xml.find("/group:interface/group:operations", {"group"=>"http://rescue.org/ns/group/0.2"}).first)
+    schema.append_schemablock(xml.find("/group:interface/group:operations", {"group"=>"http://rescue.org/ns/group/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).first)
     Riddl::Parameter::Complex.new("xml","text/xml", schema.to_s)
   end
 end
+
 class AddResource < Riddl::Implementation
   def response
     begin
@@ -34,16 +21,18 @@ class AddResource < Riddl::Implementation
         c = @p[1].value.read
         # Check if parameter matches the schema generate for this group
         xml = XML::Smart.string(c)
-        group = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-        schema = XML::Smart.string(group.transform_with(XML::Smart.open("rng+xsl/generate-service-schema.xsl")))
+        interface = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
+        schema = XML::Smart.string(interface.transform_with(XML::Smart.open("rng+xsl/generate-service-schema.xsl")))
         if xml.validate_against(schema) == false
           FileUtils.rm_r "#{@r.join("/")}/#{@p[0].value}"
           @status = 415 # Media-Type not supprted
           return
         end
-        if Workflow::check_syntax(xml) == false
+        if Execution::check_syntax(xml, interface) == false
           @status = 415 # Media-Type not supprted
-          return Riddl::Parameter::Simple.new("message", Workflow::error)
+          puts "Execution-Syntax-Error:" 
+          puts Execution::error
+          return Riddl::Parameter::Simple.new("error-message", Execution::error)
         end
         f = File.new("#{@r.join("/")}/#{@p[0].value}/properties.xml", "w")
       end
@@ -72,15 +61,15 @@ class UpdateResource < Riddl::Implementation
         end
       elsif @p[0].name == "properties"
         xml = XML::Smart.string(@p[0].value.read)
-        group = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-        schema = XML::Smart.string(group.transform_with(XML::Smart.open("rng+xsl/generate-service-schema.xsl")))
+        interface = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
+        schema = XML::Smart.string(interface.transform_with(XML::Smart.open("rng+xsl/generate-service-schema.xsl")))
         if xml.validate_against(schema) == false
           @status = 415 # Media-Type not supprted
           return
         end
-        if Workflow::check_syntax(xml) == false
+        if Execution::check_syntax(xml, interface) == false
           @status = 415 # Media-Type not supprted
-          return Riddl::Parameter::Simple.new("message", Workflow::error)
+          return Riddl::Parameter::Simple.new("error-message", Execution::error)
         end
         f = File.new("#{@r.join("/")}/properties.xml", "w")
         f.write(xml)
@@ -102,7 +91,7 @@ class GetMethod < Riddl::Implementation
       @status = 404 # not found
       return
     end
-    Riddl::Parameter::Complex.new("workflow","text/xml", wf.dump)
+    Riddl::Parameter::Complex.new("execution","text/xml", wf.dump)
   end
 end
 
@@ -134,7 +123,7 @@ class GetInterface < Riddl::Implementation
         end
       end
     end
-    s = XML::Smart.string("<rng:element name='input-message'/>")
+    s = XML::Smart.string("<rng:element name='input-message' xmlns:rng='http://relaxng.org/ns/structure/1.0'/>")
     params.each do |k,v|
       s.root.add(v)
     end
@@ -156,7 +145,7 @@ class GetInterface < Riddl::Implementation
         end
       end
     end
-    s = XML::Smart.string("<rng:element name='output-message'/>")
+    s = XML::Smart.string("<rng:element name='output-message' xmlns:rng='http://relaxng.org/ns/structure/1.0'/>")
     params.each do |k,v|
       s.root.add(v)
     end
@@ -186,6 +175,7 @@ class RNGSchema
   def initialize()
     @__schema = XML::Smart.string("<grammar/>")
     @__schema.root.attributes.add("xmlns", "http://relaxng.org/ns/structure/1.0")
+    @__schema.root.attributes.add("xmlns:rng", "http://relaxng.org/ns/structure/1.0")
     @__schema.root.attributes.add("xmlns:group", "http://rescue.org/ns/group/0.2")
     @__schema.root.attributes.add("xmlns:service", "http://rescue.org/ns/service/0.2")
     @__schema.root.attributes.add("xmlns:exec", "http://rescue.org/ns/execution/0.2")
