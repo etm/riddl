@@ -85,6 +85,7 @@
         <post in="subgroup"/>
         <delete in="*"/>
         <resource relative="operations">
+          <get in="*" out="xml"/>
           <resource>
             <get in="input" out="schema"/>
             <get in="output" out="schema"/>
