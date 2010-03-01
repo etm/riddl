@@ -24,6 +24,7 @@ ARGV.each do |a|
 end
 
 # Testcases for adding resources
+puts "Skip ceate-tests" if !create
 if create
 puts "Starting create-tests"
 # {{{
@@ -44,7 +45,13 @@ status, response = client.resource("groups").post [
       Riddl::Parameter::Simple.new("group-name", "testclient-group"),
       Riddl::Parameter::Complex.new("interface", "text/xml", File.open("example-cinema/group.xml", "r"))
       ]
-puts test + " failed with error: #{status}" if status != expectation
+if status != expectation      
+puts test + " failed with error: #{status}"
+rename = false
+update = false
+validate = false
+delete = false
+end
 # }}}
 
 expectation = 409
@@ -64,7 +71,13 @@ test = "Creating subgroup (expected status: #{expectation})"
 status, response = client.resource("groups/testclient-group").post [
       Riddl::Parameter::Simple.new("subgroup-name", "testclient-subgroup")
       ]
-puts test + " failed with error: #{status}" if status != expectation
+if status != expectation      
+puts test + " failed with error: #{status}"
+rename = false
+update = false
+validate = false
+delete = false
+end
 # }}}
 
 expectation = 409
@@ -73,7 +86,13 @@ test = "Creating subgroup with a name that already exists (expected status: #{ex
 status, response = client.resource("groups/testclient-group").post [
       Riddl::Parameter::Simple.new("subgroup-name", "testclient-subgroup")
       ]
-puts test + " failed with error: #{status}" if status != expectation
+if status != expectation      
+puts test + " failed with error: #{status}"
+rename = false
+update = false
+validate = false
+delete = false
+end
 # }}}
 
 
@@ -94,7 +113,13 @@ status, response = client.resource("groups/testclient-group/testclient-subgroup"
       Riddl::Parameter::Simple.new("service-name", "testclient-service"),
       Riddl::Parameter::Complex.new("properties", "text/xml", File.open("example-cinema/service.xml", "r"))
       ]
-puts test + " failed with error: #{status}" if status != expectation
+if status != expectation      
+puts test + " failed with error: #{status}"
+rename = false
+update = false
+validate = false
+delete = false
+end
 # }}}
 
 expectation = 409
@@ -110,6 +135,7 @@ end
 # }}}
 
 # Testcases for requesting reources
+puts "Skip validation" if !validate
 if validate
 puts "Starting validation-test"
 # {{{
@@ -149,7 +175,8 @@ end
 # }}}
 
 
-# Testcases for updating
+# Testcases for renaming
+puts "Skip rename-tests" if !rename
 if update
 puts "Starting update-tests"
 # {{{
@@ -168,13 +195,20 @@ test = "Updating service with valide XML (expected status: #{expectation})"
 status, response = client.resource("groups/testclient-group/testclient-subgroup/testclient-service").put [
       Riddl::Parameter::Complex.new("properties", "text/xml", File.open("example-cinema/service.xml", "r"))
       ]
-puts test + " failed with error: #{status}" if status != expectation
+if status != expectation      
+puts test + " failed with error: #{status}"
+rename = false
+update = false
+validate = false
+delete = false
+end
 # }}}
 end
 # }}}
 
 
 # Testcases for renaming resources
+puts "Skip update-tests" if !update
 if rename
 puts "Start renaming-tests"
 # {{{
@@ -184,7 +218,13 @@ test = "Renaming group (expected status: #{expectation})"
 status, response = client.resource("groups/testclient-group/").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-group-renamed")
       ]
-puts test + " failed with error: #{status}" if status != expectation
+if status != expectation      
+puts test + " failed with error: #{status}"
+rename = false
+update = false
+validate = false
+delete = false
+end
 # }}}
 
 expectation = 200
@@ -193,7 +233,13 @@ test = "Renaming subggroup (expected status: #{expectation})"
 status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-subgroup-renamed")
       ]
-puts test + " failed with error: #{status}" if status != expectation
+if status != expectation      
+puts test + " failed with error: #{status}"
+rename = false
+update = false
+validate = false
+delete = false
+end
 # }}}
 
 expectation = 200
@@ -202,7 +248,13 @@ test = "Renaming service (expected status: #{expectation})"
 status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup-renamed/testclient-service").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-service-renamed")
       ]
-puts test + " failed with error: #{status}" if status != expectation
+if status != expectation      
+puts test + " failed with error: #{status}"
+rename = false
+update = false
+validate = false
+delete = false
+end
 # }}}
 
 expectation = 409
@@ -237,6 +289,7 @@ end
 
 
 # Testcases for deleting resources
+puts "Skip delete-test" if !delete
 if delete
 puts "Starting delete-tests"
 # {{{

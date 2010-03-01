@@ -36,10 +36,19 @@
     </zeroOrMore>
     <zeroOrMore>
       <element name="exec:output">
-        <attribute name="name"/>
         <choice>
-          <attribute name="message-parameter"/>
-          <attribute name="context"/>
+          <group>
+            <attribute name="name"/>
+            <attribute name="message-parameter"/>
+          </group>
+          <group>
+            <attribute name="context"/>
+            <attribute name="message-parameter"/>
+          </group>
+          <group>
+            <attribute name="name"/>
+            <attribute name="context"/>
+          </group>
         </choice>
       </element>
     </zeroOrMore>

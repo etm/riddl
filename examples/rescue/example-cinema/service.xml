@@ -10,7 +10,8 @@
     <query>
       <execution>
         <exec:endpoint id="search">super-kino.at/web-api</exec:endpoint>
-        <exec:context id="operation">suchen</exec:context>
+        <exec:context id="search-operation">suchen</exec:context>
+        <exec:context id="saal">keine Angabe</exec:context>
         <exec:call id="search" endpoint="search" http-method="get">
           <exec:input name="op" context="search-operation"/>
           <exec:input name="titel" message-parameter="title"/>
@@ -19,7 +20,7 @@
           <exec:output name="titel" message-parameter="movie-title"/>
           <exec:output name="id" message-parameter="show-id"/>
           <exec:output name="start" message-parameter="starting-time"/>
-          <exec:output name="saal" message-parameter="hall"/>
+          <exec:output context="saal" message-parameter="hall"/>
         </exec:call>
       </execution>
     </query>
@@ -36,7 +37,7 @@
         </exec:call>
         <exec:call id="buchen" endpoint="buchen" http-method="post">
           <exec:input name="vorstellung" message-parameter="show-id"/>
-          <exec:input name="anzahl" message-parameter="numberOfSeats"/>
+          <exec:input name="anzahl" message-parameter="number-of-seats"/>
           <exec:input name="id" context="sitzungsID"/>
           <exec:output name="reservierungsnummer" message-parameter="reservation-id"/>
         </exec:call>
@@ -45,15 +46,18 @@
     <undo>
       <execution>
         <exec:endpoint id="anmelden">super-kino.at/login</exec:endpoint>
-        <exec:endpoint id="abbestellen">super-kino.at/{username}/{reservation-id}</exec:endpoint>
+        <exec:endpoint id="abbestellen">super-kino.at/{sinnlos}/bla/{reservation-id}</exec:endpoint>
         <exec:context id="sitzungsID"/>
+        <exec:context id="sinnlos">macht-keinen-sinn</exec:context>
+        <exec:context id="kosten">5</exec:context>
         <exec:call id="login" endpoint="anmelden" http-method="get">
           <exec:input name="name" message-parameter="username"/>
           <exec:input name="pwd" message-parameter="password"/>
           <exec:output name="id" context="sitzungsID"/>
         </exec:call>
-        <exec:call id="buchen" endpoint="buchen" http-method="delete">
+        <exec:call id="buchen" endpoint="abbestellen" http-method="delete">
           <exec:input name="id" context="sitzungsID"/>
+          <exec:output context="kosten" message-parameter="cancelation-costs"/>
         </exec:call>
       </execution>
     </undo>
