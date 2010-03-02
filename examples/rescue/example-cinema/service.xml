@@ -23,6 +23,11 @@
           <exec:output context="saal" message-parameter="hall"/>
         </exec:call>
       </execution>
+      <compensation/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
     </query>
     <invoke>
       <execution>

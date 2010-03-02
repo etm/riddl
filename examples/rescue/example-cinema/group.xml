@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 
 <interface  xmlns="http://rescue.org/ns/group/0.2"
-            xmlns:rng="http://relaxng.org/ns/structure/1.0">
+            xmlns:rng="http://relaxng.org/ns/structure/1.0"
+            xmlns:exec="http://rescue.org/ns/execute/0.2">
   <properties>
 <!-- {{{ -->
     <rng:element name="longitude">
@@ -19,65 +20,85 @@
   <operations>
 <!-- {{{ -->
     <operation name="search" short="search for movies">
-      <execute name="find" method="query" request="multiple"/>
+      <messages>
+        <message name="input">
+          <rng:element name="title">
+            <caption lang="en">Title</caption>
+            <caption lang="de">Titel</caption>
+            <rng:data type="string"/>
+          </rng:element>
+          <rng:element name="date">
+            <caption lang="en">Date</caption>
+            <caption lang="de">Datum</caption>
+            <rng:data type="date"/>
+          </rng:element>
+          <rng:element name="preferred-time">
+            <caption lang="en">preferred time</caption>
+            <caption lang="de">bevorzugte Zeit</caption>
+            <rng:data type="time"/>
+          </rng:element>
+        </message>
+        <message name="output">
+          <rng:zeroOrMore>
+            <rng:element name="show">
+              <rng:element name="movie-title">
+                <caption lang="en">Movietitle</caption>
+                <caption lang="de">Filmtitel</caption>
+                <rng:data type="string"/>
+              </rng:element>
+              <rng:element name="show-id">
+                <caption lang="en">ShowID</caption>
+                <caption lang="de">VorstellungsID</caption>
+                <rng:data type="string"/>
+              </rng:element>
+              <rng:element name="starting-time">
+                <caption lang="en">Starting time</caption>
+                <caption lang="de">Beginzeit</caption>
+                <rng:data type="time"/>
+              </rng:element>
+              <rng:element name="hall">
+                <caption lang="en">Hall</caption>
+                <caption lang="de">Saal</caption>
+                <rng:data type="positiveInteger"/>
+              </rng:element>
+            </rng:element>
+          </rng:zeroOrMore>
+        </message>
+      </messages>
+      <endpoints>
+        <exec:endpoint id="search"/>
+        <exec:endpoint id="invoke"/>
+      </endpoints>
+      <context-variables>
+        <exec:context id="scoping-test"/>
+      </context-variables>
+      <execute>
+        <exec:call name="find" endpoint="search">
+          <input message="input"/>
+          <output message="output"/>
+        </exec:call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
     </operation>
     <operation name="book" short="select show and book tickets">
-      <execute name="search-show" method="query" request="multiple">
-        <selection name="show"/>
-      </execute>
-      <execute name="book-tickets" method="invoke" request="particular" selector="show"/>
-    </operation>
-    <operation name="cancel" short="cancel reservation">
-      <execute name="cancel-reservation" method="undo" request="particular" selector="input-message"/>
+      <execution>
+       
+        <execute name="search-show" method="query" request="multiple">
+          <selection name="show"/>
+        </execute>
+        <execute name="book-tickets" method="invoke" request="particular" selector="show"/>
+      </execution>
+      <compensation/>
     </operation>
 <!-- }}} -->
   </operations>
   <methods>
     <method name="query">
 <!-- {{{ -->
-      <input-message>
-        <rng:element name="title">
-          <caption lang="en">Title</caption>
-          <caption lang="de">Titel</caption>
-          <rng:data type="string"/>
-        </rng:element>
-        <rng:element name="date">
-          <caption lang="en">Date</caption>
-          <caption lang="de">Datum</caption>
-          <rng:data type="date"/>
-        </rng:element>
-        <rng:element name="preferred-time">
-          <caption lang="en">preferred time</caption>
-          <caption lang="de">bevorzugte Zeit</caption>
-          <rng:data type="time"/>
-        </rng:element>
-      </input-message>
-      <output-message>
-        <rng:zeroOrMore>
-          <rng:element name="show">
-            <rng:element name="movie-title">
-              <caption lang="en">Movietitle</caption>
-              <caption lang="de">Filmtitel</caption>
-              <rng:data type="string"/>
-            </rng:element>
-            <rng:element name="show-id">
-              <caption lang="en">ShowID</caption>
-              <caption lang="de">VorstellungsID</caption>
-              <rng:data type="string"/>
-            </rng:element>
-            <rng:element name="starting-time">
-              <caption lang="en">Starting time</caption>
-              <caption lang="de">Beginzeit</caption>
-              <rng:data type="time"/>
-            </rng:element>
-            <rng:element name="hall">
-              <caption lang="en">Hall</caption>
-              <caption lang="de">Saal</caption>
-              <rng:data type="positiveInteger"/>
-            </rng:element>
-          </rng:element>
-        </rng:zeroOrMore>
-      </output-message>
     </method>
 <!-- }}} -->
     <method name="invoke">

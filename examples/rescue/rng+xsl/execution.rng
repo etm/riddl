@@ -17,14 +17,16 @@
   <element name="exec:call">
     <attribute name="endpoint"/>
     <attribute name="id"/>
-    <attribute name="http-method">
-      <choice>
-        <value>get</value>
-        <value>put</value>
-        <value>post</value>
-        <value>delete</value>
-      </choice>
-    </attribute>
+    <optional> <!-- if a call is defined at class-level the http-method can be not given to let the service decide which one is needed -->
+      <attribute name="http-method">
+        <choice>
+          <value>get</value>
+          <value>put</value>
+          <value>post</value>
+          <value>delete</value>
+        </choice>
+      </attribute>
+    </optional>
     <zeroOrMore>
       <element name="exec:input">
         <attribute name="name"/>
@@ -62,15 +64,19 @@
   </element>
 </define>
 
+<define name="execution-plan">
+  <zeroOrMore>
+    <choice>
+      <ref name="context"/>
+      <ref name="call"/>
+      <ref name="endpoint"/>
+    </choice>
+  </zeroOrMore>
+</define>
+
 <start>
   <element name="exec:execution-plan">
-    <zeroOrMore>
-      <choice>
-        <ref name="context"/>
-        <ref name="call"/>
-        <ref name="endpoint"/>
-      </choice>
-    </zeroOrMore>
+    <ref name="execution-plan"/>
   </element>
 </start>
 </grammar>
