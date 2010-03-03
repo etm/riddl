@@ -1,103 +1,123 @@
 <?xml version="1.0"?>
 <grammar  xmlns="http://relaxng.org/ns/structure/1.0"
           xmlns:rng="http://relaxng.org/ns/structure/1.0"
-          xmlns:group="http://rescue.org/ns/group/0.2"
+          xmlns:domain="http://rescue.org/ns/domain/0.2"
+          xmlns:exec="http://rescue.org/ns/execution/0.2"
           datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
 
 <include href="relaxng-modular.rng"/>
 <include href="execution.rng"/>
 
+<start combine="choice">
+  <element name="domain:domain-description">
+    <element name="domain:properties">
+      <zeroOrMore>
+        <ref name="property"/>
+      </zeroOrMore>
+    </element>
+
+    <element name="domain:messages">
+      <zeroOrMore>
+        <element name="domain:message">
+          <attribute name="name"/>
+          <ref name="message"/>
+        </element>
+      </zeroOrMore>
+    </element>
+    
+    <optional>
+      <element name="domain:variables">
+        <zeroOrMore>
+          <ref name="context"/>
+        </zeroOrMore>
+      </element>
+    </optional>
+
+    <element name="domain:endpoints">
+      <element name="exec:endpoint"> <!-- needs to be set and is used for most of the call's in the class-level-workflow to refer to same resourcepath during an particular execution-->
+        <attribute name="id"><value>resource-scope</value></attribute>
+      </element>
+      <zeroOrMore>
+        <ref name="endpoint"/>
+      </zeroOrMore>
+    </element>
+  
+    <element name="domain:methods">
+      <zeroOrMore>
+        <ref name="method"/>
+      </zeroOrMore>
+    </element>
+  </element>
+</start>
+
+<define name="message">
+  <choice>
+    <group>
+      <element name="rng:zeroOrMore">
+        <element name="rng:element">
+          <attribute name="name"/>
+          <zeroOrMore>
+            <ref name="property"/>
+          </zeroOrMore>
+        </element>
+      </element>
+    </group>
+    <group>
+      <zeroOrMore>
+        <ref name="property"/>
+      </zeroOrMore>
+    </group>
+  </choice>
+</define>
+
+<define name="method">
+  <element name="domain:method">
+    <attribute name="name"/>
+    <attribute name="short"/>
+    <ref name="description"/>
+    <element name="domain:execute">
+      <ref name="execution-code"/>
+    </element>
+    <element name="domain:compensate">
+      <ref name="execution-code"/>
+    </element>
+    <element name="domain:undo">
+      <ref name="execution-code"/>
+    </element>
+    <element name="domain:redo">
+      <ref name="execution-code"/>
+    </element>
+    <element name="domain:suspend">
+      <ref name="execution-code"/>
+    </element>
+    <element name="domain:abort">
+      <ref name="execution-code"/>
+    </element>
+  </element>
+</define>
+
+<define name="description">
+  <zeroOrMore>
+    <element name="domain:description">
+      <attribute name="lang"><data type="language"/></attribute>
+      <text/>
+    </element>
+  </zeroOrMore>
+</define>
+
 <define name="property">
   <element name="rng:element">
     <attribute name="name"/>
     <oneOrMore>
-      <element name="group:caption"><text/>
+      <element name="domain:caption">
         <attribute name="lang"><data type="language"/></attribute>
+        <text/>
       </element>
     </oneOrMore>
-    <optional>
-      <element name="group:description"><text/></element>
-    </optional>
-    <element name="data">
+    <element name="rng:data">
       <ref name="data"/>
     </element>
   </element>
 </define>
 
-<define name="message">
-  <choice>
-    <element name="rng:zeroOrMore">
-      <element name="rng:element">
-        <attribute name="name"/>
-        <zeroOrMore>
-          <ref name="property"/>
-        </zeroOrMore>
-      </element>
-    </element>
-    <zeroOrMore>
-      <ref name="property"/>
-    </zeroOrMore>
-  </choice>
-</define>
-
-
-<start>
-  <element name="group:interface">
-    <optional>
-      <element name="group:properties">
-        <zeroOrMore>
-          <ref name="property"/>
-        </zeroOrMore>
-      </element>
-    </optional>
-    <element name="group:operations">
-      <!-- aka class-level-workflow-->
-      <zeroOrMore>
-        <element name="group:operation">
-          <attribute name="name"/>
-          <attribute name="short"/>
-          <optional>
-            <element name="group:description">
-              <text/>
-            </element>
-          </opional>
-          <element name="group:input-message">
-            <ref name="message"/>
-          </element>
-          <element name="group:output-message">
-            <ref name="message"/>
-          </element>
-          <element name="group:endpoints">
-            <zeroOrMore>
-              <ref name="endpoint"/>
-            </zeroOrMore>
-          </element>
-          <element name="group:context-variables">
-            <zeroOrMore>
-              <ref name="context"/>
-            </zeroOrMore>
-          </element>
-          <element name="group:execute">
-            <ref name="execution-plan"/>
-          </element>
-          <element name="group:compensate">
-            <ref name="execution-plan"/>
-          </element>
-          <element name="group:undo">
-            <ref name="execution-plan"/>
-          </element>
-          <element name="group:redo">
-            <ref name="execution-plan"/>
-          </element>
-          <element name="group:suspend">
-            <ref name="execution-plan"/>
-          </element>
-          <element name="group:abort">
-            <ref name="execution-plan"/>
-          </element>
-        </element>
-      </zeroOrMore>
-    </element>
-  </element>
-</start>
 </grammar>

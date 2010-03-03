@@ -210,7 +210,6 @@ end
 # Testcases for renaming resources
 puts "Skip update-tests" if !update
 if rename
-puts "Start renaming-tests"
 # {{{
 expectation = 200
 test = "Renaming group (expected status: #{expectation})"

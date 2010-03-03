@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 
-<service-details xmlns="http://rescue.org/ns/service/0.2"
+<service-description xmlns="http://rescue.org/ns/service/0.2"
                  xmlns:exec="http://rescue.org/ns/execution/0.2">
   <properties>
     <longitude>4711</longitude>
     <latitude>0815</latitude>
   </properties>
   <methods>
-    <query>
-      <execution>
+    <search>
+      <execute>
         <exec:endpoint id="search">super-kino.at/web-api</exec:endpoint>
         <exec:context id="search-operation">suchen</exec:context>
         <exec:context id="saal">keine Angabe</exec:context>
@@ -22,15 +22,15 @@
           <exec:output name="start" message-parameter="starting-time"/>
           <exec:output context="saal" message-parameter="hall"/>
         </exec:call>
-      </execution>
-      <compensation/>
+      </execute>
+      <compensate/>
       <undo/>
       <redo/>
       <suspend/>
       <abort/>
-    </query>
-    <invoke>
-      <execution>
+    </search>
+    <book>
+      <execute>
         <exec:endpoint id="anmelden">super-kino.at/login</exec:endpoint>
         <exec:endpoint id="buchen">super-kino.at/web-api</exec:endpoint>
         <exec:context id="operation">buchen</exec:context>
@@ -46,10 +46,9 @@
           <exec:input name="id" context="sitzungsID"/>
           <exec:output name="reservierungsnummer" message-parameter="reservation-id"/>
         </exec:call>
-      </execution>
-    </invoke>
-    <undo>
-      <execution>
+      </execute>
+      <compensate/>
+      <undo>
         <exec:endpoint id="anmelden">super-kino.at/login</exec:endpoint>
         <exec:endpoint id="abbestellen">super-kino.at/{sinnlos}/bla/{reservation-id}</exec:endpoint>
         <exec:context id="sitzungsID"/>
@@ -64,7 +63,10 @@
           <exec:input name="id" context="sitzungsID"/>
           <exec:output context="kosten" message-parameter="cancelation-costs"/>
         </exec:call>
-      </execution>
-    </undo>
+      </undo>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </book>
   </methods>
-</service-details>
+</service-description>

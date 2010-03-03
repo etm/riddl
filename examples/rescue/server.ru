@@ -41,11 +41,13 @@ run(
           run DeleteResource if method :delete => '*'
           run AddResource if method :post => 'subgroup'
 
-          on resource 'operations' do
-            run GetOperations if method :get => "*"
+          on resource 'methods' do
+            run GetMethods if method :get => "*"
             on resource do
-              run GetInterface if method :get => 'input'
-              run GetInterface if method :get => 'output'
+              on resource do
+                run GetInterface if method :get => 'input'
+                run GetInterface if method :get => 'output'
+              end
             end
           end
           on resource do # Subgroup-level
