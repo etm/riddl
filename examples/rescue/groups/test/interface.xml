@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 
-<interface  xmlns="http://rescue.org/ns/group/0.2"
-            xmlns:rng="http://relaxng.org/ns/structure/1.0">
+<domain-description  xmlns="http://rescue.org/ns/domain/0.2"
+            xmlns:rng="http://relaxng.org/ns/structure/1.0"
+            xmlns:exec="http://rescue.org/ns/execution/0.2">
   <properties>
 <!-- {{{ -->
     <rng:element name="longitude">
@@ -16,131 +17,169 @@
     </rng:element>
 <!-- }}} -->
   </properties>
-  <operations>
-<!-- {{{ -->
-    <operation name="search" short="search for movies">
-      <execute name="find" method="query" request="multiple"/>
-    </operation>
-    <operation name="book" short="select show and book tickets">
-      <execute name="search-show" method="query" request="multiple">
-        <selection name="show"/>
-      </execute>
-      <execute name="book-tickets" method="invoke" request="particular" selector="show"/>
-    </operation>
-    <operation name="cancel" short="cancel reservation">
-      <execute name="cancel-reservation" method="undo" request="particular" selector="input-message"/>
-    </operation>
+  <messages>
+    <message name="search-parameters">
+<!-- {{{ -->    
+      <rng:element name="title">
+        <caption lang="en">Title</caption>
+        <caption lang="de">Titel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="date">
+        <caption lang="en">Date</caption>
+        <caption lang="de">Datum</caption>
+        <rng:data type="date"/>
+      </rng:element>
+      <rng:element name="preferred-time">
+        <caption lang="en">preferred time</caption>
+        <caption lang="de">bevorzugte Zeit</caption>
+        <rng:data type="time"/>
+      </rng:element>
 <!-- }}} -->
-  </operations>
-  <methods>
-    <method name="query">
-<!-- {{{ -->
-      <input-message>
-        <rng:element name="title">
-          <caption lang="en">Title</caption>
-          <caption lang="de">Titel</caption>
-          <rng:data type="string"/>
-        </rng:element>
-        <rng:element name="date">
-          <caption lang="en">Date</caption>
-          <caption lang="de">Datum</caption>
-          <rng:data type="date"/>
-        </rng:element>
-        <rng:element name="preferred-time">
-          <caption lang="en">preferred time</caption>
-          <caption lang="de">bevorzugte Zeit</caption>
-          <rng:data type="time"/>
-        </rng:element>
-      </input-message>
-      <output-message>
-        <rng:zeroOrMore>
-          <rng:element name="show">
-            <rng:element name="movie-title">
-              <caption lang="en">Movietitle</caption>
-              <caption lang="de">Filmtitel</caption>
-              <rng:data type="string"/>
-            </rng:element>
-            <rng:element name="show-id">
-              <caption lang="en">ShowID</caption>
-              <caption lang="de">VorstellungsID</caption>
-              <rng:data type="string"/>
-            </rng:element>
-            <rng:element name="starting-time">
-              <caption lang="en">Starting time</caption>
-              <caption lang="de">Beginzeit</caption>
-              <rng:data type="time"/>
-            </rng:element>
-            <rng:element name="hall">
-              <caption lang="en">Hall</caption>
-              <caption lang="de">Saal</caption>
-              <rng:data type="positiveInteger"/>
-            </rng:element>
+    </message>
+    <message name="list-shows">
+<!-- {{{ -->    
+      <rng:zeroOrMore>
+        <rng:element name="show">
+          <rng:element name="cinema-uri">
+            <caption lang="en">Kino-WWW</caption>
+            <caption lang="de">Cinema-URI</caption>
+            <rng:data type="string"/>
           </rng:element>
-        </rng:zeroOrMore>
-      </output-message>
-    </method>
+          <rng:element name="movie-title">
+            <caption lang="en">Movietitle</caption>
+            <caption lang="de">Filmtitel</caption>
+            <rng:data type="string"/>
+          </rng:element>
+          <rng:element name="show-id">
+            <caption lang="en">ShowID</caption>
+            <caption lang="de">VorstellungsID</caption>
+            <rng:data type="string"/>
+          </rng:element>
+          <rng:element name="starting-time">
+            <caption lang="en">Starting time</caption>
+            <caption lang="de">Beginzeit</caption>
+            <rng:data type="time"/>
+          </rng:element>
+          <rng:element name="hall">
+            <caption lang="en">Hall</caption>
+            <caption lang="de">Saal</caption>
+            <rng:data type="positiveInteger"/>
+          </rng:element>
+        </rng:element>
+      </rng:zeroOrMore>
 <!-- }}} -->
-    <method name="invoke">
-<!-- {{{ -->
-      <input-message>
-        <rng:element name="show-id">
-          <caption lang="en">ShowID</caption>
-          <caption lang="de">VorstellungsID</caption>
-          <rng:data type="string"/>
-        </rng:element>
-        <rng:element name="number-of-seats">
-          <caption lang="en">Number of seats</caption>
-          <caption lang="de">Anzahl Plaetze</caption>
-          <rng:data type="positiveInteger"/>
-        </rng:element>
-        <rng:element name="username">
-          <caption lang="en">Username</caption>
-          <caption lang="de">Benutzername</caption>
-          <rng:data type="string"/>
-        </rng:element>
-        <rng:element name="password">
-          <caption lang="en">Password</caption>
-          <caption lang="de">Passwort</caption>
-          <rng:data type="string"/>
-        </rng:element>
-      </input-message>
-      <output-message>
-        <rng:element name="reservation-id">
-          <caption lang="en">Reservation ID</caption>
-          <caption lang="de">Reservierungsnummer</caption>
-          <rng:data type="string"/>
-        </rng:element>
-      </output-message>
-    </method>
+    </message>
+    <message name="selected-show">
+<!-- {{{ -->    
+      <rng:element name="movie-title">
+        <caption lang="en">Movietitle</caption>
+        <caption lang="de">Filmtitel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="show-id">
+        <caption lang="en">ShowID</caption>
+        <caption lang="de">VorstellungsID</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="starting-time">
+        <caption lang="en">Starting time</caption>
+        <caption lang="de">Beginzeit</caption>
+        <rng:data type="time"/>
+      </rng:element>
+      <rng:element name="hall">
+        <caption lang="en">Hall</caption>
+        <caption lang="de">Saal</caption>
+        <rng:data type="positiveInteger"/>
+      </rng:element>
 <!-- }}} -->
-    <method name="undo">
+    </message>
+    <message name="book-tickets">
+<!-- {{{ -->    
+      <rng:element name="show-id">
+        <caption lang="en">ShowID</caption>
+        <caption lang="de">VorstellungsID</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="number-of-persons">
+        <caption lang="en">Hall</caption>
+        <caption lang="de">Saal</caption>
+        <rng:data type="positiveInteger"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+    <message name="reservation-result">
+<!-- {{{ -->    
+      <rng:element name="reservation-id">
+        <caption lang="en">Reservation ID</caption>
+        <caption lang="de">Reservierungsnummer</caption>
+        <rng:data type="string"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+  </messages>
+  <variables>
+<!-- {{{ -->  
+    <exec:context id="selected-cinema-uri">bla</exec:context>
+<!-- }}} -->  
+  </variables>
+  <endpoints>
 <!-- {{{ -->
-      <input-message>
-        <rng:element name="username">
-          <caption lang="en">Username</caption>
-          <caption lang="de">Benutzername</caption>
-          <rng:data type="string"/>
-        </rng:element>
-        <rng:element name="password">
-          <caption lang="en">Password</caption>
-          <caption lang="de">Passwort</caption>
-          <rng:data type="string"/>
-        </rng:element>
-        <rng:element name="reservation-id">
-          <caption lang="en">ReservationID</caption>
-          <caption lang="de">Reservierungsnummer</caption>
-          <rng:data type="string"/>
-        </rng:element>
-      </input-message>
-      <output-message>
-        <rng:element name="cancelation-costs">
-          <caption lang="en">Stornokosten</caption>
-          <caption lang="de">Cancelation costs</caption>
-          <rng:data type="float"/>
-        </rng:element>
-      </output-message>
+    <exec:endpoint id="resource-scope"/>
+    <exec:endpoint id="selector-service"/>
+<!-- }}} -->
+  </endpoints>
+  <methods>
+    <method name="search" short="search for avaliable shows">
+<!-- {{{ -->   
+      <execute>
+        <exec:call id="find" endpoint="resource-scope" http-method="get">
+          <exec:input message="search-parameters"/>
+          <exec:output message="list-shows"/>
+        </exec:call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->  
     </method>
- <!-- }}} -->
+    <method name="search-and-book" short="search for shows, select show and book tickets">
+<!-- {{{ -->
+      <execute>
+        <exec:call id="call-find" endpoint="resource-scope" service-method="search">
+          <exec:input name="something" message-parameter="some-parameter"/>
+        </exec:call>
+        <exec:call id="call-select" endpoint="selector-service" http-method="get" group-by="//show">
+          <exec:resource-id xpath="//show/cinema-uri" context="selected-cinema-uri"/>
+          <exec:input message="list-shows"/>
+          <exec:output message="selected-show"/>
+        </exec:call>
+        <exec:call id="call-book" endpoint="selected-cinema-uri" service-method="book"/>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->
+    </method>
+    <method name="book" short="book tickets for a given show and cinema">
+<!-- {{{ -->   
+      <execute>
+        <exec:call id="call-book" endpoint="resource-scope" service-method="book">
+          <exec:input message="book-tickets"/>
+          <exec:output message="reservation-result"/>
+        </exec:call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->     
+    </method>
   </methods>
-</interface>
+</domain-description>
 
