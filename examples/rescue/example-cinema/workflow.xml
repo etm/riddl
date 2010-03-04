@@ -1,45 +1,60 @@
-<workflow xmlns="http://rescue.org/ns/workflow/0.2">
-  <context id="title">Alice in Wonderland</context>
-  <context id="preferred-starting-time">20:00:00</context>
-  <context id="cinema-date">2010-02-26</context>
-  <context id="cinema-reservation-id"/>
-  <context id="number-of-persons"/>
-  <context id="cinema-time"/>
-  <context id="departure">2010-02-27</context>
-  <context id="reservation-lodging"/>
-  <context id="car-park">yes</context>
-  <context id="stars">3</context>
+<workflow xmlns="http://rescue.org/ns/controlflow/0.2">
+  <!-- Context for cinema input/output -->
+  <context id="movie_cinema_date">2010-02-26</context>
+  <context id="movie_number_of_persons">4</context>
+  <context id="movie_preferred_starting_time">20:00:00</context>
+  <context id="movie_title">Alice in Wonderland</context>
+  
+  <context id="movie_cine_hall"/>
+  <context id="movie_act_title"/>
+  <context id="movie_cinema_reservation_id"/>
+  <context id="movie_cinema_time"/>
+  
+  <!-- Context for lodging input/output -->
+  <context id="sleep_departure">2010-02-27</context>
+
+  <context id="sleep_reservation_lodging"/>
+
   <context id="longitutde">234</context>
   <context id="latitude">789</context>
 
+  <!-- from the domain_model -->
+  <endpoint id="movie_resource-path">Cinemas/Arthouse</endpoint>
+  <endpoint id="movie_selector_service">www.my_client.org/select</endpoint>
 
-  <task id="go-to-the-movies" resource-path="Cinemas/Arthouse" operation="book" selector-uri="http://localhost:9292">
-    <properties>
-      <constraint class="geo-location">
-        <property name="longitude" context="longitude"/>
-        <property name="latitude" context="latitude"/>
-      </constraint>
-    </properties>
-    <input message-parameter="title" context="title"/>
-    <input message-parameter="preferred-time" context="preferred-starting-time"/>
-    <input message-parameter="date" context="cinema-date"/>
-    <input message-parameter="number-of-persons" context="number-of-persons"/>
-    <output message-parameter="reservation-id" context="reservation-id"/>
-    <output message-parameter="starting-time" context="cinema-time"/> 
+  <call id="movie" endpoint="movie_resource-path" service-method="search_and_book">
+    <input message-parameter="date" context="movie_cinema_date"/>
+    <input message-parameter="number_of_persons" context="movie_number_of_persons"/>
+    <input message-parameter="preferred_time" context="movie-preferred_starting_time"/>
+    <input message-parameter="title" context="movie_title"/>
+    <output message-parameter="hall" context="movie_cine_hall"/>
+    <output message-parameter="movie_title" context="movie_act_title"/>
+    <output message-parameter="reservation_id" context="movie_cinema_reservation_id"/>
+    <output message-parameter="starting_time" context="movie_cinema_time"/> 
   </task>
 
-  <task id="find-a-place-to-sleep" resource-path="Lodging/Fancy" operation="book" selector-uri="http://waehle-mein-hotel.at">
-    <properties>
-      <constraint class="exact-match">
-        <property name="car-park" context="carpark"/>
-        <property name="city" task-id="go-to-the-movies" service-property="city"/>
-      </constraint>
-      <constraint class="greater-than">
-        <property name="stars" context="stars"/>
-      </constraint>
-    </properties>
-    <input message-parameter="aravial" context="cinema-date"/>
-    <input message-parameter="departure" context="departure"/>
-    <output message-parameter="reservation-id" context="reservation-lodging"/>
+  <!-- Properties -->
+  <context id="sleep_car_park">yes</context>
+  <context id="sleep_stars">3</context>
+  
+  <!-- from the domain_model -->
+  <endpoint id="sleep_resource-path">Lodging/Fancy</context>
+
+
+  <!--
+  activity :call, :sleep_resource-path, constrants => { ["==", "movie", "city", "stadt" ],  ["==", "movie", "city", "stadt" ], [">=", "city", "stadt" ] }, :parameters => 
+  -->
+
+  <call id="sleep" endpoint="sleep_resource-path" service-method="locate_and_book">
+    <constraint property="city" comparater="==" call-id="movie" referred-property="town">
+    <constraint property="stars" comparater=">=" context="sleep_stars">
+    <input message-parameter="date" context="movie_cinema_date"/>
+    <input message-parameter="number_of_persons" context="movie_number_of_persons"/>
+    <input message-parameter="preferred_time" context="movie-preferred_starting_time"/>
+    <input message-parameter="title" context="movie_title"/>
+    <output message-parameter="hall" context="movie_cine_hall"/>
+    <output message-parameter="movie_title" context="movie_act_title"/>
+    <output message-parameter="reservation_id" context="movie_cinema_reservation_id"/>
+    <output message-parameter="starting_time" context="movie_cinema_time"/> 
   </task>
 </workflow>

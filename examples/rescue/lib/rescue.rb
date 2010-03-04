@@ -29,7 +29,7 @@ class AddResource < Riddl::Implementation
           return
         end
 =begin
-        if Execution::check_syntax(xml, interface) == false
+      if Execution::check_syntax(xml, interface) == false
           @status = 415 # Media-Type not supprted
           puts "Execution-Syntax-Error:" 
           puts Execution::error
@@ -65,7 +65,7 @@ class UpdateResource < Riddl::Implementation
           @status = 409
           return
         end
-      elsif @p[0].name == "properties"
+      elsif @p[0].name == "service-description"
         xml = XML::Smart.string(@p[0].value.read)
         interface = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
         schema = XML::Smart.string(interface.transform_with(XML::Smart.open("rng+xsl/generate-service-schema.xsl")))
@@ -73,7 +73,7 @@ class UpdateResource < Riddl::Implementation
           @status = 415 # Media-Type not supprted
           return
         end
-=begin        
+=begin
         if Execution::check_syntax(xml, interface) == false
           @status = 415 # Media-Type not supprted
           return Riddl::Parameter::Simple.new("error-message", Execution::error)
