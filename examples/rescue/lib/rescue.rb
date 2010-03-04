@@ -3,7 +3,7 @@ class GetMethods < Riddl::Implementation
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     schema = RNGSchema.new
 
-    schema.append_schemablock(xml.find("/domain:domain-description/domain:class-level-workflows", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).first)
+    schema.append_schemablock(xml.find("/domain:domain-description/domain:methods", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).first)
     Riddl::Parameter::Complex.new("xml","text/xml", schema.to_s)
   end
 end
@@ -28,14 +28,14 @@ class AddResource < Riddl::Implementation
           @status = 415 # Media-Type not supprted
           return
         end
-=begin        
+=begin
         if Execution::check_syntax(xml, interface) == false
           @status = 415 # Media-Type not supprted
           puts "Execution-Syntax-Error:" 
           puts Execution::error
           return Riddl::Parameter::Simple.new("error-message", Execution::error)
         end
-=end        
+=end
         f = File.new("#{@r.join("/")}/#{@p[0].value}/properties.xml", "w")
       end
       if @p[0].name != "subgroup-name"
@@ -54,6 +54,10 @@ class UpdateResource < Riddl::Implementation
   def response
     begin
       if @p[0].name == "new-name"
+        if File.directory?(@r.join("/")) == false
+          @status = 410
+          return
+        end
         begin
           File.rename("#{@r.join("/")}", "#{@r[0..-2].join("/")}/#{@p[0].value}")
         rescue
@@ -69,12 +73,12 @@ class UpdateResource < Riddl::Implementation
           @status = 415 # Media-Type not supprted
           return
         end
-=begin
+=begin        
         if Execution::check_syntax(xml, interface) == false
           @status = 415 # Media-Type not supprted
           return Riddl::Parameter::Simple.new("error-message", Execution::error)
         end
-=end        
+=end
         f = File.new("#{@r.join("/")}/properties.xml", "w")
         f.write(xml)
         f.close()
@@ -86,18 +90,6 @@ class UpdateResource < Riddl::Implementation
   end
 end
 
-class GetMethod < Riddl::Implementation
-
-  def response
-    xml = XML::Smart.open("#{@r[0..-2].join("/")}/properties.xml")
-    wf = xml.find("/service:service-details/service:operations/service:#{@r[-1]}", {"service" => "http://rescue.org/ns/service/0.2"}).first
-    if wf == nil
-      @status = 404 # not found
-      return
-    end
-    Riddl::Parameter::Complex.new("execution","text/xml", wf.dump)
-  end
-end
 
 class GetInterface < Riddl::Implementation
 
@@ -122,6 +114,10 @@ class GetInterface < Riddl::Implementation
     else 
       input = collect_input(@r[3], @r[4], xml)
       output = collect_output(@r[3], @r[4], xml)
+      if input.length == 0 && output.length == 0
+        @status = 404 # not found
+        return
+      end
       s = nil
       if @p[0].name == "input"
         s = XML::Smart.string("<rng:element name='input-message' xmlns:rng='http://relaxng.org/ns/structure/1.0'/>")
@@ -139,7 +135,7 @@ class GetInterface < Riddl::Implementation
       end
       schema.append_schemablock(s.root)
     end 
-    Riddl::Parameter::Complex.new("xml","text/xml", schema.to_s)
+    Riddl::Parameter::Complex.new("schema","text/xml", schema.to_s)
   end
 
   def collect_input(method_name, operation_name, xml)
@@ -305,7 +301,7 @@ class GetServiceDescription <  Riddl::Implementation
       @status = 410
       return
     end
-    Riddl::Parameter::Complex.new("service","text/xml",File.open("#{@r.join("/")}/properties.xml", "r"))
+    Riddl::Parameter::Complex.new("service-description","text/xml",File.open("#{@r.join("/")}/properties.xml", "r"))
   end
 end
 

@@ -27,8 +27,8 @@
   <message name="properties">
     <parameter name="properties" type="string"/>
   </message>
-  <message name="serviceSchema">
-    <parameter name="serviceSchema" type="string"/>
+  <message name="service-schema">
+    <parameter name="service-schema" type="string"/>
   </message>
 
   <message name="schema">
@@ -37,7 +37,7 @@
 
   <message name="group">
     <parameter name="group-name" type="string"/>
-    <parameter name="interface" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+    <parameter name="domain-description" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <xi:include href="rng+xsl/group.rng"/>
     </parameter>
   </message>
@@ -57,11 +57,11 @@
 
   <message name="service">
     <parameter name="service-name" type="string"/>
-    <parameter name="properties" mimetype="text/xml"/>
+    <parameter name="service-description" mimetype="text/xml"/>
   </message>
 
-  <message name="service-properties">
-    <parameter name="properties" mimetype="text/xml"/>
+  <message name="service-description">
+    <parameter name="service-description" mimetype="text/xml"/>
   </message>
 
 <!--}}}-->
@@ -80,7 +80,7 @@
 <!-- {{{ -->
         <get in="*" out="atom-feed"/>
         <get in="properties" out="schema"/>
-        <get in="serviceSchema" out="schema"/>
+        <get in="service-schema" out="schema"/>
         <put in="rename"/>
         <post in="subgroup"/>
         <delete in="*"/>
@@ -105,11 +105,8 @@
 <!-- {{{ -->
             <get in="*" out="xml"/>
             <put in="rename"/>
-            <put in="service-properties"/>
+            <put in="service-description"/>
             <delete in="*"/>
-            <resource>
-              <get in="*" out="xml"/>
-            </resource>
 <!--}}}-->
           </resource>  
 
