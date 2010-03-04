@@ -33,7 +33,7 @@ test = "Creating group with a invalide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups").post [
       Riddl::Parameter::Simple.new("group-name", "testclient-group-invalide-xml"),
-      Riddl::Parameter::Complex.new("interface", "text/xml", File.open("example-cinema/service.xml", "r"))
+      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/service.xml", "r"))
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
@@ -43,7 +43,11 @@ test= "Creating group with valide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups").post [
       Riddl::Parameter::Simple.new("group-name", "testclient-group"),
-      Riddl::Parameter::Complex.new("interface", "text/xml", File.open("example-cinema/group.xml", "r"))
+      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/group.xml", "r"))
+      ]
+status, response = client.resource("groups").post [
+      Riddl::Parameter::Simple.new("group-name", "testclient-group-exists"),
+      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/group.xml", "r"))
       ]
 if status != expectation      
 puts test + " failed with error: #{status}"
@@ -59,7 +63,7 @@ test = "Creating group with a name that already exists (expected status: #{expec
 # {{{
 status, response = client.resource("groups").post [
       Riddl::Parameter::Simple.new("group-name", "testclient-group"),
-      Riddl::Parameter::Complex.new("interface", "text/xml", File.open("example-cinema/group.xml", "r"))
+      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/group.xml", "r"))
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
@@ -67,9 +71,12 @@ puts test + " failed with error: #{status}" if status != expectation
 
 expectation = 201
 test = "Creating subgroup (expected status: #{expectation})"
-# {{{zo
+# {{{zo 
 status, response = client.resource("groups/testclient-group").post [
       Riddl::Parameter::Simple.new("subgroup-name", "testclient-subgroup")
+      ]
+status, response = client.resource("groups/testclient-group").post [
+      Riddl::Parameter::Simple.new("subgroup-name", "testclient-subgroup-exists")
       ]
 if status != expectation      
 puts test + " failed with error: #{status}"
@@ -101,17 +108,21 @@ test = "Creating service with invalide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group/testclient-subgroup/").post [
       Riddl::Parameter::Simple.new("service-name", "testclient-service-invalide-xml"),
-      Riddl::Parameter::Complex.new("properties", "text/xml", File.open("example-cinema/group.xml", "r"))
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/group.xml", "r"))
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
 expectation = 201
 test = "Creating service with valide XML (expected status: #{expectation})"
-# {{{
+# {{{ 
 status, response = client.resource("groups/testclient-group/testclient-subgroup").post [
       Riddl::Parameter::Simple.new("service-name", "testclient-service"),
-      Riddl::Parameter::Complex.new("properties", "text/xml", File.open("example-cinema/service.xml", "r"))
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service.xml", "r"))
+      ]
+status, response = client.resource("groups/testclient-group/testclient-subgroup").post [
+      Riddl::Parameter::Simple.new("service-name", "testclient-service-exists"),
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service.xml", "r"))
       ]
 if status != expectation      
 puts test + " failed with error: #{status}"
@@ -124,10 +135,10 @@ end
 
 expectation = 409
 test = "Creating service with a name that already exists (expected status: #{expectation})"
-# {{{
+# {{{ 
 status, response = client.resource("groups/testclient-group/testclient-subgroup").post [
       Riddl::Parameter::Simple.new("service-name", "testclient-service"),
-      Riddl::Parameter::Complex.new("properties", "text/xml", File.open("example-cinema/service.xml", "r"))
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service.xml", "r"))
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
@@ -140,7 +151,7 @@ if validate
 puts "Starting validation-test"
 # {{{
 test = "Validating serviceSchema against service-properties"
-status, response = client.resource("groups/testclient-group").get [Riddl::Parameter::Simple.new("serviceSchema","")]
+status, response = client.resource("groups/testclient-group").get [Riddl::Parameter::Simple.new("service-schema","")]
 schema = XML::Smart.string(response[0].value.read)
 puts test + " failed during requesting properties schema with status-code: #{status}" if status != 200
 status, response = client.resource("groups/testclient-group/testclient-subgroup/testclient-service").get []
@@ -175,25 +186,24 @@ end
 # }}}
 
 
-# Testcases for renaming
-puts "Skip rename-tests" if !rename
+# Testcases for updating
+puts "Skip updating-tests" if !update
 if update
-puts "Starting update-tests"
-# {{{
+# {{{ 
 expectation = 415
 test = "Updating service with invalide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group/testclient-subgroup/testclient-service").put [
-      Riddl::Parameter::Complex.new("properties", "text/xml", File.open("example-cinema/group.xml", "r"))
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/group.xml", "r"))
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
 
 expectation = 200
 test = "Updating service with valide XML (expected status: #{expectation})"
-# {{{
+# {{{ 
 status, response = client.resource("groups/testclient-group/testclient-subgroup/testclient-service").put [
-      Riddl::Parameter::Complex.new("properties", "text/xml", File.open("example-cinema/service.xml", "r"))
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service.xml", "r"))
       ]
 if status != expectation      
 puts test + " failed with error: #{status}"
@@ -208,9 +218,9 @@ end
 
 
 # Testcases for renaming resources
-puts "Skip update-tests" if !update
+puts "Skip rename-tests" if !rename
 if rename
-# {{{
+# {{{ 
 expectation = 200
 test = "Renaming group (expected status: #{expectation})"
 # {{{
@@ -256,10 +266,37 @@ delete = false
 end
 # }}}
 
+expectation = 410
+test = "Renaming group with a name that not exists (expected status: #{expectation})"
+# {{{
+status, response = client.resource("groups/testclient-group").put [
+      Riddl::Parameter::Simple.new("new-name", "testclient-group-renamed")
+      ]
+puts test + " failed with error: #{status}" if status != expectation
+# }}}
+
+expectation = 410
+test = "Renaming subggroup with a name that not exists (expected status: #{expectation})"
+# {{{
+status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup").put [
+      Riddl::Parameter::Simple.new("new-name", "testclient-subgroup-renamed")
+      ]
+puts test + " failed with error: #{status}" if status != expectation
+# }}}
+
+expectation = 410
+test = "Renaming service with a name that not exists (expected status: #{expectation})"
+# {{{
+status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup-renamed/testclient-service").put [
+      Riddl::Parameter::Simple.new("new-name", "testclient-service-renamed")
+      ]
+puts test + " failed with error: #{status}" if status != expectation
+# }}}
+
 expectation = 409
 test = "Renaming group with a name that already exists (expected status: #{expectation})"
-# {{{
-status, response = client.resource("groups/testclient-group/").put [
+# {{{ 
+status, response = client.resource("groups/testclient-group-exists").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-group-renamed")
       ]
 puts test + " failed with error: #{status}" if status != expectation
@@ -268,16 +305,16 @@ puts test + " failed with error: #{status}" if status != expectation
 expectation = 409
 test = "Renaming subggroup with a name that already exists (expected status: #{expectation})"
 # {{{
-status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup").put [
+status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup-exists").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-subgroup-renamed")
       ]
 puts test + " failed with error: #{status}" if status != expectation
-# }}}
+# }}} 
 
 expectation = 409
 test = "Renaming service with a name that already exists (expected status: #{expectation})"
-# {{{
-status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup-renamed/testclient-service").put [
+# {{{  
+status, response = client.resource("groups/testclient-group-renamed/testclient-subgroup-renamed/testclient-service-exists").put [
       Riddl::Parameter::Simple.new("new-name", "testclient-service-renamed")
       ]
 puts test + " failed with error: #{status}" if status != expectation
@@ -310,6 +347,7 @@ expectation = 200
 test= "Deleting group (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group-renamed").delete []
+status, response = client.resource("groups/testclient-group-exists").delete []
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
 end
