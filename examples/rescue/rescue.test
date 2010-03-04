@@ -163,8 +163,8 @@ puts test + " failed because schema does not match against xml"  if xml.validate
 # Looping through each operation and check if messages are valid
 status, response = client.resource("groups/testclient-group/operations").get []
 schema = XML::Smart.string(response[0].value.read)
-operations = schema.find("//group:operation", {"group" => "http://rescue.org/ns/group/0.2"})
-
+operations = schema.find("//domain:method", {"domain" => "http://rescue.org/ns/domain/0.2"})
+=begin
 operations.each do |o|
   operation =  o.attributes.get_attr("name")
   puts "\tTesting #{operation}-input-message"
@@ -182,6 +182,7 @@ operations.each do |o|
   xml = XML::Smart.open("example-cinema/#{operation}-output.xml")
   puts message + " failed" if xml.validate_against(schema) == false
 end
+=end
 end
 # }}}
 
@@ -197,7 +198,7 @@ status, response = client.resource("groups/testclient-group/testclient-subgroup/
       Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/group.xml", "r"))
       ]
 puts test + " failed with error: #{status}" if status != expectation
-# }}}
+# }}} 
 
 expectation = 200
 test = "Updating service with valide XML (expected status: #{expectation})"
@@ -214,7 +215,7 @@ delete = false
 end
 # }}}
 end
-# }}}
+# }} }
 
 
 # Testcases for renaming resources

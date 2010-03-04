@@ -2,11 +2,11 @@
 <grammar  xmlns="http://relaxng.org/ns/structure/1.0"
           xmlns:rng="http://relaxng.org/ns/structure/1.0"
           xmlns:domain="http://rescue.org/ns/domain/0.2"
-          xmlns:exec="http://rescue.org/ns/execution/0.2"
+          xmlns:flow="http://rescue.org/ns/controlflow/0.2"
           datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
 
 <include href="relaxng-modular.rng"/>
-<include href="execution.rng"/>
+<include href="controlflow.rng"/>
 
 <start combine="choice">
   <element name="domain:domain-description">
@@ -25,26 +25,24 @@
       </zeroOrMore>
     </element>
     
-    <optional>
-      <element name="domain:variables">
+    <element name="domain:operations">
+      <optional>
+        <element name="domain:variables">
+          <zeroOrMore>
+            <ref name="context"/>
+          </zeroOrMore>
+        </element>
+      </optional>
+      <element name="domain:endpoints">
+        <element name="flow:endpoint"> <!-- needs to be set and is used for most of the call's in the class-level-workflow to refer to same resourcepath during an particular execution-->
+          <attribute name="id"><value>resource_path</value></attribute>
+        </element>
         <zeroOrMore>
-          <ref name="context"/>
+          <ref name="endpoint"/>
         </zeroOrMore>
       </element>
-    </optional>
-
-    <element name="domain:endpoints">
-      <element name="exec:endpoint"> <!-- needs to be set and is used for most of the call's in the class-level-workflow to refer to same resourcepath during an particular execution-->
-        <attribute name="id"><value>resource-scope</value></attribute>
-      </element>
       <zeroOrMore>
-        <ref name="endpoint"/>
-      </zeroOrMore>
-    </element>
-  
-    <element name="domain:methods">
-      <zeroOrMore>
-        <ref name="method"/>
+        <ref name="operation"/>
       </zeroOrMore>
     </element>
   </element>
@@ -70,8 +68,8 @@
   </choice>
 </define>
 
-<define name="method">
-  <element name="domain:method">
+<define name="operation">
+  <element name="domain:operation">
     <attribute name="name"/>
     <attribute name="short"/>
     <ref name="description"/>

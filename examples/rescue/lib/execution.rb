@@ -2,9 +2,22 @@ class Execution
   @@error_message = ""
   def self.check_syntax(service, interface)
     @@error_message = ""
-    service.find("//service:methods/*", {"service"=>"http://rescue.org/ns/service/0.2"}).each do |execution|
-      method_name = execution.name.name
-      #puts "Checking Execution within service-details/methods/#{method_name}/execution"
+    # Domain-Level
+      # Check if service-method exists
+      # Check if enpoints are defined and unique
+      # Check if contexts are defined and unique
+      # Check if input-message exists
+      # Check if output-message exists
+    # Instacne-Level
+      
+
+
+
+=begin
+    service.find("//service:methods/service:*", {"service"=>"http://rescue.org/ns/service/0.2"}).each do |execution|
+      interface.find("/domain:domain-description/domain:methods/domain:method[@name='#{method_name}'}
+      method_name = execution.parent.name.name
+      puts "Checking Execution within service-details/methods/#{method_name}/execution"
       # Cheking if any input-message-parameter is referred as input for an activity that is not part of the input-message
       execution.find("//service:#{method_name}/service:execution/descendant::exec:input", 
                 {"exec"=>"http://rescue.org/ns/execution/0.2", "service"=>"http://rescue.org/ns/service/0.2"}).each do |input|
@@ -50,6 +63,7 @@ class Execution
         end
       end
     end
+=end    
     @@error_message == ""
   end
 

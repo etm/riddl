@@ -1,31 +1,45 @@
 <?xml version="1.0"?>
 <grammar  xmlns="http://relaxng.org/ns/structure/1.0"
           xmlns:rng="http://relaxng.org/ns/structure/1.0"
-          xmlns:exec="http://rescue.org/ns/execution/0.2"
+          xmlns:flow="http://rescue.org/ns/controlflow/0.2"
           datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
 
 
 <start combine="choice">
-  <element name="exec:execution-plan">
+  <element name="flow:execution-plan">
     <ref name="execution-code"/>
   </element>
 </start>
 
 <define name="context">
-  <element name="exec:context">
+  <element name="flow:context">
     <attribute name="id"/>
     <text/>
   </element> 
 </define>
 
+<define name="constraint">
+  <element name="constraint"> 
+    <attribute name="property"/>
+    <attribute name="comparator"/>
+    <choice>
+      <attribute name="context"/>
+      <group>
+        <attribute name="call-id"/>
+        <attribute name="referred-property"/>
+      </group>
+    </choice>
+  </element>
+</define>
+
 <!-- Define differen call-types: class-method, selection, particular and multiple -->
 <!-- {{{ --> 
 <define name="call">
-  <element name="exec:call">
+  <element name="flow:call">
     <attribute name="id"/>
     <attribute name="endpoint"/>
     <choice>
-      <attribute name="service-method"/>
+      <attribute name="service-operation"/>
       <attribute name="http-method"><!-- defualt will be get -->
         <choice>
           <value>get</value>
@@ -34,13 +48,19 @@
           <value>delete</value>
         </choice>
       </attribute>
+      <attribute name="state-controlflow"/>
     </choice>
     <optional>
       <attribute name="group-by"/> <!-- Itempath holds the xpath to be used for generating the oportunities out of the input-message -->
-      <element name="exec:resource-id"> <!-- the uri of the resource from where the output was selected -->
+      <element name="flow:resource-id"> <!-- the uri of the resource from where the output was selected -->
         <attribute name="xpath"/>
-        <attribute name="context"/>
+        <attribute name="endpoint"/>
       </element>
+    </optional>
+    <optional>
+      <zeroOrMore>
+        <ref name="constraint"/>
+      </zeroOrMore>
     </optional>
     <ref name="in-out"/>
   </element>
@@ -52,7 +72,7 @@
 <!-- {{{ -->
 <define name="in-out">
   <zeroOrMore>
-    <element name="exec:input">
+    <element name="flow:input">
       <choice>
         <attribute name="message"/>
         <group>
@@ -66,7 +86,7 @@
     </element>
   </zeroOrMore>
   <zeroOrMore>
-    <element name="exec:output">
+    <element name="flow:output">
       <choice>
         <attribute name="message"/>
         <group>
@@ -87,7 +107,7 @@
 <!-- }}} -->
 
 <define name="endpoint">
-  <element name="exec:endpoint">
+  <element name="flow:endpoint">
     <attribute name="id"/>
     <text/>
   </element>

@@ -4,7 +4,7 @@
   xmlns:rng="http://relaxng.org/ns/structure/1.0"
   xmlns:service="http://rescue.org/ns/service/0.2"
   xmlns:domain="http://rescue.org/ns/domain/0.2"
-  xmlns:exec="http://rescue.org/ns/execution/0.2">
+  xmlns:flow="http://rescue.org/ns/controlflow/0.2">
 
   <xsl:output method="xml"/>
 
@@ -21,7 +21,7 @@
             <xsl:apply-templates select="/domain:domain-description/domain:properties/rng:element"/>
           </element><xsl:text>&#10;</xsl:text>
           <element name="service:methods"><xsl:text>&#10;</xsl:text>
-            <xsl:apply-templates select="//exec:call[not(@service-method=preceding::exec:call/@service-method) and (@service-method != '')]"/>
+            <xsl:apply-templates select="//flow:call[not(@service-method=preceding::flow:call/@service-method) and (@service-method != '')]"/>
           </element><xsl:text>&#10;</xsl:text>
         </element><xsl:text>&#10;</xsl:text>
       </start>
@@ -29,7 +29,7 @@
     <!--/xsl:element-->
   </xsl:template>
 
-  <xsl:template match="//exec:call">
+  <xsl:template match="//flow:call">
     <element name="service:{@service-method}">
       <element name="service:execute">
         <ref name="execution-code"/>
