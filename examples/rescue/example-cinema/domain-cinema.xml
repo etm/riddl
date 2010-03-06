@@ -205,7 +205,7 @@
       <execute>
         <flow:choose>
           <flow:alternative>
-            <flow:condition test="selected_cinema" oparator="!=" fix-value="nil"/>
+            <flow:condition test="selected_cinema" operator="!=" fix-value="nil"/>
             <flow:call id="order_popcorn" endpoint="selected_cinema" service-operation="popcorn" state-controlflow="execute">
               <flow:input message="popcorn_order"/>
               <flow:output message="popcorn_result"/>

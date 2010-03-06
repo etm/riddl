@@ -31,14 +31,14 @@
   <choice>
     <element name="flow:condition">
       <attribute name="test"/>
-      <attribute name="oparator"/>
+      <attribute name="operator"/>
       <choice>
         <attribute name="variable"/> <!-- could be context or endpoint -->
         <attribute name="fix-value"/>
       </choice>
     </element>
     <element name="flow:group">
-      <attribute name="oparator"/>
+      <attribute name="operator"/>
       <ref name="condition"/> <!-- at least two conditions must be member of a group -->
       <oneOrMore>
         <ref name="condition"/>
@@ -106,8 +106,9 @@
 <define name="manipulate">
 <!-- {{{ --> 
   <element name="flow:manipulate">
+    <attribute name="id"/>
     <attribute name="target"/>
-    <attribute name="oparator"/> <!-- should also be able to interprete RegExp -->
+    <attribute name="operator"/> <!-- should also be able to interprete RegExp -->
     <choice>
       <attribute name="variable"/>
       <attribute name="fix-value"/>

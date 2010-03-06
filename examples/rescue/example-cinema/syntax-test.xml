@@ -1,39 +1,41 @@
 <?xml version="1.0"?>
 <controlflow xmlns="http://rescue.org/ns/controlflow/0.2">
-  <endpoint id="epAirBook">http://air.org/book</endpoint>
-  <endpoint id="epAirPayk">http://air.org/pay</endpoint>
-  <endpoint id="epHotelBook">http://hotel.org/book</endpoint>
-  <endpoint id="epHotelBook">http://hotel.org/pay</endpoint>
   <endpoint id="epApproval">http://company.org/approval</endpoint>
 
   <context id="persons">3</context>
-  <context id="creditcard">Visa</context>
-  <context id="airline"/>
-  <context id="hotel"/>
+  <context id="creditcard">Visa-902384234890</context>
   <context id="from">Vienna</context>
   <context id="to">Dublin</context>
   <context id="sum"/>
 
-  <context id="approved"/>
+  <context id="approved">false</context>
 
   <cycle id="cycle_persons">
-    <condition test="persons" oparator="&gt;" fix-value="0"/>
+    <condition test="persons" operator="&gt;" fix-value="0"/>
     <parallel type="wait">
       <branch>
+        <endpoint id="epAirBook">http://air.org/book</endpoint>
+        <endpoint id="epAirPayk">http://air.org/pay</endpoint>
+        <context id="airline"/>
         <critical id="airbooking">
           <call id="a1_1" endpoint="epAirBook" http-method="post" http-status="201">
             <input name="from" context="from"/>
             <input name="to" context="to"/>
             <output name="id" context="airline"/>
+            <output name="ud" context="airline"/>
+            <output name="od" context="airline"/>
           </call>
           <call id="a1_2" endpoint="epAirPay" http-method="post" http-status="200">
             <input name="airline" context="airline"/>
             <input name="creditcard" context="creditcard"/>
-            <manipulate target="sum" oparator="+" parameter-name="amount"/>
+            <manipulate id="add_ticket_price" target="sum" operator="+" parameter-name="amount"/>
           </call>
         </critical>
       </branch>
       <branch>
+        <endpoint id="epHotelBook">http://hotel.org/book</endpoint>
+        <endpoint id="epHotelBook">http://hotel.org/pay</endpoint>
+        <context id="hotel"/>
         <critical id="hotelbooking">
           <call id="a2_1" endpoint="epHotelBook" http-method="post" http-status="201">
             <input name="to" context="to"/>
@@ -42,16 +44,25 @@
           <call id="a1_2" endpoint="epHotelPay" http-method="post" http-status="200">
             <input name="hotel" context="hotel"/>
             <input name="creditcard" context="creditcard"/>
-            <manipulate target="sum" oparator="+" parameter-name="amount"/>
+            <manipulate id="add_hotel_price" target="sum" operator="+" parameter-name="amount"/>
           </call>
         </critical>
       </branch>
     </parallel>
-    <manipulate target="persons" oparator="-" fix-value="1"/>
+    <manipulate id="reduce_persons" target="persons" operator="-" fix-value="1"/>
+    <manipulate id="bla" target="blu" operator="+" fix-value="bli"/>
+    <manipulate id="bla" target="blu" operator="+" variable="bli"/>
   </cycle>
   <choose>
     <alternative>
-      <condition test="sum" oparator="&lt;" fix-value="1000"/>
+      <group operator="and">
+        <condition test="airline" operator="!=" fix-value="crash-for-sure"/>
+        <condition test="sum" operator="&lt;" fix-value="1000"/>
+        <group operator="or">
+          <condition test="airline" operator="==" fix-value="aeroflot"/>
+          <condition test="airline" operator="==" fix-value="rayenair"/>
+        </group>
+      </group>
         <call id="a3" endpoint="approval" http-method="get" http-status="200">
           <input name="sum" context="sum"/>
           <output name="approved" context="approved"/>
