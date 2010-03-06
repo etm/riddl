@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<controlflow xmlns="http://rescue.org/ns/controlflow/0.2">
+  <endpoint id="epAirBook">http://air.org/book</endpoint>
+  <endpoint id="epAirPayk">http://air.org/pay</endpoint>
+  <endpoint id="epHotelBook">http://hotel.org/book</endpoint>
+  <endpoint id="epHotelBook">http://hotel.org/pay</endpoint>
+  <endpoint id="epApproval">http://company.org/approval</endpoint>
+
+  <context id="persons">3</context>
+  <context id="creditcard">Visa</context>
+  <context id="airline"/>
+  <context id="hotel"/>
+  <context id="from">Vienna</context>
+  <context id="to">Dublin</context>
+  <context id="sum"/>
+
+  <context id="approved"/>
+
+  <cycle id="cycle_persons">
+    <condition test="persons" oparator="&gt;" fix-value="0"/>
+    <parallel type="wait">
+      <branch>
+        <critical id="airbooking">
+          <call id="a1_1" endpoint="epAirBook" http-method="post" http-status="201">
+            <input name="from" context="from"/>
+            <input name="to" context="to"/>
+            <output name="id" context="airline"/>
+          </call>
+          <call id="a1_2" endpoint="epAirPay" http-method="post" http-status="200">
+            <input name="airline" context="airline"/>
+            <input name="creditcard" context="creditcard"/>
+            <manipulate target="sum" oparator="+" parameter-name="amount"/>
+          </call>
+        </critical>
+      </branch>
+      <branch>
+        <critical id="hotelbooking">
+          <call id="a2_1" endpoint="epHotelBook" http-method="post" http-status="201">
+            <input name="to" context="to"/>
+            <output name="id" context="hotel"/>
+          </call>
+          <call id="a1_2" endpoint="epHotelPay" http-method="post" http-status="200">
+            <input name="hotel" context="hotel"/>
+            <input name="creditcard" context="creditcard"/>
+            <manipulate target="sum" oparator="+" parameter-name="amount"/>
+          </call>
+        </critical>
+      </branch>
+    </parallel>
+    <manipulate target="persons" oparator="-" fix-value="1"/>
+  </cycle>
+  <choose>
+    <alternative>
+      <condition test="sum" oparator="&lt;" fix-value="1000"/>
+        <call id="a3" endpoint="approval" http-method="get" http-status="200">
+          <input name="sum" context="sum"/>
+          <output name="approved" context="approved"/>
+        </call>
+    </alternative>
+  </choose>
+</controlflow>

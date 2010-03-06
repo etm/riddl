@@ -6,7 +6,7 @@
     <longitude>4711</longitude>
     <latitude>0815</latitude>
   </properties>
-  <methods>
+  <operations>
     <search>
       <execute>
         <flow:endpoint id="search">super-kino.at/web-api</flow:endpoint>
@@ -68,5 +68,5 @@
       <suspend/>
       <abort/>
     </book>
-  </methods>
+  </operations>
 </service-description>
