@@ -1,9 +1,9 @@
-class GetMethods < Riddl::Implementation
+class GetOperations < Riddl::Implementation
   def response
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     schema = RNGSchema.new
 
-    schema.append_schemablock(xml.find("/domain:domain-description/domain:methods", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).first)
+    schema.append_schemablock(xml.find("/domain:domain-description/domain:operations", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).first)
     Riddl::Parameter::Complex.new("xml","text/xml", schema.to_s)
   end
 end
@@ -99,21 +99,12 @@ class GetInterface < Riddl::Implementation
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     params = nil
 
-    if @r[4] != "execute" &&
-       @r[4] != "compensate" &&
-       @r[4] != "undo" &&
-       @r[4] != "redo" &&
-       @r[4] != "suspend" &&
-       @r[4] != "abort"
-      @status = 404 # not foud
-      return
-    end
 
     if @p[0].name == "properties"
       schema.append_schemablock(xml.find("/domain:domain-description/domain:properties", {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
     else 
-      input = collect_input(@r[3], @r[4], xml)
-      output = collect_output(@r[3], @r[4], xml)
+      input = collect_input(@r[3], xml)
+      output = collect_output(@r[3], xml)
       if input.length == 0 && output.length == 0
         @status = 404 # not found
         return
@@ -138,15 +129,15 @@ class GetInterface < Riddl::Implementation
     Riddl::Parameter::Complex.new("schema","text/xml", schema.to_s)
   end
 
-  def collect_input(method_name, operation_name, xml)
+  def collect_input(operation_name, xml)
     params = Hash.new
-    xml.find("/domain:domain-description/domain:methods/domain:method[@name='#{method_name}']/domain:#{operation_name}/descendant::exec:call", 
-            {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "exec"=>"http://rescue.org/ns/execution/0.2"}).each do |call|
-      params.merge!(collect_input(call.attributes.get_attr("service-method").value, operation_name, xml)) if call.attributes.include?("service-method") && method_name != call.attributes.get_attr("service-method").value # Call refers to another method of the service
-      call.find("descendant::exec:input", {"exec"=>"http://rescue.org/ns/execution/0.2"}).each do |input|
+    xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{operation_name}']/descendant::flow:call", 
+            {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
+      params.merge!(collect_input(call.attributes.get_attr("service-operation").value, xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes.get_attr("service-operation").value # Call refers to another operation  of the service
+      call.find("descendant::flow:input", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
         if input.attributes.include?("message") # call uses a message
           xml.find("/domain:domain-description/domain:messages/domain:message[@name='#{input.attributes.get_attr("message")}']/rng:*",
-                  {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "exec"=>"http://rescue.org/ns/execution/0.2"}).each do |p|
+                  {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlfow/0.2"}).each do |p|
             params[p.attributes.get_attr("name").value] = p if p.name.name == "element" # use element
             params["ZoM" + p.children[0].attributes.get_attr("name").value] = p if p.name.name == "zeroOrMore" # use zeroOrMore-block
           end
@@ -156,21 +147,22 @@ class GetInterface < Riddl::Implementation
     params
   end
 
-  def collect_output(method_name, operation_name, xml)
+  def collect_output(operation_name, xml)
     params = Hash.new
-    xml.find("/domain:domain-description/domain:methods/domain:method[@name='#{method_name}']/domain:#{operation_name}/descendant::exec:call", 
-            {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "exec"=>"http://rescue.org/ns/execution/0.2"}).each do |call|
-      params.merge!(collect_output(call.attributes.get_attr("service-method").value, operation_name, xml)) if call.attributes.include?("service-method") && method_name != call.attributes.get_attr("service-method").value # Call refers to another method of the service
-      call.find("descendant::exec:output", {"exec"=>"http://rescue.org/ns/execution/0.2"}).each do |output|
+    xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{operation_name}']/descendant::flow:call", 
+            {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
+      params.merge!(collect_output(call.attributes.get_attr("service-operation").value, xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes.get_attr("service-operation").value # Call refers to another operation of the service
+      call.find("descendant::flow:output", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
         if output.attributes.include?("message") # call uses a message
           xml.find("/domain:domain-description/domain:messages/domain:message[@name='#{output.attributes.get_attr("message")}']/rng:*",
-                  {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "exec"=>"http://rescue.org/ns/execution/0.2"}).each do |p|
+                  {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlfow/0.2"}).each do |p|
             params[p.attributes.get_attr("name").value] = p if p.name.name == "element" # use element
             params["ZoM" + p.children[0].attributes.get_attr("name").value] = p if p.name.name == "zeroOrMore" # use zeroOrMore-block
           end
         end
       end  
     end
+    puts params.inspect
     params
   end
 end
@@ -231,18 +223,6 @@ class DeleteResource < Riddl::Implementation
       @status = 404
       puts $ERRO_INFO
     end
-  end
-end
-
-class GetDescription < Riddl::Implementation
-
-  def response
-    if File.exist?("description.xml") == false
-      puts "Can not read description.xml"
-      @status = 410 # 410: Gone
-      return
-    end
-    Riddl::Parameter::Complex.new("description","text/xml", File.open("description.xml", "r"))
   end
 end
 

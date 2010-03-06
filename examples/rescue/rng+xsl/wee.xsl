@@ -23,9 +23,33 @@
     <xsl:value-of select="@id"/>
     <xsl:text>, :call, :</xsl:text>
     <xsl:value-of select="@endpoint"/>
-    <xsl:text>, @inputs = {</xsl:text>
+    <xsl:text>, input = {</xsl:text>
     <xsl:apply-templates select="child::flow:input"/>
-    <xsl:text>} do </xsl:text>
+    <xsl:text>}</xsl:text>
+    <xsl:if test="string(@http-method)">
+      <xsl:text>, http = {:method => '</xsl:text>
+      <xsl:value-of select="@http-method"/>
+      <xsl:text>', :status => </xsl:text>
+      <xsl:value-of select="@http-status"/>
+      <xsl:text>}</xsl:text>
+    </xsl:if>
+    <xsl:if test="string(@service-operation)">
+      <xsl:text>, service = {:operation => '</xsl:text>
+      <xsl:value-of select="@service-operation"/>
+      <xsl:text>', :controlflow => </xsl:text>
+      <xsl:value-of select="@state-controlflow"/>
+      <xsl:text>}</xsl:text>
+    </xsl:if>
+    <xsl:if test="string(@group-by)">
+      <xsl:text>, group = {:group_by => '</xsl:text>
+      <xsl:value-of select="@group-by"/>
+      <xsl:text>', :uri_xpath => </xsl:text>
+      <xsl:value-of select="child::flow:resource-id/@xpath"/>
+      <xsl:text>', :target_endpoint => </xsl:text>
+      <xsl:value-of select="child::flow:resource-id/@endpoint"/>
+      <xsl:text>}</xsl:text>
+    </xsl:if>
+    <xsl:text> do </xsl:text>
     <xsl:for-each select="child::flow:*[name() != 'input']">
       <xsl:if test="position() = 1">
         <xsl:text>|</xsl:text>
@@ -53,10 +77,31 @@
   <xsl:template match="//flow:output">
     <!-- {{{ -->
     <xsl:text>&#xa;</xsl:text>
-    <xsl:text>@</xsl:text>
-    <xsl:value-of select="@context"/>
-    <xsl:text> = </xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:choose>
+      <xsl:when test="string(@name) and string(@context)">
+        <xsl:text>@</xsl:text>
+        <xsl:value-of select="@context"/>
+        <xsl:text> = </xsl:text>
+        <xsl:value-of select="@name"/>
+      </xsl:when>
+      <xsl:when test="string(@name) and string(@message-parameter)">
+      </xsl:when>
+      <xsl:when test="string(@fix-value) and string(@message-parameter)">
+        <xsl:text>output[:</xsl:text>
+        <xsl:value-of select="@message-parameter"/>
+        <xsl:text>] = </xsl:text>
+        <xsl:call-template name="is_string">
+          <xsl:with-param name="v" select="@fix-value"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="string(@context) and string(@message-parameter)">
+        <xsl:text>output[:</xsl:text>
+        <xsl:value-of select="@message-parameter"/>
+        <xsl:text>] = </xsl:text>
+        <xsl:text>@</xsl:text>
+        <xsl:value-of select="@context"/>
+      </xsl:when>
+    </xsl:choose>
     <!-- }}} -->
   </xsl:template>
   
@@ -64,8 +109,22 @@
     <!-- {{{ --> 
     <xsl:text>:</xsl:text>
     <xsl:value-of select="@name"/>
-    <xsl:text> => @</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:choose>
+      <xsl:when test="string(@context)">
+          <xsl:text> => @</xsl:text>
+          <xsl:value-of select="@context"/>
+      </xsl:when>
+      <xsl:when test="string(@message-parameter)">
+          <xsl:text>input[:</xsl:text><xsl:value-of select="@message-parameter"/><xsl:text>]</xsl:text>
+      </xsl:when>
+      <xsl:when test="string(@fix-value)">
+          <xsl:text>input[:</xsl:text>
+            <xsl:call-template name="is_string">
+              <xsl:with-param name="v" select="@fix-value"/>
+            </xsl:call-template>
+          <xsl:text>]</xsl:text>
+      </xsl:when>
+    </xsl:choose>
     <xsl:if test="position() != last()">
       <xsl:text>, </xsl:text>
     </xsl:if>
@@ -106,7 +165,7 @@
         <xsl:text>&#xa;end</xsl:text>
       </xsl:otherwise>
     </xsl:choose>
-    <!-- }}} -->
+    <!-- }}} --> 
   </xsl:template>
   
   <xsl:template match="//flow:critical">

@@ -193,6 +193,7 @@
           <attribute name="name"/>
           <choice>
             <attribute name="context"/>
+            <attribute name="fix-value"/>
             <attribute name="message-parameter"/>
           </choice>
         </group>
@@ -211,7 +212,10 @@
           </choice>
         </group>
         <group>
-          <attribute name="context"/>
+          <choice>
+            <attribute name="context"/>
+            <attribute name="fix-value"/>
+          </choice>
           <attribute name="message-parameter"/>
         </group>
       </choice>
