@@ -117,7 +117,7 @@
       </rng:element>
 <!-- }}} -->
     </message>
-    <message name="order_popcorn">
+    <message name="popcorn_order">
 <!-- {{{ -->      
       <rng:element name="reservation_id">
         <caption lang="en">Reservation ID</caption>
@@ -132,6 +132,29 @@
 <!-- }}} -->
     </message>
     <message name="popcorn_result">
+<!-- {{{ -->      
+      <rng:element name="price">
+        <caption lang="en">Preis</caption>
+        <caption lang="de">Price</caption>
+        <rng:data type="float"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+    <message name="undo_booking_input">
+<!-- {{{ -->      
+      <rng:element name="reservation_id">
+        <caption lang="en">Reservation ID</caption>
+        <caption lang="de">Reservierungsnummer</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="accept_penalty">
+        <caption lang="en">Penalty payment accepted</caption>
+        <caption lang="de">Strafzahlung akzeptieren</caption>
+        <rng:data type="boolean"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+    <message name="undo_booking_output">
 <!-- {{{ -->      
       <rng:element name="price">
         <caption lang="en">Preis</caption>
@@ -188,7 +211,7 @@
     <operation name="book" short="book tickets for a given show and cinema">
 <!-- {{{ -->   
       <execute>
-        <flow:call id="call_book" endpoint="resource_scope" service-operation="popcorn" state-controlflow="execute">
+        <flow:call id="call_book" endpoint="resource_scope" service-operation="book" state-controlflow="execute">
           <flow:input message="book_tickets"/>
           <flow:output message="reservation_result"/>
         </flow:call>
@@ -200,7 +223,7 @@
       <abort/>
 <!-- }}} -->       
     </operation>
-    <operation name="order-popcorn" short="get popcorn to your seat">
+    <operation name="order_popcorn" short="get popcorn to your seat">
 <!-- {{{ -->    
       <execute>
         <flow:choose>

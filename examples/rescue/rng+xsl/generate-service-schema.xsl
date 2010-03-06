@@ -13,7 +13,6 @@
               datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" 
               xmlns:service="http://rescue.org/ns/service/0.2" 
               xmlns:flow="http://rescue.org/ns/controlflow/0.2">
-      <xsl:copy-of select="document('controlflow.rng')/rng:grammar/rng:define"/>
       <xsl:text>&#10;</xsl:text><xsl:text>&#10;</xsl:text>
       <start>
         <element name="service:service-description">
@@ -29,6 +28,7 @@
           </element>
         </element>
       </start>
+      <xsl:copy-of select="document('controlflow.rng')/rng:grammar/rng:define"/>
     </grammar>
     <!--/xsl:element-->
   </xsl:template>
@@ -38,27 +38,27 @@
     <element name="service:{@service-operation}">
       <xsl:text>&#10;&#9;&#9;</xsl:text>
       <element name="service:execute">
-        <ref name="execution-code"/>
+        <ref name="controlflow-code"/>
       </element>
       <xsl:text>&#10;&#9;&#9;</xsl:text>
       <element name="service:compensate">
-        <ref name="execution-code"/>
+        <ref name="controlflow-code"/>
       </element>
       <xsl:text>&#10;&#9;&#9;</xsl:text>
       <element name="service:undo">
-      <ref name="execution-code"/>
+      <ref name="controlflow-code"/>
       </element>
       <xsl:text>&#10;&#9;&#9;</xsl:text>
       <element name="service:redo">
-        <ref name="execution-code"/>
+        <ref name="controlflow-code"/>
       </element>
       <xsl:text>&#10;&#9;&#9;</xsl:text>
       <element name="service:suspend">
-        <ref name="execution-code"/>
+        <ref name="controlflow-code"/>
       </element>
       <xsl:text>&#10;&#9;&#9;</xsl:text>
       <element name="service:abort">
-        <ref name="execution-code"/>
+        <ref name="controlflow-code"/>
       </element>
       <xsl:text>&#10;&#9;</xsl:text>
     </element>

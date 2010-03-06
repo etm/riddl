@@ -33,7 +33,7 @@ test = "Creating group with a invalide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups").post [
       Riddl::Parameter::Simple.new("group-name", "testclient-group-invalide-xml"),
-      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/service.xml", "r"))
+      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/service-cinema.xml", "r"))
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
@@ -43,11 +43,11 @@ test= "Creating group with valide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups").post [
       Riddl::Parameter::Simple.new("group-name", "testclient-group"),
-      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/group.xml", "r"))
+      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/domain-cinema.xml", "r"))
       ]
 status, response = client.resource("groups").post [
       Riddl::Parameter::Simple.new("group-name", "testclient-group-exists"),
-      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/group.xml", "r"))
+      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/domain-cinema.xml", "r"))
       ]
 if status != expectation      
 puts test + " failed with error: #{status}"
@@ -63,7 +63,7 @@ test = "Creating group with a name that already exists (expected status: #{expec
 # {{{
 status, response = client.resource("groups").post [
       Riddl::Parameter::Simple.new("group-name", "testclient-group"),
-      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/group.xml", "r"))
+      Riddl::Parameter::Complex.new("domain-description", "text/xml", File.open("example-cinema/domain-cinema.xml", "r"))
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
@@ -108,7 +108,7 @@ test = "Creating service with invalide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group/testclient-subgroup/").post [
       Riddl::Parameter::Simple.new("service-name", "testclient-service-invalide-xml"),
-      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/group.xml", "r"))
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/domain-cinema.xml", "r"))
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
@@ -118,11 +118,11 @@ test = "Creating service with valide XML (expected status: #{expectation})"
 # {{{ 
 status, response = client.resource("groups/testclient-group/testclient-subgroup").post [
       Riddl::Parameter::Simple.new("service-name", "testclient-service"),
-      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service.xml", "r"))
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service-cinema.xml", "r"))
       ]
 status, response = client.resource("groups/testclient-group/testclient-subgroup").post [
       Riddl::Parameter::Simple.new("service-name", "testclient-service-exists"),
-      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service.xml", "r"))
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service-cinema.xml", "r"))
       ]
 if status != expectation      
 puts test + " failed with error: #{status}"
@@ -138,7 +138,7 @@ test = "Creating service with a name that already exists (expected status: #{exp
 # {{{ 
 status, response = client.resource("groups/testclient-group/testclient-subgroup").post [
       Riddl::Parameter::Simple.new("service-name", "testclient-service"),
-      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service.xml", "r"))
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service-cinema.xml", "r"))
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}}
@@ -195,7 +195,7 @@ expectation = 415
 test = "Updating service with invalide XML (expected status: #{expectation})"
 # {{{
 status, response = client.resource("groups/testclient-group/testclient-subgroup/testclient-service").put [
-      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/group.xml", "r"))
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/domain-cinema.xml", "r"))
       ]
 puts test + " failed with error: #{status}" if status != expectation
 # }}} 
@@ -204,7 +204,7 @@ expectation = 200
 test = "Updating service with valide XML (expected status: #{expectation})"
 # {{{ 
 status, response = client.resource("groups/testclient-group/testclient-subgroup/testclient-service").put [
-      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service.xml", "r"))
+      Riddl::Parameter::Complex.new("service-description", "text/xml", File.open("example-cinema/service-cinema.xml", "r"))
       ]
 if status != expectation      
 puts test + " failed with error: #{status}"

@@ -38,7 +38,7 @@
   <message name="group">
     <parameter name="group-name" type="string"/>
     <parameter name="domain-description" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <xi:include href="rng+xsl/group.rng"/>
+      <xi:include href="rng+xsl/domain.rng"/>
     </parameter>
   </message>
 
@@ -51,7 +51,7 @@
   </message>
 
   <message name="riddl-description">
-    <parameter name="riddl-descritpion" type="string"/>
+    <parameter name="riddl-description" type="string"/>
   </message>
 
 
@@ -71,6 +71,9 @@
     <request method="get" in="riddl-description" out="description">
       <ann:label xml:lang="en">Show description</ann:label>
     </request>
+    <resource relative="xsl" recursive="true">
+      <get in="*" out="xml"/>
+    </resource>  
     <resource relative="groups">
 <!-- {{{ -->
       <get in="*" out="atom-feed"/>
@@ -84,13 +87,11 @@
         <put in="rename"/>
         <post in="subgroup"/>
         <delete in="*"/>
-        <resource relative="methods">
+        <resource relative="operations">
           <get in="*" out="xml"/>
           <resource>
-            <resource>
-              <get in="input" out="schema"/>
-              <get in="output" out="schema"/>
-            </resource>
+            <get in="input" out="schema"/>
+            <get in="output" out="schema"/>
           </resource>
         </resource>
 <!--}}}-->

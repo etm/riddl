@@ -3,6 +3,8 @@
 require 'rack'
 require 'socket'
 require '../../lib/ruby/server'
+require '../../lib/ruby/utils/fileserve'
+require '../../lib/ruby/utils/erbserve'
 require 'lib/MarkUS_V3.0'
 require 'xml/smart'
 require 'fileutils'
@@ -25,9 +27,10 @@ run(
     process_out false
     cross_site_xhr true
     on resource do
-        p 'Processing description ....' if method :riddl => '*'
-        run GetDescription if method :riddl => '*'
-
+      run Riddl::Utils::FileServe, 'description.xml' if method :get => 'riddl-description'
+      on resource 'xsl' do
+        run Riddl::Utils::ERBServe, 'rng+xsl' if method :get => '*'
+      end
       on resource 'groups' do
         # Generating the ATOM feed with groups
         run GenerateFeed if method :get => '*'
@@ -41,13 +44,11 @@ run(
           run DeleteResource if method :delete => '*'
           run AddResource if method :post => 'subgroup'
 
-          on resource 'methods' do
-            run GetMethods if method :get => "*"
+          on resource 'operations' do
+            run GetOperations if method :get => "*"
             on resource do
-              on resource do
-                run GetInterface if method :get => 'input'
-                run GetInterface if method :get => 'output'
-              end
+              run GetInterface if method :get => 'input'
+              run GetInterface if method :get => 'output'
             end
           end
           on resource do # Subgroup-level
