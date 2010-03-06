@@ -74,22 +74,22 @@
     <attribute name="short"/>
     <ref name="description"/>
     <element name="domain:execute">
-      <ref name="execution-code"/>
+      <ref name="controlflow-code"/>
     </element>
     <element name="domain:compensate">
-      <ref name="execution-code"/>
+      <ref name="controlflow-code"/>
     </element>
     <element name="domain:undo">
-      <ref name="execution-code"/>
+      <ref name="controlflow-code"/>
     </element>
     <element name="domain:redo">
-      <ref name="execution-code"/>
+      <ref name="controlflow-code"/>
     </element>
     <element name="domain:suspend">
-      <ref name="execution-code"/>
+      <ref name="controlflow-code"/>
     </element>
     <element name="domain:abort">
-      <ref name="execution-code"/>
+      <ref name="controlflow-code"/>
     </element>
   </element>
 </define>

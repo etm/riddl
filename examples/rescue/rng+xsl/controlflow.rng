@@ -6,19 +6,128 @@
 
 
 <start combine="choice">
-  <element name="flow:execution-plan">
-    <ref name="execution-code"/>
+  <element name="flow:controlflow">
+    <ref name="controlflow-code"/>
   </element>
 </start>
 
+<define name="controlflow-code">
+  <zeroOrMore>
+    <choice>
+      <ref name="endpoint"/>
+      <ref name="context"/>
+      <ref name="manipulate"/>
+      <ref name="call"/>
+      <ref name="cycle"/>
+      <ref name="parallel"/>
+      <ref name="choose"/>
+      <ref name="critical"/>
+    </choice>
+  </zeroOrMore>
+</define>
+
+<define name="condition">
+<!-- {{{ --> 
+  <choice>
+    <element name="flow:condition">
+      <attribute name="test"/>
+      <attribute name="oparator"/>
+      <choice>
+        <attribute name="variable"/> <!-- could be context or endpoint -->
+        <attribute name="fix-value"/>
+      </choice>
+    </element>
+    <element name="flow:group">
+      <attribute name="oparator"/>
+      <ref name="condition"/> <!-- at least two conditions must be member of a group -->
+      <oneOrMore>
+        <ref name="condition"/>
+      </oneOrMore>
+    </element>
+  </choice>
+<!-- }}} -->
+</define>
+
+<define name="choose">
+<!-- {{{ --> 
+  <element name="flow:choose">
+    <oneOrMore>
+      <element name="flow:alternative">
+        <ref name="condition"/>
+        <ref name="controlflow-code"/>
+      </element>
+    </oneOrMore>
+    <optional>
+      <element name="flow:otherwise">
+        <ref name="controlflow-code"/>
+      </element>
+    </optional>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="parallel">
+<!-- {{{ --> 
+  <element name="flow:parallel">
+    <attribute name="type">
+      <choice>
+        <value>wait</value>
+        <value>nowait</value>
+      </choice>
+    </attribute>
+    <oneOrMore>
+      <element name="flow:branch">
+        <ref name="controlflow-code"/>
+      </element>
+    </oneOrMore>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="critical">
+<!-- {{{ --> 
+  <element name="flow:critical">
+    <attribute name="id"/>
+    <ref name="controlflow-code"/>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="cycle">
+<!-- {{{ --> 
+  <element name="flow:cycle">
+    <attribute name="id"/>
+    <ref name="condition"/>
+    <ref name="controlflow-code"/>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="manipulate">
+<!-- {{{ --> 
+  <element name="flow:manipulate">
+    <attribute name="target"/>
+    <attribute name="oparator"/> <!-- should also be able to interprete RegExp -->
+    <choice>
+      <attribute name="variable"/>
+      <attribute name="fix-value"/>
+      <attribute name="parameter-name"/>
+    </choice>
+  </element>
+<!-- }}} -->
+</define>
+
 <define name="context">
+<!-- {{{ --> 
   <element name="flow:context">
     <attribute name="id"/>
     <text/>
   </element> 
+<!-- }}} -->
 </define>
 
 <define name="constraint">
+<!-- {{{ --> 
   <element name="constraint"> 
     <attribute name="property"/>
     <attribute name="comparator"/>
@@ -30,29 +139,34 @@
       </group>
     </choice>
   </element>
+<!-- }}} -->
 </define>
 
-<!-- Define differen call-types: class-method, selection, particular and multiple -->
-<!-- {{{ --> 
 <define name="call">
+<!-- {{{ --> 
   <element name="flow:call">
     <attribute name="id"/>
     <attribute name="endpoint"/>
     <choice>
-      <attribute name="service-operation"/>
-      <attribute name="http-method"><!-- defualt will be get -->
-        <choice>
-          <value>get</value>
-          <value>post</value>
-          <value>put</value>
-          <value>delete</value>
-        </choice>
-      </attribute>
-      <attribute name="state-controlflow"/>
+      <group>
+        <attribute name="service-operation"/>
+        <attribute name="state-controlflow"/>
+      </group>
+      <group>
+        <attribute name="http-method">
+          <choice>
+            <value>get</value>
+            <value>post</value>
+            <value>put</value>
+            <value>delete</value>
+          </choice>
+        </attribute>
+        <attribute name="http-status"/>
+      </group>
     </choice>
     <optional>
-      <attribute name="group-by"/> <!-- Itempath holds the xpath to be used for generating the oportunities out of the input-message -->
-      <element name="flow:resource-id"> <!-- the uri of the resource from where the output was selected -->
+      <attribute name="group-by"/> <!-- holds the xpath to be used for generating the oportunities out of the input-message -->
+      <element name="flow:resource-id"> <!-- selector and target for the resource from which the output was selected -->
         <attribute name="xpath"/>
         <attribute name="endpoint"/>
       </element>
@@ -64,13 +178,12 @@
     </optional>
     <ref name="in-out"/>
   </element>
-</define>
 <!-- }}} -->
+</define>
 
 
-<!-- Define input and output -->
-<!-- {{{ -->
 <define name="in-out">
+<!-- {{{ -->
   <zeroOrMore>
     <element name="flow:input">
       <choice>
@@ -103,24 +216,19 @@
       </choice>
     </element>
   </zeroOrMore>
-</define>
+  <zeroOrMore>
+    <ref name="manipulate"/>
+  </zeroOrMore>
 <!-- }}} -->
+</define>
 
 <define name="endpoint">
+<!-- {{{ --> 
   <element name="flow:endpoint">
     <attribute name="id"/>
     <text/>
   </element>
-</define>
-
-<define name="execution-code">
-  <zeroOrMore>
-    <choice>
-      <ref name="context"/>
-      <ref name="call"/>
-      <ref name="endpoint"/>
-    </choice>
-  </zeroOrMore>
+<!-- }}} -->
 </define>
 
 </grammar>

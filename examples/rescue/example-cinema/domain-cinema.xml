@@ -117,22 +117,45 @@
       </rng:element>
 <!-- }}} -->
     </message>
+    <message name="order_popcorn">
+<!-- {{{ -->      
+      <rng:element name="reservation_id">
+        <caption lang="en">Reservation ID</caption>
+        <caption lang="de">Reservierungsnummer</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="quantity">
+        <caption lang="en">Quantity</caption>
+        <caption lang="de">Packungen</caption>
+        <rng:data type="positiveInteger"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+    <message name="popcorn_result">
+<!-- {{{ -->      
+      <rng:element name="price">
+        <caption lang="en">Preis</caption>
+        <caption lang="de">Price</caption>
+        <rng:data type="float"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
   </messages>
   <operations>
     <variables>
-      <flow:context id="something">some</flow:context>
+      <flow:context id="empty"/>
     </variables>
     <endpoints>
-  <!-- {{{ -->
+  <!-- {{{ --> 
       <flow:endpoint id="resource_path"/>
-      <flow:endpoint id="selected_cinema_uri">bla</flow:endpoint>
+      <flow:endpoint id="selected_cinema">bla</flow:endpoint>
       <flow:endpoint id="selector_service"/>
   <!-- }}} -->
     </endpoints>
     <operation name="search" short="search for avaliable shows">
 <!-- {{{ -->   
       <execute>
-        <flow:call id="find" endpoint="resource_scope" state-controlflow="search">
+        <flow:call id="find" endpoint="resource_scope" service-operation="search" state-controlflow="execute">
           <flow:input message="search_parameters"/>
           <flow:output message="list_shows"/>
         </flow:call>
@@ -147,28 +170,48 @@
     <operation name="search_and_book" short="search for shows, select show and book tickets">
 <!-- {{{ --> 
       <execute>
-        <flow:call id="call_find" endpoint="resource_scope" service-operation="search"/>
-        <flow:call id="call_select" endpoint="selector_service" http-method="get" group-by="//show">
-          <flow:resource-id xpath="//show/cinema_uri" endpoint="selected_cinema_uri"/>
+        <flow:call id="call_find" endpoint="resource_scope" service-operation="search" state-controlflow="execute"/>
+        <flow:call id="call_select" endpoint="selector_service" http-method="get" http-status="200" group-by="//show">
+          <flow:resource-id xpath="//show/cinema_uri" endpoint="selected_cinema"/>
           <flow:input message="list_shows"/>
           <flow:output message="selected_show"/>
         </flow:call>
-        <flow:call id="call_book" endpoint="selected_cinema_uri" service-operation="book"/>
+        <flow:call id="call_book" endpoint="selected_cinema_uri" service-operation="book" state-controlflow="execute"/>
       </execute>
       <compensate/>
       <undo/>
       <redo/>
       <suspend/>
       <abort/>
-<!-- }}} -->
+<!-- }}} --> 
     </operation>
     <operation name="book" short="book tickets for a given show and cinema">
 <!-- {{{ -->   
       <execute>
-        <flow:call id="call_book" endpoint="resource_scope" state-controlflow="book">
+        <flow:call id="call_book" endpoint="resource_scope" service-operation="popcorn" state-controlflow="execute">
           <flow:input message="book_tickets"/>
           <flow:output message="reservation_result"/>
         </flow:call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->       
+    </operation>
+    <operation name="order-popcorn" short="get popcorn to your seat">
+<!-- {{{ -->    
+      <execute>
+        <flow:choose>
+          <flow:alternative>
+            <flow:condition test="selected_cinema" oparator="!=" fix-value="nil"/>
+            <flow:call id="order_popcorn" endpoint="selected_cinema" service-operation="popcorn" state-controlflow="execute">
+              <flow:input message="popcorn_order"/>
+              <flow:output message="popcorn_result"/>
+            </flow:call>
+          </flow:alternative>
+        </flow:choose>
       </execute>
       <compensate/>
       <undo/>
