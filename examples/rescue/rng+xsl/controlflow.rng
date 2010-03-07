@@ -96,6 +96,11 @@
 <define name="cycle">
 <!-- {{{ --> 
   <element name="flow:cycle">
+    <zeroOrMore>
+      <element name="flow:iterated-context">
+        <attribute name="id"/>
+      </element>
+    </zeroOrMore>
     <attribute name="id"/>
     <ref name="condition"/>
     <ref name="controlflow-code"/>
