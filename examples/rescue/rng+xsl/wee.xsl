@@ -13,12 +13,25 @@
     <xsl:text>&#xa;&#xa;# Define controlflow&#xa;</xsl:text>
     <xsl:text>&#xa;&#xa;control flow do</xsl:text>
     <xsl:apply-templates select="/flow:controlflow/flow:*[(name() != 'endpoint') and (name() != 'context')]"/>
-    <xsl:text>&#xa;end</xsl:text>
+    <xsl:text>&#xa;end&#xa;</xsl:text>
   </xsl:template>
 
+  <xsl:template name="prefix-whitespaces">
+  <!-- {{{ -->
+    <xsl:param name="index" select="1"/>
+    <xsl:text>  </xsl:text>
+    <xsl:if test="(count(ancestor::flow:*)) &gt; $index">
+      <xsl:call-template name="prefix-whitespaces">
+        <xsl:with-param name="index" select="$index +1"/>
+      </xsl:call-template>
+    </xsl:if>
+    <!-- }}} -->
+  </xsl:template>
+  
   <xsl:template match="//flow:call">
     <!-- {{{ -->
     <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>activity :</xsl:text>
     <xsl:value-of select="@id"/>
     <xsl:text>, :call, :</xsl:text>
@@ -70,17 +83,35 @@
       </xsl:if>
     </xsl:for-each>
     <xsl:apply-templates select="child::flow:*[name() != 'input']"/>
-    <xsl:text>&#xa;end</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>end</xsl:text>
     <!-- }}} -->
   </xsl:template>
-  
+
   <xsl:template match="//flow:output">
     <!-- {{{ -->
     <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:variable name="context" select="@context"/>
     <xsl:choose>
       <xsl:when test="string(@name) and string(@context)">
-        <xsl:text>@</xsl:text>
-        <xsl:value-of select="@context"/>
+        <xsl:choose>
+          <xsl:when test="ancestor::flow:cycle/flow:iterated-context[@id = $context]">
+            <xsl:variable name="cycle" select="ancestor::flow:cycle[flow:iterated-context[@id = $context]]"/>
+            <xsl:text>"@</xsl:text>
+            <xsl:value-of select="$cycle/@id"/>
+            <xsl:text>_</xsl:text>
+            <xsl:value-of select="@context"/>
+            <xsl:text>_#{@</xsl:text>
+            <xsl:value-of select="$cycle/@id"/>
+            <xsl:text>_iterator}".to_sym</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text>@</xsl:text>
+            <xsl:value-of select="@context"/>
+          </xsl:otherwise>
+        </xsl:choose>
         <xsl:text> = </xsl:text>
         <xsl:value-of select="@name"/>
       </xsl:when>
@@ -138,6 +169,7 @@
   <xsl:template match="//flow:manipulate">
     <!-- {{{ --> 
     <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
     <xsl:choose>
       <xsl:when test="string(@parameter-name)">
         <xsl:text>@</xsl:text>
@@ -150,7 +182,9 @@
       <xsl:otherwise>
         <xsl:text>activity :</xsl:text>
         <xsl:value-of select="@id"/>
-        <xsl:text>, :manipulate do&#xa;@</xsl:text>
+        <xsl:text>, :manipulate do&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:text>  @</xsl:text>
         <xsl:value-of select="@target"/>
         <xsl:text> </xsl:text>
         <xsl:value-of select="@operator"/>
@@ -166,7 +200,9 @@
             </xsl:call-template>
           </xsl:when>
         </xsl:choose>
-        <xsl:text>&#xa;end</xsl:text>
+        <xsl:text>&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:text>end</xsl:text>
       </xsl:otherwise>
     </xsl:choose>
     <!-- }}} --> 
@@ -174,72 +210,117 @@
   
   <xsl:template match="//flow:critical">
     <!-- {{{ -->
-    <xsl:text>&#xa;critical(:</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>critical(:</xsl:text>
     <xsl:value-of select="@id"/>
     <xsl:text>) do </xsl:text>
     <xsl:apply-templates select="child::flow:*[(name() != 'endpoint') and (name() != 'context')]"/>
-    <xsl:text>&#xa;end</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>end</xsl:text>
     <!-- }}} -->
   </xsl:template>
   
   <xsl:template match="//flow:parallel">
     <!-- {{{ -->
     <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>parallel (:</xsl:text>
     <xsl:value-of select="@type"/>
     <xsl:text>)</xsl:text>
     <xsl:apply-templates select="child::flow:branch"/>
-    <xsl:text>&#xa;end</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>end</xsl:text>
     <!-- }}} -->
   </xsl:template>
   
   <xsl:template match="//flow:branch">
     <!-- {{{ --> 
-    <xsl:text>&#xa;parallel_branch do</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>parallel_branch do</xsl:text>
     <xsl:apply-templates select="child::flow:*[(name() != 'endpoint') and (name() != 'context')]"/>
-    <xsl:text>&#xa;end</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>end</xsl:text>
     <!-- }}} -->
   </xsl:template>
   
   <xsl:template match="//flow:cycle">
     <!-- {{{ -->
     <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>context :</xsl:text>
+    <xsl:value-of select="@id"/>
+    <xsl:variable name="cycle_id" select="@id"/>
+    <xsl:text>_iterator => 1&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>cycle(</xsl:text>
     <xsl:apply-templates select="child::flow:group"/>
     <xsl:apply-templates select="child::flow:condition"/>
     <xsl:text>) do </xsl:text>
-    <xsl:apply-templates select="child::flow:*[(name() != 'group') and (name() != 'condition') and (name() != 'endpoint') and (name() != 'context')]"/>
-    <xsl:text>&#xa;end</xsl:text>
+    <xsl:for-each select="child::flow:iterated-context">
+      <xsl:text>&#xa;</xsl:text>
+      <xsl:call-template name="prefix-whitespaces"/>
+      <xsl:text>context "</xsl:text>
+      <xsl:value-of select="$cycle_id"/>
+      <xsl:text>_</xsl:text>
+      <xsl:value-of select="@id"/>
+      <xsl:text>_#{@</xsl:text>
+      <xsl:value-of select="$cycle_id"/>
+      <xsl:text>_iterator}".to_sym => nil</xsl:text>
+    </xsl:for-each>
+    <xsl:apply-templates select="child::flow:*[(name() != 'group') and (name() != 'condition') and (name() != 'endpoint') and (name() != 'context') and (name() != 'iterated-context')]"/>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>  @</xsl:text>
+    <xsl:value-of select="@id"/>
+    <xsl:text>_iterator++</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>end</xsl:text>
     <!-- }}} -->
   </xsl:template>
 
   <xsl:template match="//flow:choose">
     <!-- {{{ -->
     <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>choose do</xsl:text>
     <xsl:apply-templates select="child::flow:alternative"/>
     <xsl:apply-templates select="child::flow:otherwise"/>
-    <xsl:text>&#xa;end</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>end</xsl:text>
     <!-- }}} -->
   </xsl:template>
   
   <xsl:template match="//flow:alternative">
     <!-- {{{ -->
     <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>alternative(</xsl:text>
     <xsl:apply-templates select="child::flow:group"/>
     <xsl:apply-templates select="child::flow:condition"/>
     <xsl:text>) do </xsl:text>
     <xsl:apply-templates select="child::flow:*[(name() != 'group') and (name() != 'condition') and (name() != 'endpoint') and (name() != 'context')]"/>
-    <xsl:text>&#xa;end</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>end</xsl:text>
     <!-- }}} -->
   </xsl:template>
   
   <xsl:template match="//flow:otherwise">
     <!-- {{{ -->
-    <xsl:text>&#xa;otherwise do</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>otherwise do</xsl:text>
     <xsl:apply-templates select="child::flow:*[(name() != 'endpoint') and (name() != 'context')]"/>
-    <xsl:text>&#xa;end</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>end</xsl:text>
     <!-- }}} -->
   </xsl:template>
   
@@ -280,6 +361,7 @@
   <xsl:template match="//flow:context">
     <!-- {{{ -->
     <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>context :</xsl:text><xsl:value-of select="@id"/><xsl:text> => </xsl:text>
     <xsl:call-template name="is_string">
       <xsl:with-param name="v" select="text()"/>
@@ -290,7 +372,7 @@
   <!-- Template for endpoints variables -->
   <xsl:template match="//flow:endpoint">
     <!-- {{{ -->
-    <xsl:text>&#xa;</xsl:text>
+    <xsl:text>&#xa;  </xsl:text>
     <xsl:text>endpoint :</xsl:text><xsl:value-of select="@id"/><xsl:text> => '</xsl:text><xsl:value-of select="."/>
     <!-- }}} -->
   </xsl:template>
@@ -310,59 +392,5 @@
       </xsl:otherwise>
     </xsl:choose>
     <!-- }}} -->
-  </xsl:template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- Template for endpoints variables -->
-  <xsl:template match="//activity">
-
-    <xsl:text>activity :</xsl:text><xsl:value-of select="@id"/>, :<xsl:value-of select="@method"/><xsl:text>, :e</xsl:text><xsl:value-of select="substring(@id,2)"/>
-    <xsl:apply-templates select="input"/>
-    <xsl:text> do |</xsl:text>
-    <xsl:for-each select="./context">
-      <xsl:text></xsl:text><xsl:value-of select="@parameter"/>
-      <xsl:if test="position()!=last()"><xsl:text>, </xsl:text></xsl:if>
-    </xsl:for-each>
-    <xsl:text>|</xsl:text>
-    <xsl:for-each select="./context">
-      <xsl:text>&#xa; </xsl:text><xsl:text>@</xsl:text><xsl:value-of select="@id"/><xsl:text> = </xsl:text><xsl:value-of select="@parameter"/>
-
-
-      <xsl:text>&#xa; puts </xsl:text><xsl:text>@</xsl:text><xsl:value-of select="@id"/>
-      <xsl:text>&#xa; puts </xsl:text><xsl:value-of select="@parameter"/>
-
-
-    </xsl:for-each>
-    <xsl:text>&#xa;end&#xa;&#xa;</xsl:text>
-  </xsl:template>
-
-  <!-- Template for activity inputs -->
-  <xsl:template match="input">
-    <xsl:text>, :</xsl:text><xsl:value-of select="@name"/><xsl:text> => @</xsl:text><xsl:value-of select="@context"/>
   </xsl:template>
 </xsl:stylesheet>

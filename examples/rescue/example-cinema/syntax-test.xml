@@ -11,19 +11,18 @@
   <context id="approved">false</context>
 
   <cycle id="cycle_persons">
+    <iterated-context id="hotel"/>
+    <iterated-context id="airline"/>
     <condition test="persons" operator="&gt;" fix-value="0"/>
     <parallel type="wait">
       <branch>
         <endpoint id="epAirBook">http://air.org/book</endpoint>
         <endpoint id="epAirPayk">http://air.org/pay</endpoint>
-        <context id="airline"/>
         <critical id="airbooking">
           <call id="a1_1" endpoint="epAirBook" http-method="post" http-status="201">
             <input name="from" context="from"/>
             <input name="to" context="to"/>
             <output name="id" context="airline"/>
-            <output name="ud" context="airline"/>
-            <output name="od" context="airline"/>
           </call>
           <call id="a1_2" endpoint="epAirPay" http-method="post" http-status="200">
             <input name="airline" context="airline"/>
@@ -35,7 +34,6 @@
       <branch>
         <endpoint id="epHotelBook">http://hotel.org/book</endpoint>
         <endpoint id="epHotelBook">http://hotel.org/pay</endpoint>
-        <context id="hotel"/>
         <critical id="hotelbooking">
           <call id="a2_1" endpoint="epHotelBook" http-method="post" http-status="201">
             <input name="to" context="to"/>
