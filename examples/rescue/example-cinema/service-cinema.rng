@@ -1,17 +1,5 @@
 <?xml version="1.0"?>
-<grammar  xmlns="http://relaxng.org/ns/structure/1.0"
-          xmlns:rng="http://relaxng.org/ns/structure/1.0"
-          xmlns:flow="http://rescue.org/ns/controlflow/0.2"
-          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
-
-
-<start combine="choice">
-  <element name="flow:controlflow">
-    <ref name="controlflow-code"/>
-  </element>
-</start>
-
-<define name="controlflow-code">
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:service="http://rescue.org/ns/service/0.2" xmlns:flow="http://rescue.org/ns/controlflow/0.2" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:domain="http://rescue.org/ns/domain/0.2" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"><define name="controlflow-code">
   <zeroOrMore>
     <choice>
       <ref name="endpoint"/>
@@ -24,9 +12,7 @@
       <ref name="critical"/>
     </choice>
   </zeroOrMore>
-</define>
-
-<define name="condition">
+</define><define name="condition">
 <!-- {{{ --> 
   <choice>
     <element name="flow:condition">
@@ -46,9 +32,7 @@
     </element>
   </choice>
 <!-- }}} -->
-</define>
-
-<define name="choose">
+</define><define name="choose">
 <!-- {{{ --> 
   <element name="flow:choose">
     <oneOrMore>
@@ -64,9 +48,7 @@
     </optional>
   </element>
 <!-- }}} -->
-</define>
-
-<define name="parallel">
+</define><define name="parallel">
 <!-- {{{ --> 
   <element name="flow:parallel">
     <attribute name="type">
@@ -82,18 +64,14 @@
     </oneOrMore>
   </element>
 <!-- }}} -->
-</define>
-
-<define name="critical">
+</define><define name="critical">
 <!-- {{{ --> 
   <element name="flow:critical">
     <attribute name="id"/>
     <ref name="controlflow-code"/>
   </element>
 <!-- }}} -->
-</define>
-
-<define name="cycle">
+</define><define name="cycle">
 <!-- {{{ --> 
   <element name="flow:cycle">
     <attribute name="id"/>
@@ -101,9 +79,7 @@
     <ref name="controlflow-code"/>
   </element>
 <!-- }}} -->
-</define>
-
-<define name="manipulate">
+</define><define name="manipulate">
 <!-- {{{ --> 
   <element name="flow:manipulate">
     <attribute name="id"/>
@@ -116,18 +92,14 @@
     </choice>
   </element>
 <!-- }}} -->
-</define>
-
-<define name="context">
+</define><define name="context">
 <!-- {{{ --> 
   <element name="flow:context">
     <attribute name="id"/>
     <text/>
   </element> 
 <!-- }}} -->
-</define>
-
-<define name="constraint">
+</define><define name="constraint">
 <!-- {{{ --> 
   <element name="constraint"> 
     <attribute name="property"/>
@@ -141,9 +113,7 @@
     </choice>
   </element>
 <!-- }}} -->
-</define>
-
-<define name="call">
+</define><define name="call">
 <!-- {{{ --> 
   <element name="flow:call">
     <attribute name="id"/>
@@ -180,12 +150,8 @@
     <ref name="in-out"/>
   </element>
 <!-- }}} -->
-</define>
-
-
-<define name="in-out">
+</define><define name="in-out">
 <!-- {{{ -->
-  <optional>
   <zeroOrMore>
     <element name="flow:input">
       <choice>
@@ -194,15 +160,12 @@
           <attribute name="name"/>
           <choice>
             <attribute name="context"/>
-            <attribute name="fix-value"/>
             <attribute name="message-parameter"/>
           </choice>
         </group>
       </choice>
     </element>
   </zeroOrMore>
-  </optional>
-  <optional>
   <zeroOrMore>
     <element name="flow:output">
       <choice>
@@ -215,25 +178,17 @@
           </choice>
         </group>
         <group>
-          <choice>
-            <attribute name="context"/>
-            <attribute name="fix-value"/>
-          </choice>
+          <attribute name="context"/>
           <attribute name="message-parameter"/>
         </group>
       </choice>
     </element>
   </zeroOrMore>
-  </optional>
-  <optional>
   <zeroOrMore>
     <ref name="manipulate"/>
   </zeroOrMore>
-  </optional>
 <!-- }}} -->
-</define>
-
-<define name="endpoint">
+</define><define name="endpoint">
 <!-- {{{ --> 
   <element name="flow:endpoint">
     <attribute name="id"/>
@@ -242,4 +197,34 @@
 <!-- }}} -->
 </define>
 
-</grammar>
+<start><element name="service:service-description">
+<element name="service:properties">
+	<element name="service:longitude"><rng:data xmlns="http://rescue.org/ns/domain/0.2" type="positiveInteger"/></element>
+	<element name="service:latitude"><rng:data xmlns="http://rescue.org/ns/domain/0.2" type="positiveInteger"/></element>
+</element>
+<element name="service:operations">
+	<element name="service:search">
+		<element name="service:execute"><ref name="controlflow-code"/></element>
+		<element name="service:compensate"><ref name="controlflow-code"/></element>
+		<element name="service:undo"><ref name="controlflow-code"/></element>
+		<element name="service:redo"><ref name="controlflow-code"/></element>
+		<element name="service:suspend"><ref name="controlflow-code"/></element>
+		<element name="service:abort"><ref name="controlflow-code"/></element>
+	</element>
+	<element name="service:book">
+		<element name="service:execute"><ref name="controlflow-code"/></element>
+		<element name="service:compensate"><ref name="controlflow-code"/></element>
+		<element name="service:undo"><ref name="controlflow-code"/></element>
+		<element name="service:redo"><ref name="controlflow-code"/></element>
+		<element name="service:suspend"><ref name="controlflow-code"/></element>
+		<element name="service:abort"><ref name="controlflow-code"/></element>
+	</element>
+	<element name="service:popcorn">
+		<element name="service:execute"><ref name="controlflow-code"/></element>
+		<element name="service:compensate"><ref name="controlflow-code"/></element>
+		<element name="service:undo"><ref name="controlflow-code"/></element>
+		<element name="service:redo"><ref name="controlflow-code"/></element>
+		<element name="service:suspend"><ref name="controlflow-code"/></element>
+		<element name="service:abort"><ref name="controlflow-code"/></element>
+	</element>
+</element></element></start></grammar>

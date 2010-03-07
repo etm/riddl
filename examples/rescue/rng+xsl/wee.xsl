@@ -41,9 +41,9 @@
       <xsl:text>}</xsl:text>
     </xsl:if>
     <xsl:if test="string(@group-by)">
-      <xsl:text>, group = {:group_by => '</xsl:text>
+      <xsl:text>, group = {:group_selector => '</xsl:text>
       <xsl:value-of select="@group-by"/>
-      <xsl:text>', :uri_xpath => </xsl:text>
+      <xsl:text>', :uri_selector => </xsl:text>
       <xsl:value-of select="child::flow:resource-id/@xpath"/>
       <xsl:text>', :target_endpoint => </xsl:text>
       <xsl:value-of select="child::flow:resource-id/@endpoint"/>
@@ -84,22 +84,26 @@
         <xsl:text> = </xsl:text>
         <xsl:value-of select="@name"/>
       </xsl:when>
-      <xsl:when test="string(@name) and string(@message-parameter)">
-      </xsl:when>
-      <xsl:when test="string(@fix-value) and string(@message-parameter)">
-        <xsl:text>output[:</xsl:text>
-        <xsl:value-of select="@message-parameter"/>
-        <xsl:text>] = </xsl:text>
-        <xsl:call-template name="is_string">
-          <xsl:with-param name="v" select="@fix-value"/>
-        </xsl:call-template>
-      </xsl:when>
-      <xsl:when test="string(@context) and string(@message-parameter)">
-        <xsl:text>output[:</xsl:text>
-        <xsl:value-of select="@message-parameter"/>
-        <xsl:text>] = </xsl:text>
+      <xsl:when test="string(@message-parameter)">
         <xsl:text>@</xsl:text>
-        <xsl:value-of select="@context"/>
+        <xsl:value-of select="parent::flow:call/@id"/>
+        <xsl:text>_</xsl:text>
+        <xsl:value-of select="@message-parameter"/>
+        <xsl:text> = </xsl:text>
+        <xsl:choose>
+          <xsl:when test="string(@name)">
+            <xsl:value-of select="@name"/>
+          </xsl:when>
+          <xsl:when test="string(@fix-value)">
+            <xsl:call-template name="is_string">
+              <xsl:with-param name="v" select="@fix-value"/>
+            </xsl:call-template>
+          </xsl:when>
+          <xsl:when test="string(@context)">
+            <xsl:text>@</xsl:text>
+            <xsl:value-of select="@context"/>
+          </xsl:when>
+        </xsl:choose>
       </xsl:when>
     </xsl:choose>
     <!-- }}} -->

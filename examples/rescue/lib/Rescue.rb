@@ -110,12 +110,14 @@ class GetInterface < Riddl::Implementation
         return
       end
       s = nil
+      # Select input of all state-controlflows with an given operation and remove all call-outputs
       if @p[0].name == "input"
         s = XML::Smart.string("<rng:element name='input-message' xmlns:rng='http://relaxng.org/ns/structure/1.0'/>")
         input.delete_if{|k,v| output.key?(k)}
         params = input
       end
       
+      # Select output of all state-controlflows with an given operation and remove all call-inputs
       if @p[0].name == "output"
         s = XML::Smart.string("<rng:element name='output-message' xmlns:rng='http://relaxng.org/ns/structure/1.0'/>")
         output.delete_if{|k,v| input.key?(k)}
