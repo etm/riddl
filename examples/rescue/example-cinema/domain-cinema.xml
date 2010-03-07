@@ -138,30 +138,26 @@
         <caption lang="de">Price</caption>
         <rng:data type="float"/>
       </rng:element>
-<!-- }}} -->
-    </message>
-    <message name="undo_booking_input">
-<!-- {{{ -->      
-      <rng:element name="reservation_id">
-        <caption lang="en">Reservation ID</caption>
-        <caption lang="de">Reservierungsnummer</caption>
-        <rng:data type="string"/>
-      </rng:element>
-      <rng:element name="accept_penalty">
-        <caption lang="en">Penalty payment accepted</caption>
-        <caption lang="de">Strafzahlung akzeptieren</caption>
-        <rng:data type="boolean"/>
-      </rng:element>
-<!-- }}} -->
-    </message>
-    <message name="undo_booking_output">
-<!-- {{{ -->      
-      <rng:element name="price">
-        <caption lang="en">Preis</caption>
-        <caption lang="de">Price</caption>
+      <rng:element name="order_number">
+        <caption lang="en">Bestellnummer</caption>
+        <caption lang="de">Order number</caption>
         <rng:data type="float"/>
       </rng:element>
 <!-- }}} -->
+    </message>
+    <message name="undo_popcorn">
+<!-- {{{ -->      
+      <rng:element name="order_number">
+        <caption lang="en">Bestellnummer</caption>
+        <caption lang="de">Order number</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="quantity">
+        <caption lang="en">Quantity</caption>
+        <caption lang="de">Packungen</caption>
+        <rng:data type="boolean"/>
+      </rng:element>
+<!-- }}} --> 
     </message>
   </messages>
   <operations>
@@ -226,18 +222,17 @@
     <operation name="order_popcorn" short="get popcorn to your seat">
 <!-- {{{ -->    
       <execute>
-        <flow:choose>
-          <flow:alternative>
-            <flow:condition test="selected_cinema" operator="!=" fix-value="nil"/>
-            <flow:call id="order_popcorn" endpoint="selected_cinema" service-operation="popcorn" state-controlflow="execute">
-              <flow:input message="popcorn_order"/>
-              <flow:output message="popcorn_result"/>
-            </flow:call>
-          </flow:alternative>
-        </flow:choose>
+        <flow:call id="order_popcorn" endpoint="selected_cinema" service-operation="popcorn" state-controlflow="execute">
+          <flow:input message="popcorn_order"/>
+          <flow:output message="popcorn_result"/>
+        </flow:call>
       </execute>
       <compensate/>
-      <undo/>
+      <undo>
+        <flow:call id="order_popcorn" endpoint="selected_cinema" service-operation="popcorn" state-controlflow="undo">
+          <flow:input message="popcorn_undo"/>
+        </flow:call>
+      </undo>
       <redo/>
       <suspend/>
       <abort/>

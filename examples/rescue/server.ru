@@ -12,8 +12,8 @@ require 'pp'
 #require 'logger'
 
 
-require 'lib/rescue'
-require 'lib/execution'
+require 'lib/Rescue'
+require 'lib/Execution'
 
 use Rack::ShowStatus
 
