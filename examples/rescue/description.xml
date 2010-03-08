@@ -90,6 +90,7 @@
         <resource relative="operations">
           <get in="*" out="xml"/>
           <resource>
+            <get in="*" out="xml"/>
             <get in="input" out="schema"/>
             <get in="output" out="schema"/>
           </resource>

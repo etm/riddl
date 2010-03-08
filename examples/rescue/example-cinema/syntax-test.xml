@@ -1,69 +1,83 @@
 <?xml version="1.0"?>
 <controlflow xmlns="http://rescue.org/ns/controlflow/0.2">
-  <endpoint id="epApproval">http://company.org/approval</endpoint>
+  <endpoint id="e01">http://company.org/approval</endpoint>
+  <endpoint id="e02">http://company.org/approval</endpoint>
 
-  <context id="persons">3</context>
-  <context id="creditcard">Visa-902384234890</context>
-  <context id="from">Vienna</context>
-  <context id="to">Dublin</context>
-  <context id="sum"/>
-
-  <context id="approved">false</context>
-
-  <cycle id="cycle_persons">
-    <iterated-context id="hotel"/>
-    <iterated-context id="airline"/>
-    <condition test="persons" operator="&gt;" fix-value="0"/>
-    <parallel type="wait">
-      <branch>
-        <endpoint id="epAirBook">http://air.org/book</endpoint>
-        <endpoint id="epAirPayk">http://air.org/pay</endpoint>
-        <critical id="airbooking">
-          <call id="a1_1" endpoint="epAirBook" http-method="post" http-status="201">
-            <input name="from" context="from"/>
-            <input name="to" context="to"/>
-            <output name="id" context="airline"/>
-          </call>
-          <call id="a1_2" endpoint="epAirPay" http-method="post" http-status="200">
-            <input name="airline" context="airline"/>
-            <input name="creditcard" context="creditcard"/>
-            <manipulate id="add_ticket_price" target="sum" operator="+" parameter-name="amount"/>
-          </call>
-        </critical>
-      </branch>
-      <branch>
-        <endpoint id="epHotelBook">http://hotel.org/book</endpoint>
-        <endpoint id="epHotelBook">http://hotel.org/pay</endpoint>
-        <critical id="hotelbooking">
-          <call id="a2_1" endpoint="epHotelBook" http-method="post" http-status="201">
-            <input name="to" context="to"/>
-            <output name="id" context="hotel"/>
-          </call>
-          <call id="a1_2" endpoint="epHotelPay" http-method="post" http-status="200">
-            <input name="hotel" context="hotel"/>
-            <input name="creditcard" context="creditcard"/>
-            <manipulate id="add_hotel_price" target="sum" operator="+" parameter-name="amount"/>
-          </call>
-        </critical>
-      </branch>
-    </parallel>
-    <manipulate id="reduce_persons" target="persons" operator="-" fix-value="1"/>
-    <manipulate id="bla" target="blu" operator="+" fix-value="bli"/>
-    <manipulate id="bla" target="blu" operator="+" variable="bli"/>
+  <context id="c01">3</context>
+  <context id="c02">Visa-902384234890</context>
+  <context id="c03">true</context>
+  
+  <cycle id="cycle_01">
+    <group connector="||">
+      <condition test="fix_value_number" comparator="&gt;" fix-value="0"/>
+      <group connector="&amp;&amp;">
+        <condition test="context_value" comparator="&lt;" variable="c01"/>
+        <condition test="boolean" comparator="some_op" fix-value="true"/>
+      </group>
+    </group>
+    <cycle id="cycle_02">
+      <condition test="fix_value_string" comparator="contains" fix-value="string_value"/>
+      <iterated-context id="ic02"/>
+      <parallel type="wait">
+        <branch>
+          <endpoint id="epAirPayk">http://air.org/pay</endpoint>
+          <critical id="critical">
+            <call id="input_call" endpoint="e01" http-method="post" http-status="201">
+              <input name="context" context="c_name"/>
+              <input name="iterated_context" context="ic02"/>
+              <input name="mp" message-parameter="mp_name"/>
+            </call>
+            <call id="input_call_fix" endpoint="e01" http-method="post" http-status="201">
+              <input name="fix_number" fix-value="1"/>
+              <input name="fix_string" fix-value="string"/>
+              <input name="fix_boolean" fix-value="true"/>
+            </call>
+          </critical>
+        </branch>
+        <branch>
+          <cycle id="cycle_03">
+            <condition test="cycle_03_iterator" comparator="==" fix-value="5"/>
+            <iterated-context id="ic_output_03"/>
+            <critical id="critical_01">
+              <call id="output_context_call" endpoint="output" http-method="post" http-status="201">
+                <output name="c_name" context="oContext" />
+                <output context="oProperty" property="p_name"/>
+                <output context="ic_output_03" property="p_name"/>
+              </call>
+              <call id="output_mp_call" endpoint="output" http-method="post" http-status="201">
+                <output message-parameter="mp_c" context="c_name"/>
+                <output message-parameter="mp_c" context="ic02"/>
+                <output message-parameter="mp_p" property="p_name"/>
+                <output message-parameter="mp_rep" name="response"/>
+                <output message-parameter="mp_fix_num" fix-value="2"/>
+                <output message-parameter="mp_fix_string" fix-value="string"/>
+                <output message-parameter="mp_fix_bool" fix-value="true"/>
+              </call>
+            </critical>
+          </cycle>
+        </branch>
+      </parallel>
+      <manipulate id="man_ic_02" target="ic02" operator="-=" fix-value="1"/>
+      <manipulate id="man_something" target="something" operator="=" variable="ic01"/>
+    </cycle>
   </cycle>
   <choose>
     <alternative>
-      <group operator="and">
-        <condition test="airline" operator="!=" fix-value="crash-for-sure"/>
-        <condition test="sum" operator="&lt;" fix-value="1000"/>
-        <group operator="or">
-          <condition test="airline" operator="==" fix-value="aeroflot"/>
-          <condition test="airline" operator="==" fix-value="rayenair"/>
+      <group connector="and">
+        <condition test="context_string" comparator="!=" fix-value="crash-for-sure"/>
+        <condition test="context_boolean" comparator="==" fix-value="false"/>
+        <condition test="context_number" comparator="&gt;" fix-value="5"/>
+        <group connector="or">
+          <condition test="context" comparator="==" variable="context_context"/>
+          <condition test="context_contains" comparator="contains" fix-value="context_search_string"/>
         </group>
       </group>
-        <call id="a3" endpoint="approval" http-method="get" http-status="200">
+        <call id="a3" endpoint="additional_costs" http-method="get" http-status="200">
           <input name="sum" context="sum"/>
-          <output name="approved" context="approved"/>
+          <output target="mes_name" operator="+=" name="costs"/>
+          <output target="mes_con" operator="+=" context="con_costs"/>
+          <output target="mes_prop" operator="+=" property="prop_costs"/>
+          <output target="mes_fix" operator="+=" fix-value="true"/>
         </call>
     </alternative>
   </choose>

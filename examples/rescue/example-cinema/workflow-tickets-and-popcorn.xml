@@ -14,6 +14,8 @@ for each couple if they are cheaper the 10 EUR together
 
   <!-- Context derived from Cinema-domain (variables) -->
   <context id="a01_empty"/>
+  <context id="a01_carpark">true</context>
+  <context id="property_test"/>
   
   <!-- Context derived from activity a01 (messages) -->
   <context id="a01_title">Alice in Wonderland</context>
@@ -30,6 +32,7 @@ for each couple if they are cheaper the 10 EUR together
   <context id="a02_price"/>
 
   <call id="a01" endpoint="a01_resource_path" service-operation="book_and_search" state-controlflow="execute">
+    <constraint property="carpark" comparator="==" context="a01_carpark"/>
     <input name="title" context="a01_title"/>
     <input name="date" context="a01_date"/>
     <input name="preferred_time" context="a01_preferred_time"/>
@@ -38,6 +41,7 @@ for each couple if they are cheaper the 10 EUR together
     <output name="starting_time" context="a01_starting_time"/>
     <output name="hall" context="a01_hall"/>
     <output name="reservation_id" context="a01_reservation-id"/>
+    <output property="carpark" context="property_test"/>
   </call>
 
   <manipulate id="man_01" target="a02_quantity" operator="/" fix-value="2"/>
@@ -50,7 +54,7 @@ for each couple if they are cheaper the 10 EUR together
 
   <choose>
     <alternative>
-      <condition test="a02_price" operator=">" fix-value="10"/>
+      <condition test="a02_price" comparator="&gt;" fix-value="10"/>
       <call id="a03" endpoint="a01_selected_cinema" service-operation="order_popcorn" state-controlflow="undo"> 
         <input name="reservation_id" context="a01_reservation_id"/>
         <input name="quantity" context="a02_quantity"/>

@@ -5,6 +5,7 @@
   <properties>
     <longitude>4711</longitude>
     <latitude>0815</latitude>
+    <carpark>true</carpark>
   </properties>
   <operations>
     <search>
