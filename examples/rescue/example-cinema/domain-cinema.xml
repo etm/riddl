@@ -15,6 +15,11 @@
       <caption lang="de">Breitengrad</caption>
       <rng:data type="positiveInteger"/>
     </rng:element>
+    <rng:element name="carpark">
+      <caption lang="en">Carpark</caption>
+      <caption lang="de">Parkplatz</caption>
+      <rng:data type="boolean"/>
+    </rng:element>
 <!-- }}} -->
   </properties>
   <messages>
@@ -207,13 +212,18 @@
     <operation name="book" short="book tickets for a given show and cinema">
 <!-- {{{ -->   
       <execute>
-        <flow:call id="call_book" endpoint="resource_scope" service-operation="book" state-controlflow="execute">
+        <flow:call id="book" endpoint="resource_scope" service-operation="book" state-controlflow="execute">
           <flow:input message="book_tickets"/>
           <flow:output message="reservation_result"/>
         </flow:call>
       </execute>
       <compensate/>
-      <undo/>
+      <undo>
+        <flow:call id="book" endpoint="resource_scope" service-operation="book" state-controlflow="undo">
+          <flow:input message="book_tickets"/>
+          <flow:output message="reservation_result"/>
+        </flow:call>
+      </undo>
       <redo/>
       <suspend/>
       <abort/>

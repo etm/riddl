@@ -47,6 +47,7 @@ run(
           on resource 'operations' do
             run GetOperations if method :get => "*"
             on resource do
+              run GetInterface if method :get => '*'
               run GetInterface if method :get => 'input'
               run GetInterface if method :get => 'output'
             end

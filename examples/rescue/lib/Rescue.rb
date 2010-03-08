@@ -1,10 +1,13 @@
 class GetOperations < Riddl::Implementation
   def response
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-    schema = RNGSchema.new
-
+    schema = RNGSchema.new(true)
+    ret = XML::Smart.string("<operations xmlns=\"http://rescue.org/ns/rescue/0.2\"/>")
+    xml.find("/domain:domain-description/domain:operations/domain:operation", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |o|
+      ret.root.add("operation", {"name" => o.attributes.get_attr("name")})
+    end
     schema.append_schemablock(xml.find("/domain:domain-description/domain:operations", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).first)
-    Riddl::Parameter::Complex.new("xml","text/xml", schema.to_s)
+    Riddl::Parameter::Complex.new("xml","text/xml", ret.to_s)
   end
 end
 
@@ -94,13 +97,16 @@ end
 class GetInterface < Riddl::Implementation
 
   def response
-    schema = RNGSchema.new
+    schema = RNGSchema.new(false)
     p = nil
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     params = nil
 
 
-    if @p[0].name == "properties"
+    if @p[0] == nil # If no parameter is given, the defition of the service-operation is requested
+      schema = XML::Smart.string("<state-sontrolflow xmlns=\"http://rescue.org/ns/controlflow/0.2\" xmlns:flow=\"http://rescue.org/ns/controlflow/0.2\"/>")
+      schema.root.add(xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{@r[3]}']", {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
+    elsif @p[0].name == "properties"
       schema.append_schemablock(xml.find("/domain:domain-description/domain:properties", {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
     else 
       input = collect_input(@r[3], xml)
@@ -187,8 +193,10 @@ end
 class RNGSchema
   @__schema = nil
   @__start_node = nil
+  @__remove_cpations = nil
 
-  def initialize()
+  def initialize(remove_captions)
+    @__remove_captions = remove_captions
     @__schema = XML::Smart.string("<grammar/>")
     @__schema.root.attributes.add("xmlns", "http://relaxng.org/ns/structure/1.0")
     @__schema.root.attributes.add("xmlns:rng", "http://relaxng.org/ns/structure/1.0")
@@ -203,7 +211,7 @@ class RNGSchema
 
   def append_schemablock(schema_block)
     captions = schema_block.find("//domain:caption", {"domain" => "http://rescue.org/ns/domain/0.2"})
-    captions.delete_if!{true} if captions != nil
+    captions.delete_if!{true} if captions != nil and @__remove_captions == true
     @__start_node.add(schema_block)
   end
 

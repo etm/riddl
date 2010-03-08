@@ -1,5 +1,38 @@
 <?xml version="1.0"?>
-<grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:service="http://rescue.org/ns/service/0.2" xmlns:flow="http://rescue.org/ns/controlflow/0.2" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:domain="http://rescue.org/ns/domain/0.2" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"><define name="controlflow-code">
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:service="http://rescue.org/ns/service/0.2" xmlns:flow="http://rescue.org/ns/controlflow/0.2" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:domain="http://rescue.org/ns/domain/0.2" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+<start><element name="service:service-description">
+<element name="service:properties">
+	<element name="service:longitude"><rng:data xmlns="http://rescue.org/ns/domain/0.2" type="positiveInteger"/></element>
+	<element name="service:latitude"><rng:data xmlns="http://rescue.org/ns/domain/0.2" type="positiveInteger"/></element>
+	<element name="service:carpark"><rng:data xmlns="http://rescue.org/ns/domain/0.2" type="boolean"/></element>
+</element>
+<element name="service:operations">
+	<element name="service:search">
+		<element name="service:execute"><ref name="controlflow-code"/></element>
+		<element name="service:compensate"><ref name="controlflow-code"/></element>
+		<element name="service:undo"><ref name="controlflow-code"/></element>
+		<element name="service:redo"><ref name="controlflow-code"/></element>
+		<element name="service:suspend"><ref name="controlflow-code"/></element>
+		<element name="service:abort"><ref name="controlflow-code"/></element>
+	</element>
+	<element name="service:book">
+		<element name="service:execute"><ref name="controlflow-code"/></element>
+		<element name="service:compensate"><ref name="controlflow-code"/></element>
+		<element name="service:undo"><ref name="controlflow-code"/></element>
+		<element name="service:redo"><ref name="controlflow-code"/></element>
+		<element name="service:suspend"><ref name="controlflow-code"/></element>
+		<element name="service:abort"><ref name="controlflow-code"/></element>
+	</element>
+	<element name="service:popcorn">
+		<element name="service:execute"><ref name="controlflow-code"/></element>
+		<element name="service:compensate"><ref name="controlflow-code"/></element>
+		<element name="service:undo"><ref name="controlflow-code"/></element>
+		<element name="service:redo"><ref name="controlflow-code"/></element>
+		<element name="service:suspend"><ref name="controlflow-code"/></element>
+		<element name="service:abort"><ref name="controlflow-code"/></element>
+	</element>
+</element></element></start><define name="controlflow-code">
   <zeroOrMore>
     <choice>
       <ref name="endpoint"/>
@@ -17,14 +50,14 @@
   <choice>
     <element name="flow:condition">
       <attribute name="test"/>
-      <attribute name="operator"/>
+      <attribute name="comparator"/>
       <choice>
         <attribute name="variable"/> <!-- could be context or endpoint -->
         <attribute name="fix-value"/>
       </choice>
     </element>
     <element name="flow:group">
-      <attribute name="operator"/>
+      <attribute name="connector"/>
       <ref name="condition"/> <!-- at least two conditions must be member of a group -->
       <oneOrMore>
         <ref name="condition"/>
@@ -76,6 +109,11 @@
   <element name="flow:cycle">
     <attribute name="id"/>
     <ref name="condition"/>
+    <zeroOrMore>
+      <element name="flow:iterated-context">
+        <attribute name="id"/>
+      </element>
+    </zeroOrMore>
     <ref name="controlflow-code"/>
   </element>
 <!-- }}} -->
@@ -88,7 +126,6 @@
     <choice>
       <attribute name="variable"/>
       <attribute name="fix-value"/>
-      <attribute name="parameter-name"/>
     </choice>
   </element>
 <!-- }}} -->
@@ -101,15 +138,12 @@
 <!-- }}} -->
 </define><define name="constraint">
 <!-- {{{ --> 
-  <element name="constraint"> 
+  <element name="flow:constraint"> 
     <attribute name="property"/>
     <attribute name="comparator"/>
     <choice>
       <attribute name="context"/>
-      <group>
-        <attribute name="call-id"/>
-        <attribute name="referred-property"/>
-      </group>
+      <attribute name="fix-value"/>
     </choice>
   </element>
 <!-- }}} -->
@@ -142,50 +176,64 @@
         <attribute name="endpoint"/>
       </element>
     </optional>
-    <optional>
-      <zeroOrMore>
-        <ref name="constraint"/>
-      </zeroOrMore>
-    </optional>
+    <zeroOrMore>
+      <ref name="constraint"/>
+    </zeroOrMore>
     <ref name="in-out"/>
   </element>
-<!-- }}} -->
+<!-- }}} --> 
 </define><define name="in-out">
 <!-- {{{ -->
   <zeroOrMore>
-    <element name="flow:input">
-      <choice>
-        <attribute name="message"/>
-        <group>
-          <attribute name="name"/>
-          <choice>
-            <attribute name="context"/>
+    <choice>
+      <element name="flow:input">
+        <choice>
+          <attribute name="message"/>
+          <group>
+            <attribute name="name"/>
+            <choice>
+              <attribute name="context"/>
+              <attribute name="fix-value"/>
+              <attribute name="message-parameter"/>
+            </choice>
+          </group>
+        </choice>
+      </element>
+      <element name="flow:output">
+        <choice>
+          <attribute name="message"/>
+          <group>
             <attribute name="message-parameter"/>
-          </choice>
-        </group>
-      </choice>
-    </element>
-  </zeroOrMore>
-  <zeroOrMore>
-    <element name="flow:output">
-      <choice>
-        <attribute name="message"/>
-        <group>
-          <attribute name="name"/>
-          <choice>
+            <choice>
+              <attribute name="property"/>
+              <attribute name="name"/>
+              <attribute name="context"/>
+              <attribute name="fix-value"/>
+            </choice>
+          </group>
+          <group>
             <attribute name="context"/>
-            <attribute name="message-parameter"/>
-          </choice>
-        </group>
-        <group>
-          <attribute name="context"/>
-          <attribute name="message-parameter"/>
-        </group>
-      </choice>
-    </element>
-  </zeroOrMore>
-  <zeroOrMore>
-    <ref name="manipulate"/>
+            <choice>
+              <attribute name="property"/>
+              <attribute name="name"/>
+            </choice>
+          </group>
+          <group>
+            <attribute name="operator"/>
+            <choice>
+              <attribute name="message-parameter"/>
+              <attribute name="target"/> 
+            </choice>
+            <choice>
+              <attribute name="property"/>
+              <attribute name="context"/>
+              <attribute name="name"/>
+              <attribute name="fix-value"/>
+            </choice>
+          </group>
+        </choice>
+      </element>
+    </choice>
   </zeroOrMore>
 <!-- }}} -->
 </define><define name="endpoint">
@@ -195,36 +243,4 @@
     <text/>
   </element>
 <!-- }}} -->
-</define>
-
-<start><element name="service:service-description">
-<element name="service:properties">
-	<element name="service:longitude"><rng:data xmlns="http://rescue.org/ns/domain/0.2" type="positiveInteger"/></element>
-	<element name="service:latitude"><rng:data xmlns="http://rescue.org/ns/domain/0.2" type="positiveInteger"/></element>
-</element>
-<element name="service:operations">
-	<element name="service:search">
-		<element name="service:execute"><ref name="controlflow-code"/></element>
-		<element name="service:compensate"><ref name="controlflow-code"/></element>
-		<element name="service:undo"><ref name="controlflow-code"/></element>
-		<element name="service:redo"><ref name="controlflow-code"/></element>
-		<element name="service:suspend"><ref name="controlflow-code"/></element>
-		<element name="service:abort"><ref name="controlflow-code"/></element>
-	</element>
-	<element name="service:book">
-		<element name="service:execute"><ref name="controlflow-code"/></element>
-		<element name="service:compensate"><ref name="controlflow-code"/></element>
-		<element name="service:undo"><ref name="controlflow-code"/></element>
-		<element name="service:redo"><ref name="controlflow-code"/></element>
-		<element name="service:suspend"><ref name="controlflow-code"/></element>
-		<element name="service:abort"><ref name="controlflow-code"/></element>
-	</element>
-	<element name="service:popcorn">
-		<element name="service:execute"><ref name="controlflow-code"/></element>
-		<element name="service:compensate"><ref name="controlflow-code"/></element>
-		<element name="service:undo"><ref name="controlflow-code"/></element>
-		<element name="service:redo"><ref name="controlflow-code"/></element>
-		<element name="service:suspend"><ref name="controlflow-code"/></element>
-		<element name="service:abort"><ref name="controlflow-code"/></element>
-	</element>
-</element></element></start></grammar>
+</define></grammar>

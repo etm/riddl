@@ -31,14 +31,14 @@
   <choice>
     <element name="flow:condition">
       <attribute name="test"/>
-      <attribute name="operator"/>
+      <attribute name="comparator"/>
       <choice>
         <attribute name="variable"/> <!-- could be context or endpoint -->
         <attribute name="fix-value"/>
       </choice>
     </element>
     <element name="flow:group">
-      <attribute name="operator"/>
+      <attribute name="connector"/>
       <ref name="condition"/> <!-- at least two conditions must be member of a group -->
       <oneOrMore>
         <ref name="condition"/>
@@ -96,13 +96,13 @@
 <define name="cycle">
 <!-- {{{ --> 
   <element name="flow:cycle">
+    <attribute name="id"/>
+    <ref name="condition"/>
     <zeroOrMore>
       <element name="flow:iterated-context">
         <attribute name="id"/>
       </element>
     </zeroOrMore>
-    <attribute name="id"/>
-    <ref name="condition"/>
     <ref name="controlflow-code"/>
   </element>
 <!-- }}} -->
@@ -117,7 +117,6 @@
     <choice>
       <attribute name="variable"/>
       <attribute name="fix-value"/>
-      <attribute name="parameter-name"/>
     </choice>
   </element>
 <!-- }}} -->
@@ -134,15 +133,12 @@
 
 <define name="constraint">
 <!-- {{{ --> 
-  <element name="constraint"> 
+  <element name="flow:constraint"> 
     <attribute name="property"/>
     <attribute name="comparator"/>
     <choice>
       <attribute name="context"/>
-      <group>
-        <attribute name="call-id"/>
-        <attribute name="referred-property"/>
-      </group>
+      <attribute name="fix-value"/>
     </choice>
   </element>
 <!-- }}} -->
@@ -177,64 +173,68 @@
         <attribute name="endpoint"/>
       </element>
     </optional>
-    <optional>
-      <zeroOrMore>
-        <ref name="constraint"/>
-      </zeroOrMore>
-    </optional>
+    <zeroOrMore>
+      <ref name="constraint"/>
+    </zeroOrMore>
     <ref name="in-out"/>
   </element>
-<!-- }}} -->
+<!-- }}} --> 
 </define>
 
 
 <define name="in-out">
 <!-- {{{ -->
-  <optional>
   <zeroOrMore>
-    <element name="flow:input">
-      <choice>
-        <attribute name="message"/>
-        <group>
-          <attribute name="name"/>
-          <choice>
-            <attribute name="context"/>
-            <attribute name="fix-value"/>
+    <choice>
+      <element name="flow:input">
+        <choice>
+          <attribute name="message"/>
+          <group>
+            <attribute name="name"/>
+            <choice>
+              <attribute name="context"/>
+              <attribute name="fix-value"/>
+              <attribute name="message-parameter"/>
+            </choice>
+          </group>
+        </choice>
+      </element>
+      <element name="flow:output">
+        <choice>
+          <attribute name="message"/>
+          <group>
             <attribute name="message-parameter"/>
-          </choice>
-        </group>
-      </choice>
-    </element>
-  </zeroOrMore>
-  </optional>
-  <optional>
-  <zeroOrMore>
-    <element name="flow:output">
-      <choice>
-        <attribute name="message"/>
-        <group>
-          <attribute name="name"/>
-          <choice>
+            <choice>
+              <attribute name="property"/>
+              <attribute name="name"/>
+              <attribute name="context"/>
+              <attribute name="fix-value"/>
+            </choice>
+          </group>
+          <group>
             <attribute name="context"/>
-            <attribute name="message-parameter"/>
-          </choice>
-        </group>
-        <group>
-          <choice>
-            <attribute name="context"/>
-            <attribute name="fix-value"/>
-          </choice>
-          <attribute name="message-parameter"/>
-        </group>
-      </choice>
-    </element>
+            <choice>
+              <attribute name="property"/>
+              <attribute name="name"/>
+            </choice>
+          </group>
+          <group>
+            <attribute name="operator"/>
+            <choice>
+              <attribute name="message-parameter"/>
+              <attribute name="target"/> 
+            </choice>
+            <choice>
+              <attribute name="property"/>
+              <attribute name="context"/>
+              <attribute name="name"/>
+              <attribute name="fix-value"/>
+            </choice>
+          </group>
+        </choice>
+      </element>
+    </choice>
   </zeroOrMore>
-  </optional>
-  <optional>
-  <zeroOrMore>
-    <ref name="manipulate"/>
-  </zeroOrMore>
-  </optional>
 <!-- }}} -->
 </define>
 
