@@ -35,7 +35,7 @@
       </optional>
       <element name="domain:endpoints">
         <element name="flow:endpoint"> <!-- needs to be set and is used for most of the call's in the class-level-workflow to refer to same resourcepath during an particular execution-->
-          <attribute name="id"><value>resource_path</value></attribute>
+          <attribute name="id"><value>resource_scope</value></attribute>
         </element>
         <zeroOrMore>
           <ref name="endpoint"/>

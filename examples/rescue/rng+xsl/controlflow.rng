@@ -176,6 +176,12 @@
     <zeroOrMore>
       <ref name="constraint"/>
     </zeroOrMore>
+    <zeroOrMore>
+      <element name="flow:assign-endpoint">
+        <attribute name="id"/>
+        <attribute name="use"/>
+      </element>
+    </zeroOrMore>
     <ref name="in-out"/>
   </element>
 <!-- }}} --> 

@@ -8,8 +8,8 @@ for each couple if they are cheaper the 10 EUR together
 -->
 
   <!-- Endpoints derived from Cinema-domain -->
-  <endpoint id="a01_resource_path">test/testclient-subgroup-renamed/testclient-service-renamed</endpoint>
-  <endpoint id="a01_selected_cinema"/>
+  <endpoint id="a01_resource_scope">test/testclient-subgroup-renamed/</endpoint>
+  <endpoint id="a01_selected_cinema">test/testclient-subgroup-renamed/testclient-service-renamed</endpoint>
   <endpoint id="a01_selector_service">http://select-my-cinema.at</endpoint>
 
   <!-- Context derived from Cinema-domain (variables) -->
@@ -23,7 +23,7 @@ for each couple if they are cheaper the 10 EUR together
   <context id="a01_preferred_time">20:00:00</context>
   <context id="a01_number_of_persons">4</context>
   <context id="a01_movie_title"/>
-  <context id="a01_sarting_time"/>
+  <context id="a01_starting_time"/>
   <context id="a01_hall"/>
   <context id="a01_reservation_id"/>
 
@@ -31,8 +31,10 @@ for each couple if they are cheaper the 10 EUR together
   <context id="a02_quantitty"/>
   <context id="a02_price"/>
 
-  <call id="a01" endpoint="a01_resource_path" service-operation="search_and_book" state-controlflow="execute">
+  <call id="a01" endpoint="a01_resource_scope" service-operation="search_and_book" state-controlflow="execute">
     <constraint property="carpark" comparator="==" context="a01_carpark"/>
+    <endpoint id="selected_cinema" use="a01_selected_cinema"/>
+    <endpoint id="selector_service" use="a01_selector_service"/>
     <input name="title" context="a01_title"/>
     <input name="date" context="a01_date"/>
     <input name="preferred_time" context="a01_preferred_time"/>
@@ -40,7 +42,7 @@ for each couple if they are cheaper the 10 EUR together
     <output name="movie_title" context="a01_movie_title"/>
     <output name="starting_time" context="a01_starting_time"/>
     <output name="hall" context="a01_hall"/>
-    <output name="reservation_id" context="a01_reservation-id"/>
+    <output name="reservation_id" context="a01_reservation_id"/>
     <output property="carpark" context="property_test"/>
   </call>
 
@@ -48,7 +50,7 @@ for each couple if they are cheaper the 10 EUR together
 
   <call id="a02" endpoint="a01_selected_cinema" service-operation="order_popcorn" state-controlflow="execute">
     <input name="quantity" context="a02_quantity"/>
-    <input name="reservation_id" context="a01_reservation-id"/>
+    <input name="reservation_id" context="a01_reservation_id"/>
     <output name="price" context="a02_price"/>
   </call>
 
