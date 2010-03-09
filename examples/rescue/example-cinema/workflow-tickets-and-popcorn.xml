@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 
+<controlflow xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- 
 Book tickets for Alice in Wonderland at the 10th of March for 4 persons 
 in an Arthouse Cinema with a carpark and order one package of popcorn 
 for each couple if they are cheaper the 10 EUR together
 -->
 
-<controlflow xmlns="http://rescue.org/ns/controlflow/0.2">
   <!-- Endpoints derived from Cinema-domain -->
-  <endpoint id="a01_resource_path">Cinemas/Arthouse</endpoint>
+  <endpoint id="a01_resource_path">test/testclient-subgroup-renamed/testclient-service-renamed</endpoint>
   <endpoint id="a01_selected_cinema"/>
   <endpoint id="a01_selector_service">http://select-my-cinema.at</endpoint>
 
@@ -31,7 +31,7 @@ for each couple if they are cheaper the 10 EUR together
   <context id="a02_quantitty"/>
   <context id="a02_price"/>
 
-  <call id="a01" endpoint="a01_resource_path" service-operation="book_and_search" state-controlflow="execute">
+  <call id="a01" endpoint="a01_resource_path" service-operation="search_and_book" state-controlflow="execute">
     <constraint property="carpark" comparator="==" context="a01_carpark"/>
     <input name="title" context="a01_title"/>
     <input name="date" context="a01_date"/>

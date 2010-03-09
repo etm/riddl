@@ -104,8 +104,10 @@ class GetInterface < Riddl::Implementation
 
 
     if @p[0] == nil # If no parameter is given, the defition of the service-operation is requested
-      schema = XML::Smart.string("<state-sontrolflow xmlns=\"http://rescue.org/ns/controlflow/0.2\" xmlns:flow=\"http://rescue.org/ns/controlflow/0.2\"/>")
-      schema.root.add(xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{@r[3]}']", {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
+      schema = XML::Smart.string("<state-controlflow xmlns=\"http://rescue.org/ns/controlflow/0.2\" xmlns:flow=\"http://rescue.org/ns/controlflow/0.2\"/>")
+      o = xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{@r[3]}']", {"domain" => "http://rescue.org/ns/domain/0.2"}).first
+      @status = 410 if o == nil
+      schema.root.add(o) if o != nil
     elsif @p[0].name == "properties"
       schema.append_schemablock(xml.find("/domain:domain-description/domain:properties", {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
     else 
