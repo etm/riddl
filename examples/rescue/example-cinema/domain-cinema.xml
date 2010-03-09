@@ -169,13 +169,6 @@
     <variables>
       <flow:context id="empty"/>
     </variables>
-    <endpoints>
-  <!-- {{{ --> 
-      <flow:endpoint id="resource_path"/>
-      <flow:endpoint id="selected_cinema">bla</flow:endpoint>
-      <flow:endpoint id="selector_service"/>
-  <!-- }}} -->
-    </endpoints>
     <operation name="search" short="search for avaliable shows">
 <!-- {{{ -->   
       <execute>
@@ -194,13 +187,15 @@
     <operation name="search_and_book" short="search for shows, select show and book tickets">
 <!-- {{{ --> 
       <execute>
+        <flow:endpoint id="selected_cinema"/>
+        <flow:endpoint id="selector_service"/>
         <flow:call id="call_find" endpoint="resource_scope" service-operation="search" state-controlflow="execute"/>
         <flow:call id="call_select" endpoint="selector_service" http-method="get" http-status="200" group-by="//show">
           <flow:resource-id xpath="//show/cinema_uri" endpoint="selected_cinema"/>
           <flow:input message="list_shows"/>
           <flow:output message="selected_show"/>
         </flow:call>
-        <flow:call id="call_book" endpoint="selected_cinema_uri" service-operation="book" state-controlflow="execute"/>
+        <flow:call id="call_book" endpoint="selected_cinema" service-operation="book" state-controlflow="execute"/>
       </execute>
       <compensate/>
       <undo/>
@@ -212,6 +207,8 @@
     <operation name="book" short="book tickets for a given show and cinema">
 <!-- {{{ -->   
       <execute>
+        <flow:endpoint id="survey_service">http://survey.com/cinema-repo-service</flow:endpoint>
+        <flow:call id="survey" endpoint="survey_service" http-method="post" http-status="200"/>
         <flow:call id="book" endpoint="resource_scope" service-operation="book" state-controlflow="execute">
           <flow:input message="book_tickets"/>
           <flow:output message="reservation_result"/>
@@ -232,14 +229,14 @@
     <operation name="order_popcorn" short="get popcorn to your seat">
 <!-- {{{ -->    
       <execute>
-        <flow:call id="order_popcorn" endpoint="selected_cinema" service-operation="popcorn" state-controlflow="execute">
+        <flow:call id="order_popcorn" endpoint="resource_scope" service-operation="popcorn" state-controlflow="execute">
           <flow:input message="popcorn_order"/>
           <flow:output message="popcorn_result"/>
         </flow:call>
       </execute>
       <compensate/>
       <undo>
-        <flow:call id="order_popcorn" endpoint="selected_cinema" service-operation="popcorn" state-controlflow="undo">
+        <flow:call id="order_popcorn" endpoint="resource_scope" service-operation="popcorn" state-controlflow="undo">
           <flow:input message="popcorn_undo"/>
         </flow:call>
       </undo>

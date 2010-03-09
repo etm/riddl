@@ -4,7 +4,7 @@ class GetOperations < Riddl::Implementation
     schema = RNGSchema.new(true)
     ret = XML::Smart.string("<operations xmlns=\"http://rescue.org/ns/rescue/0.2\"/>")
     xml.find("/domain:domain-description/domain:operations/domain:operation", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |o|
-      ret.root.add("operation", {"name" => o.attributes.get_attr("name")})
+      ret.root.add("operation", {"name" => o.attributes["name"]})
     end
     schema.append_schemablock(xml.find("/domain:domain-description/domain:operations", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).first)
     Riddl::Parameter::Complex.new("xml","text/xml", ret.to_s)
@@ -143,13 +143,13 @@ class GetInterface < Riddl::Implementation
     params = Hash.new
     xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{operation_name}']/descendant::flow:call", 
             {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
-      params.merge!(collect_input(call.attributes.get_attr("service-operation").value, xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes.get_attr("service-operation").value # Call refers to another operation  of the service
+      params.merge!(collect_input(call.attributes["service-operation"].value, xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes["service-operation"].value # Call refers to another operation  of the service
       call.find("descendant::flow:input", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
         if input.attributes.include?("message") # call uses a message
-          xml.find("/domain:domain-description/domain:messages/domain:message[@name='#{input.attributes.get_attr("message")}']/rng:*",
+          xml.find("/domain:domain-description/domain:messages/domain:message[@name='#{input.attributes["message"]}']/rng:*",
                   {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlfow/0.2"}).each do |p|
-            params[p.attributes.get_attr("name").value] = p if p.name.name == "element" # use element
-            params["ZoM" + p.children[0].attributes.get_attr("name").value] = p if p.name.name == "zeroOrMore" # use zeroOrMore-block
+            params[p.attributes["name"].value] = p if p.name.name == "element" # use element
+            params["ZoM" + p.children[0].attributes["name"].value] = p if p.name.name == "zeroOrMore" # use zeroOrMore-block
           end
         end
       end  
@@ -161,13 +161,13 @@ class GetInterface < Riddl::Implementation
     params = Hash.new
     xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{operation_name}']/descendant::flow:call", 
             {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
-      params.merge!(collect_output(call.attributes.get_attr("service-operation").value, xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes.get_attr("service-operation").value # Call refers to another operation of the service
+      params.merge!(collect_output(call.attributes["service-operation"].value, xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes["service-operation"].value # Call refers to another operation of the service
       call.find("descendant::flow:output", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
         if output.attributes.include?("message") # call uses a message
-          xml.find("/domain:domain-description/domain:messages/domain:message[@name='#{output.attributes.get_attr("message")}']/rng:*",
+          xml.find("/domain:domain-description/domain:messages/domain:message[@name='#{output.attributes["message"]}']/rng:*",
                   {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlfow/0.2"}).each do |p|
-            params[p.attributes.get_attr("name").value] = p if p.name.name == "element" # use element
-            params["ZoM" + p.children[0].attributes.get_attr("name").value] = p if p.name.name == "zeroOrMore" # use zeroOrMore-block
+            params[p.attributes["name"].value] = p if p.name.name == "element" # use element
+            params["ZoM" + p.children[0].attributes["name"].value] = p if p.name.name == "zeroOrMore" # use zeroOrMore-block
           end
         end
       end  
