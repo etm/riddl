@@ -151,6 +151,7 @@ if validate
 puts "Starting validation-test"
 # {{{
 test = "Validating serviceSchema against service-properties"
+status, response = client.resource("groups/testclient-group/operations/search_and_book").get 
 status, response = client.resource("groups/testclient-group").get [Riddl::Parameter::Simple.new("service-schema","")]
 schema = XML::Smart.string(response[0].value.read)
 puts test + " failed during requesting properties schema with status-code: #{status}" if status != 200
