@@ -8,8 +8,8 @@ for each couple if they are cheaper the 10 EUR together
 -->
 
   <!-- Endpoints derived from Cinema-domain -->
-  <endpoint id="a01_resource_scope">test/testclient-subgroup-renamed/</endpoint>
-  <endpoint id="a01_selected_cinema">test/testclient-subgroup-renamed/testclient-service-renamed</endpoint>
+  <endpoint id="a01_resource_scope">Cinema/Arthouse</endpoint>
+  <endpoint id="a01_selected_cinema">Cinema/Arthouse</endpoint>
   <endpoint id="a01_selector_service">http://select-my-cinema.at</endpoint>
 
   <!-- Context derived from Cinema-domain (variables) -->
@@ -31,7 +31,7 @@ for each couple if they are cheaper the 10 EUR together
   <context id="a02_quantitty"/>
   <context id="a02_price"/>
 
-  <call id="a01" endpoint="a01_resource_scope" service-operation="search_and_book" state-controlflow="execute">
+  <call id="a01" endpoint="a01_resource_scope" service-operation="search-and-book" state-controlflow="execute">
     <constraint property="carpark" comparator="==" context="a01_carpark"/>
     <endpoint id="selected_cinema" use="a01_selected_cinema"/>
     <endpoint id="selector_service" use="a01_selector_service"/>
@@ -47,8 +47,7 @@ for each couple if they are cheaper the 10 EUR together
   </call>
 
   <manipulate id="man_01" target="a02_quantity" operator="/" fix-value="2"/>
-
-  <call id="a02" endpoint="a01_selected_cinema" service-operation="order_popcorn" state-controlflow="execute">
+  <call id="a02" endpoint="a01_selected_cinema" service-operation="popcorn" state-controlflow="execute">
     <input name="quantity" context="a02_quantity"/>
     <input name="reservation_id" context="a01_reservation_id"/>
     <output name="price" context="a02_price"/>
@@ -57,7 +56,7 @@ for each couple if they are cheaper the 10 EUR together
   <choose>
     <alternative>
       <condition test="a02_price" comparator="&gt;" fix-value="10"/>
-      <call id="a03" endpoint="a01_selected_cinema" service-operation="order_popcorn" state-controlflow="undo"> 
+      <call id="a03" endpoint="a01_selected_cinema" service-operation="popcorn" state-controlflow="undo"> 
         <input name="reservation_id" context="a01_reservation_id"/>
         <input name="quantity" context="a02_quantity"/>
       </call>

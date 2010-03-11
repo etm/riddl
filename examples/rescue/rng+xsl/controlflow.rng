@@ -11,11 +11,33 @@
   </element>
 </start>
 
+
 <define name="controlflow-code">
+  <!-- {{{ -->
+  <zeroOrMore>
+    <choice>
+      <ref name="assigns"/>
+      <ref name="controls"/>
+    </choice>
+  </zeroOrMore>
+  <!-- }}} -->
+</define>
+
+<define name="assigns">
+  <!-- {{{ -->
   <zeroOrMore>
     <choice>
       <ref name="endpoint"/>
       <ref name="context"/>
+    </choice>
+  </zeroOrMore>
+  <!-- }}} -->
+</define>
+
+<define name="controls">
+  <!-- {{{ -->
+  <zeroOrMore>
+    <choice>
       <ref name="manipulate"/>
       <ref name="call"/>
       <ref name="cycle"/>
@@ -24,6 +46,7 @@
       <ref name="critical"/>
     </choice>
   </zeroOrMore>
+  <!-- }}} -->
 </define>
 
 <define name="condition">
@@ -188,6 +211,26 @@
 </define>
 
 
+<define name="xsl-code">
+  <!-- {{{ -->
+  <element>
+    <nsName ns="http://www.w3.org/1999/XSL/Transform"/>
+    <zeroOrMore>
+      <attribute>
+        <anyName/>
+        <text/>
+      </attribute>
+    </zeroOrMore>
+    <choice>
+      <text/>
+      <zeroOrMore>
+        <ref name="xsl-code"/>
+      </zeroOrMore>
+    </choice>
+  </element>
+  <!-- }}} -->
+</define>
+
 <define name="in-out">
 <!-- {{{ -->
   <zeroOrMore>
@@ -204,6 +247,15 @@
             </choice>
           </group>
         </choice>
+        <zeroOrMore>
+          <element name="copy">
+            <attribute name="xsl-variable"/>
+            <attribute name="context"/>
+          </element>
+        </zeroOrMore>
+        <zeroOrMore>
+          <ref name="xsl-code"/>  
+        </zeroOrMore>
       </element>
       <element name="flow:output">
         <choice>
@@ -224,6 +276,7 @@
               <attribute name="name"/>
             </choice>
           </group>
+ <!--
           <group>
             <attribute name="operator"/>
             <choice>
@@ -237,7 +290,11 @@
               <attribute name="fix-value"/>
             </choice>
           </group>
+-->
         </choice>
+        <zeroOrMore>
+          <ref name="xsl-code"/>  
+        </zeroOrMore>
       </element>
     </choice>
   </zeroOrMore>
