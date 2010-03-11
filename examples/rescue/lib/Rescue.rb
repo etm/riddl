@@ -143,14 +143,15 @@ class GetInterface < Riddl::Implementation
     params = Hash.new
     xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{operation_name}']/descendant::flow:call", 
             {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
-      params.merge!(collect_input(call.attributes["service-operation"].value, xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes["service-operation"].value # Call refers to another operation  of the service
-      call.find("descendant::flow:input", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
+      params.merge!(collect_input(call.attributes["service-operation"], xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes["service-operation"] # Call refers to another operation  of the service
+      call.find("child::flow:input", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
         if input.attributes.include?("message") # call uses a message
           xml.find("/domain:domain-description/domain:messages/domain:message[@name='#{input.attributes["message"]}']/rng:*",
                   {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlfow/0.2"}).each do |p|
-            params[p.attributes["name"].value] = p if p.name.name == "element" # use element
-            params["ZoM" + p.children[0].attributes["name"].value] = p if p.name.name == "zeroOrMore" # use zeroOrMore-block
+            params[p.attributes["name"]] = p
           end
+        else
+          params[input.attributes['message-parameter']] = xml.find("//rng:element[@name='#{input.attributes['message-parameter']}']", {"rng"=>"http://relaxng.org/ns/structure/1.0"}).first if input.attributes.include?('message-parameter')
         end
       end  
     end
@@ -161,18 +162,19 @@ class GetInterface < Riddl::Implementation
     params = Hash.new
     xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{operation_name}']/descendant::flow:call", 
             {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
-      params.merge!(collect_output(call.attributes["service-operation"].value, xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes["service-operation"].value # Call refers to another operation of the service
-      call.find("descendant::flow:output", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
+      params.merge!(collect_output(call.attributes["service-operation"], xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes["service-operation"] # Call refers to another operation of the service
+      call.find("child::flow:output", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
         if output.attributes.include?("message") # call uses a message
           xml.find("/domain:domain-description/domain:messages/domain:message[@name='#{output.attributes["message"]}']/rng:*",
                   {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlfow/0.2"}).each do |p|
-            params[p.attributes["name"].value] = p if p.name.name == "element" # use element
-            params["ZoM" + p.children[0].attributes["name"].value] = p if p.name.name == "zeroOrMore" # use zeroOrMore-block
+            params[p.attributes["name"]] = p
           end
+        else
+          params[output.attributes['message-parameter']] = xml.find("//rng:element[@name='#{output.attributes['message-parameter']}']", {"rng"=>"http://relaxng.org/ns/structure/1.0"}).first if output.attributes.include?('message-parameter')
         end
       end  
     end
-    puts params.inspect
+    puts "OUTPUT: " + params.inspect
     params
   end
 end
