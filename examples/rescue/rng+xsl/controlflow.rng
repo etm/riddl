@@ -124,9 +124,12 @@
     <zeroOrMore>
       <element name="flow:iterated-context">
         <attribute name="id"/>
+        <optional>
+        <text/>
+        </optional>
       </element>
     </zeroOrMore>
-    <ref name="controlflow-code"/>
+    <ref name="controls"/>
   </element>
 <!-- }}} -->
 </define>
@@ -136,11 +139,19 @@
   <element name="flow:manipulate">
     <attribute name="id"/>
     <attribute name="target"/>
-    <attribute name="operator"/> <!-- should also be able to interprete RegExp -->
+    <attribute name="operator"/> 
     <choice>
-      <attribute name="variable"/>
+      <group>
+        <attribute name="variable"/>
+        <optional>
+          <attribute name="xpath"/>
+        </optional>
+      </group>
       <attribute name="fix-value"/>
     </choice>
+    <zeroOrMore>
+      <ref name="xsl-code"/>
+    </zeroOrMore>
   </element>
 <!-- }}} -->
 </define>
@@ -157,10 +168,10 @@
 <define name="constraint">
 <!-- {{{ --> 
   <element name="flow:constraint"> 
-    <attribute name="property"/>
+    <attribute name="xpath"/>
     <attribute name="comparator"/>
     <choice>
-      <attribute name="context"/>
+      <attribute name="variable"/>
       <attribute name="fix-value"/>
     </choice>
   </element>
@@ -176,6 +187,22 @@
       <group>
         <attribute name="service-operation"/>
         <attribute name="state-controlflow"/>
+        <optional>
+          <attribute name="group-by"/> <!-- holds the xpath to be used for generating the oportunities out of the input-message -->
+          <element name="flow:resource-id"> <!-- selector and target for the resource from which the output was selected -->
+            <attribute name="xpath"/>
+            <attribute name="endpoint"/>
+          </element>
+        </optional>
+        <zeroOrMore>
+          <ref name="constraint"/>
+        </zeroOrMore>
+        <zeroOrMore>
+          <element name="flow:assign-endpoint">
+            <attribute name="id"/>
+            <attribute name="use"/>
+          </element>
+        </zeroOrMore>
       </group>
       <group>
         <attribute name="http-method">
@@ -187,24 +214,15 @@
           </choice>
         </attribute>
         <attribute name="http-status"/>
+        <optional>
+          <attribute name="group-by"/> <!-- holds the xpath to be used for generating the oportunities out of the input-message -->
+          <element name="flow:resource-id"> <!-- selector and target for the resource from which the output was selected -->
+            <attribute name="xpath"/>
+            <attribute name="endpoint"/>
+          </element>
+        </optional>
       </group>
     </choice>
-    <optional>
-      <attribute name="group-by"/> <!-- holds the xpath to be used for generating the oportunities out of the input-message -->
-      <element name="flow:resource-id"> <!-- selector and target for the resource from which the output was selected -->
-        <attribute name="xpath"/>
-        <attribute name="endpoint"/>
-      </element>
-    </optional>
-    <zeroOrMore>
-      <ref name="constraint"/>
-    </zeroOrMore>
-    <zeroOrMore>
-      <element name="flow:assign-endpoint">
-        <attribute name="id"/>
-        <attribute name="use"/>
-      </element>
-    </zeroOrMore>
     <ref name="in-out"/>
   </element>
 <!-- }}} --> 
@@ -232,7 +250,7 @@
 </define>
 
 <define name="in-out">
-<!-- {{{ -->
+<!--  {{{ -->
   <zeroOrMore>
     <choice>
       <element name="flow:input">
@@ -263,34 +281,23 @@
           <group>
             <attribute name="message-parameter"/>
             <choice>
-              <attribute name="property"/>
-              <attribute name="name"/>
+              <group>
+                <attribute name="name"/>
+                <optional>
+                  <attribute name="xpath"/>
+                </optional>
+              </group>
               <attribute name="context"/>
               <attribute name="fix-value"/>
             </choice>
           </group>
           <group>
             <attribute name="context"/>
-            <choice>
-              <attribute name="property"/>
-              <attribute name="name"/>
-            </choice>
+            <attribute name="name"/>
+            <optional>
+              <attribute name="xpath"/>
+            </optional>
           </group>
- <!--
-          <group>
-            <attribute name="operator"/>
-            <choice>
-              <attribute name="message-parameter"/>
-              <attribute name="target"/> 
-            </choice>
-            <choice>
-              <attribute name="property"/>
-              <attribute name="context"/>
-              <attribute name="name"/>
-              <attribute name="fix-value"/>
-            </choice>
-          </group>
--->
         </choice>
         <zeroOrMore>
           <ref name="xsl-code"/>  
