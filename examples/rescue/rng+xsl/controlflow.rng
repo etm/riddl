@@ -16,7 +16,6 @@
   <!-- {{{ -->
   <zeroOrMore>
     <choice>
-      <ref name="assigns"/>
       <ref name="controls"/>
     </choice>
   </zeroOrMore>
@@ -119,16 +118,7 @@
 <define name="cycle">
 <!-- {{{ --> 
   <element name="flow:cycle">
-    <attribute name="id"/>
     <ref name="condition"/>
-    <zeroOrMore>
-      <element name="flow:iterated-context">
-        <attribute name="id"/>
-        <optional>
-        <text/>
-        </optional>
-      </element>
-    </zeroOrMore>
     <ref name="controls"/>
   </element>
 <!-- }}} -->
@@ -138,19 +128,20 @@
 <!-- {{{ --> 
   <element name="flow:manipulate">
     <attribute name="id"/>
-    <attribute name="target"/>
-    <attribute name="operator"/> 
-    <choice>
-      <group>
-        <attribute name="variable"/>
-        <optional>
-          <attribute name="xpath"/>
-        </optional>
-      </group>
-      <attribute name="fix-value"/>
-    </choice>
     <zeroOrMore>
-      <ref name="xsl-code"/>
+      <choice>
+        <ref name="assigns"/>
+        <element name="flow:instruction">
+          <attribute name="target"/>
+          <attribute name="operator"/> 
+          <choice>
+            <group>
+              <attribute name="variable"/>
+            </group>
+            <attribute name="fix-value"/>
+          </choice>
+        </element>
+      </choice>
     </zeroOrMore>
   </element>
 <!-- }}} -->
@@ -213,7 +204,6 @@
             <value>delete</value>
           </choice>
         </attribute>
-        <attribute name="http-status"/>
         <optional>
           <attribute name="group-by"/> <!-- holds the xpath to be used for generating the oportunities out of the input-message -->
           <element name="flow:resource-id"> <!-- selector and target for the resource from which the output was selected -->
@@ -227,7 +217,6 @@
   </element>
 <!-- }}} --> 
 </define>
-
 
 <define name="xsl-code">
   <!-- {{{ -->
@@ -259,21 +248,18 @@
           <group>
             <attribute name="name"/>
             <choice>
-              <attribute name="context"/>
+              <group>
+                <attribute name="variable"/>
+                <ref name="transformable"/>
+              </group>
+              <group>
+                <attribute name="message-parameter"/>
+                <ref name="transformable"/>
+              </group>
               <attribute name="fix-value"/>
-              <attribute name="message-parameter"/>
             </choice>
           </group>
         </choice>
-        <zeroOrMore>
-          <element name="copy">
-            <attribute name="xsl-variable"/>
-            <attribute name="context"/>
-          </element>
-        </zeroOrMore>
-        <zeroOrMore>
-          <ref name="xsl-code"/>  
-        </zeroOrMore>
       </element>
       <element name="flow:output">
         <choice>
@@ -283,29 +269,42 @@
             <choice>
               <group>
                 <attribute name="name"/>
-                <optional>
-                  <attribute name="xpath"/>
-                </optional>
+                <ref name="transformable"/>
               </group>
-              <attribute name="context"/>
+              <group>
+                <attribute name="variable"/>
+                <ref name="transformable"/>
+              </group>
               <attribute name="fix-value"/>
             </choice>
           </group>
           <group>
-            <attribute name="context"/>
+            <attribute name="variable"/>
             <attribute name="name"/>
-            <optional>
-              <attribute name="xpath"/>
-            </optional>
+            <ref name="transformable"/>
           </group>
         </choice>
-        <zeroOrMore>
-          <ref name="xsl-code"/>  
-        </zeroOrMore>
       </element>
     </choice>
   </zeroOrMore>
 <!-- }}} -->
+</define>
+
+<define name="transformable">
+  <!-- {{{ -->
+  <optional>
+    <attribute name="transformation-uri"/>
+    <zeroOrMore>
+      <element name="copy">
+        <attribute name="xsl-name"/>
+        <attribute name="variable"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <ref name="xsl-code"/>
+    </zeroOrMore>
+  </optional>
+  <!-- }}} -->
 </define>
 
 <define name="endpoint">
