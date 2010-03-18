@@ -2,8 +2,9 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:flow="http://rescue.org/ns/controlflow/0.2">
- 
- <xsl:output method="text"/>
+
+  <xsl:include href="xml-to-string.xsl"/>
+  <xsl:output method="text"/>
 
   <xsl:template match="/">
     <xsl:text>#--------------------------------------------------------------------------------------------------&#xa;</xsl:text>
@@ -91,7 +92,14 @@
               <xsl:call-template name="resolve-message-parameter"/>
             </xsl:when>
           </xsl:choose>
-          <xsl:text>, :xsl => ""}</xsl:text>
+          <xsl:text>, :xsl => &#xa;&lt;&lt;XSLT&#xa;</xsl:text>
+            <xsl:call-template name="prefix-whitespaces"/>
+            <xsl:call-template name="xml-to-string">
+              <xsl:with-param name="node-set" select="child::xsl:*"/>
+            </xsl:call-template>
+            <xsl:text>&#xa;XSLT&#xa;</xsl:text>
+            <xsl:call-template name="prefix-whitespaces"/>
+          <xsl:text>}</xsl:text>
           <xsl:text> do |result|&#xa;</xsl:text>
             <xsl:call-template name="prefix-whitespaces"/>
             <xsl:text>  var_</xsl:text>
@@ -210,91 +218,186 @@
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>do |result|</xsl:text>
-    <xsl:apply-templates select="child::flow:output"/>
+    <xsl:apply-templates select="child::flow:output">
+      <xsl:with-param name="mode" select="'assign'"/>
+    </xsl:apply-templates>
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>end</xsl:text>
+    <xsl:apply-templates select="child::flow:output">
+      <xsl:with-param name="mode" select="'transform'"/>
+    </xsl:apply-templates>
     <!-- }}} -->
   </xsl:template>
 
   <xsl:template match="//flow:output">
-    <!-- {{{ --> 
-    <xsl:text>&#xa;</xsl:text>
-    <xsl:call-template name="prefix-whitespaces"/>
+    <!-- {{{ -->
+    <xsl:param name="mode"/>
     <xsl:choose>
-      <xsl:when test="string(@message-parameter)">
-      <!-- Message-Parameter is the target -->
-        <xsl:call-template name="resolve-message-parameter"/>
-        <xsl:text> = </xsl:text>
+      <xsl:when test="$mode = 'assign'">
+        <xsl:text>&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:choose>
+          <xsl:when test="string(@message-parameter)">
+          <!-- Message-Parameter is the target -->
+            <xsl:call-template name="resolve-message-parameter"/>
+            <xsl:text> = </xsl:text>
+            <xsl:choose>
+              <xsl:when test="string(@variable)">
+                <xsl:call-template name="resolve-variable">
+                  <xsl:with-param name="var" select="@variable"/>
+                </xsl:call-template>
+              </xsl:when>
+              <xsl:when test="string(@name)">
+                <xsl:text>result[:</xsl:text>
+                <xsl:value-of select="@name"/>
+                <xsl:text>]</xsl:text>
+              </xsl:when>
+              <xsl:when test="string(@fix-value)">
+                <xsl:value-of select="@fix-value"/>
+              </xsl:when>
+            </xsl:choose>
+          </xsl:when>
+          <xsl:when test="not(string(@message-parameter))and (string(@variable))">
+          <!-- Context is the target -->
+            <xsl:call-template name="resolve-variable">
+              <xsl:with-param name="var" select="@variable"/>
+            </xsl:call-template>
+            <xsl:text> = </xsl:text>
+            <xsl:choose>
+              <xsl:when test="string(@name)">
+                <xsl:text>result[:</xsl:text>
+                <xsl:value-of select="@name"/>
+                <xsl:text>]</xsl:text>
+              </xsl:when>
+            </xsl:choose>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text>") # ERROR during assignment of output</xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+      <xsl:when test="($mode = 'transform') and (child::xsl:*)">
+        <xsl:text>&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:text>activity :transform_output_</xsl:text>
+        <xsl:value-of select="@name"/>
+        <xsl:text>_</xsl:text>
+        <xsl:value-of select="parent::flow:call/@id"/>
+        <xsl:text>_</xsl:text>
+        <xsl:value-of select="generate-id()"/>
+        <xsl:text>, :</xsl:text>
+        <xsl:value-of select="@transformation-uri"/>
+        <xsl:text>, inputs = {:xml => </xsl:text>
         <xsl:choose>
           <xsl:when test="string(@variable)">
             <xsl:call-template name="resolve-variable">
               <xsl:with-param name="var" select="@variable"/>
             </xsl:call-template>
           </xsl:when>
-          <xsl:when test="string(@name)">
-            <xsl:text>result[:</xsl:text>
-            <xsl:value-of select="@name"/>
-            <xsl:text>]</xsl:text>
-          </xsl:when>
-          <xsl:when test="string(@fix-value)">
-            <xsl:value-of select="@fix-value"/>
+          <xsl:when test="string(@message-parameter)">
+            <xsl:call-template name="resolve-message-parameter"/>
           </xsl:when>
         </xsl:choose>
+        <xsl:text>, :xsl => &#xa;&lt;&lt;XSLT&#xa;</xsl:text>
+          <xsl:call-template name="prefix-whitespaces"/>
+          <xsl:call-template name="xml-to-string">
+            <xsl:with-param name="node-set" select="child::xsl:*"/>
+          </xsl:call-template>
+          <xsl:text>&#xa;XSLT&#xa;</xsl:text>
+          <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:text>}</xsl:text>
+        <xsl:text> do |result|&#xa;</xsl:text>
+          <xsl:call-template name="prefix-whitespaces"/>
+          <xsl:text>  </xsl:text>
+          <xsl:choose>
+            <xsl:when test="string(@variable)">
+              <xsl:call-template name="resolve-variable">
+                <xsl:with-param name="var" select="@variable"/>
+              </xsl:call-template>
+            </xsl:when>
+            <xsl:when test="string(@message-parameter)">
+              <xsl:call-template name="resolve-message-parameter"/>
+            </xsl:when>
+          </xsl:choose>
+          <xsl:text> = result.values[0]&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:text>end&#xa;</xsl:text>
       </xsl:when>
-      <xsl:when test="not(string(@message-parameter))and (string(@variable))">
-      <!-- Context is the target -->
-        <xsl:call-template name="resolve-variable">
-          <xsl:with-param name="var" select="@variable"/>
-        </xsl:call-template>
-        <xsl:text> = </xsl:text>
-        <xsl:choose>
-          <xsl:when test="string(@name)">
-            <xsl:text>result[:</xsl:text>
-            <xsl:value-of select="@name"/>
-            <xsl:text>]</xsl:text>
-          </xsl:when>
-        </xsl:choose>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:text>") # ERROR during assignment of output</xsl:text>
-      </xsl:otherwise>
     </xsl:choose>
     <!-- }}} -->
   </xsl:template>
 
   <xsl:template match="//flow:instruction">
     <!-- {{{ -->
-    <xsl:text>&#xa;</xsl:text>
-    <xsl:call-template name="prefix-whitespaces"/>
-    <xsl:call-template name="resolve-variable">
-      <xsl:with-param name="var" select="@target"/>
-    </xsl:call-template>
+    <xsl:param name="mode"/>
+    <xsl:variable name="var" select="@variable"/>
     <xsl:choose>
-      <xsl:when test="not(contains(@operator,'='))">
-        <xsl:text>.</xsl:text>
+      <xsl:when test="($mode = 'transform') and (child::xsl:*)">
+        <xsl:text>Transform target:</xsl:text>
+        <xsl:choose>
+          <xsl:when test="not(contains(@operator,'='))">
+            <xsl:text>.</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+          </xsl:otherwise>
+        </xsl:choose>
+        <xsl:value-of select="@operator"/>
+        <xsl:value-of select="generate-id(//flow:*[@id = $var])"/>
       </xsl:when>
-      <xsl:otherwise>
-      </xsl:otherwise>
-    </xsl:choose>
-    <xsl:value-of select="@operator"/>
-    <xsl:text>(</xsl:text>
-    <xsl:choose>
-      <xsl:when test="string(@variable)">
+      <xsl:when test="child::xsl:*">
+        <xsl:text>&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
         <xsl:call-template name="resolve-variable">
           <xsl:with-param name="var" select="@variable"/>
         </xsl:call-template>
+        <xsl:choose>
+          <xsl:when test="not(contains(@operator,'='))">
+            <xsl:text>.</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+          </xsl:otherwise>
+        </xsl:choose>
+        <xsl:value-of select="@operator"/>
+        <xsl:value-of select="generate-id(//flow:*[@id = $var])"/>
       </xsl:when>
-      <xsl:when test="string(@fix-value)">
-       <xsl:value-of select="@fix-value"/> 
-      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text>&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:call-template name="resolve-variable">
+          <xsl:with-param name="var" select="@target"/>
+        </xsl:call-template>
+        <xsl:choose>
+          <xsl:when test="not(contains(@operator,'='))">
+            <xsl:text>.</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+          </xsl:otherwise>
+        </xsl:choose>
+        <xsl:value-of select="@operator"/>
+        <xsl:text>(</xsl:text>
+        <xsl:choose>
+          <xsl:when test="string(@variable)">
+            <xsl:call-template name="resolve-variable">
+              <xsl:with-param name="var" select="@variable"/>
+            </xsl:call-template>
+          </xsl:when>
+          <xsl:when test="string(@fix-value)">
+           <xsl:value-of select="@fix-value"/> 
+          </xsl:when>
+        </xsl:choose>
+        <xsl:text>)</xsl:text>
+      </xsl:otherwise>
     </xsl:choose>
-    <xsl:text>)</xsl:text>
     <!-- }}} -->  
   </xsl:template>
 
   <xsl:template match="//flow:manipulate">
     <!-- {{{ -->
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:apply-templates name="child::flow:instruction">
+      <xsl:with-param name="mode" select="'transform'"/>
+    </xsl:apply-templates>
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>activity :</xsl:text>

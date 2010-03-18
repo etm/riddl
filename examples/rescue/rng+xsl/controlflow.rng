@@ -137,6 +137,7 @@
           <choice>
             <group>
               <attribute name="variable"/>
+              <ref name="transformable"/>
             </group>
             <attribute name="fix-value"/>
           </choice>
