@@ -69,8 +69,17 @@
     </parallel>
     <manipulate id="man_01"> 
       <instruction target="iterated_context" operator="+=" variable="some_context"/> 
-      <instruction target="some_context" operator="-=" fix-value="Date.new(@some_context)"/>
-      <instruction target="with_pattern" operator="+=" variable="some_context"/>
+      <instruction target="some_context" operator="-=" variable="wo_pattern"/>
+      <instruction target="with_pattern" operator="+=" variable="some_context" transformation-uri="transformation_service">
+        <xsl:template match="/">
+          <xsl:apply-templates select="//results"/> 
+        </xsl:template>
+        <xsl:template match="//results">
+          <xsl:element name="result">
+            <xsl:value-of select="text"/>
+          </xsl:element>
+        </xsl:template>
+      </instruction>
       <instruction target="some_context" operator="some_operation" fix-value="@some_context.some_method(@some_context)"/>
     </manipulate>
   </cycle>
