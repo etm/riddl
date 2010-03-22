@@ -40,6 +40,8 @@
         <critical id="crit_01">
           <call id="call_02" endpoint="with_pattern" http-method="get">
             <input name="xml" message-parameter="xml_context" transformation-uri="transformation_service">
+              <copy xsl-name="some-variable" variable="some_context"/>
+              <copy xsl-name="some-context" variable="wo_pattern"/>
               <xsl:template match="/">
                 <xsl:apply-templates select="//items"/> 
               </xsl:template>

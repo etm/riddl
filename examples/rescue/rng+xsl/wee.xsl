@@ -55,6 +55,20 @@
     <!-- }}} -->
   </xsl:template>
 
+  <xsl:template match="//flow:copy">
+    <!-- {{{ -->
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>&lt;xsl:variable name=&quot;</xsl:text>
+    <xsl:value-of select="@xsl-name"/>
+    <xsl:text>&quot; select=&quot;#{</xsl:text>
+    <xsl:call-template name="resolve-variable">
+      <xsl:with-param name="var" select="@variable"/>
+    </xsl:call-template>
+    <xsl:text>}&quot;&gt;</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <!-- }}} -->
+  </xsl:template>
+
   <xsl:template name="input">
     <!-- {{{ -->
     <xsl:param name="input" select="child::flow:input"/>
@@ -67,7 +81,7 @@
         <xsl:when test="string(@transformation-uri)">
           <xsl:text>&#xa;</xsl:text>
           <xsl:call-template name="prefix-whitespaces"/>
-          <xsl:text># -------------- Perform input transformation ---------------------&#xa;</xsl:text>
+          <xsl:text>&#xa;# -------------- Perform input transformation ---------------------&#xa;</xsl:text>
           <xsl:call-template name="prefix-whitespaces"/>
           <xsl:text>var_</xsl:text>
           <xsl:value-of select="$id"/>
@@ -93,6 +107,7 @@
             </xsl:when>
           </xsl:choose>
           <xsl:text>, :xsl => &#xa;&lt;&lt;XSLT&#xa;</xsl:text>
+            <xsl:apply-templates select="child::flow:copy"/>
             <xsl:call-template name="prefix-whitespaces"/>
             <xsl:call-template name="xml-to-string">
               <xsl:with-param name="node-set" select="child::xsl:*"/>
@@ -137,6 +152,7 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:for-each>
+    <xsl:text>&#xa;# -------------- Perform input transformation ---------------------&#xa;</xsl:text>
     <!-- }}} --> 
   </xsl:template>
 
@@ -232,6 +248,7 @@
 
   <xsl:template match="//flow:output">
     <!-- {{{ -->
+    <xsl:text>&#xa;# -------------- Perform output transformation ---------------------&#xa;</xsl:text>
     <xsl:param name="mode"/>
     <xsl:choose>
       <xsl:when test="$mode = 'assign'">
@@ -300,6 +317,7 @@
           </xsl:when>
         </xsl:choose>
         <xsl:text>, :xsl => &#xa;&lt;&lt;XSLT&#xa;</xsl:text>
+          <xsl:apply-templates select="child::flow:copy"/>
           <xsl:call-template name="prefix-whitespaces"/>
           <xsl:call-template name="xml-to-string">
             <xsl:with-param name="node-set" select="child::xsl:*"/>
@@ -325,6 +343,7 @@
         <xsl:text>end&#xa;</xsl:text>
       </xsl:when>
     </xsl:choose>
+    <xsl:text>&#xa;# -------------- Perform output transformation ---------------------&#xa;</xsl:text>
     <!-- }}} -->
   </xsl:template>
 
@@ -371,6 +390,7 @@
           </xsl:otherwise>
         </xsl:choose>
         <xsl:text>, :xsl => &#xa;&lt;&lt;XSLT&#xa;</xsl:text>
+          <xsl:apply-templates select="child::flow:copy"/>
           <xsl:call-template name="prefix-whitespaces"/>
           <xsl:call-template name="xml-to-string">
             <xsl:with-param name="node-set" select="child::xsl:*"/>
@@ -456,6 +476,7 @@
 
   <xsl:template match="//flow:manipulate">
     <!-- {{{ -->
+    <xsl:text>&#xa;# -------------- Perform manipulate transformation ---------------------&#xa;</xsl:text>
     <xsl:text>&#xa;</xsl:text>
     <xsl:apply-templates name="child::flow:instruction">
       <xsl:with-param name="mode" select="'transform'"/>
@@ -471,6 +492,7 @@
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>end</xsl:text>
+    <xsl:text>&#xa;# -------------- Perform manipulate transformation ---------------------&#xa;</xsl:text>
     <!-- }}} -->  
   </xsl:template>
   
