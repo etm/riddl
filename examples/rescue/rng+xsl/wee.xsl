@@ -332,34 +332,114 @@
     <!-- {{{ -->
     <xsl:param name="mode"/>
     <xsl:variable name="var" select="@variable"/>
+    <xsl:variable name="target" select="@target"/>
     <xsl:choose>
       <xsl:when test="($mode = 'transform') and (child::xsl:*)">
-        <xsl:text>Transform target:</xsl:text>
-        <xsl:choose>
-          <xsl:when test="not(contains(@operator,'='))">
-            <xsl:text>.</xsl:text>
-          </xsl:when>
-          <xsl:otherwise>
-          </xsl:otherwise>
-        </xsl:choose>
-        <xsl:value-of select="@operator"/>
-        <xsl:value-of select="generate-id(//flow:*[@id = $var])"/>
-      </xsl:when>
-      <xsl:when test="child::xsl:*">
         <xsl:text>&#xa;</xsl:text>
         <xsl:call-template name="prefix-whitespaces"/>
-        <xsl:call-template name="resolve-variable">
-          <xsl:with-param name="var" select="@variable"/>
-        </xsl:call-template>
+        <xsl:value-of select="generate-id()"/>
+        <xsl:text> = </xsl:text>
         <xsl:choose>
-          <xsl:when test="not(contains(@operator,'='))">
-            <xsl:text>.</xsl:text>
+          <xsl:when test="preceding-sibling::flow:instruction[@target = $target]">
+            <xsl:value-of select="generate-id(preceding-sibling::flow:instruction[@target = $target][1])"/>
           </xsl:when>
           <xsl:otherwise>
+            <xsl:call-template name="resolve-variable">
+              <xsl:with-param name="var" select="@target"/>
+            </xsl:call-template>
           </xsl:otherwise>
         </xsl:choose>
+        <xsl:text>&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:text>activity :transform_instruction_</xsl:text>
+        <xsl:value-of select="@target"/>
+        <xsl:text>_</xsl:text>
+        <xsl:value-of select="parent::flow:manipulate/@id"/>
+        <xsl:text>_</xsl:text>
+        <xsl:value-of select="generate-id()"/>
+        <xsl:text>, :</xsl:text>
+        <xsl:value-of select="@transformation-uri"/>
+        <xsl:text>, inputs = {:xml => </xsl:text>
+        <xsl:choose>
+          <xsl:when test="preceding-sibling::flow:instruction[@target = $var]">
+            <xsl:value-of select="generate-id(preceding-sibling::flow:instruction[@target = $var][1])"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:call-template name="resolve-variable">
+              <xsl:with-param name="var" select="@variable"/>
+            </xsl:call-template>
+          </xsl:otherwise>
+        </xsl:choose>
+        <xsl:text>, :xsl => &#xa;&lt;&lt;XSLT&#xa;</xsl:text>
+          <xsl:call-template name="prefix-whitespaces"/>
+          <xsl:call-template name="xml-to-string">
+            <xsl:with-param name="node-set" select="child::xsl:*"/>
+          </xsl:call-template>
+          <xsl:text>&#xa;XSLT&#xa;</xsl:text>
+          <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:text>}</xsl:text>
+        <xsl:text> do |result|&#xa;</xsl:text>
+          <xsl:call-template name="prefix-whitespaces"/>
+          <xsl:text>  </xsl:text>
+          <xsl:value-of select="generate-id()"/>
+          <xsl:if test="not(contains(@operator, '='))">
+            <xsl:text>.</xsl:text>
+          </xsl:if>
+          <xsl:value-of select="@operator"/>
+          <xsl:if test="not(contains(@operator, '='))">
+            <xsl:text>(</xsl:text>
+          </xsl:if>
+          <xsl:text>result.values[0]</xsl:text>
+          <xsl:if test="not(contains(@operator, '='))">
+            <xsl:text>)</xsl:text>
+          </xsl:if>
+          <xsl:text>&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:text>end&#xa;</xsl:text>
+      </xsl:when>
+      <xsl:when test="($mode = 'transform')">
+        <xsl:value-of select="generate-id()"/>
+        <xsl:text> = </xsl:text>
+        <xsl:choose>
+          <xsl:when test="preceding-sibling::flow:instruction[@target = $target]">
+            <xsl:value-of select="generate-id(preceding-sibling::flow:instruction[@target = $target][1])"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:call-template name="resolve-variable">
+              <xsl:with-param name="var" select="@target"/>
+            </xsl:call-template>
+          </xsl:otherwise>
+        </xsl:choose>
+        <xsl:text>&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:value-of select="generate-id()"/>
+        <xsl:if test="not(contains(@operator, '='))">
+          <xsl:text>.</xsl:text>
+        </xsl:if>
         <xsl:value-of select="@operator"/>
-        <xsl:value-of select="generate-id(//flow:*[@id = $var])"/>
+        <xsl:if test="not(contains(@operator, '='))">
+          <xsl:text>(</xsl:text>
+        </xsl:if>
+        <xsl:choose>
+          <xsl:when test="preceding-sibling::flow:instruction[@target = $var]">
+            <xsl:value-of select="generate-id(preceding-sibling::flow:instruction[@target = $var])"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:choose>
+              <xsl:when test="string(@variable)">
+                <xsl:call-template name="resolve-variable">
+                  <xsl:with-param name="var" select="@variable"/>
+                </xsl:call-template>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="@fix-value"/>
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:otherwise>
+        </xsl:choose>
+        <xsl:if test="not(contains(@operator, '='))">
+          <xsl:text>)</xsl:text>
+        </xsl:if>
       </xsl:when>
       <xsl:otherwise>
         <xsl:text>&#xa;</xsl:text>
@@ -367,26 +447,8 @@
         <xsl:call-template name="resolve-variable">
           <xsl:with-param name="var" select="@target"/>
         </xsl:call-template>
-        <xsl:choose>
-          <xsl:when test="not(contains(@operator,'='))">
-            <xsl:text>.</xsl:text>
-          </xsl:when>
-          <xsl:otherwise>
-          </xsl:otherwise>
-        </xsl:choose>
-        <xsl:value-of select="@operator"/>
-        <xsl:text>(</xsl:text>
-        <xsl:choose>
-          <xsl:when test="string(@variable)">
-            <xsl:call-template name="resolve-variable">
-              <xsl:with-param name="var" select="@variable"/>
-            </xsl:call-template>
-          </xsl:when>
-          <xsl:when test="string(@fix-value)">
-           <xsl:value-of select="@fix-value"/> 
-          </xsl:when>
-        </xsl:choose>
-        <xsl:text>)</xsl:text>
+        <xsl:text> = </xsl:text>
+        <xsl:value-of select="generate-id()"/>
       </xsl:otherwise>
     </xsl:choose>
     <!-- }}} -->  
