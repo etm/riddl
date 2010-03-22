@@ -296,7 +296,7 @@
   <optional>
     <attribute name="transformation-uri"/>
     <zeroOrMore>
-      <element name="copy">
+      <element name="flow:copy">
         <attribute name="xsl-name"/>
         <attribute name="variable"/>
       </element>
