@@ -7,7 +7,6 @@
   <xsl:output method="text"/>
 
   <xsl:template match="/">
-    <xsl:text>#--------------------------------------------------------------------------------------------------&#xa;</xsl:text>
     <xsl:apply-templates select="/flow:controlflow/flow:*"/>
     <xsl:text>&#xa;</xsl:text>
   </xsl:template>
@@ -81,7 +80,7 @@
         <xsl:when test="string(@transformation-uri)">
           <xsl:text>&#xa;</xsl:text>
           <xsl:call-template name="prefix-whitespaces"/>
-          <xsl:text>&#xa;# -------------- Perform input transformation ---------------------&#xa;</xsl:text>
+          <xsl:text>parallel_branch do&#xa;</xsl:text>
           <xsl:call-template name="prefix-whitespaces"/>
           <xsl:text>var_</xsl:text>
           <xsl:value-of select="$id"/>
@@ -129,6 +128,8 @@
           <xsl:text>var_</xsl:text>
           <xsl:value-of select="$id"/>
           <xsl:text>&#xa;</xsl:text>
+          <xsl:call-template name="prefix-whitespaces"/>
+          <xsl:text>end&#xa;</xsl:text>
         </xsl:when>
         <xsl:otherwise>
           <xsl:text>&#xa;</xsl:text>
@@ -152,7 +153,6 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:for-each>
-    <xsl:text>&#xa;# -------------- Perform input transformation ---------------------&#xa;</xsl:text>
     <!-- }}} --> 
   </xsl:template>
 
@@ -189,7 +189,13 @@
 
   <xsl:template match="//flow:call">
     <!-- {{{ -->
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>parallel (:wait) do</xsl:text>
     <xsl:call-template name="input"/>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>end&#xa;</xsl:text>
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>activity :</xsl:text>
@@ -240,15 +246,20 @@
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>end</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>parallel (:wait) do</xsl:text>
     <xsl:apply-templates select="child::flow:output">
       <xsl:with-param name="mode" select="'transform'"/>
     </xsl:apply-templates>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
+    <xsl:text>end</xsl:text>
     <!-- }}} -->
   </xsl:template>
 
   <xsl:template match="//flow:output">
     <!-- {{{ -->
-    <xsl:text>&#xa;# -------------- Perform output transformation ---------------------&#xa;</xsl:text>
     <xsl:param name="mode"/>
     <xsl:choose>
       <xsl:when test="$mode = 'assign'">
@@ -297,6 +308,8 @@
       <xsl:when test="($mode = 'transform') and (child::xsl:*)">
         <xsl:text>&#xa;</xsl:text>
         <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:text>parallel_branch do&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
         <xsl:text>activity :transform_output_</xsl:text>
         <xsl:value-of select="@name"/>
         <xsl:text>_</xsl:text>
@@ -341,9 +354,11 @@
           <xsl:text> = result.values[0]&#xa;</xsl:text>
         <xsl:call-template name="prefix-whitespaces"/>
         <xsl:text>end&#xa;</xsl:text>
+        <xsl:text>&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:text>end&#xa;</xsl:text>
       </xsl:when>
     </xsl:choose>
-    <xsl:text>&#xa;# -------------- Perform output transformation ---------------------&#xa;</xsl:text>
     <!-- }}} -->
   </xsl:template>
 
@@ -476,8 +491,8 @@
 
   <xsl:template match="//flow:manipulate">
     <!-- {{{ -->
-    <xsl:text>&#xa;# -------------- Perform manipulate transformation ---------------------&#xa;</xsl:text>
     <xsl:text>&#xa;</xsl:text>
+    <xsl:call-template name="prefix-whitespaces"/>
     <xsl:apply-templates name="child::flow:instruction">
       <xsl:with-param name="mode" select="'transform'"/>
     </xsl:apply-templates>
@@ -492,7 +507,6 @@
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>end</xsl:text>
-    <xsl:text>&#xa;# -------------- Perform manipulate transformation ---------------------&#xa;</xsl:text>
     <!-- }}} -->  
   </xsl:template>
   
@@ -516,16 +530,16 @@
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>parallel (:</xsl:text>
     <xsl:value-of select="@type"/>
-    <xsl:text>)</xsl:text>
+    <xsl:text>) do</xsl:text>
     <xsl:apply-templates select="child::flow:branch"/>
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>end</xsl:text>
-    <!-- }}} -->
+    <!-- }}} --> 
   </xsl:template>
   
   <xsl:template match="//flow:branch">
-    <!-- {{{ --> 
+    <!-- {{{ -->  
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>parallel_branch do</xsl:text>
