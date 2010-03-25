@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<grammar  xmlns="http://relaxng.org/ns/structure/1.0"
+          xmlns:rng="http://relaxng.org/ns/structure/1.0"
+          xmlns:syntax="http://cpee.org/ns/syntax/1.0"
+          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+
+<start>
+  <element name="syntax:controlflow">
+    <ref name="controlflow-code"/>
+  </element>
+</start>
+
+<define name="controlflow-code">
+  <!--  {{{ -->
+  <zeroOrMore>
+    <choice>
+      <ref name="controls"/>
+    </choice>
+  </zeroOrMore>
+  <!-- }}} -->
+</define>
+
+<define name="controls">
+  <!-- {{{ -->
+  <zeroOrMore>
+    <choice>
+      <ref name="manipulate"/>
+      <ref name="call"/>
+      <ref name="cycle"/>
+      <ref name="parallel"/>
+      <ref name="branch"/>
+      <ref name="choose"/>
+      <ref name="critical"/>
+    </choice>
+  </zeroOrMore>
+  <!-- }}} -->
+</define>
+
+<define name="choose">
+<!-- {{{ --> 
+  <element name="syntax:choose">
+    <oneOrMore>
+      <element name="syntax:alternative">
+        <attribute name="condition">
+          <text/>
+        </attribute>
+      </element>
+    </oneOrMore>
+    <optional>
+      <element name="syntax:otherwise">
+        <ref name="controlflow-code"/>
+      </element>
+    </optional>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="parallel">
+<!-- {{{ --> 
+  <element name="syntax:parallel">
+    <attribute name="type">
+      <choice>
+        <value>wait</value>
+        <value>nowait</value>
+      </choice>
+    </attribute>
+    <oneOrMore>
+      <ref name="controlflow-code"/>
+    </oneOrMore>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="critical">
+<!-- {{{ --> 
+  <element name="syntax:critical">
+    <attribute name="id"/>
+    <ref name="controlflow-code"/>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="cycle">
+<!-- {{{ --> 
+  <element name="syntax:cycle">
+    <ref name="controls"/>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="manipulate">
+<!-- {{{ --> 
+  <element name="syntax:manipulate">
+    <attribute name="id"/>
+    <text/>
+  </element>
+<!-- }}} --> 
+</define>
+
+<define name="call">
+<!-- {{{ --> 
+  <element name="syntax:call">
+    <attribute name="id"/>
+    <attribute name="endpoint"/>
+    <attribute name="http-method">
+      <text/>
+    </attribute>
+    <zeroOrMore>
+      <element name="syntax:parameter">
+        <attribute name="name"/>
+        <attribute name="value"/>
+      </element>
+    </zeroOrMore>
+    <optional>
+      <ref name="manipulate"/>
+    </optional>
+  </element>
+<!-- }}} --> 
+</define>
+
+
+</grammar>
