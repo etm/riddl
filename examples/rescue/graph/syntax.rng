@@ -14,26 +14,30 @@
 <define name="controlflow-code">
   <!--  {{{ -->
   <zeroOrMore>
-    <choice>
       <ref name="controls"/>
-    </choice>
   </zeroOrMore>
   <!-- }}} -->
 </define>
 
 <define name="controls">
   <!-- {{{ -->
-  <zeroOrMore>
-    <choice>
-      <ref name="manipulate"/>
-      <ref name="call"/>
-      <ref name="cycle"/>
-      <ref name="parallel"/>
-      <ref name="branch"/>
-      <ref name="choose"/>
-      <ref name="critical"/>
-    </choice>
-  </zeroOrMore>
+  <choice>
+    <ref name="manipulate"/>
+    <ref name="call"/>
+    <ref name="cycle"/>
+    <ref name="parallel"/>
+    <ref name="branch"/>
+    <ref name="choose"/>
+    <ref name="critical"/>
+  </choice>
+  <!-- }}} -->
+</define>
+
+<define name="branch">
+  <!-- {{{ -->
+  <element name="syntax:branch">
+    <ref name="controlflow-code"/>
+  </element>
   <!-- }}} -->
 </define>
 
@@ -45,6 +49,7 @@
         <attribute name="condition">
           <text/>
         </attribute>
+        <ref name="controlflow-code"/>
       </element>
     </oneOrMore>
     <optional>
@@ -65,9 +70,7 @@
         <value>nowait</value>
       </choice>
     </attribute>
-    <oneOrMore>
-      <ref name="controlflow-code"/>
-    </oneOrMore>
+    <ref name="controlflow-code"/>
   </element>
 <!-- }}} -->
 </define>
@@ -84,7 +87,8 @@
 <define name="cycle">
 <!-- {{{ --> 
   <element name="syntax:cycle">
-    <ref name="controls"/>
+    <attribute name="condition"/>
+    <ref name="controlflow-code"/>
   </element>
 <!-- }}} -->
 </define>
