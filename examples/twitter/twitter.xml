@@ -21,9 +21,7 @@
   </message>
 
   <message name="xml">
-    <parameter name="return" mimetype="application/xml">
-      <!-- provide a relaxng of the return -->
-    </parameter>
+    <parameter name="return" mimetype="application/xml"/>
   </message>
 
   <resource>
