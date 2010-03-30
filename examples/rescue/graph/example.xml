@@ -1,0 +1,56 @@
+<controlflow xmlns="http://cpee.org/ns/syntax/1.0">
+  <call id="c01" endpoint="ep01" http-method="get">
+    <parameter name="input" value="17"/>
+    <parameter name="input_2" value="&quot;Aber Hallo!&quot;"/>
+    <manipulate id="man">
+      @c1 = result[:out_name_1]
+      @c2 = result[:out_name_2]
+    </manipulate>
+  </call>
+  <critical id="crit01">
+    <call id="c02" endpoint="ep02" http-method="get">
+      <parameter name="input" value="17"/>
+      <parameter name="input_2" value="&quot;Aber Hallo!&quot;"/>
+    </call>
+  </critical>
+  <parallel type="wait">
+    <branch>
+      <call id="c03" endpoint="ep03" http-method="put">
+        <parameter name="input" value="@c2"/>
+        <manipulate id="man02">
+          @c4 = result
+        </manipulate>
+      </call>
+    </branch>
+    <cycle condition="@c4 != success">
+      <branch>
+        <call id="c04" endpoint="ep04" http-method="put">
+          <parameter name="input" value="@c2"/>
+          <manipulate id="man02">
+            @c4 = result
+          </manipulate>
+        </call>
+      </branch>
+    </cycle>
+  </parallel>
+  <choose>
+    <alternative condition="@c1 lt;= @c3">
+      <manipulate id="man03">
+        @c1.some_method(@c2)
+      </manipulate>
+    </alternative>
+    <alternative condition="@c2 > @c4">
+      <manipulate id="man04">
+        @c2 += @c4
+      </manipulate>
+    </alternative>
+    <otherwise>
+      <manipulate id="man05">
+        @c5 = "Otherwise - it was!"
+      </manipulate>
+    </otherwise>
+  </choose>
+  <critical id="crit01">
+    <call id="c05" endpoint="ep05" http-method="delete"/>
+  </critical>
+</controlflow>

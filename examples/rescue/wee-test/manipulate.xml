@@ -1,0 +1,25 @@
+<controlflow xmlns="http://rescue.org/ns/controlflow/0.2" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <manipulate id="initialize">
+    <context id="context_1">'some string is here'</context>
+    <context id="context_2">4711</context>
+    <context id="context_3">true</context>
+    <context id="context_4">Date.new("2001-12-24")</context>
+    <context id="context_5">'this-is-a-pattern'</context>
+    <endpoint id="ep_1">&quot;http://no_patterns-needed.org/service&quot;</endpoint>
+    <endpoint id="ep_2">&quot;http://here-is-a-pattern-used.org/#{@pattern_context}/some-uri-parts&quot;</endpoint>
+  </manipulate>
+  <manipulate id="man_01"> 
+    <instruction target="context_1" operator="+=" variable="context_2"> 
+      <xsl:template match="/">
+        <xsl:apply-templates select="//results"/> 
+      </xsl:template>
+    </instruction>
+    <instruction target="context_2" operator="=" variable="context_3"/>
+    <instruction target="ep_1" operator="some_method" variable="context_1" transformation-uri="transformation_service">
+      <xsl:template match="/">
+        <xsl:apply-templates select="//results"/> 
+      </xsl:template>
+    </instruction>
+    <instruction target="ep_2" operator="=" fix-value="@some_context.some_method(@some_context)"/>
+  </manipulate>
+</controlflow>

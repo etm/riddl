@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+
+<controlflow xmlns="http://rescue.org/ns/controlflow/0.2">
+<!-- 
+Book tickets for Alice in Wonderland at the 10th of March for 4 persons 
+in an Arthouse Cinema with a carpark and order one package of popcorn 
+for each couple if they are cheaper the 10 EUR together
+-->
+
+  <!-- Endpoints derived from Cinema-domain -->
+  <endpoint id="a01_resource_scope">Cinema/Arthouse</endpoint>
+  <endpoint id="a01_selected_cinema">Cinema/Arthouse</endpoint>
+  <endpoint id="a01_selector_service">http://select-my-cinema.at</endpoint>
+
+  <!-- Context derived from Cinema-domain (variables) -->
+  <context id="a01_empty"/>
+  <context id="a01_carpark">true</context>
+  <context id="property_test"/>
+  
+  <!-- Context derived from activity a01 (messages) -->
+  <context id="a01_title">Alice in Wonderland</context>
+  <context id="a01_date">2010-03-10</context>
+  <context id="a01_preferred_time">20:00:00</context>
+  <context id="a01_number_of_persons">4</context>
+  <context id="a01_movie_title"/>
+  <context id="a01_starting_time"/>
+  <context id="a01_hall"/>
+  <context id="a01_reservation_id"/>
+
+  <!-- Context derived from activty a02 (messages>) -->
+  <context id="a02_quantitty"/>
+  <context id="a02_price"/>
+
+  <call id="a01" endpoint="a01_resource_scope" service-operation="search-and-book" state-controlflow="execute">
+    <constraint property="carpark" comparator="==" context="a01_carpark"/>
+    <endpoint id="selected_cinema" use="a01_selected_cinema"/>
+    <endpoint id="selector_service" use="a01_selector_service"/>
+    <input name="title" context="a01_title"/>
+    <input name="date" context="a01_date"/>
+    <input name="preferred_time" context="a01_preferred_time"/>
+    <input name="number_of_persons" context="a01_number_of_persons"/>
+    <output name="movie_title" context="a01_movie_title"/>
+    <output name="starting_time" context="a01_starting_time"/>
+    <output name="hall" context="a01_hall"/>
+    <output name="reservation_id" context="a01_reservation_id"/>
+    <output property="carpark" context="property_test"/>
+  </call>
+
+  <manipulate id="man_01" target="a02_quantity" operator="/" fix-value="2"/>
+  <call id="a02" endpoint="a01_selected_cinema" service-operation="popcorn" state-controlflow="execute">
+    <input name="quantity" context="a02_quantity"/>
+    <input name="reservation_id" context="a01_reservation_id"/>
+    <output name="price" context="a02_price"/>
+  </call>
+
+  <choose>
+    <alternative>
+      <condition test="a02_price" comparator="&gt;" fix-value="10"/>
+      <call id="a03" endpoint="a01_selected_cinema" service-operation="popcorn" state-controlflow="undo"> 
+        <input name="reservation_id" context="a01_reservation_id"/>
+        <input name="quantity" context="a02_quantity"/>
+      </call>
+    </alternative>
+  </choose>
+</controlflow>

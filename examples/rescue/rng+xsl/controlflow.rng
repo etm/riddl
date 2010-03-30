@@ -1,0 +1,320 @@
+<?xml version="1.0"?>
+<grammar  xmlns="http://relaxng.org/ns/structure/1.0"
+          xmlns:rng="http://relaxng.org/ns/structure/1.0"
+          xmlns:flow="http://rescue.org/ns/controlflow/0.2"
+          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+
+<start combine="choice">
+  <element name="flow:controlflow">
+    <ref name="controlflow-code"/>
+  </element>
+</start>
+
+
+<define name="controlflow-code">
+  <!-- {{{ -->
+  <zeroOrMore>
+    <choice>
+      <ref name="controls"/>
+    </choice>
+  </zeroOrMore>
+  <!-- }}} -->
+</define>
+
+<define name="assigns">
+  <!-- {{{ -->
+  <zeroOrMore>
+    <choice>
+      <ref name="endpoint"/>
+      <ref name="context"/>
+    </choice>
+  </zeroOrMore>
+  <!-- }}} -->
+</define>
+
+<define name="controls">
+  <!-- {{{ -->
+  <zeroOrMore>
+    <choice>
+      <ref name="manipulate"/>
+      <ref name="call"/>
+      <ref name="cycle"/>
+      <ref name="parallel"/>
+      <ref name="choose"/>
+      <ref name="critical"/>
+    </choice>
+  </zeroOrMore>
+  <!-- }}} -->
+</define>
+
+<define name="condition">
+<!-- {{{ --> 
+  <choice>
+    <element name="flow:condition">
+      <attribute name="test"/>
+      <attribute name="comparator"/>
+      <choice>
+        <attribute name="variable"/> <!-- could be context or endpoint -->
+        <attribute name="fix-value"/>
+      </choice>
+    </element>
+    <element name="flow:group">
+      <attribute name="connector"/>
+      <ref name="condition"/> <!-- at least two conditions must be member of a group -->
+      <oneOrMore>
+        <ref name="condition"/>
+      </oneOrMore>
+    </element>
+  </choice>
+<!-- }}} -->
+</define>
+
+<define name="choose">
+<!-- {{{ --> 
+  <element name="flow:choose">
+    <oneOrMore>
+      <element name="flow:alternative">
+        <ref name="condition"/>
+        <ref name="controlflow-code"/>
+      </element>
+    </oneOrMore>
+    <optional>
+      <element name="flow:otherwise">
+        <ref name="controlflow-code"/>
+      </element>
+    </optional>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="parallel">
+<!-- {{{ --> 
+  <element name="flow:parallel">
+    <attribute name="type">
+      <choice>
+        <value>wait</value>
+        <value>nowait</value>
+      </choice>
+    </attribute>
+    <oneOrMore>
+      <element name="flow:branch">
+        <ref name="controlflow-code"/>
+      </element>
+    </oneOrMore>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="critical">
+<!-- {{{ --> 
+  <element name="flow:critical">
+    <attribute name="id"/>
+    <ref name="controlflow-code"/>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="cycle">
+<!-- {{{ --> 
+  <element name="flow:cycle">
+    <ref name="condition"/>
+    <ref name="controls"/>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="manipulate">
+<!-- {{{ --> 
+  <element name="flow:manipulate">
+    <attribute name="id"/>
+    <zeroOrMore>
+      <choice>
+        <ref name="assigns"/>
+        <element name="flow:instruction">
+          <attribute name="target"/>
+          <attribute name="operator"/> 
+          <choice>
+            <group>
+              <attribute name="variable"/>
+              <ref name="transformable"/>
+            </group>
+            <attribute name="fix-value"/>
+          </choice>
+        </element>
+      </choice>
+    </zeroOrMore>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="context">
+<!-- {{{ --> 
+  <element name="flow:context">
+    <attribute name="id"/>
+    <text/>
+  </element> 
+<!-- }}} -->
+</define>
+
+<define name="constraint">
+<!-- {{{ --> 
+  <element name="flow:constraint"> 
+    <attribute name="xpath"/>
+    <attribute name="comparator"/>
+    <choice>
+      <attribute name="variable"/>
+      <attribute name="fix-value"/>
+    </choice>
+  </element>
+<!-- }}} -->
+</define>
+
+<define name="call">
+<!-- {{{ --> 
+  <element name="flow:call">
+    <attribute name="id"/>
+    <attribute name="endpoint"/>
+    <choice>
+      <group>
+        <attribute name="service-operation"/>
+        <attribute name="state-controlflow"/>
+        <optional>
+          <attribute name="group-by"/> <!-- holds the xpath to be used for generating the oportunities out of the input-message -->
+          <element name="flow:resource-id"> <!-- selector and target for the resource from which the output was selected -->
+            <attribute name="xpath"/>
+            <attribute name="endpoint"/>
+          </element>
+        </optional>
+        <zeroOrMore>
+          <ref name="constraint"/>
+        </zeroOrMore>
+        <zeroOrMore>
+          <element name="flow:assign-endpoint">
+            <attribute name="id"/>
+            <attribute name="use"/>
+          </element>
+        </zeroOrMore>
+      </group>
+      <group>
+        <attribute name="http-method">
+          <choice>
+            <value>get</value>
+            <value>post</value>
+            <value>put</value>
+            <value>delete</value>
+          </choice>
+        </attribute>
+        <optional>
+          <attribute name="group-by"/> <!-- holds the xpath to be used for generating the oportunities out of the input-message -->
+          <element name="flow:resource-id"> <!-- selector and target for the resource from which the output was selected -->
+            <attribute name="xpath"/>
+            <attribute name="endpoint"/>
+          </element>
+        </optional>
+      </group>
+    </choice>
+    <ref name="in-out"/>
+  </element>
+<!-- }}} --> 
+</define>
+
+<define name="xsl-code">
+  <!-- {{{ -->
+  <element>
+    <nsName ns="http://www.w3.org/1999/XSL/Transform"/>
+    <zeroOrMore>
+      <attribute>
+        <anyName/>
+        <text/>
+      </attribute>
+    </zeroOrMore>
+    <choice>
+      <text/>
+      <zeroOrMore>
+        <ref name="xsl-code"/>
+      </zeroOrMore>
+    </choice>
+  </element>
+  <!-- }}} -->
+</define>
+
+<define name="in-out">
+<!--  {{{ -->
+  <zeroOrMore>
+    <choice>
+      <element name="flow:input">
+        <choice>
+          <attribute name="message"/>
+          <group>
+            <attribute name="name"/>
+            <choice>
+              <group>
+                <attribute name="variable"/>
+                <ref name="transformable"/>
+              </group>
+              <group>
+                <attribute name="message-parameter"/>
+                <ref name="transformable"/>
+              </group>
+              <attribute name="fix-value"/>
+            </choice>
+          </group>
+        </choice>
+      </element>
+      <element name="flow:output">
+        <choice>
+          <attribute name="message"/>
+          <group>
+            <attribute name="message-parameter"/>
+            <choice>
+              <group>
+                <attribute name="name"/>
+                <ref name="transformable"/>
+              </group>
+              <group>
+                <attribute name="variable"/>
+                <ref name="transformable"/>
+              </group>
+              <attribute name="fix-value"/>
+            </choice>
+          </group>
+          <group>
+            <attribute name="variable"/>
+            <attribute name="name"/>
+            <ref name="transformable"/>
+          </group>
+        </choice>
+      </element>
+    </choice>
+  </zeroOrMore>
+<!-- }}} -->
+</define>
+
+<define name="transformable">
+  <!-- {{{ -->
+  <optional>
+    <attribute name="transformation-uri"/>
+    <zeroOrMore>
+      <element name="flow:copy">
+        <attribute name="xsl-name"/>
+        <attribute name="variable"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <ref name="xsl-code"/>
+    </zeroOrMore>
+  </optional>
+  <!-- }}} -->
+</define>
+
+<define name="endpoint">
+<!-- {{{ --> 
+  <element name="flow:endpoint">
+    <attribute name="id"/>
+    <text/>
+  </element>
+<!-- }}} -->
+</define>
+
+</grammar>
