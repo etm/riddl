@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <title>Workflow-graph</title>
+    <script src="graph.js" type="text/javascript" charset="utf-8"></script>
+    <script src="request.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+      function doSome() {
+        var url = document.getElementById("txtURL").value;
+        make_request(url, function(resp) {alert(resp);});
+
+        alert(url);
+      }
+    </script>
+  </head>
+  <body>
+    <input type="text" value="http://www.pri.univie.ac.at/~ralph/example.xml" id="txtURL"/>
+    <input type="button" value="load" onClick="doSome()"/>
+    <h1>Process-graph</h1>
+    <div id="graph">
+    </div>
+  </body>
+</html>

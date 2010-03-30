@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<grammar  xmlns="http://relaxng.org/ns/structure/1.0"
+          xmlns:rng="http://relaxng.org/ns/structure/1.0"
+          xmlns:domain="http://rescue.org/ns/domain/0.2"
+          xmlns:flow="http://rescue.org/ns/controlflow/0.2"
+          datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+<include href="relaxng-modular.rng"/>
+<include href="controlflow.rng"/>
+
+<start combine="choice">
+  <element name="domain:domain-description">
+    <element name="domain:properties">
+      <zeroOrMore>
+        <ref name="property"/>
+      </zeroOrMore>
+    </element>
+
+    <element name="domain:messages">
+      <zeroOrMore>
+        <element name="domain:message">
+          <attribute name="name"/>
+          <ref name="message"/>
+        </element>
+      </zeroOrMore>
+    </element>
+    <element name="domain:operations">
+      <zeroOrMore>
+        <ref name="operation"/>
+      </zeroOrMore>
+    </element>
+  </element>
+</start>
+
+
+<define name="message">
+  <zeroOrMore>
+    <choice>
+      <element name="rng:element">
+        <attribute name="name"/>
+        <element name="rng:zeroOrMore">
+          <element name="rng:element">
+            <attribute name="name"/>
+            <zeroOrMore>
+              <ref name="property"/>
+            </zeroOrMore>
+          </element>
+        </element>
+      </element>
+      <ref name="property"/>
+    </choice>
+  </zeroOrMore>
+</define>
+
+<define name="operation">
+  <element name="domain:operation">
+    <attribute name="name"/>
+    <attribute name="short"/>
+    <ref name="description"/>
+    <optional>
+      <element name="domain:variables">
+        <zeroOrMore>
+          <ref name="context"/>
+        </zeroOrMore>
+      </element>
+    </optional>
+    <element name="domain:endpoints">
+      <element name="flow:endpoint">
+        <attribute name="id"><value>resource_scope</value></attribute>
+      </element>
+      <zeroOrMore>
+        <ref name="endpoint"/>
+      </zeroOrMore>
+    </element>
+    <element name="domain:execute">
+      <ref name="controls"/>
+    </element>
+    <element name="domain:compensate">
+      <ref name="controls"/>
+    </element>
+    <element name="domain:undo">
+      <ref name="controls"/>
+    </element>
+    <element name="domain:redo">
+      <ref name="controls"/>
+    </element>
+    <element name="domain:suspend">
+      <ref name="controls"/>
+    </element>
+    <element name="domain:abort">
+      <ref name="controls"/>
+    </element>
+  </element>
+</define>
+
+<define name="description">
+  <zeroOrMore>
+    <element name="domain:description">
+      <attribute name="lang"><data type="language"/></attribute>
+      <text/>
+    </element>
+  </zeroOrMore>
+</define>
+
+<define name="property">
+  <element name="rng:element">
+    <attribute name="name"/>
+    <oneOrMore>
+      <element name="domain:caption">
+        <attribute name="lang"><data type="language"/></attribute>
+        <text/>
+      </element>
+    </oneOrMore>
+    <element name="rng:data">
+      <ref name="data"/>
+    </element>
+  </element>
+</define>
+
+</grammar>

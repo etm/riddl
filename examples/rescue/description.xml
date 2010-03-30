@@ -27,8 +27,8 @@
   <message name="properties">
     <parameter name="properties" type="string"/>
   </message>
-  <message name="serviceSchema">
-    <parameter name="serviceSchema" type="string"/>
+  <message name="service-schema">
+    <parameter name="service-schema" type="string"/>
   </message>
 
   <message name="schema">
@@ -37,8 +37,8 @@
 
   <message name="group">
     <parameter name="group-name" type="string"/>
-    <parameter name="interface" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <xi:include href="rng+xsl/group.rng"/>
+    <parameter name="domain-description" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rng+xsl/domain.rng"/>
     </parameter>
   </message>
 
@@ -51,17 +51,17 @@
   </message>
 
   <message name="riddl-description">
-    <parameter name="riddl-descritpion" type="string"/>
+    <parameter name="riddl-description" type="string"/>
   </message>
 
 
   <message name="service">
     <parameter name="service-name" type="string"/>
-    <parameter name="properties" mimetype="text/xml"/>
+    <parameter name="service-description" mimetype="text/xml"/>
   </message>
 
-  <message name="service-properties">
-    <parameter name="properties" mimetype="text/xml"/>
+  <message name="service-description">
+    <parameter name="service-description" mimetype="text/xml"/>
   </message>
 
 <!--}}}-->
@@ -71,6 +71,9 @@
     <request method="get" in="riddl-description" out="description">
       <ann:label xml:lang="en">Show description</ann:label>
     </request>
+    <resource relative="xsl" recursive="true">
+      <get in="*" out="xml"/>
+    </resource>  
     <resource relative="groups">
 <!-- {{{ -->
       <get in="*" out="atom-feed"/>
@@ -80,13 +83,14 @@
 <!-- {{{ -->
         <get in="*" out="atom-feed"/>
         <get in="properties" out="schema"/>
-        <get in="serviceSchema" out="schema"/>
+        <get in="service-schema" out="schema"/>
         <put in="rename"/>
         <post in="subgroup"/>
         <delete in="*"/>
         <resource relative="operations">
           <get in="*" out="xml"/>
           <resource>
+            <get in="*" out="xml"/>
             <get in="input" out="schema"/>
             <get in="output" out="schema"/>
           </resource>
@@ -103,11 +107,8 @@
 <!-- {{{ -->
             <get in="*" out="xml"/>
             <put in="rename"/>
-            <put in="service-properties"/>
+            <put in="service-description"/>
             <delete in="*"/>
-            <resource>
-              <get in="*" out="xml"/>
-            </resource>
 <!--}}}-->
           </resource>  
 
