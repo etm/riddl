@@ -39,9 +39,9 @@
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-producer/1.0">
         <start>
           <element name="subscriptions">
-            <attribute name="information">
+            <attribute name="details">
               <choice>
-                <value>full</value>
+                <value>debug</value>
                 <value>production</value>
               </choice>  
             </attribute>
