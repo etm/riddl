@@ -120,9 +120,9 @@ module Riddl
               doc.namespaces = { 'n' => 'http://riddl.org/ns/common-patterns/notifications-producer/1.0' }
               while @p.length > 0
                 topic = @p.shift.value
-                item = p.shift
-                type = item.name
-                items = item.value.split(',')
+                base = @p.shift
+                type = base.name
+                items = base.value.split(',')
                 t = if topics.include?(topic)
                   doc.find("/n:subscription/n:topic[@id='#{topic}']").first
                 else
@@ -130,7 +130,7 @@ module Riddl
                   doc.root.add('topic', :id => topic)
                 end
                 items.each do |i|
-                  t.add(item, i)
+                  t.add(type[0..-2], i)
                 end
               end
             end  

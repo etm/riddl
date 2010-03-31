@@ -6,7 +6,7 @@ module Riddl
       VERSION_MINOR = 0
       PROPERTIES_SCHEMA_XSL_RNG = "#{File.dirname(__FILE__)}/../ns/common-patterns/properties/#{VERSION_MAJOR}.#{VERSION_MINOR}/properties.schema.xsl"
 
-      def self::implementation(properties,schema,strans,handler,level)
+      def self::implementation(properties,schema,strans,handler,level,details=:production)
         unless handler.class == Class && handler.superclass == Riddl::Utils::Properties::HandlerBase
           raise "handler not a subclass of HandlerBase"
         end
