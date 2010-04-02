@@ -7,28 +7,16 @@
           <start>
             <choice>
               <element name="values">
-                <ref name="content"/>
+                <ref name="value-list"/>
               </element>
               <element name="value">
-                <ref name="content"/>
-              </element>
-              <element name="properties">
-                <ref name="content"/>
+                <ref name="value"/>
               </element>
               <element name="not-existing">
                 <empty/>
               </element>  
             </choice>
           </start>
-
-          <define name="content">
-            <oneOrMore>
-              <choice>
-                <ref name="value"/>
-                <ref name="value-list"/>
-              </choice>
-            </oneOrMore>
-          </define>
 
           <define name="value">
             <zeroOrMore>
@@ -40,35 +28,30 @@
           </define>  
                  
           <define name="value-list">
-            <element>
-              <anyName/>
-              <oneOrMore>
-                <choice>
-                  <ref name="value"/>
-                  <ref name="value-list"/>
-                </choice>
-              </oneOrMore>
-            </element>
+            <oneOrMore>
+              <element>
+                <anyName/>
+                <text/>
+              </element>
+            </oneOrMore>
           </define>
           
           <define name="any">
             <element>
               <anyName/>
               <zeroOrMore>
-                <choice>
-                  <attribute>
-                    <anyName/>
-                  </attribute>
-                  <text/>
-                  <ref name="any"/>
-                </choice>
+                <attribute>
+                  <anyName/>
+                </attribute>
               </zeroOrMore>
+              <ref name="value"/>
             </element>
           </define>
 
         </grammar>
       </parameter>
       <parameter name="value" type="string"/>
+      <parameter name="content" mimetype="text/xml"/>
     </choice>
   </message>
 
