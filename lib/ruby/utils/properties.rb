@@ -55,13 +55,13 @@ module Riddl
       end
 
       def self::modifiable?(schema,property)
-        schema.find("boolean(/p:properties/p:#{property}[@modifiable='true'])")
+        schema.find("boolean(/p:properties/p:#{property}[@modifiable='true'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}[@modifiable='true'])")
       end
       def self::valid_state?(schema,property,current,new)
-        schema.find("boolean(/p:properties/p:#{property}/p:#{current}/p:#{new}[@putable='true'])")
+        schema.find("boolean(/p:properties/p:#{property}/p:#{current}/p:#{new}[@putable='true'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}/p:#{current}/p:#{new}[@putable='true'])")
       end
       def self::is_state?(schema,property)
-        schema.find("boolean(/p:properties/p:#{property}[@type='state'])")
+        schema.find("boolean(/p:properties/p:#{property}[@type='state'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}[@type='state'])")
       end
 
       class HandlerBase
@@ -149,7 +149,6 @@ module Riddl
           relpath    = @r[level..-1]
           handler.new(properties,relpath[1]).read
 
-          p relpath
           if ret = extract_values(properties,schema,relpath[1],relpath[2])
             ret
           else
@@ -187,7 +186,7 @@ module Riddl
                 if res.any?
                   c = res.first.children
                   if c.length == 1 && c.first.class == XML::Smart::Dom::Element
-                    prop = c.first.dump
+                    return Riddl::Parameter::Complex.new("content","text/xml",c.first.dump)
                   else
                     prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
                     prop.root.add c
@@ -227,7 +226,7 @@ module Riddl
           key      = @p.detect{|p| p.name == 'key'}.value
           value    = @p.detect{|p| p.name == 'value'}.value
           property = relpath[1]
-            
+
           unless Riddl::Utils::Properties::modifiable?(schema,property.nil? ? key : property)
             @status = 500
             return # change properties.schema
