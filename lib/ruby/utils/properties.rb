@@ -172,7 +172,6 @@ module Riddl
               when :map
                 res = pdoc.find("/p:properties/*[name()=\"#{property}\"]#{add}")
                 if res.any?
-                  p "hallo"
                   prop = XML::Smart::string("<values xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
                   prop.root.add(res.first.find("*"))
                 else
