@@ -28,12 +28,12 @@
           </define>  
                  
           <define name="value-list">
-            <oneOrMore>
+            <zeroOrMore>
               <element>
                 <anyName/>
                 <text/>
               </element>
-            </oneOrMore>
+            </zeroOrMore>
           </define>
           
           <define name="any">
