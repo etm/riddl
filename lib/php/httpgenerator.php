@@ -11,33 +11,41 @@
       $this->type = $type;
     }
 
-    function generate() {
+    function generate($mode='output') {
       # set all headers
       foreach ($this->headers as $h) {
         $this->set_header($h->name(),$h->value());
       }
       # generate content
       if (is_array($this->params) && count($this->params) == 1) {
-        $this->body($this->params[0]);
+        $this->body($this->params[0],$mode);
       } elseif (is_a($this->params,'RiddlParameterSimple') || is_a($this->params,'RiddlParameterComplex')) {
-        $this->body($this->params);
+        $this->body($this->params,$mode);
       } elseif (is_array($this->params) && count($this->params) > 1) {
-        $this->multipart();
+        $this->multipart($mode);
       } else {
         $this->set_header("Content-length","0");
       }
       $this->critical_eol();
     }
 
-    private function body($r) {
+    private function body($r,$mode) {
       if (is_a($r,'RiddlParameterSimple')) {
-        $this->set_header("Content-Type","text/plain");
-        $this->set_header("Riddl-Type","simple");
-        $this->set_header("Content-ID",$r->name());
-        $this->set_header("Content-length",$r->size());
-        $this->critical_eol();
-        fwrite($this->sock, $r->value());
-        $this->critical_eol();
+        if ($mode == 'output') {
+          $this->set_header("Content-Type","text/plain");
+          $this->set_header("Riddl-Type","simple");
+          $this->set_header("Content-ID",$r->name());
+          $this->set_header("Content-length",$r->size());
+          $this->critical_eol();
+          fwrite($this->sock, $r->value());
+          $this->critical_eol();
+        }  
+        if ($mode == 'input') {
+          $this->set_header("Content-Type","text/plain");
+          $this->critical_eol();
+          fwrite($this->sock, urlencode($r->name()) + '=' + urlencode($r->value()));
+          $this->critical_eol();
+        }  
       } elseif (is_a($r,'RiddlParameterComplex')) {
         $this->set_header("Content-Type",$r->mimetype());
         $this->set_header("Riddl-Type","complex");
@@ -57,7 +65,7 @@
       }  
     }
 
-    private function multipart() {
+    private function multipart($mode) {
       $this->set_header("Content-type","multipart/mixed; boundary=\"" . $this->BOUNDARY . "\"");
       $ret = tmpfile();
       foreach($this->params as $r) {
