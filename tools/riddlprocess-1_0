@@ -47,5 +47,5 @@ case dowhat
   when 'facade':
     d.visualize_facade
   when 'description':
-    puts d.description_xml
+    puts d.description_xml(true)
 end 

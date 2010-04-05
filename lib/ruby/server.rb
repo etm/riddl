@@ -11,22 +11,30 @@ module Riddl
     BOUNDARY = "Time_is_an_illusion._Lunchtime_doubly_so.0xriddldata"
     EOL = "\r\n"
 
-    attr_reader :env, :req, :res
-
-    def initialize(description,&blk)
-      @riddl_description = Riddl::Wrapper::new(description)
-      raise SpecificationError, 'No RIDDL description found.' unless @riddl_description.description?
-      raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl_description.validate!
-      @riddl_description.load_necessary_handlers!
-      
+    def initialize(riddl,&blk)
       @riddl_norun = true
       @riddl_logger = nil
       @riddl_process_out = true 
       @riddl_cross_site_xhr = false
+      @accessible_description = false
       @riddl_blk =  nil
       instance_eval(&blk)
       @riddl_norun = false
 
+      riddl = Riddl::Wrapper.new(riddl)
+      if riddl.description?
+        @riddl_description = riddl
+        raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl_description.validate!
+      elsif riddl.declaration?
+        @riddl_declaration = riddl
+        raise SpecificationError, 'RIDDL declaration does not conform to specification' unless @riddl_declaration.validate!
+        @riddl_description_string = riddl.declaration.description_xml(@accessible_description)
+        @riddl_description = Riddl::Wrapper.new(@riddl_description_string)
+      else
+        raise SpecificationError, 'Not a RIDDL file'
+      end
+
+      @riddl_description.load_necessary_handlers!
       @riddl_paths = @riddl_description.paths
     end
 
@@ -44,6 +52,7 @@ module Riddl
       @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
 
       if @riddl_matching_path
+        @riddl_matching_path_pieces = @riddl_matching_path[0].split('/')
         @riddl_headers = {}
         @riddl_env.each do |h,v|
           @riddl_headers[$1] = v if h =~ /^HTTP_(.*)$/
@@ -74,7 +83,7 @@ module Riddl
         else
           @riddl_path = '/'
           @riddl_res.status = 404
-          instance_eval(&@riddl_blk)
+          instance_exec(info, &@riddl_blk)  
           if @riddl_cross_site_xhr
             @riddl_res['Access-Control-Allow-Origin'] = '*'
             @riddl_res['Access-Control-Max-Age'] = '0'
@@ -91,19 +100,19 @@ module Riddl
     def on(resource, &block)
       if @riddl_norun
         @riddl_blk = block if @riddl_blk.nil?
-      else  
+      else
         @riddl_path << (@riddl_path == '/' ? resource : '/' + resource)
-        block.call(
-          { :h => @riddl_headers, 
-            :p => @riddl_parameters, 
-            :r => @riddl_pinfo.sub(/\//,'').split('/'), 
-            :m => @riddl_method, 
-            :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
-            :match => @riddl_path.sub(/\//,'').split('/') 
-          }
-        )
+
+        ### only descend when there is a possibility that it holds the right path
+        rp = @riddl_path.split('/')
+        block.call(info) if @riddl_matching_path_pieces[rp.length-1] == rp.last
+
         @riddl_path = File.dirname(@riddl_path).gsub(/\/+/,'/')
       end  
+    end
+    
+    def use(blk,*args)
+      instance_eval(&blk)
     end
 
     def process_out(pout)
@@ -115,21 +124,15 @@ module Riddl
     def logger(lgr)
       @riddl_logger = lgr
     end
+    def accessible_description(ad)
+      @accessible_description = ad
+    end
 
     def run(what,*args)
       return if @riddl_norun
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::Implementation
-        w = what.new(
-          { :h => @riddl_headers, 
-            :p => @riddl_parameters, 
-            :r => @riddl_pinfo.sub(/\//,'').split('/'), 
-            :m => @riddl_method, 
-            :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
-            :match => @riddl_path.sub(/\//,'').split('/'),
-            :a => args
-          }
-        )
+        w = what.new(info(:a => args))
         response          = w.response
         headers           = w.headers
         @riddl_res.status = w.status
@@ -176,5 +179,23 @@ module Riddl
     end
 
     def resource(path=nil); return if @riddl_norun; path.nil? ? '{}' : path end
+
+    def info(other={})
+      { :h => @riddl_headers, 
+        :p => @riddl_parameters, 
+        :r => @riddl_pinfo.sub(/\//,'').split('/'), 
+        :m => @riddl_method, 
+        :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
+        :match => @riddl_path.sub(/\//,'').split('/') 
+      }.merge(other)
+    end
+
+    def description_string
+      @riddl_description_string
+    end
+
+    def facade
+      @riddl_declaration
+    end
   end
 end

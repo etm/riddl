@@ -9,11 +9,11 @@ module Riddl
 
   class Client
     #{{{
-    def initialize(base, riddl=nil, protocol='GET')
-      @base = base.nil? ? nil : base.gsub(/\/+$/,'')
+    def initialize(base, riddl=nil)
+      @base = base.nil? ? '' : base.gsub(/\/+$/,'')
       @wrapper = nil
       unless riddl.nil?
-        @wrapper = Riddl::Wrapper::new(riddl,protocol)
+        @wrapper = (riddl.class == Riddl::Wrapper ? riddl : Riddl::Wrapper::new(riddl))
         raise SpecificationError, 'No RIDDL description or declaration found.' if !@wrapper.description? && !@wrapper.declaration?
         raise SpecificationError, 'RIDDL does not conform to specification' unless @wrapper.validate!
         @wrapper.load_necessary_handlers!
@@ -23,11 +23,11 @@ module Riddl
     def self::location(base)
       new(base)
     end
-    def self::interface(base,riddl,protocol='RIDDL')
-      new(base,riddl,protocol)
+    def self::interface(base,riddl)
+      new(base,riddl)
     end
-    def self::facade(riddl,protocol='GET')
-      new(nil,riddl,protocol)
+    def self::facade(riddl)
+      new(nil,riddl)
     end
 
     def resource(path="")
@@ -112,6 +112,15 @@ module Riddl
       end
       private :extract_qparams
 
+      def merge_paths(int,real)
+        t = int.top.sub(/^\/*/,'').split('/')
+        real = real.sub(/^\/*/,'').split('/')
+        real = real[t.length..-1]
+        base = int.base == '' ? @base : int.base
+        base + '/' + real.join('/')
+      end
+      private :merge_paths
+
       def exec_request(riddl_method,parameters)
         headers = extract_headers(parameters)
 
@@ -135,8 +144,10 @@ module Riddl
         end
 
         if !@wrapper.nil? && @wrapper.declaration?
+          headers['Riddl-Declaration-Path'] = @rpath
           if riddl_message.route.nil?
-            res, response = make_request(@rpath,riddl_method,parameters,headers)
+            reqp = merge_paths(riddl_message.interface,@rpath)
+            res, response = make_request(reqp,riddl_method,parameters,headers,qparams)
             if res.code.to_i == 200
               unless @wrapper.check_message(response,res,riddl_message.out)
                 raise OutputError, "Not a valid output from service."
@@ -148,7 +159,8 @@ module Riddl
             th = headers
             tq = qparams
             riddl_message.route.each do |m|
-              res, response = make_request(m.interface,riddl_method,tp,th,tq)
+              reqp = merge_paths(m.interface,@rpath)
+              res, response = make_request(reqp,riddl_method,tp,th,tq)
               if res.code.to_i != 200 || !@wrapper.check_message(response,res,m.out)
                 raise OutputError, "Not a valid output from service."
               end
@@ -170,6 +182,7 @@ module Riddl
         qs = qparams.join('&')
         req = Riddl::Client::Request.new(riddl_method,url.path,parameters,headers,qs)
         res = response = nil
+
         Net::HTTP.start(url.host, url.port) do |http|
           http.request(req) do |res|
             bs = Parameter::Tempfile.new("RiddlBody")

@@ -10,14 +10,13 @@ module Riddl
           if layer.nil?
             @content = content
           else  
-            temp = layer.find("des:#{type}[@name='#{name}']").first.to_doc
-            layer.namespaces.each do |n|
-              name = "xmlns#{n.prefix.nil? ? '' : ':' + n.prefix}"
-              value = n.href
-              temp.root.attributes[name] = value
-            end
-            temp.root.find("@name").delete_all!
-            @content = temp.root.to_doc
+            tempA = layer.find("des:#{type}[@name='#{name}']").first
+            tempB = tempA.to_doc
+            if layer.namespaces[nil] && tempA.namespaces.to_a.empty?
+              tempB.root.namespaces[nil] = layer.namespaces[nil]
+            end  
+            tempB.root.find("@name").delete_all!
+            @content = tempB.root.to_doc
             @content.namespaces = {
               'des' => Riddl::Wrapper::DESCRIPTION,
               'dec' => Riddl::Wrapper::DECLARATION

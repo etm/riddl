@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/description')
 require File.expand_path(File.dirname(__FILE__) + '/declaration/tile')
 require File.expand_path(File.dirname(__FILE__) + '/declaration/facade')
+require File.expand_path(File.dirname(__FILE__) + '/declaration/interface')
 
 module Riddl
   class Wrapper
@@ -13,8 +14,8 @@ module Riddl
         rpaths(@facade.resource,'')
       end
       
-      def description_xml
-        @facade.description_xml
+      def description_xml(get_description=false)
+        @facade.description_xml(get_description)
       end  
 
       def visualize_tiles_and_layers
@@ -66,14 +67,17 @@ module Riddl
             block = layer.find("dec:block")
 
             lname = layer.attributes['name']
-            lpath = riddl.find("string(/dec:declaration/dec:interface[@name=\"#{lname}\"]/@path)")
+            lpath = riddl.find("string(/dec:declaration/dec:interface[@name=\"#{lname}\"]/@location)")
             des = riddl.find("/dec:declaration/dec:interface[@name=\"#{lname}\"]/des:description").first
             desres = des.find("des:resource").first
             if apply_to.empty?
-              til.add_description(des,desres,"/",index,"#{lpath}",block)
+              int = Interface.new("/",lpath,"/")
+              rec = desres.attributes['recursive']
+              til.add_description(des,desres,"/",index,int,block,rec)
             else
               apply_to.each do |at|
-                til.add_description(des,desres,at.to_s,index,"#{lpath}",block)
+                int = Interface.new(at.to_s,lpath,"/")
+                til.add_description(des,desres,at.to_s,index,int,block)
               end
             end
           end

@@ -17,17 +17,15 @@
   </define>
 
   <define name="element">
-    <element>
-      <anyName/>
-      <attribute name="type">
-        <choice>
-          <value>content</value>
-          <value>value</value>
-          <value>map</value>
-          <value>list</value>
-        </choice>
-      </attribute>
-      <optional>
+    <choice>
+      <element>
+        <anyName/>
+        <ref name="modifiable"/>
+        <attribute name="type">
+          <choice>
+            <value>value</value>
+          </choice>
+        </attribute>
         <choice>
           <element name="choice">
             <ref name="common-atts"/>
@@ -48,16 +46,46 @@
             <ref name="common-atts"/>
             <ref name="data"/>
           </element>
-          <element name="externalRef">
-            <attribute name="href">
-              <data type="anyURI"/>
-            </attribute>
-            <ref name="common-atts"/>
-            <ref name="other"/>
-          </element>
         </choice>  
-      </optional>  
-    </element>
+        <ref name="other-inside"/>
+      </element>
+      <element>
+        <anyName/>
+        <ref name="modifiable"/>
+        <attribute name="type">
+          <choice>
+            <value>content</value>
+            <value>map</value>
+            <value>list</value>
+          </choice>
+        </attribute>
+        <ref name="other-inside"/>
+      </element>
+      <element>
+        <anyName/>
+        <ref name="modifiable"/>
+        <attribute name="type">
+          <choice>
+            <value>state</value>
+          </choice>
+        </attribute>
+        <oneOrMore>
+          <element>
+            <anyName/>
+            <zeroOrMore>
+              <element>
+                <anyName/>
+                <optional>
+                  <attribute name="putable">
+                    <data type="boolean"/>
+                  </attribute>  
+                </optional>  
+              </element>
+            </zeroOrMore>
+          </element>
+        </oneOrMore>
+      </element>
+    </choice>
   </define>
 
   <define name="optional">
@@ -65,5 +93,46 @@
       <ref name="element"/>
     </element>
   </define>
+
+  <define name="modifiable">
+    <choice>
+      <attribute name="modifiable">
+        <choice>
+          <value>true</value>
+        </choice>  
+      </attribute>
+      <group>
+        <attribute name="modifiable">
+          <choice>
+            <value>false</value>
+          </choice>  
+        </attribute>
+        <attribute name="mutable">
+          <data type="boolean"/>
+        </attribute>
+      </group>
+    </choice>  
+  </define>
+    
+  <define name="other-inside">
+    <zeroOrMore>
+      <element>
+        <anyName>
+          <except>
+            <nsName/>
+          </except>
+        </anyName>
+        <zeroOrMore>
+          <choice>
+            <attribute>
+              <anyName/>
+            </attribute>
+            <text/>
+            <ref name="any"/>
+          </choice>
+        </zeroOrMore>
+      </element>
+    </zeroOrMore>
+  </define>  
 
 </grammar>
