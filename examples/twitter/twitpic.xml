@@ -1,0 +1,33 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="update-with-pic">
+    <header name="Authorization" type="string"/>
+    <parameter name="status" type="string"/>
+    <parameter name="image" mimetype="application/jpeg"/>
+  </message>
+
+  <message name="update">
+    <header name="Authorization" type="string"/>
+    <parameter name="status" type="string"/>
+    <optional>
+      <parameter name="in_reply_to_status_id" type="string"/>
+    </optional>
+    <optional>
+      <parameter name="lat" type="float">
+        <param name="minInclusive">-90.0</param>
+        <param name="maxInclusive">+90.0</param>
+      </parameter>
+    </optional>
+    <optional>
+      <parameter name="long" type="float">
+        <param name="minInclusive">-180.0</param>
+        <param name="maxInclusive">+180.0</param>
+      </parameter>
+    </optional>
+  </message>
+
+  <resource>
+     <post in="update-with-pic" out="update"/>
+  </resource>  
+
+</description>

@@ -1,0 +1,120 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" 
+             xmlns="http://riddl.org/ns/description/1.0" 
+             xmlns:ann="http://riddl.org/ns/annotation/1.0" 
+             xmlns:xi="http://www.w3.org/2001/XInclude">
+
+<!-- Messages -->
+<!--{{{-->
+  <message name="description">
+    <parameter name="description" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="../../ns/description/1.0/description.rng"/>
+    </parameter>
+  </message>
+
+  <message name="xml">
+    <parameter name="xml" mimetype="text/xml"/>
+  </message>
+  <message name="atom-feed">
+    <parameter name="feed" mimetype="application/atom+xml"/>
+  </message>
+
+  <message name="input">
+    <parameter name="input" type="string"/>
+  </message>
+  <message name="output">
+    <parameter name="output" type="string"/>
+  </message>
+  <message name="properties">
+    <parameter name="properties" type="string"/>
+  </message>
+  <message name="service-schema">
+    <parameter name="service-schema" type="string"/>
+  </message>
+
+  <message name="schema">
+    <parameter name="schema" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng"/>
+  </message>
+
+  <message name="group">
+    <parameter name="group-name" type="string"/>
+    <parameter name="domain-description" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <xi:include href="rng+xsl/domain.rng"/>
+    </parameter>
+  </message>
+
+  <message name="rename">
+    <parameter name="new-name" type="string"/>
+  </message>
+
+  <message name="subgroup">
+    <parameter name="subgroup-name" type="string"/>
+  </message>
+
+  <message name="riddl-description">
+    <parameter name="riddl-description" type="string"/>
+  </message>
+
+
+  <message name="service">
+    <parameter name="service-name" type="string"/>
+    <parameter name="service-description" mimetype="text/xml"/>
+  </message>
+
+  <message name="service-description">
+    <parameter name="service-description" mimetype="text/xml"/>
+  </message>
+
+<!--}}}-->
+<!-- Resources -->
+<!-- {{{ -->
+  <resource>
+    <request method="get" in="riddl-description" out="description">
+      <ann:label xml:lang="en">Show description</ann:label>
+    </request>
+    <resource relative="xsl" recursive="true">
+      <get in="*" out="xml"/>
+    </resource>  
+    <resource relative="groups">
+<!-- {{{ -->
+      <get in="*" out="atom-feed"/>
+      <post in="group"/>
+<!--}}}-->
+      <resource> <!-- Group-level -->
+<!-- {{{ -->
+        <get in="*" out="atom-feed"/>
+        <get in="properties" out="schema"/>
+        <get in="service-schema" out="schema"/>
+        <put in="rename"/>
+        <post in="subgroup"/>
+        <delete in="*"/>
+        <resource relative="operations">
+          <get in="*" out="xml"/>
+          <resource>
+            <get in="*" out="xml"/>
+            <get in="input" out="schema"/>
+            <get in="output" out="schema"/>
+          </resource>
+        </resource>
+<!--}}}-->
+        <resource> <!-- Subgroup-level -->
+<!-- {{{ -->
+          <get in="*" out="atom-feed"/>
+          <delete in="*"/>
+          <put in="rename"/>
+          <post in="service"/>
+<!--}}}-->
+          <resource> <!-- Service-level -->
+<!-- {{{ -->
+            <get in="*" out="xml"/>
+            <put in="rename"/>
+            <put in="service-description"/>
+            <delete in="*"/>
+<!--}}}-->
+          </resource>  
+
+        </resource>  
+      </resource>  
+    </resource>  
+  </resource>  
+<!-- }}} -->
+</description>

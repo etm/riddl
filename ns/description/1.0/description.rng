@@ -13,25 +13,24 @@
     <attribute name="datatypeLibrary">
       <data type="anyURI"/>
     </attribute>
-    <ref name="riddl-common-atts"/>
+    <ref name="riddl-description-other-atts"/>
     <zeroOrMore>
       <choice>
         <element name="message">
-          <ref name="riddl-other-atts"/>
+          <ref name="riddl-description-other-atts"/>
           <ref name="riddl-message"/>
         </element>
         <element name="transformation">
-          <ref name="riddl-other-atts"/>
+          <ref name="riddl-description-other-atts"/>
           <ref name="riddl-transformation"/>
         </element>
       </choice>  
     </zeroOrMore>
     <element name="resource">  
-      <ref name="riddl-root-resource"/>
-      <ref name="riddl-other-atts"/>
+      <ref name="riddl-resource-dynamic"/>
     </element>
   </define>
-
+  
   <define name="riddl-message">
     <ref name="riddl-att-name"/>
     <zeroOrMore>
@@ -47,21 +46,31 @@
     <oneOrMore>
       <choice>
         <element name="add_header">
-          <ref name="riddl-header"/>
+          <oneOrMore>
+            <ref name="riddl-header"/>
+          </oneOrMore>  
         </element>  
         <element name="add_as_first">
-          <ref name="riddl-parameter"/>
+          <oneOrMore>
+            <ref name="riddl-parameter"/>
+          </oneOrMore>  
         </element>  
         <element name="add_as_last">
-          <ref name="riddl-parameter"/>
+          <oneOrMore>
+            <ref name="riddl-parameter"/>
+          </oneOrMore>  
         </element>  
         <element name="add_before">
           <ref name="riddl-att-name-star"/>
-          <ref name="riddl-parameter"/>
+          <oneOrMore>
+            <ref name="riddl-parameter"/>
+          </oneOrMore>  
         </element>
         <element name="add_after">
           <ref name="riddl-att-name-star"/>
-          <ref name="riddl-parameter"/>
+          <oneOrMore>
+            <ref name="riddl-parameter"/>
+          </oneOrMore>  
         </element>
         <element name="remove_each">
           <ref name="riddl-att-col-remove"/>
@@ -143,7 +152,7 @@
   <define name="riddl-parameter">
     <element name="parameter">
       <ref name="riddl-att-name"/>
-      <ref name="riddl-other-atts"/>
+      <ref name="riddl-description-other-atts"/>
       <choice>
         <ref name="riddl-fixed"/>
         <ref name="data"/>
@@ -174,52 +183,42 @@
     </optional>  
   </define>
 
-  <define name="riddl-root-resource">
-    <ref name="riddl-resource-content"/>
-  </define>
-  <define name="riddl-resource-dynamic">
+  <define name="riddl-resource-attributes">
     <optional>
+      <attribute name="pattern">
+        <data type="string"/>
+      </attribute>  
+    </optional>
+    <ref name="riddl-description-other-atts"/>
+  </define>
+    
+  <define name="riddl-resource-recursive-choice">
+    <choice>
       <attribute name="recursive">
         <data type="boolean"/>
       </attribute>  
-    </optional>
+      <group>
+        <ref name="riddl-resource-sub"/>
+      </group>  
+    </choice>  
+  </define>  
+
+  <define name="riddl-resource-dynamic">
+    <ref name="riddl-resource-attributes"/>
     <ref name="riddl-resource-content"/>
-    <ref name="riddl-other-atts"/>
+    <ref name="riddl-resource-recursive-choice"/>
   </define>
   <define name="riddl-resource-named">
+    <ref name="riddl-resource-attributes"/>
     <attribute name="relative">
       <ref name="riddl-datatype-relpath"/>
     </attribute>
-    <ref name="riddl-resource-dynamic"/>
+    <ref name="riddl-resource-content"/>
+    <ref name="riddl-resource-recursive-choice"/>
   </define>
-
-  <define name="riddl-resource-content">
-    <zeroOrMore>
-      <choice>
-        <element name="post">
-          <ref name="riddl-atts-request"/>
-          <ref name="riddl-others"/>
-        </element>
-        <element name="get">
-          <ref name="riddl-atts-request"/>
-          <ref name="riddl-others"/>
-        </element>
-        <element name="put">
-          <ref name="riddl-atts-request"/>
-          <ref name="riddl-others"/>
-        </element>
-        <element name="delete">
-          <ref name="riddl-atts-request"/>
-          <ref name="riddl-others"/>
-        </element>
-        <element name="request">
-          <ref name="riddl-att-method"/>
-          <ref name="riddl-atts-request"/>
-          <ref name="riddl-others"/>
-        </element>  
-      </choice>  
-    </zeroOrMore>
-    <!-- One named resources, multiple dynamic ones, before or after the named -->
+    
+  <define name="riddl-resource-sub">
+    <!-- One dynamic resources, multiple named ones, before or after the dynamic -->
     <zeroOrMore>
       <element name="resource">
         <ref name="riddl-resource-named"/>
@@ -235,6 +234,61 @@
         <ref name="riddl-resource-named"/>
       </element>
     </zeroOrMore>
+  </define>  
+
+  <define name="riddl-resource-content">
+    <zeroOrMore>
+      <choice>
+        <element name="post">
+          <ref name="riddl-atts-request"/>
+          <ref name="riddl-description-others"/>
+        </element>
+        <element name="get">
+          <ref name="riddl-atts-request"/>
+          <ref name="riddl-description-others"/>
+        </element>
+        <element name="put">
+          <ref name="riddl-atts-request"/>
+          <ref name="riddl-description-others"/>
+        </element>
+        <element name="delete">
+          <ref name="riddl-atts-request"/>
+          <ref name="riddl-description-others"/>
+        </element>
+        <element name="request">
+          <ref name="riddl-att-method"/>
+          <ref name="riddl-atts-request"/>
+          <ref name="riddl-description-others"/>
+        </element>  
+      </choice>  
+    </zeroOrMore>
   </define>
+
+  <define name="riddl-description-others">
+    <ref name="other"/>
+    <zeroOrMore>
+      <attribute>
+        <anyName>
+          <except>
+            <nsName/>
+            <nsName ns=""/>
+          </except>
+        </anyName>
+      </attribute>
+    </zeroOrMore>
+  </define>  
+
+  <define name="riddl-description-other-atts">
+    <zeroOrMore>
+      <attribute>
+        <anyName>
+          <except>
+            <nsName/>
+            <nsName ns=""/>
+          </except>
+        </anyName>
+      </attribute>
+    </zeroOrMore>
+  </define>  
    
 </grammar>

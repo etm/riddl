@@ -43,20 +43,22 @@ module Riddl
           #}}}
         end
 
-        def add_description(des,desres,path,index,interface,block,res=@base_path,rel="/")
+        def add_description(des,desres,path,index,interface,block,rec=nil,res=@base_path)
           #{{{
-          res = add_path(path,res)
+          res = add_path(path,res,rec)
           res.add_requests(des,desres,index,interface)
           block.each do |bl|
             bpath = bl.to_s.gsub(/\/+/,'/').gsub(/\/$/,'')
             bpath = (bpath == "" ? "/" : bpath)
-            if rel == bpath
+            if interface.sub == bpath
               res.remove_requests(des,bl.attributes)
             end  
           end
           desres.find("des:resource").each do |desres|
             cpath = desres.attributes['relative'] || "{}"
-            add_description(des,desres,cpath,index,interface+"/"+cpath,block,res,(rel+"/"+cpath).gsub(/\/+/,'/'))
+            rec = desres.attributes['recursive']
+            int = Interface.new_from_interface(interface,(interface.sub+"/"+cpath).gsub(/\/+/,'/'))
+            add_description(des,desres,cpath,index,int,block,rec,res)
           end
           nil
           #}}}
@@ -71,13 +73,13 @@ module Riddl
           #}}}
         end
 
-        def add_path(path,res)
+        def add_path(path,res,rec=nil)
           #{{{
           pres = res
           path.split('/').each do |pa|
             next if pa == ""
             unless pres.resources.has_key?(pa)
-              pres.resources[pa] = Riddl::Wrapper::Description::Resource.new(pa)
+              pres.resources[pa] = Riddl::Wrapper::Description::Resource.new(pa,rec.nil? ? false : true)
             end
             pres = pres.resources[pa]
           end

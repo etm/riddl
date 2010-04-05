@@ -7,13 +7,14 @@ module Riddl
           @resource = Riddl::Wrapper::Description::Resource.new("/")
         end
 
-        def description_xml
+        def description_xml(get_description)
           #{{{
           result = ""
           messages = {}
           names = []
           messages_result = ""
-          description_xml_priv(result,messages,0)
+          description_result = ""
+          description_xml_priv(result,messages,0,get_description)
           messages.each do |hash,mess|
             t = mess.content.dup
             name = mess.name
@@ -21,14 +22,29 @@ module Riddl
             t.root.attributes['name'] = name
             messages_result << t.root.dump + "\n"
           end
-          "<description #{Riddl::Wrapper::COMMON}>\n\n" +  messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>"
+          if get_description
+            description_result = <<-END
+              <message name="riddl-description-response">
+                <parameter name="riddl-description" mimetype="text/xml"/>
+              </message>
+              <message name="riddl-description-request">
+                <parameter name="riddl-description" type="string"/>
+              </message>
+
+            END
+            description_result.gsub!(/^            /,'')
+          end
+          "<description #{Riddl::Wrapper::COMMON}>\n\n" + description_result + messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>"
           #}}}
         end
-        def description_xml_priv(result,messages,level,res=@resource)
+        def description_xml_priv(result,messages,level,get_description,res=@resource)
           #{{{
           s = "  " * (level + 1)
           t = "  " * (level + 2)
-          result << s + "<resource#{res.path != '/' && res.path != '' ? " relative=\"#{res.path}\"" : ''}>\n"
+          result << s + "<resource#{res.path != '/' && res.path != '{}' ? " relative=\"#{res.path}\"" : ''}#{res.recursive ? " recursive=\"true\"" : ''}>\n"
+          if get_description
+            result << t + "<get in='riddl-description-request' out='riddl-description-response'/>\n"
+          end  
           res.composition.each do |k,v|
             v.each do |m|
               m = m.result
@@ -62,7 +78,7 @@ module Riddl
             end  
           end
           res.resources.each do |k,v|
-            description_xml_priv(result,messages,level+1,v)
+            description_xml_priv(result,messages,level+1,false,v)
           end
           ""
           result << s + "</resource>\n"
@@ -78,7 +94,7 @@ module Riddl
           end  
           res.resources.each do |path,r|
             unless fac.resources.has_key?(path)
-              fac.resources[path] = Riddl::Wrapper::Description::Resource.new(path)
+              fac.resources[path] = Riddl::Wrapper::Description::Resource.new(path,r.recursive)
             end  
             merge_tiles(r,fac.resources[path])
           end

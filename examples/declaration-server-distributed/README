@@ -1,0 +1,5 @@
+How to start?
+
+> rackup main.ru
+> rackup properties.ru
+> rackup declaration.ru

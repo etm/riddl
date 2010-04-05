@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <properties xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
   <name/>
-  <state>ready</state>
   <context-variables>
     <a>7</a>
     <b>7</b>
@@ -11,5 +10,6 @@
     <e2 xmlns="http://riddl.org/ns/common-patterns/properties/1.0">mager</e2>
   </endpoints>
   <handlers/>
-  <description xmlns="http://riddl.org/ns/common-patterns/properties/1.0">asss</description>
+  <description xmlns="http://riddl.org/ns/common-patterns/properties/1.0">lala</description>
+  <state xmlns="http://riddl.org/ns/common-patterns/properties/1.0">stopped</state>
 </properties>

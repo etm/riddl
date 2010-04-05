@@ -1,0 +1,15 @@
+<declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <interface name="main">
+    <xi:include href="producer-server.xml"/>
+  </interface>
+  <interface name="producer">
+    <xi:include href="producer.xml"/>
+  </interface>
+
+  <facade>
+    <tile>
+      <layer name="main"/>
+      <layer name="producer"/>
+    </tile>
+  </facade>
+</declaration>
