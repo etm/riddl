@@ -162,14 +162,14 @@ module Riddl
             add = decision = nil
             if minor.nil?
               add = ''
-              decision = map_or_value(schema,property)
+              decision = property_type(schema,property)
             else
               add = "/*[name()=\"#{minor}\"]"
               decision = :value
             end
 
             case decision
-              when :map
+              when :map, :list
                 res = pdoc.find("/p:properties/*[name()=\"#{property}\"]#{add}")
                 if res.any?
                   prop = XML::Smart::string("<values xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
@@ -202,7 +202,7 @@ module Riddl
         end
         private :extract_values
 
-        def map_or_value(schema,property)
+        def property_type(schema,property)
           exis = schema.find("/p:properties/*[name()='#{property}']|/p:properties/p:optional/*[name()='#{property}']")
           if exis.any?
             return exis.first.attributes['type'].to_sym
@@ -210,7 +210,7 @@ module Riddl
             return nil
           end
         end
-        private :map_or_value
+        private :property_type
       end #}}}
       
       # Modifiable
