@@ -9,6 +9,9 @@
               <element name="values">
                 <ref name="value-list"/>
               </element>
+              <element name="content">
+                <ref name="content"/>
+              </element>
               <element name="value">
                 <ref name="value"/>
               </element>
@@ -19,12 +22,7 @@
           </start>
 
           <define name="value">
-            <zeroOrMore>
-              <choice>
-                <text/>
-                <ref name="any"/>
-              </choice>
-            </zeroOrMore>
+            <text/>
           </define>  
                  
           <define name="value-list">
@@ -36,6 +34,15 @@
             </zeroOrMore>
           </define>
           
+          <define name="content">
+            <zeroOrMore>
+              <choice>
+                <text/>
+                <ref name="any"/>
+              </choice>
+            </zeroOrMore>
+          </define>
+          
           <define name="any">
             <element>
               <anyName/>
@@ -44,7 +51,7 @@
                   <anyName/>
                 </attribute>
               </zeroOrMore>
-              <ref name="value"/>
+              <ref name="content"/>
             </element>
           </define>
 
