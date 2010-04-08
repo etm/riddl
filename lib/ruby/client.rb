@@ -95,6 +95,20 @@ module Riddl
         #}}}
       end
       private :extract_headers
+      def extract_response_headers(headers)
+        #{{{
+        ret = {}
+        headers.each do |k,v|
+          if v.nil?
+            ret[k.name.upcase.gsub(/\-/,'_')] = v
+          else  
+            ret[k.upcase.gsub(/\-/,'_')] = v
+          end  
+        end
+        ret
+        #}}}
+      end
+      private :extract_headers
       
       def extract_qparams(parameters)
         #{{{
@@ -140,7 +154,7 @@ module Riddl
               raise OutputError, "Not a valid output from service."
             end
           end
-          return res.code.to_i, response
+          return res.code.to_i, response, extract_response_headers(res)
         end
 
         if !@wrapper.nil? && @wrapper.declaration?
@@ -153,7 +167,7 @@ module Riddl
                 raise OutputError, "Not a valid output from service."
               end
             end  
-            return res.code.to_i, response
+            return res.code.to_i, response, extract_response_headers(res)
           else
             tp = parameters
             th = headers
@@ -166,11 +180,11 @@ module Riddl
               end
               unless m == riddl_message.route.last
                 tp = response
-                th = extract_headers(response)
+                th = extract_headers(response) # TODO extract relvant headers from res (get from m.out)
                 tq = extract_qparams(response)
               end
             end
-            return res.code.to_i, response
+            return res.code.to_i, response, extract_response_headers(res)
           end
         end
       end
