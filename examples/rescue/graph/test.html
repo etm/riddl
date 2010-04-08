@@ -1,22 +1,205 @@
-<html>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8"/>
   <head>
     <title>Workflow-graph</title>
     <script src="graph.js" type="text/javascript" charset="utf-8"></script>
     <script src="request.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript">
-      function doSome() {
+      function loadProcessDescription() {
         var url = document.getElementById("txtURL").value;
-        make_request(url, function(resp) {alert(resp);});
+        var xml = null;
+        make_request(url, function(resp) {
+          xml = (new DOMParser()).parseFromString(resp, "text/xml");
+          document.getElementById("xml-area").value = resp;
+        });
+      }
 
-        alert(url);
+      function draw() {
+        var xml = (new DOMParser()).parseFromString(document.getElementById("xml-area").value, "text/xml");
+        g = new WFGraph(xml, document.getElementById("graph"));
+        g.generateGraph();
+
       }
     </script>
+    <style type="text/css">
+      svg {
+        fill: #DDDDDD;
+        fill-opacity:1;
+      }
+      svg line.ourline {
+        z-index: 4;
+        stroke-opacity: 0.9; 
+        stroke:#000000;
+        stroke-width: 2; 
+        fill: none;
+      }
+      svg rect.block {
+        stroke-dasharray: 9, 3, 5;
+        stroke: #000000;
+        fill: none;
+      }
+      svg symbol {
+        z-index: 5;
+      }
+      svg .stand {
+        fill:#ffffff;
+        fill-opacity:1;
+        stroke:#000000;
+        stroke-width:2.06896567;
+        stroke-linecap:round;
+        stroke-linejoin:round;
+        stroke-miterlimit:4;
+        stroke-opacity:1;
+        stroke-dasharray:none;
+      }
+      svg .standwithout {
+        fill:#ffffff;
+        fill-opacity:1;
+      }
+      svg text.normal {
+        font-size:20px;
+        font-style:normal;
+        font-variant:normal;
+        font-weight:bold;
+        font-stretch:normal;
+        text-align:center;
+        line-height:125%;
+        writing-mode:lr-tb;
+        text-anchor:middle;
+        color:#000000;
+        fill:#000000;
+        fill-opacity:1;
+        stroke:none;
+        font-family:Arial;
+      }
+      svg text.normallarge {
+        font-size:25px;
+        font-style:normal;
+        font-variant:normal;
+        font-weight:bold;
+        font-stretch:normal;
+        text-align:center;
+        line-height:125%;
+        writing-mode:lr-tb;
+        text-anchor:middle;
+        color:#000000;
+        fill:#000000;
+        fill-opacity:1;
+        stroke:none;
+        font-family:Arial;
+      }
+      svg text.small {
+        font-size:14px;
+        font-style:normal;
+        font-variant:normal;
+        font-weight:bold;
+        font-stretch:normal;
+        text-align:center;
+        line-height:125%;
+        writing-mode:lr-tb;
+        text-anchor:middle;
+        color:#000000;
+        fill:#000000;
+        fill-opacity:1;
+        stroke:none;
+        font-family:Arial;
+      }
+    </style>
   </head>
   <body>
-    <input type="text" value="http://www.pri.univie.ac.at/~ralph/example.xml" id="txtURL"/>
-    <input type="button" value="load" onClick="doSome()"/>
-    <h1>Process-graph</h1>
-    <div id="graph">
-    </div>
+    <table border="1">
+      <tr>
+        <td valign="top">
+          <div>
+            <input type="text" value="http://www.pri.univie.ac.at/~ralph/example.xml" id="txtURL" size="41"/>
+            <input type="button" value="Load description" onclick="loadProcessDescription()"/>
+          </div>
+          <br/>
+          <div>
+            <textarea id="xml-area" cols="66" rows="25"></textarea>
+          </div>
+          <br/>
+          <input type="button" value="Generate graph" onclick="draw()" style="width:480px"/>
+          <br/>
+        </td>
+        <td>
+          <div>
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="0" width="0">
+                <defs>
+                  <symbol id="call"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="14" class="stand"/>
+                    <text class="normal" transform='translate(15,21)'>c</text>
+                  </symbol><!-- }}} -->
+                  <symbol id="manipulate"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="14" class="stand"/>
+                    <text class="normal" transform='translate(15,21)'>m</text>
+                  </symbol><!-- }}} -->
+                  <symbol id="callmanipulate"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="14" class="stand"/>
+                    <text class="normal" transform='translate(15,21)'>c</text>
+                    <circle cx="28" cy="28" r="9" class="stand"/>
+                    <text class="small" transform='translate(28,32)'>m</text>
+                  </symbol><!-- }}} -->
+                  <symbol id="choose"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="14" class="stand"/>
+                    <text class="normal" transform='translate(15,21)'>σ</text>
+                  </symbol><!-- }}} -->
+                  <symbol id="alternative"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="14" class="standwithout"/>
+                    <text class="normal" transform='translate(15,21)'>{܅}</text>
+                  </symbol><!-- }}} -->
+                  <symbol id="otherwise"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="14" class="standwithout"/>
+                    <text class="normal" transform='translate(15,21)'>{⁎}</text>
+                  </symbol><!-- }}} -->
+                  <symbol id="parallel"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="14" class="stand"/>
+                    <text class="normal" transform='translate(15,21)'>||</text>
+                  </symbol><!-- }}} -->
+                  <symbol id="parallel_branch"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="14" class="stand"/>
+                    <text class="normal" transform='translate(15,21)'>|</text>
+                  </symbol><!-- }}} -->
+                  <symbol id="critical"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="14" class="stand"/>
+                    <text class="normal" transform='translate(16.5,21.5)'>⚠</text>
+                  </symbol><!-- }}} -->
+                  <symbol id="cycle"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="14" class="stand"/>
+                    <text class="normallarge" transform='translate(15,23)'>↺</text>
+                  </symbol><!-- }}} -->
+                  <symbol id="empty"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="3" class="stand"/>
+                  </symbol><!-- }}} -->
+                  <symbol id="end"><!-- {{{ -->
+                    <circle cx="15" cy="15" r="14" class="stand"/>
+                    <circle cx="15" cy="15" r="11" class="stand"/>
+                    <text class="normal" transform='translate(15,21)'>Ω</text>
+                  </symbol><!-- }}} -->
+                  <g id="arrowMarker">
+                    <!-- {{{ -->
+                    <g stroke="black" stroke-width="0.3">
+                      <line x1="3" y1="-2" x2="0" y2="0"/>
+                      <line x1="3" y1="+2" x2="0" y2="0"/>
+                    </g>
+                  </g>
+                  <marker id="startMarker" markerWidth="48" markerHeight="24" viewBox="-4 -4 25 5" orient="auto" refX="3" refY="0" markerUnits="strokeWidth">
+                    <g>
+                      <use xlink:href="#arrowMarker" transform="rotate(180)" stroke-width="1" stroke="black"/>
+                    </g>
+                  <!-- }}} -->
+                  </marker> 
+                </defs>
+                <g id="graph">
+                  <g id="blocks"/>
+                  <g id="lines"/>
+                  <g id="symbols"/>
+                </g>
+            </svg>
+          </div>
+        </td>
+      </tr>
+    </table>
   </body>
-</html>
+<html>
