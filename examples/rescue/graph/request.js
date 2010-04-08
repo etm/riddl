@@ -20,17 +20,15 @@ function make_request(url, success) {
     return false;
   }
 
-  http_request.onreadystatechange = ready_state;
   http_request.open('GET', url, true);
   http_request.send(null);
-}
-
-function ready_state() {
-  if (http_request.readyState == 4) {
-    if (http_request.status == 200) {
-      success(http_request.responseText);
-    } else {
-      alert('Error precessing request');
+  http_request.onreadystatechange = function () {
+    if (http_request.readyState == 4) {
+      if (http_request.status == 200) {
+        success(http_request.responseText);
+      } else {
+        alert('Error processing request');
+      }
     }
   }
 }
