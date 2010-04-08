@@ -3,7 +3,14 @@
   <message name="notification">
     <parameter name="key" type="string"/>
     <parameter name="topic" type="string"/>
-    <parameter name="event" type="string"/>
+    <choice>
+      <parameter name="event" type="string">
+        <param name="pattern">[\w_]+</param>
+      </parameter>
+      <parameter name="vote" type="string">
+        <param name="pattern">[\w_]+</param>
+      </parameter>
+    </choice>  
     <parameter name="notification" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-consumer/1.0">
         <start>
@@ -73,12 +80,12 @@
 
       </grammar>
     </parameter>
-    <parameter name="consumer-id" type="string"/>
+    <parameter name="message-uid" type="string"/>
     <parameter name="fingerprint-with-consumer-secret" type="string"/>
   </message>
 
   <message name="acknowledgment">
-    <parameter name="producer-id" type="integer"/>
+    <parameter name="message-uid" type="integer"/>
     <parameter name="fingerprint-with-consumer-secret" type="string"/>
   </message>
 

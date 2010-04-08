@@ -6,7 +6,7 @@ module Riddl
       VERSION_MINOR = 0
       PROPERTIES_SCHEMA_XSL_RNG = "#{File.dirname(__FILE__)}/../ns/common-patterns/properties/#{VERSION_MAJOR}.#{VERSION_MINOR}/properties.schema.xsl"
 
-      def self::implementation(properties,schema,strans,handler,level)
+      def self::implementation(properties,schema,strans,handler,level,details=:production)
         unless handler.class == Class && handler.superclass == Riddl::Utils::Properties::HandlerBase
           raise "handler not a subclass of HandlerBase"
         end
@@ -55,13 +55,13 @@ module Riddl
       end
 
       def self::modifiable?(schema,property)
-        schema.find("boolean(/p:properties/p:#{property}[@modifiable='true'])")
+        schema.find("boolean(/p:properties/p:#{property}[@modifiable='true'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}[@modifiable='true'])")
       end
       def self::valid_state?(schema,property,current,new)
-        schema.find("boolean(/p:properties/p:#{property}/p:#{current}/p:#{new}[@putable='true'])")
+        schema.find("boolean(/p:properties/p:#{property}/p:#{current}/p:#{new}[@putable='true'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}/p:#{current}/p:#{new}[@putable='true'])")
       end
       def self::is_state?(schema,property)
-        schema.find("boolean(/p:properties/p:#{property}[@type='state'])")
+        schema.find("boolean(/p:properties/p:#{property}[@type='state'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}[@type='state'])")
       end
 
       class HandlerBase
@@ -107,22 +107,33 @@ module Riddl
 
           xml = File::read(properties).gsub(/properties xmlns="[^"]+"|properties xmlns='[^']+'/,'properties')
           e = XML::Smart::string(xml).root.find(@p[0].value)
-          prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+          prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>").to_s
           if e.class == XML::Smart::Dom::NodeSet
             if e.any?
-              t = e.first
-              if t.find("*").any?
-                prop.root.add(t.children)
-              else
-                prop.root.text = t.to_s
-              end
+              if e.length == 1
+                t = e.first
+                if t.find("*").any?
+                  prop = XML::Smart::string("<content xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+                  prop.root.add(t.children)
+                else
+                  prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+                  prop.root.text = t.to_s
+                end
+              end  
+              if e.length > 1
+                prop = XML::Smart::string("<content xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+                e.each do |t|
+                  prop.root.add(t)
+                end
+              end  
             else
-              XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+              prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>").to_s
             end
           else
+            prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
             prop.root.text = e.to_s
           end
-          return Riddl::Parameter::Complex.new("document","text/xml",prop.to_s)
+          return Riddl::Parameter::Complex.new("value","text/xml",prop.to_s)
         end
       end #}}}
 
@@ -149,7 +160,6 @@ module Riddl
           relpath    = @r[level..-1]
           handler.new(properties,relpath[1]).read
 
-          p relpath
           if ret = extract_values(properties,schema,relpath[1],relpath[2])
             ret
           else
@@ -163,14 +173,14 @@ module Riddl
             add = decision = nil
             if minor.nil?
               add = ''
-              decision = map_or_value(schema,property)
+              decision = property_type(schema,property)
             else
               add = "/*[name()=\"#{minor}\"]"
               decision = :value
             end
 
             case decision
-              when :map
+              when :map, :list
                 res = pdoc.find("/p:properties/*[name()=\"#{property}\"]#{add}")
                 if res.any?
                   prop = XML::Smart::string("<values xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
@@ -187,9 +197,9 @@ module Riddl
                 if res.any?
                   c = res.first.children
                   if c.length == 1 && c.first.class == XML::Smart::Dom::Element
-                    prop = c.first.dump
+                    return Riddl::Parameter::Complex.new("content","text/xml",c.first.dump)
                   else
-                    prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+                    prop = XML::Smart::string("<content xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
                     prop.root.add c
                     prop = prop.to_s
                   end
@@ -203,7 +213,7 @@ module Riddl
         end
         private :extract_values
 
-        def map_or_value(schema,property)
+        def property_type(schema,property)
           exis = schema.find("/p:properties/*[name()='#{property}']|/p:properties/p:optional/*[name()='#{property}']")
           if exis.any?
             return exis.first.attributes['type'].to_sym
@@ -211,7 +221,7 @@ module Riddl
             return nil
           end
         end
-        private :map_or_value
+        private :property_type
       end #}}}
       
       # Modifiable
@@ -227,7 +237,7 @@ module Riddl
           key      = @p.detect{|p| p.name == 'key'}.value
           value    = @p.detect{|p| p.name == 'value'}.value
           property = relpath[1]
-            
+
           unless Riddl::Utils::Properties::modifiable?(schema,property.nil? ? key : property)
             @status = 500
             return # change properties.schema

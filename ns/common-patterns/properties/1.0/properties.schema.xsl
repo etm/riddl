@@ -27,10 +27,12 @@
         <element>
           <anyName/>
           <zeroOrMore>
+            <attribute>
+              <anyName/>
+            </attribute>
+          </zeroOrMore>
+          <zeroOrMore>
             <choice>
-              <attribute>
-                <anyName/>
-              </attribute>
               <text/>
               <ref name="any"/>
             </choice>

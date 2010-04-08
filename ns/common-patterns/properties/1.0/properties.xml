@@ -7,13 +7,13 @@
           <start>
             <choice>
               <element name="values">
+                <ref name="value-list"/>
+              </element>
+              <element name="content">
                 <ref name="content"/>
               </element>
               <element name="value">
-                <ref name="content"/>
-              </element>
-              <element name="properties">
-                <ref name="content"/>
+                <ref name="value"/>
               </element>
               <element name="not-existing">
                 <empty/>
@@ -21,54 +21,44 @@
             </choice>
           </start>
 
-          <define name="content">
-            <oneOrMore>
-              <choice>
-                <ref name="value"/>
-                <ref name="value-list"/>
-              </choice>
-            </oneOrMore>
-          </define>
-
           <define name="value">
+            <text/>
+          </define>  
+                 
+          <define name="value-list">
+            <zeroOrMore>
+              <element>
+                <anyName/>
+                <text/>
+              </element>
+            </zeroOrMore>
+          </define>
+          
+          <define name="content">
             <zeroOrMore>
               <choice>
                 <text/>
                 <ref name="any"/>
               </choice>
             </zeroOrMore>
-          </define>  
-                 
-          <define name="value-list">
-            <element>
-              <anyName/>
-              <oneOrMore>
-                <choice>
-                  <ref name="value"/>
-                  <ref name="value-list"/>
-                </choice>
-              </oneOrMore>
-            </element>
           </define>
           
           <define name="any">
             <element>
               <anyName/>
               <zeroOrMore>
-                <choice>
-                  <attribute>
-                    <anyName/>
-                  </attribute>
-                  <text/>
-                  <ref name="any"/>
-                </choice>
+                <attribute>
+                  <anyName/>
+                </attribute>
               </zeroOrMore>
+              <ref name="content"/>
             </element>
           </define>
 
         </grammar>
       </parameter>
       <parameter name="value" type="string"/>
+      <parameter name="content" mimetype="text/xml"/>
     </choice>
   </message>
 

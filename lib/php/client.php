@@ -22,11 +22,11 @@
       $this->resource = $path;
     }
 
-    function get($what) { return $this->request("get",$what); }
-    function post($what) { return $this->request("post",$what); }
-    function put($what) { return $this->request("put",$what); }
-    function delete($what) { return $this->request("delete",$what); }
-    function request($type,$what) {
+    function get($what=array()) { return $this->request("get",$what); }
+    function post($what=array()) { return $this->request("post",$what); }
+    function put($what=array()) { return $this->request("put",$what); }
+    function delete($what=array()) { return $this->request("delete",$what); }
+    function request($type,$what=array()) {
       $params = array();
       $headers = array();
       if (is_array($what)) {
@@ -62,7 +62,8 @@
       } else {  
         $sock = fopen($this->debug,'w');
       }
-
+      
+      if (trim($urlp['path']) == '') $urlp['path'] = '/';
       fwrite($sock, $type . " " . trim($urlp['path']) . " HTTP/1.1" . $this->EOL);
       fwrite($sock, "Host: " . $urlp['host'] . $this->EOL);
       $g = new RiddlHttpGenerator($headers,$params,$sock,'socket');
@@ -73,8 +74,18 @@
       if (is_null($this->debug)) {
         while ($str = trim(fgets($sock, 4096)))
           $headers .= "$str\n";
-        while (!feof($sock))
-          fwrite($body,fgets($sock, 4096));
+        preg_match("/Content-Length: (.*)/i", $headers, $matches);
+        $content_length = $matches[1];
+        if (!is_null($content_length)) {
+	  if (!intval($content_length) == 0)
+            $t = fread($sock, $content_length);
+          fwrite($body,$t);
+        } else {
+          while (!feof($sock)) {
+            $t = fread($sock, 4096);
+            fwrite($body,$t);
+          }  
+        }  
       }  
       fclose($sock);
       rewind($body);
