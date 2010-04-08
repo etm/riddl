@@ -1,5 +1,11 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
+  <message name="update-with-pic">
+    <header name="Authorization" type="string"/>
+    <parameter name="status" type="string"/>
+    <parameter name="image" mimetype="application/jpeg"/>
+  </message>
+
   <message name="update">
     <header name="Authorization" type="string"/>
     <parameter name="status" type="string"/>
@@ -20,21 +26,8 @@
     </optional>
   </message>
 
-  <message name="xml">
-    <parameter name="return" mimetype="application/xml"/>
-  </message>
-
   <resource>
-    <resource relative="statuses">
-      <resource relative="show">
-        <resource relative="\d+\.xml">
-          <get in="*" out="xml"/>
-        </resource>
-      </resource>
-      <resource relative="update.xml">
-        <post in="update" out="xml"/>
-      </resource>
-    </resource>
+     <post in="update-with-pic" out="update"/>
   </resource>  
 
 </description>

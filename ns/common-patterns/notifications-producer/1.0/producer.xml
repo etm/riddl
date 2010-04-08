@@ -17,7 +17,11 @@
               <data type="string"/>
             </attribute>  
             <oneOrMore>
-              <element name="event">
+              <element>
+                <choice>
+                  <name>event</name>
+                  <name>vote</name>
+                </choice>
                 <data type="string">
                   <param name="pattern">[\w-_]+</param>
                 </data>
@@ -35,9 +39,9 @@
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-producer/1.0">
         <start>
           <element name="subscriptions">
-            <attribute name="information">
+            <attribute name="details">
               <choice>
-                <value>full</value>
+                <value>debug</value>
                 <value>production</value>
               </choice>  
             </attribute>
@@ -67,19 +71,17 @@
             <attribute name="url">
               <data type="string"/>
             </attribute>
-            <attribute name="last-producer-id">
-              <data type="integer"/>
-            </attribute>
-            <attribute name="last-consumer-id">
-              <data type="integer"/>
-            </attribute>
             <oneOrMore>
               <element name="topic">
                 <attribute name="id">
                   <data type="string"/>
                 </attribute>  
                 <oneOrMore>
-                  <element name="event">
+                  <element>
+                    <choice>
+                      <name>event</name>
+                      <name>vote</name>
+                    </choice>
                     <data type="string">
                       <param name="pattern">[\w_]+</param>
                     </data>
@@ -92,18 +94,18 @@
       </grammar>
     </parameter>
     <optional>
-      <parameter name="producer-id" type="integer"/>
+      <parameter name="message-uid" type="integer"/>
       <parameter name="fingerprint-with-producer-secret" type="string"/>
     </optional>  
   </message>
   
   <message name="delete">
-    <parameter name="producer-id" type="integer"/>
+    <parameter name="message-uid" type="integer"/>
     <parameter name="fingerprint-with-producer-secret" type="string"/>
   </message>
   <message name="request">
     <optional>
-      <parameter name="producer-id" type="integer"/>
+      <parameter name="message-uid" type="integer"/>
       <parameter name="fingerprint-with-producer-secret" type="string"/>
     </optional>  
   </message>
@@ -112,9 +114,14 @@
     <parameter name="url" type="string"/>
     <oneOrMore>
       <parameter name="topic" type="string"/>
-      <parameter name="event" type="string">
-         <param name="pattern">(\w+,)*(\w+)</param>
-      </parameter>
+      <choice>
+        <parameter name="votes" type="string">
+          <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
+        </parameter>
+        <parameter name="events" type="string">
+          <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
+        </parameter>
+      </choice>
     </oneOrMore>
   </message>  
   <message name="acknowledgment">
@@ -124,13 +131,18 @@
   </message>
 
   <message name="details">
-    <parameter name="producer-id" type="integer"/>
+    <parameter name="message-uid" type="integer"/>
     <parameter name="url" type="string"/>
     <oneOrMore>
       <parameter name="topic" type="string"/>
-      <parameter name="event" type="string">
-         <param name="pattern">(\w+,)*(\w+)</param>
-      </parameter>
+      <choice>
+        <parameter name="votes" type="string">
+           <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
+        </parameter>
+        <parameter name="events" type="string">
+           <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
+        </parameter>
+      </choice>
     </oneOrMore>
     <parameter name="fingerprint-with-producer-secret" type="string"/>
   </message>

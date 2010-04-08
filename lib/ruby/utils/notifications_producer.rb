@@ -115,18 +115,22 @@ module Riddl
             File.open(data + '/' + key + '/producer-secret','w') { |f| f.write producer_secret }
             File.open(data + '/' + key + '/consumer-secret','w') { |f| f.write consumer_secret }
 
-            xml = <<-END
-              <subscription url='#{url}' last-producer-id='0' last-consumer-id='0' xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>
-            END
             topics = []
-            XML::Smart::modify(data + '/' + key + '/subscription.xml',xml) do |doc|
+            XML::Smart::modify(data + '/' + key + '/subscription.xml',"<subscription url='#{url}' xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>") do |doc|
+              doc.namespaces = { 'n' => 'http://riddl.org/ns/common-patterns/notifications-producer/1.0' }
               while @p.length > 0
                 topic = @p.shift.value
-                events = @p.shift.value.split(',')
-                topics << topic
-                t = doc.root.add('topic', :id => topic)
-                events.each do |e|
-                  t.add('event', e)
+                base = @p.shift
+                type = base.name
+                items = base.value.split(',')
+                t = if topics.include?(topic)
+                  doc.find("/n:subscription/n:topic[@id='#{topic}']").first
+                else
+                  topics << topic
+                  doc.root.add('topic', :id => topic)
+                end
+                items.each do |i|
+                  t.add(type[0..-2], i)
                 end
               end
             end  
