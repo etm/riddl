@@ -71,7 +71,7 @@ module Riddl
         @riddl_message = @riddl_description.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
         if @riddl_message.nil?
           if @riddl_env.has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
-            @riddl_res['Access-Control-Allow-Origin'] = @riddl_env['HTTP_ORIGIN']
+            @riddl_res['Access-Control-Allow-Origin'] = '*'
             @riddl_res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
             @riddl_res['Access-Control-Max-Age'] = '0'
             @riddl_res['Content-Length'] = '0'
