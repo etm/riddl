@@ -2,8 +2,7 @@ module Riddl
   class Wrapper
     class Description < WrapperUtils
 
-      class RequestBase
-        #{{{
+      class AccessBase# {{{
         def used=(value)
           @used = value
         end
@@ -11,11 +10,9 @@ module Riddl
           @used || false
         end
         attr_reader :interface
-        #}}}
-      end
+      end# }}}
 
-      class RequestInOut < RequestBase
-        #{{{
+      class RequestInOut < AccessBase# {{{
         def initialize(des,min,mout,interface)
           @interface = interface
           if des.nil?
@@ -34,11 +31,9 @@ module Riddl
         end
         attr_reader :in, :out
         def visualize; "in #{@in.name.inspect} out #{@out.nil? ? "NIL" : @out.name.inspect}"; end
-        #}}}
-      end
+      end# }}}
 
-      class RequestTransformation < RequestBase
-        #{{{
+      class RequestTransformation < AccessBase# {{{
         def initialize(des,mtrans,interface)
           @interface = interface
           if des.nil?
@@ -67,11 +62,9 @@ module Riddl
           @trans.hash + (@out.nil? ? 0 : @out.hash)
         end
         def visualize; "transformation #{@trans.name.inspect}"; end
-        #}}}
-      end
+      end# }}}
 
-      class RequestStarOut < RequestBase
-        #{{{
+      class RequestStarOut < AccessBase# {{{
         def initialize(des,mout,interface)
           @interface = interface
           if des.nil?
@@ -88,11 +81,9 @@ module Riddl
           @out.nil? ? 0 : @out.hash
         end
         def visualize; "out #{@out.nil? ? "NIL" : @out.name.inspect}"; end
-        #}}}
-      end
+      end# }}}
 
-      class RequestPass < RequestBase
-        #{{{
+      class RequestPass < AccessBase# {{{
         def initialize(interface)
           @interface = interface
         end  
@@ -100,8 +91,17 @@ module Riddl
         def hash
           0
         end
-        #}}}
-      end
+      end# }}}
+
+      class WebSocket < AccessBase# {{{
+        def visualize; ""; end
+        def initialize(interface)
+          @interface = interface
+        end  
+        def hash
+          0
+        end
+      end# }}}
       
     end
   end

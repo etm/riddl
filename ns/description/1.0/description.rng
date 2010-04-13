@@ -260,6 +260,9 @@
           <ref name="riddl-atts-request"/>
           <ref name="riddl-description-others"/>
         </element>  
+        <element name="websocket">
+          <empty/>
+        </element>  
       </choice>  
     </zeroOrMore>
   </define>

@@ -1,5 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/description/resource')
-require File.expand_path(File.dirname(__FILE__) + '/description/request')
+require File.expand_path(File.dirname(__FILE__) + '/description/access')
 require File.expand_path(File.dirname(__FILE__) + '/description/message_and_transformation')
 
 module Riddl
@@ -17,7 +17,7 @@ module Riddl
         #{{{
         what += res.path
         puts what
-        res.requests.each do |k,v|
+        res.access_methods.each do |k,v|
           puts "  #{k.upcase}:"
           v.each_with_index do |l,i|
             l.each do |r|
@@ -39,7 +39,7 @@ module Riddl
           end
           res = res.resources[path]
         end
-        res.add_requests(des,desres,0,nil)
+        res.add_access_methods(des,desres,0,nil)
         desres.find("des:resource").each do |desres|
           cpath = desres.attributes['relative'] || "{}"
           rec = desres.attributes['recursive']

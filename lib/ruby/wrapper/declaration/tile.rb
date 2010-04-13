@@ -16,7 +16,7 @@ module Riddl
           what += res.path
           puts what
           if mode == :layers
-            res.requests.each do |k,v|
+            res.access_methods.each do |k,v|
               puts "  #{k.upcase}:"
               v.each_with_index do |l,i|
                 puts "    Layer #{i}:"
@@ -46,12 +46,12 @@ module Riddl
         def add_description(des,desres,path,index,interface,block,rec=nil,res=@base_path)
           #{{{
           res = add_path(path,res,rec)
-          res.add_requests(des,desres,index,interface)
+          res.add_access_methods(des,desres,index,interface)
           block.each do |bl|
             bpath = bl.to_s.gsub(/\/+/,'/').gsub(/\/$/,'')
             bpath = (bpath == "" ? "/" : bpath)
             if interface.sub == bpath
-              res.remove_requests(des,bl.attributes)
+              res.remove_access_methods(des,bl.attributes)
             end  
           end
           desres.find("des:resource").each do |desres|
