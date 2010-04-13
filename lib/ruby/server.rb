@@ -10,8 +10,13 @@ module Riddl
   class Server
     BOUNDARY = "Time_is_an_illusion._Lunchtime_doubly_so.0xriddldata"
     EOL = "\r\n"
+    WS_HANDSHAKE = "HTTP/1.1 101 Web Socket Protocol Handshake" + EOL +
+                   "Upgrade: WebSocket" + EOL +
+                   "Connection: Upgrade" + EOL +
+                   "WebSocket-Origin: %s" + EOL +
+                   "WebSocket-Location: %s" + EOL + EOL
 
-    def initialize(riddl,&blk)
+    def initialize(riddl,&blk)# {{{
       @riddl_norun = true
       @riddl_logger = nil
       @riddl_process_out = true 
@@ -36,11 +41,11 @@ module Riddl
 
       @riddl_description.load_necessary_handlers!
       @riddl_paths = @riddl_description.paths
-    end
+    end# }}}
 
-    def call(env)
+    def call(env)# {{{
       dup._call(env)
-    end
+    end# }}}
 
     def _call(env)
       time = Time.now  unless @riddl_logger.nil?
@@ -68,27 +73,44 @@ module Riddl
         ).params
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
 
-        @riddl_message = @riddl_description.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
-        if @riddl_message.nil?
-          if @riddl_env.has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
-            @riddl_res['Access-Control-Allow-Origin'] = '*'
-            @riddl_res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-            @riddl_res['Access-Control-Max-Age'] = '0'
-            @riddl_res['Content-Length'] = '0'
-            @riddl_res.status = 200
-          else
-            @riddl_log.puts "501: the #{@riddl_method} parameters are not matching anything in the description."
-            @riddl_res.status = 501 # not implemented?!
-          end  
-        else
+        if @riddl_env["HTTP_CONNECTION"] =~ /\AUpgrade\z/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/ && @riddl_env["HTTP_ORIGIN"] && @riddl_env["HTTP_HOST"]
+          puts "WebSocket Connection"
+          @riddl_env["rack.io"].write(WS_HANDSHAKE % [@riddl_env["HTTP_ORIGIN"], ws_location])
+          @riddl_env["rack.io"].flush
+
           @riddl_path = '/'
           @riddl_res.status = 404
           instance_exec(info, &@riddl_blk)  
-          if @riddl_cross_site_xhr
-            @riddl_res['Access-Control-Allow-Origin'] = '*'
-            @riddl_res['Access-Control-Max-Age'] = '0'
+
+          while data = ws_read
+            printf("Received: %p\n", data)
+            ws_write data
+            printf("Sent: %p\n", data)
           end
-        end  
+          puts "Connection closed"
+        else
+          @riddl_message = @riddl_description.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
+          if @riddl_message.nil?
+            if @riddl_env.has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
+              @riddl_res['Access-Control-Allow-Origin'] = '*'
+              @riddl_res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+              @riddl_res['Access-Control-Max-Age'] = '0'
+              @riddl_res['Content-Length'] = '0'
+              @riddl_res.status = 200
+            else
+              @riddl_log.puts "501: the #{@riddl_method} parameters are not matching anything in the description."
+              @riddl_res.status = 501 # not implemented?!
+            end  
+          else
+            @riddl_path = '/'
+            @riddl_res.status = 404
+            instance_exec(info, &@riddl_blk)  
+            if @riddl_cross_site_xhr
+              @riddl_res['Access-Control-Allow-Origin'] = '*'
+              @riddl_res['Access-Control-Max-Age'] = '0'
+            end
+          end  
+        end
       else
         @riddl_log.puts "404: this resource for sure does not exist."
         @riddl_res.status = 404 # client requests wrong path
@@ -97,7 +119,7 @@ module Riddl
       @riddl_res.finish
     end
   
-    def on(resource, &block)
+    def on(resource, &block)# {{{
       if @riddl_norun
         @riddl_blk = block if @riddl_blk.nil?
       else
@@ -109,26 +131,26 @@ module Riddl
 
         @riddl_path = File.dirname(@riddl_path).gsub(/\/+/,'/')
       end  
-    end
+    end# }}}
     
-    def use(blk,*args)
+    def use(blk,*args)# {{{
       instance_eval(&blk)
-    end
+    end# }}}
 
-    def process_out(pout)
+    def process_out(pout)# {{{
       @riddl_process_out = pout
-    end
-    def cross_site_xhr(csxhr)
+    end# }}}
+    def cross_site_xhr(csxhr)# {{{
       @riddl_cross_site_xhr = csxhr
-    end
-    def logger(lgr)
+    end# }}}
+    def logger(lgr)# {{{
       @riddl_logger = lgr
-    end
-    def accessible_description(ad)
+    end# }}}
+    def accessible_description(ad)# {{{
       @accessible_description = ad
-    end
+    end# }}}
 
-    def run(what,*args)
+    def run(what,*args)# {{{
       return if @riddl_norun
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::Implementation
@@ -159,9 +181,9 @@ module Riddl
           end  
         end
       end
-    end
+    end# }}}
 
-    def method(what)
+    def method(what)# {{{
       return if @riddl_norun
       if what.class == Hash
         what.each do |met,min|
@@ -169,18 +191,18 @@ module Riddl
         end  
       end
       false
-    end  
+    end  # }}}
     def post(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'post' end
     def get(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'get' end
     def delete(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'delete' end
     def put(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'put' end
-    def check(min)
+    def check(min)# {{{
       @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name
-    end
+    end# }}}
 
     def resource(path=nil); return if @riddl_norun; path.nil? ? '{}' : path end
 
-    def info(other={})
+    def info(other={})# {{{
       { :h => @riddl_headers, 
         :p => @riddl_parameters, 
         :r => @riddl_pinfo.sub(/\//,'').split('/'), 
@@ -188,14 +210,29 @@ module Riddl
         :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
         :match => @riddl_path.sub(/\//,'').split('/') 
       }.merge(other)
-    end
+    end# }}}
 
-    def description_string
+    def description_string# {{{
       @riddl_description_string
+    end# }}}
+
+    def facade# {{{
+      @riddl_declaration
+    end# }}}
+
+  private
+    def ws_location
+      host   = @riddl_env['SERVER_NAME']
+      scheme = @riddl_env['rack.url_scheme'] == "https" ? "wss" : "ws"
+      path   = @riddl_env['REQUEST_URI']
+      port   = @riddl_env['SERVER_PORT']
+      
+      rv = "#{scheme}://#{host}"
+      if (scheme == "wss" && port != 443) || (scheme == "ws" && port != 80)
+        rv << ":#{port}"
+      end
+      rv << path
     end
 
-    def facade
-      @riddl_declaration
-    end
   end
 end

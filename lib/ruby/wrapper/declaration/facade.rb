@@ -51,7 +51,7 @@ module Riddl
               if %w{get post put delete}.include?(k)
                 result << t + "<#{k} "
               else
-                result << t + "<request method=\"#.upcase{k}\" "
+                result << t + "<request method=\"#{k}\" "
               end  
               case m
                 when Riddl::Wrapper::Description::RequestInOut

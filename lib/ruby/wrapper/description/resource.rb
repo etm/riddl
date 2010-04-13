@@ -7,13 +7,13 @@ module Riddl
           #{{{
           @path = path
           @resources = {}
-          @requests = {}
+          @access_methods = {}
           @composition = {}
           @recursive = recursive
           #}}}
         end
 
-        def add_requests(des,desres,index,interface)
+        def add_access_methods(des,desres,index,interface)
           #{{{
           desres.find("des:*[@in and not(@in='*')]").each do |m|
             method = m.attributes['method'] || m.name.name
@@ -35,10 +35,15 @@ module Riddl
             method = m.attributes['method'] || m.name.name
             add_request_pass(index,interface,method)
           end
+          desres.find("des:*[name()='websocket']").each do |m|
+            add_websocket(index,interface)
+          end
           #}}}
         end
 
-        def remove_requests(des,filter)
+        # TODO add websockets
+
+        def remove_access_methods(des,filter)
           #{{{
           freq = if filter['in'] && filter['in'] != '*'
             t = [RequestInOut,Riddl::Wrapper::Description::Message.new(des,filter['in'])]
@@ -55,7 +60,7 @@ module Riddl
           end
           raise BlockError, "blocking #{filter.inspect} not possible" if freq.nil?
 
-          if reqs = @requests[filter['method']]
+          if reqs = @access_methods[filter['method']]
             reqs = reqs.last # current layer
             reqs.delete_if do |req|
               if req.class == freq[0]
@@ -80,7 +85,7 @@ module Riddl
 
         def compose!
           #{{{
-          @requests.each do |k,v|
+          @access_methods.each do |k,v|
             ### remove all emtpy layers  
             v.compact!
             case v.size
@@ -143,9 +148,9 @@ module Riddl
         end
         private :compose_layers
 
-        def compose_plain(requests)
+        def compose_plain(access_method)
           #{{{
-          requests.map do |ret|
+          access_method.map do |ret|
             Composition.new(nil,ret)
           end
           #}}}
@@ -215,35 +220,42 @@ module Riddl
         # add requests helper methods
         #{{{
         def add_request_in_out(index,interface,des,method,min,mout)
-          @requests[method] ||= []
-          @requests[method][index] ||= []
-          @requests[method][index] << RequestInOut.new(des,min,mout,interface)
+          @access_methods[method] ||= []
+          @access_methods[method][index] ||= []
+          @access_methods[method][index] << RequestInOut.new(des,min,mout,interface)
         end
         private :add_request_in_out
 
         def add_request_transform(index,interface,des,method,mtrans)
-          @requests[method] ||= []
-          @requests[method][index] ||= []
-          @requests[method][index] << RequestTransformation.new(des,mtrans,interface)
+          @access_methods[method] ||= []
+          @access_methods[method][index] ||= []
+          @access_methods[method][index] << RequestTransformation.new(des,mtrans,interface)
         end
         private :add_request_transform
 
         def add_request_star_out(index,interface,des,method,mout)
-          @requests[method] ||= []
-          @requests[method][index] ||= []
-          @requests[method][index] << RequestStarOut.new(des,mout,interface)
+          @access_methods[method] ||= []
+          @access_methods[method][index] ||= []
+          @access_methods[method][index] << RequestStarOut.new(des,mout,interface)
         end
         private :add_request_star_out
 
         def add_request_pass(index,interface,method)
-          @requests[method] ||= []
-          @requests[method][index] ||= []
-          @requests[method][index] << RequestPass.new(interface)
+          @access_methods[method] ||= []
+          @access_methods[method][index] ||= []
+          @access_methods[method][index] << RequestPass.new(interface)
+        end
+        private :add_request_pass
+        
+        def add_websocket(index,interface)
+          @access_methods[:websocket] ||= []
+          @access_methods[:websocket][index] ||= []
+          @access_methods[:websocket][index] << WebSocket.new(interface)
         end
         private :add_request_pass
         #}}}
 
-        attr_reader :resources,:path,:requests,:composition,:recursive
+        attr_reader :resources,:path,:access_methods,:composition,:recursive
       end
 
       Composition = Struct.new(:route,:result)

@@ -113,7 +113,7 @@ module Riddl
       description
       declaration
       
-      req = @description.get_resource(path).requests if @is_description
+      req = @description.get_resource(path).access_methods if @is_description
       req = @declaration.get_resource(path).composition if @is_declaration
 
       mp = MessageParser.new(params,headers)
