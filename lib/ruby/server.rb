@@ -74,20 +74,12 @@ module Riddl
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
 
         if @riddl_env["HTTP_CONNECTION"] =~ /\AUpgrade\z/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/ && @riddl_env["HTTP_ORIGIN"] && @riddl_env["HTTP_HOST"]
-          puts "WebSocket Connection"
           @riddl_env["rack.io"].write(WS_HANDSHAKE % [@riddl_env["HTTP_ORIGIN"], ws_location])
           @riddl_env["rack.io"].flush
 
           @riddl_path = '/'
           @riddl_res.status = 404
           instance_exec(info, &@riddl_blk)  
-
-          while data = ws_read
-            printf("Received: %p\n", data)
-            ws_write data
-            printf("Sent: %p\n", data)
-          end
-          puts "Connection closed"
         else
           @riddl_message = @riddl_description.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
           if @riddl_message.nil?
@@ -153,6 +145,14 @@ module Riddl
     def run(what,*args)# {{{
       return if @riddl_norun
       return if @riddl_path == ''
+      if what.class == Class && what.superclass == Riddl::WebSocketImplementation
+        w = what.new(info(:a => args, :io => @riddl_env['rack.io']))
+        w.onopen
+        while data = ws_read
+          w.onmessage(data)
+        end  
+        w.onclose
+      end  
       if what.class == Class && what.superclass == Riddl::Implementation
         w = what.new(info(:a => args))
         response          = w.response
@@ -196,7 +196,10 @@ module Riddl
     def get(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'get' end
     def delete(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'delete' end
     def put(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'put' end
+    def websocket; return if @riddl_norun; @riddl_path == @riddl_matching_path[0] end
+
     def check(min)# {{{
+      return false unless @riddl_message # for websockets no @riddl_message is set
       @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name
     end# }}}
 
@@ -234,5 +237,15 @@ module Riddl
       rv << path
     end
 
+    def ws_read
+      if packet = @riddl_env['rack.io'].gets("\xff")
+        if !(packet =~ /\A\x00(.*)\xff\z/nm)
+          raise(WebSocket::Error, "input must start with \\x00 and end with \\xff")
+        end
+        $1.respond_to?(:force_encoding) ? $1.force_encoding('UTF-8') : $1
+      else
+        nil
+      end
+    end
   end
 end
