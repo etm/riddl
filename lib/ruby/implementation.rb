@@ -24,7 +24,7 @@ module Riddl
     end
   end
 
-  class WebSocket
+  class WebSocketImplementation
     def initialize(ws)
       @ws = ws
 
@@ -40,24 +40,10 @@ module Riddl
 
   protected
     def send(data)
-      data = force_encoding(data.dup(), "ASCII-8BIT")
+      str = data.dup
+      data = data.respond_to?(:force_encoding) ? data.dup.force_encoding("ASCII-8BIT") : data
       @ws[:io].write("\x00#{data}\xff")
       @ws[:io].flush
-    end
-
-    def read
-      if packet = @ws[:io].gets("\xff")
-        if !(packet =~ /\A\x00(.*)\xff\z/nm)
-          raise(WebSocket::Error, "input must start with \\x00 and end with \\xff")
-        end
-        force_encoding($1,'UTF-8')
-      else
-        nil
-      end
-    end
-
-    def force_encoding(str,enc)
-      str.respond_to?(:force_encoding) ? str.force_encoding(enc) : str
     end
   end
 end

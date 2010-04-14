@@ -1,3 +1,4 @@
+#!/usr/bin/ruby
 require "socket"
 
 WS_FLASH_SOCKET_POLICY = "<cross-domain-policy><allow-access-from domain='*' to-ports='*'/></cross-domain-policy>\n"
