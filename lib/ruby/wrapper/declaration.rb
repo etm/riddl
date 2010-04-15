@@ -39,7 +39,7 @@ module Riddl
           what += res.path
           puts what
           res.composition.each do |k,v|
-            puts "  #{k.upcase}:"
+            puts "  #{k.to_s.upcase}:"
             v.each do |r|
               puts "    #{r.result.class.name.gsub(/[^\:]+::/,'')}: #{r.result.visualize}"
               r.route.each do |ritem|

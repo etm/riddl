@@ -17,7 +17,7 @@ module Riddl
           puts what
           if mode == :layers
             res.access_methods.each do |k,v|
-              puts "  #{k.upcase}:"
+              puts "  #{k.to_s.upcase}:"
               v.each_with_index do |l,i|
                 puts "    Layer #{i}:"
                 l.each do |r|
@@ -28,7 +28,7 @@ module Riddl
           end
           if mode == :composition
             res.composition.each do |k,v|
-              puts "  #{k.upcase}:"
+              puts "  #{k.to_s.upcase}:"
               v.each do |r|
                 puts "    #{r.result.class.name.gsub(/[^\:]+::/,'')}: #{r.result.visualize}"
                 r.route.each do |ritem|

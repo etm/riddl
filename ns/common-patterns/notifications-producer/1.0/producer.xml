@@ -68,9 +68,11 @@
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-producer/1.0">
         <start>
           <element name="subscription">
-            <attribute name="url">
-              <data type="string"/>
-            </attribute>
+            <optional>
+              <attribute name="url">
+                <data type="string"/>
+              </attribute>
+            </optional>  
             <oneOrMore>
               <element name="topic">
                 <attribute name="id">
@@ -111,7 +113,9 @@
   </message>
 
   <message name="subscribe">
-    <parameter name="url" type="string"/>
+    <optional>
+      <parameter name="url" type="string"/>
+    </optional>  
     <oneOrMore>
       <parameter name="topic" type="string"/>
       <choice>
@@ -177,6 +181,9 @@
           <get    in="request" out="subscription"/>
           <put    in="details"/>
           <delete in="delete"/>
+          <resource relative="ws">
+            <websocket/>
+          </resource>
         </resource>
       </resource>
     </resource>

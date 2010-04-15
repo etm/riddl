@@ -6,9 +6,7 @@
 
   <resource>
     <get in="*" out="hello"/>
-    <resource relative="test">
-      <websocket/>
-    </resource>
+    <websocket/>
   </resource>
   
 </description>

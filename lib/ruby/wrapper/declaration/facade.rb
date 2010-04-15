@@ -50,6 +50,8 @@ module Riddl
               m = m.result
               if %w{get post put delete}.include?(k)
                 result << t + "<#{k} "
+              elsif  k == :websocket
+                result << t + "<#{k}"
               else
                 result << t + "<request method=\"#{k}\" "
               end  

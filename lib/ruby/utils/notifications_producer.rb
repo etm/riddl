@@ -23,6 +23,9 @@ module Riddl
                 run Riddl::Utils::Notifications::Producer::Subscription, data, xsls[:subscription], details if get 'request'
                 run Riddl::Utils::Notifications::Producer::UpdateSubscription, data, handler if put
                 run Riddl::Utils::Notifications::Producer::DeleteSubscription, data, handler if delete
+                on resource 'ws' do
+                  run Riddl::Utils::Notifications::Producer::WS, data, handler if websocket
+                end
               end
             end
           }
@@ -34,6 +37,9 @@ module Riddl
             @key = key
             @topics = topics
           end
+          def ws_open(socket); end
+          def ws_close; end
+          def ws_message(socket,data); end
           def create; end
           def delete; end
           def update; end
@@ -73,13 +79,14 @@ module Riddl
             Riddl::Parameter::Complex.new("subscriptions","text/xml") do
               ret = XML::Smart::string <<-END
                 #{xsl ? "<?xml-stylesheet href=\"#{xsl}\" type=\"text/xsl\"?>" : ''}
-                <subscriptions information='#{details}' xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>
+                <subscriptions details='#{details}' xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>
               END
               Dir[data + "/*"].each do |d|
                 if File.directory?(d)
                   ret.root.add('subscription', :id => File.basename(d))
                 end  
               end
+              p ret.to_s
               ret.to_s
             end
           end
@@ -89,7 +96,6 @@ module Riddl
           def response
             data    = @a[0]
             xsl     = @a[1]
-            details = @a[2]
             Riddl::Parameter::Complex.new("subscription","text/xml") do
               ret  = XML::Smart::open(data + "/" + @r.last + "/subscription.xml").to_s
               xsl ? ret.sub(/\?>\s*\r?\n/,"?>\n<?xml-stylesheet href=\"xsl\" type=\"text/xsl\"?>\n") : ret
@@ -97,12 +103,12 @@ module Riddl
           end
         end #}}}
         
-       class CreateSubscription < Riddl::Implementation #{{{
+        class CreateSubscription < Riddl::Implementation #{{{
           def response
             data    = @a[0]
             handler = @a[1]
 
-            url  = @p.shift.value
+            url  = @p[0].name == 'url' ? @p.shift.value : nil
             key  = nil
             begin
               continue = true
@@ -116,7 +122,7 @@ module Riddl
             File.open(data + '/' + key + '/consumer-secret','w') { |f| f.write consumer_secret }
 
             topics = []
-            XML::Smart::modify(data + '/' + key + '/subscription.xml',"<subscription url='#{url}' xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>") do |doc|
+            XML::Smart::modify(data + '/' + key + '/subscription.xml',"<subscription #{url ? "url='#{url}' " : ''} xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>") do |doc|
               doc.namespaces = { 'n' => 'http://riddl.org/ns/common-patterns/notifications-producer/1.0' }
               while @p.length > 0
                 topic = @p.shift.value
@@ -148,9 +154,9 @@ module Riddl
           def response
             data    = @a[0]
             handler = @a[1]
-
-            topics = []
-            handler.new(notifications,key,topics).delete
+            key     = @r.last
+            topics  = []
+            handler.new(data,key,topics).delete
           end
         end #}}}
         
@@ -158,9 +164,26 @@ module Riddl
           def response
             data    = @a[0]
             handler = @a[1]
-
+            key     = @r.last
             topics = []
-            handler.new(notifications,key,topics).update
+            handler.new(data,key,topics).update
+          end
+        end #}}}
+                  
+        class WS < Riddl::WebSocketImplementation #{{{
+          def onopen
+            @data    = @a[0]
+            @handler = @a[1]
+            @key     = @r[-2]
+            @handler.new(@data,@key,[]).ws_open(self)
+          end
+
+          def onmessage(data)
+            @handler.new(@data,@key,[]).ws_message(self,data)
+          end
+
+          def onclose
+            @handler.new(@data,@key,[]).ws_close()
           end
         end #}}}
         
