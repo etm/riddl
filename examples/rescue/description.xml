@@ -14,6 +14,14 @@
   <message name="xml">
     <parameter name="xml" mimetype="text/xml"/>
   </message>
+
+  <message name="class-level-workflow">
+    <parameter name="class-level-workflow" mimetype="text/xml"/>
+  </message>
+  
+    <message name="instance-level-workflow">
+    <parameter name="instance-level-workflow" mimetype="text/xml"/>
+  </message>
   <message name="atom-feed">
     <parameter name="feed" mimetype="application/atom+xml"/>
   </message>
@@ -90,7 +98,7 @@
         <resource relative="operations">
           <get in="*" out="xml"/>
           <resource>
-            <get in="*" out="xml"/>
+            <get in="*" out="class-level-workflow"/>
             <get in="input" out="schema"/>
             <get in="output" out="schema"/>
           </resource>
@@ -105,11 +113,11 @@
 <!--}}}-->
           <resource> <!-- Service-level -->
 <!-- {{{ -->
-            <get in="*" out="xml"/>
+            <get in="*" out="instance-level-workflow"/>
             <put in="rename"/>
             <put in="service-description"/>
             <delete in="*"/>
-<!--}}}-->
+<!--}}}--> 
           </resource>  
 
         </resource>  
