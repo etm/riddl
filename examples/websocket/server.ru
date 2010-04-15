@@ -30,8 +30,6 @@ end
 run Riddl::Server.new(::File.dirname(__FILE__) + '/description.xml') {
   on resource do
     run Bar if get '*'
-    on resource 'test' do
-      run Echo if websocket
-    end
+    run Echo if websocket
   end
 }

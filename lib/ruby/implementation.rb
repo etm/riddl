@@ -38,7 +38,6 @@ module Riddl
     def onclose;end
     def on;end
 
-  protected
     def send(data)
       str = data.dup
       data = data.respond_to?(:force_encoding) ? data.dup.force_encoding("ASCII-8BIT") : data

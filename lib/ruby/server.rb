@@ -192,14 +192,14 @@ module Riddl
       end
       false
     end  # }}}
-    def post(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'post' end
-    def get(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'get' end
+    def post(min='*');   return if @riddl_norun; check(min) && @riddl_method == 'post' end
+    def get(min='*');    return if @riddl_norun; check(min) && @riddl_method == 'get' end
     def delete(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'delete' end
-    def put(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'put' end
-    def websocket; return if @riddl_norun; @riddl_path == @riddl_matching_path[0] end
+    def put(min='*');    return if @riddl_norun; check(min) && @riddl_method == 'put' end
+    def websocket;       return if @riddl_norun; return false unless @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] end
 
     def check(min)# {{{
-      return false unless @riddl_message # for websockets no @riddl_message is set
+      return false if @riddl_message.nil? # for websockets no @riddl_message is set
       @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name
     end# }}}
 
