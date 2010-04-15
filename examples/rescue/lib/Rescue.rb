@@ -31,14 +31,6 @@ class AddResource < Riddl::Implementation
           @status = 415 # Media-Type not supprted
           return
         end
-=begin
-      if Execution::check_syntax(xml, interface) == false
-          @status = 415 # Media-Type not supprted
-          puts "Execution-Syntax-Error:" 
-          puts Execution::error
-          return Riddl::Parameter::Simple.new("error-message", Execution::error)
-        end
-=end
         f = File.new("#{@r.join("/")}/#{@p[0].value}/properties.xml", "w")
       end
       if @p[0].name != "subgroup-name"
@@ -76,12 +68,6 @@ class UpdateResource < Riddl::Implementation
           @status = 415 # Media-Type not supprted
           return
         end
-=begin
-        if Execution::check_syntax(xml, interface) == false
-          @status = 415 # Media-Type not supprted
-          return Riddl::Parameter::Simple.new("error-message", Execution::error)
-        end
-=end
         f = File.new("#{@r.join("/")}/properties.xml", "w")
         f.write(xml)
         f.close()
@@ -101,13 +87,15 @@ class GetInterface < Riddl::Implementation
     p = nil
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     params = nil
+    out_name = "schema"
 
 
-    if @p[0] == nil # If no parameter is given, the defition of the service-operation is requested
+    if @p[0] == nil # If no parameter is given, the defition of the class-level-workflow 
       schema = XML::Smart.string("<state-controlflow xmlns=\"http://rescue.org/ns/controlflow/0.2\" xmlns:flow=\"http://rescue.org/ns/controlflow/0.2\"/>")
       o = xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{@r[3]}']", {"domain" => "http://rescue.org/ns/domain/0.2"}).first
       @status = 410 if o == nil
       schema.root.add(o) if o != nil
+      out_name = "class-level-workflow"
     elsif @p[0].name == "properties"
       schema.append_schemablock(xml.find("/domain:domain-description/domain:properties", {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
     else 
@@ -136,7 +124,7 @@ class GetInterface < Riddl::Implementation
       end
       schema.append_schemablock(s.root)
     end 
-    Riddl::Parameter::Complex.new("schema","text/xml", schema.to_s)
+    Riddl::Parameter::Complex.new(out_name,"text/xml", schema.to_s)
   end
 
   def collect_input(operation_name, xml)
@@ -295,7 +283,7 @@ class GetServiceDescription <  Riddl::Implementation
       @status = 410
       return
     end
-    Riddl::Parameter::Complex.new("service-description","text/xml",File.open("#{@r.join("/")}/properties.xml", "r"))
+    Riddl::Parameter::Complex.new("instance-level-workflow","text/xml",File.open("#{@r.join("/")}/properties.xml", "r"))
   end
 end
 

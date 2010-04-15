@@ -6,28 +6,45 @@
 
 
 <start combine="choice">
-  <element name="flow:controlflow">
-    <ref name="controlflow-code"/>
+  <!-- {{{ --> 
+  <element name="testset">
+    <element name="positions">
+      <zeroOrMore>
+        <element>
+          <anyName/>
+          <text/>
+        </element>
+      </zeroOrMore>
+    </element>
+    <element name="context-variables">
+      <zeroOrMore>
+        <element>
+          <anyName/>
+          <text/>
+        </element>
+      </zeroOrMore>
+    </element>
+    <element name="endpoints">
+      <zeroOrMore>
+        <element>
+          <anyName/>
+          <text/>
+        </element>
+      </zeroOrMore>
+    </element>
+    <element name="flow:description">
+      <ref name="controlflow-code"/>
+    </element>
   </element>
+  <!-- }}} -->
 </start>
 
 
 <define name="controlflow-code">
-  <!-- {{{ -->
+  <!-- {{{ --> 
   <zeroOrMore>
     <choice>
       <ref name="controls"/>
-    </choice>
-  </zeroOrMore>
-  <!-- }}} -->
-</define>
-
-<define name="assigns">
-  <!-- {{{ -->
-  <zeroOrMore>
-    <choice>
-      <ref name="endpoint"/>
-      <ref name="context"/>
     </choice>
   </zeroOrMore>
   <!-- }}} -->
@@ -98,7 +115,7 @@
       </choice>
     </attribute>
     <oneOrMore>
-      <element name="flow:branch">
+      <element name="flow:parallel_branch">
         <ref name="controlflow-code"/>
       </element>
     </oneOrMore>
@@ -130,7 +147,6 @@
     <attribute name="id"/>
     <zeroOrMore>
       <choice>
-        <ref name="assigns"/>
         <element name="flow:instruction">
           <attribute name="target"/>
           <attribute name="operator"/> 
@@ -170,18 +186,39 @@
 <!-- }}} -->
 </define>
 
+<define name="parameter">
+<!-- {{{ --> 
+  <element name="flow:parameter">
+    <attribute name="name"/>
+    <choice>
+      <text/>
+      <zeroOrMore>
+        <ref name="parameter"/> 
+      </zeroOrMore>
+    </choice>
+  </element>
+<!-- }}} -->
+</define>
+
 <define name="call">
 <!-- {{{ --> 
   <element name="flow:call">
     <attribute name="id"/>
     <attribute name="endpoint"/>
+    <zeroOrMore>
+      <choice>
+        <ref name="parameter"/>
+        <ref name="constraint"/>
+      </choice>
+    </zeroOrMore>
+<!--
     <choice>
       <group>
         <attribute name="service-operation"/>
         <attribute name="state-controlflow"/>
         <optional>
-          <attribute name="group-by"/> <!-- holds the xpath to be used for generating the oportunities out of the input-message -->
-          <element name="flow:resource-id"> <!-- selector and target for the resource from which the output was selected -->
+          <attribute name="group-by"/> 
+          <element name="flow:resource-id">
             <attribute name="xpath"/>
             <attribute name="endpoint"/>
           </element>
@@ -206,14 +243,15 @@
           </choice>
         </attribute>
         <optional>
-          <attribute name="group-by"/> <!-- holds the xpath to be used for generating the oportunities out of the input-message -->
-          <element name="flow:resource-id"> <!-- selector and target for the resource from which the output was selected -->
+          <attribute name="group-by"/> 
+          <element name="flow:resource-id"> 
             <attribute name="xpath"/>
             <attribute name="endpoint"/>
           </element>
         </optional>
       </group>
     </choice>
+-->    
     <ref name="in-out"/>
   </element>
 <!-- }}} --> 

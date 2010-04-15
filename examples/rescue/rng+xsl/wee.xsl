@@ -7,7 +7,9 @@
   <xsl:output method="text"/>
 
   <xsl:template match="/">
-    <xsl:apply-templates select="/flow:controlflow/flow:*"/>
+    <xsl:apply-templates select="/testset/context-variables"/>
+    <xsl:apply-templates select="/testset/endpoints"/>
+    <xsl:apply-templates select="//flow:description/flow:*"/>
     <xsl:text>&#xa;</xsl:text>
   </xsl:template>
 
@@ -27,12 +29,12 @@
     <!-- {{{{ -->
     <xsl:param name="var" select="@variable"/>
     <xsl:choose>
-      <xsl:when test="(//flow:context[@id=$var])">
+      <xsl:when test="(//context-variables/*[name()=$var])">
         <xsl:text>context[:"</xsl:text>
         <xsl:value-of select="$var"/>
         <xsl:text>"]</xsl:text>
       </xsl:when>
-      <xsl:when test="//flow:endpoint[@id=$var]">
+      <xsl:when test="//endpoints/*[name()=$var]">
         <xsl:text>endpoints[:"</xsl:text>
         <xsl:value-of select="$var"/>
         <xsl:text>"]</xsl:text>
@@ -531,14 +533,14 @@
     <xsl:text>parallel (:</xsl:text>
     <xsl:value-of select="@type"/>
     <xsl:text>) do</xsl:text>
-    <xsl:apply-templates select="child::flow:branch"/>
+    <xsl:apply-templates select="child::flow:*"/>
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>end</xsl:text>
     <!-- }}} --> 
   </xsl:template>
   
-  <xsl:template match="//flow:branch">
+  <xsl:template match="//flow:parallel_branch">
     <!-- {{{ -->  
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
@@ -643,27 +645,35 @@
     <!-- }}} --> 
   </xsl:template>
 
-  <xsl:template match="//flow:context">
-    <!-- {{{ -->
+  <xsl:template match="//context-variables">
+     <!-- {{{ -->
     <xsl:text>&#xa;</xsl:text>
-    <xsl:call-template name="prefix-whitespaces"/>
-    <xsl:text>context :"</xsl:text><xsl:value-of select="@id"/><xsl:text>" => </xsl:text>
-    <xsl:if test="not(string(text()))">
-      <xsl:text> nil</xsl:text>
-    </xsl:if>
-    <xsl:value-of select="text()"/>
+    <xsl:text>&#xa;  # ------ Define context-variables -----</xsl:text>
+    <xsl:for-each select="child::*">
+      <xsl:text>&#xa;</xsl:text>
+      <xsl:call-template name="prefix-whitespaces"/>
+      <xsl:text>context:"</xsl:text><xsl:value-of select="name()"/><xsl:text>" => </xsl:text>
+      <xsl:if test="not(string(text()))">
+        <xsl:text> nil</xsl:text>
+      </xsl:if>
+      <xsl:value-of select="text()"/>
+    </xsl:for-each>
     <!-- }}} --> 
   </xsl:template>
 
-  <xsl:template match="//flow:endpoint">
+  <xsl:template match="//endpoints">
     <!-- {{{ -->
     <xsl:text>&#xa;</xsl:text>
-    <xsl:call-template name="prefix-whitespaces"/>
-    <xsl:text>endpoint :"</xsl:text><xsl:value-of select="@id"/><xsl:text>" => </xsl:text>
-    <xsl:if test="not(string(text()))">
-      <xsl:text> nil</xsl:text>
-    </xsl:if>
-    <xsl:value-of select="text()"/>
-    <!-- }}} -->
+    <xsl:text>&#xa;  # ------ Define endpoints-----</xsl:text>
+    <xsl:for-each select="child::*">
+      <xsl:text>&#xa;</xsl:text>
+      <xsl:call-template name="prefix-whitespaces"/>
+      <xsl:text>endpoint :"</xsl:text><xsl:value-of select="name()"/><xsl:text>" => </xsl:text>
+      <xsl:if test="not(string(text()))">
+        <xsl:text> nil</xsl:text>
+      </xsl:if>
+      <xsl:value-of select="text()"/>
+    </xsl:for-each>
+     <!-- }}} -->
   </xsl:template>
 </xsl:stylesheet>
