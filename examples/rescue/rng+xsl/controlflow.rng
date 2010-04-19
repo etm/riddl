@@ -35,6 +35,9 @@
     <element name="flow:description">
       <ref name="controlflow-code"/>
     </element>
+    <element name="transformation">
+      <ref name="xsl-code"/>
+    </element>
   </element>
   <!-- }}} -->
 </start>
@@ -258,7 +261,7 @@
 </define>
 
 <define name="xsl-code">
-  <!-- {{{ -->
+   <!-- {{{ -->
   <element>
     <nsName ns="http://www.w3.org/1999/XSL/Transform"/>
     <zeroOrMore>
