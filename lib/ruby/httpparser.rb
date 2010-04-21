@@ -1,7 +1,19 @@
 require File.expand_path(File.dirname(__FILE__) + "/parameter")
 
 module Riddl
+
   class HttpParser
+    class Params < Array
+      def value(index)
+        tmp = find_all{|e| e.name == index}
+        case tmp.length
+          when 0: nil
+          when 1: tmp[0].value
+          else tmp
+        end if tmp
+      end
+    end
+
     MULTIPART_CONTENT_TYPES = [
       #{{{
       'multipart/form-data',
@@ -169,7 +181,7 @@ module Riddl
       end
 
       media_type = content_type && content_type.split(/\s*[;,]\s*/, 2).first.downcase
-      @params = []
+      @params = Params.new
       parse_nested_query(query_string,:query)
       if MULTIPART_CONTENT_TYPES.include?(media_type)
         parse_multipart(input,content_type,content_length.to_i)

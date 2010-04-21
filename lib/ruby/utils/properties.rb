@@ -21,9 +21,9 @@ module Riddl
           end
           on resource 'values' do
             run   Riddl::Utils::Properties::Keys,      properties, schema,         handler        if get
-            run   Riddl::Utils::Properties::AddPair,   properties, schema, strans, handler, level if post   'key-value-pair'
+            run   Riddl::Utils::Properties::AddPair,   properties, schema, strans, handler, level if post   'key-value'
             on resource do
-              run Riddl::Utils::Properties::AddPair,   properties, schema, strans, handler, level if post   'key-value-pair'
+              run Riddl::Utils::Properties::AddPair,   properties, schema, strans, handler, level if post   'key-value'
               run Riddl::Utils::Properties::Values,    properties, schema,         handler, level if get
               run Riddl::Utils::Properties::Delete,    properties, schema, strans, handler, level if delete
               run Riddl::Utils::Properties::Put,       properties, schema, strans, handler, level if put    'value'
