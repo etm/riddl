@@ -17,7 +17,7 @@
     <with_pattern>&quot;http://here-is-a-pattern-used.org/#{@pattern_context}/some-uri-parts&quot;</with_pattern>
   </endpoints>
   <description xmlns="http://rescue.org/ns/controlflow/0.2" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <cycle>
+    <loop>
       <condition test="wo_pattern" comparator="&lt;" fix-value="5"/>
       <parallel type="nowait">
         <parallel_branch>
@@ -106,7 +106,7 @@
         </instruction>
         <instruction target="some_context" operator="some_operation" fix-value="@some_context.some_method(@some_context)"/>
       </manipulate>
-    </cycle>
+    </loop>
     <choose>
       <alternative>
         <group connector="and">
@@ -443,9 +443,9 @@
     <!-- }}} -->
 
       <xsl:template match="/">
-        <xsl:apply-templates select="/testset/context-variables"/>
-        <xsl:apply-templates select="/testset/endpoints"/>
-        <xsl:apply-templates select="/testset/flow:description/flow:*"/>
+        <xsl:apply-templates select="//context-variables"/>
+        <xsl:apply-templates select="//endpoints"/>
+        <xsl:apply-templates select="//flow:description/flow:*"/>
         <xsl:text>&#xa;</xsl:text>
       </xsl:template>
 
@@ -476,7 +476,7 @@
             <xsl:text>"]</xsl:text>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:text># ERROR: Variable not found - ID: </xsl:text><xsl:value-of select="$var"/>
+            <xsl:text>@</xsl:text><xsl:value-of select="$var"/>
           </xsl:otherwise>
         </xsl:choose>
         <!-- }}}} -->
@@ -509,9 +509,6 @@
       <xsl:template name="input">
         <!-- {{{ -->
         <xsl:param name="input" select="child::flow:input"/>
-        <xsl:text>&#xa;</xsl:text>
-        <xsl:call-template name="prefix-whitespaces"/>
-        <xsl:text>input = Hash.new</xsl:text>
         <xsl:for-each select="$input">
           <xsl:variable name="id" select="generate-id()"/>
           <xsl:choose>
@@ -629,7 +626,10 @@
         <!-- {{{ -->
         <xsl:text>&#xa;</xsl:text>
         <xsl:call-template name="prefix-whitespaces"/>
-        <xsl:text>parallel (:wait) do</xsl:text>
+        <xsl:text>input = Hash.new</xsl:text>
+        <xsl:text>&#xa;</xsl:text>
+        <xsl:call-template name="prefix-whitespaces"/>
+        <xsl:text>parallel do</xsl:text>
         <xsl:call-template name="input"/>
         <xsl:text>&#xa;</xsl:text>
         <xsl:call-template name="prefix-whitespaces"/>
@@ -640,27 +640,21 @@
         <xsl:value-of select="@id"/>
         <xsl:text>, :call, :</xsl:text>
         <xsl:value-of select="@endpoint"/>
-        <xsl:text>, input</xsl:text>
+        <xsl:text>, :input => input </xsl:text>
         <xsl:if test="string(@http-method)">
-          <xsl:text>, &#xa;</xsl:text>
-          <xsl:call-template name="prefix-whitespaces"/>
-          <xsl:text>    http-method = '</xsl:text>
+          <xsl:text>, :http-method => '</xsl:text>
           <xsl:value-of select="@http-method"/>
           <xsl:text>'</xsl:text>
         </xsl:if>
         <xsl:if test="string(@service-operation)">
-          <xsl:text>, &#xa;</xsl:text>
-          <xsl:call-template name="prefix-whitespaces"/>
-          <xsl:text>    service = {:operation => '</xsl:text>
+          <xsl:text>, :service => {:operation => '</xsl:text>
           <xsl:value-of select="@service-operation"/>
           <xsl:text>', :controlflow => '</xsl:text>
           <xsl:value-of select="@state-controlflow"/>
           <xsl:text>'}</xsl:text>
         </xsl:if>
         <xsl:if test="string(@group-by)">
-          <xsl:text>, &#xa;</xsl:text>
-          <xsl:call-template name="prefix-whitespaces"/>
-          <xsl:text>    group = {:group_selector => '</xsl:text>
+          <xsl:text>, :group => {:group_selector => '</xsl:text>
           <xsl:value-of select="@group-by"/>
           <xsl:text>', :uri_selector => </xsl:text>
           <xsl:value-of select="child::flow:resource-id/@xpath"/>
@@ -669,15 +663,12 @@
           <xsl:text>}</xsl:text>
         </xsl:if>
         <xsl:if test="child::flow:constraint">
-          <xsl:text>, &#xa;</xsl:text>
-          <xsl:call-template name="prefix-whitespaces"/>
-          <xsl:text>    constraint = {</xsl:text>
+          <xsl:text>, :constraint => {</xsl:text>
           <xsl:apply-templates select="child::flow:constraint"/>
           <xsl:text>}</xsl:text>
         </xsl:if>
-        <xsl:text>&#xa;</xsl:text>
         <xsl:call-template name="prefix-whitespaces"/>
-        <xsl:text>do |result|</xsl:text>
+        <xsl:text> do |result|</xsl:text>
         <xsl:apply-templates select="child::flow:output">
           <xsl:with-param name="mode" select="'assign'"/>
         </xsl:apply-templates>
@@ -686,7 +677,7 @@
         <xsl:text>end</xsl:text>
         <xsl:text>&#xa;</xsl:text>
         <xsl:call-template name="prefix-whitespaces"/>
-        <xsl:text>parallel (:wait) do</xsl:text>
+        <xsl:text>parallel do</xsl:text>
         <xsl:apply-templates select="child::flow:output">
           <xsl:with-param name="mode" select="'transform'"/>
         </xsl:apply-templates>
@@ -988,14 +979,14 @@
         <!-- }}} -->
       </xsl:template>
       
-      <xsl:template match="//flow:cycle">
+      <xsl:template match="//flow:loop">
         <!-- {{{ -->
         <xsl:text>&#xa;</xsl:text>
         <xsl:call-template name="prefix-whitespaces"/>
-        <xsl:text>cycle(</xsl:text>
+        <xsl:text>loop pre_test{</xsl:text>
         <xsl:apply-templates select="child::flow:group"/>
         <xsl:apply-templates select="child::flow:condition"/>
-        <xsl:text>) do </xsl:text>
+        <xsl:text>} do </xsl:text>
         <xsl:text>&#xa;</xsl:text>
         <xsl:apply-templates select="child::flow:*[(name() != 'group') and (name() != 'condition')]"/>
         <xsl:text>&#xa;</xsl:text>
@@ -1112,7 +1103,8 @@
         </xsl:for-each>
          <!-- }}} -->
       </xsl:template>
-    </xsl:stylesheet>
+
+    </xsl:stylesheet>  
     <!-- }}} -->
   </transformation>
 </testset>

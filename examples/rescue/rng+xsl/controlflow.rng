@@ -59,7 +59,7 @@
     <choice>
       <ref name="manipulate"/>
       <ref name="call"/>
-      <ref name="cycle"/>
+      <ref name="loop"/>
       <ref name="parallel"/>
       <ref name="choose"/>
       <ref name="critical"/>
@@ -135,9 +135,9 @@
 <!-- }}} -->
 </define>
 
-<define name="cycle">
+<define name="loop">
 <!-- {{{ --> 
-  <element name="flow:cycle">
+  <element name="flow:loop">
     <ref name="condition"/>
     <ref name="controls"/>
   </element>

@@ -72,7 +72,14 @@
     <parameter name="service-description" mimetype="text/xml"/>
   </message>
 
-<!--}}}-->
+  <message name="injection-request">
+    <parameter name="path" type="string"/>
+    <parameter name="repo" type="string"/>
+    <parameter name="instance" type="string"/>
+    <parameter name="position" type="string"/>
+  </message>
+
+<!--}}}--> 
 <!-- Resources -->
 <!-- {{{ -->
   <resource>
@@ -82,6 +89,9 @@
     <resource relative="xsl" recursive="true">
       <get in="*" out="xml"/>
     </resource>  
+    <resource relative="injection">
+      <get in="injection-request"/>
+    </resource>
     <resource relative="groups">
 <!-- {{{ -->
       <get in="*" out="atom-feed"/>
