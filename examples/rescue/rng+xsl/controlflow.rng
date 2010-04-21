@@ -208,13 +208,6 @@
   <element name="flow:call">
     <attribute name="id"/>
     <attribute name="endpoint"/>
-    <zeroOrMore>
-      <choice>
-        <ref name="parameter"/>
-        <ref name="constraint"/>
-      </choice>
-    </zeroOrMore>
-<!--
     <choice>
       <group>
         <attribute name="service-operation"/>
@@ -254,7 +247,6 @@
         </optional>
       </group>
     </choice>
--->    
     <ref name="in-out"/>
   </element>
 <!-- }}} --> 
