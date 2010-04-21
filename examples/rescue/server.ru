@@ -14,6 +14,7 @@ require 'pp'
 
 require 'lib/Rescue'
 require 'lib/Execution'
+require 'lib/Injection'
 
 use Rack::ShowStatus
 
@@ -30,6 +31,9 @@ run(
       run Riddl::Utils::FileServe, 'description.xml' if method :get => 'riddl-description'
       on resource 'xsl' do
         run Riddl::Utils::ERBServe, 'rng+xsl' if method :get => '*'
+      end
+      on resource 'injection' do
+        run Injection if method :get => 'injection-request'
       end
       on resource 'groups' do
         # Generating the ATOM feed with groups
