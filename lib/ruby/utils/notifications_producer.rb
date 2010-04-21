@@ -86,7 +86,6 @@ module Riddl
                   ret.root.add('subscription', :id => File.basename(d))
                 end  
               end
-              p ret.to_s
               ret.to_s
             end
           end
