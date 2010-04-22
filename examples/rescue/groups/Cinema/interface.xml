@@ -1,0 +1,250 @@
+<?xml version="1.0"?>
+
+<domain-description  xmlns="http://rescue.org/ns/domain/0.2"
+            xmlns:rng="http://relaxng.org/ns/structure/1.0"
+            xmlns:flow="http://rescue.org/ns/controlflow/0.2">
+  <properties>
+<!-- {{{ -->
+    <rng:element name="longitude">
+      <caption lang="en">Longitude</caption>
+      <caption lang="de">Längengrad</caption>
+      <rng:data type="positiveInteger"/>
+    </rng:element>
+    <rng:element name="latitude">
+      <caption lang="en">Latitude</caption>
+      <caption lang="de">Breitengrad</caption>
+      <rng:data type="positiveInteger"/>
+    </rng:element>
+    <rng:element name="carpark">
+      <caption lang="en">Carpark</caption>
+      <caption lang="de">Parkplatz</caption>
+      <rng:data type="boolean"/>
+    </rng:element>
+<!-- }}} -->
+  </properties>
+  <messages>
+    <message name="search_parameters">
+<!-- {{{ -->     
+      <rng:element name="title">
+        <caption lang="en">Title</caption>
+        <caption lang="de">Titel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="date">
+        <caption lang="en">Date</caption>
+        <caption lang="de">Datum</caption>
+        <rng:data type="date"/>
+      </rng:element>
+      <rng:element name="preferred_time">
+        <caption lang="en">preferred time</caption>
+        <caption lang="de">bevorzugte Zeit</caption>
+        <rng:data type="time"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+    <message name="list_shows">
+<!-- {{{ -->     
+      <rng:zeroOrMore>
+        <rng:element name="show">
+          <rng:element name="cinema_uri">
+            <caption lang="en">Kino-WWW</caption>
+            <caption lang="de">Cinema-URI</caption>
+            <rng:data type="string"/>
+          </rng:element>
+          <rng:element name="movie_title">
+            <caption lang="en">Movietitle</caption>
+            <caption lang="de">Filmtitel</caption>
+            <rng:data type="string"/>
+          </rng:element>
+          <rng:element name="show_id">
+            <caption lang="en">ShowID</caption>
+            <caption lang="de">VorstellungsID</caption>
+            <rng:data type="string"/>
+          </rng:element>
+          <rng:element name="starting_time">
+            <caption lang="en">Starting time</caption>
+            <caption lang="de">Beginzeit</caption>
+            <rng:data type="time"/>
+          </rng:element>
+          <rng:element name="hall">
+            <caption lang="en">Hall</caption>
+            <caption lang="de">Saal</caption>
+            <rng:data type="positiveInteger"/>
+          </rng:element>
+        </rng:element>
+      </rng:zeroOrMore>
+<!-- }}} -->
+    </message>
+    <message name="selected_show">
+<!-- {{{ -->    
+      <rng:element name="movie_title">
+        <caption lang="en">Movietitle</caption>
+        <caption lang="de">Filmtitel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="show_id">
+        <caption lang="en">ShowID</caption>
+        <caption lang="de">VorstellungsID</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="starting_time">
+        <caption lang="en">Starting time</caption>
+        <caption lang="de">Beginzeit</caption>
+        <rng:data type="time"/>
+      </rng:element>
+      <rng:element name="hall">
+        <caption lang="en">Hall</caption>
+        <caption lang="de">Saal</caption>
+        <rng:data type="positiveInteger"/>
+      </rng:element>
+<!-- }}} --> 
+    </message>
+    <message name="book_tickets">
+<!-- {{{ -->    
+      <rng:element name="show_id">
+        <caption lang="en">ShowID</caption>
+        <caption lang="de">VorstellungsID</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="number_of_persons">
+        <caption lang="en">Hall</caption>
+        <caption lang="de">Saal</caption>
+        <rng:data type="positiveInteger"/>
+      </rng:element>
+<!-- }}} --> 
+    </message>
+    <message name="reservation_result">
+<!-- {{{ -->     
+      <rng:element name="reservation_id">
+        <caption lang="en">Reservation ID</caption>
+        <caption lang="de">Reservierungsnummer</caption>
+        <rng:data type="string"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+    <message name="popcorn_order">
+<!-- {{{ -->      
+      <rng:element name="reservation_id">
+        <caption lang="en">Reservation ID</caption>
+        <caption lang="de">Reservierungsnummer</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="quantity">
+        <caption lang="en">Quantity</caption>
+        <caption lang="de">Packungen</caption>
+        <rng:data type="positiveInteger"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+    <message name="popcorn_result">
+<!-- {{{ -->      
+      <rng:element name="price">
+        <caption lang="en">Preis</caption>
+        <caption lang="de">Price</caption>
+        <rng:data type="float"/>
+      </rng:element>
+      <rng:element name="order_number">
+        <caption lang="en">Bestellnummer</caption>
+        <caption lang="de">Order number</caption>
+        <rng:data type="float"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+    <message name="undo_popcorn">
+<!-- {{{ -->      
+      <rng:element name="order_number">
+        <caption lang="en">Bestellnummer</caption>
+        <caption lang="de">Order number</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="quantity">
+        <caption lang="en">Quantity</caption>
+        <caption lang="de">Packungen</caption>
+        <rng:data type="boolean"/>
+      </rng:element>
+<!-- }}} --> 
+    </message>
+  </messages>
+  <operations>
+    <operation name="search" short="search for avaliable shows">
+<!-- {{{ -->   
+      <execute>
+        <flow:call id="perform_search" endpoint="resource_scope" service-operation="search" state-controlflow="execute">
+          <flow:input message="search_parameters"/>
+          <flow:output message="list_shows"/>
+        </flow:call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->  
+    </operation>
+    <operation name="search_and_book" short="search for shows, select show and book tickets">
+<!-- {{{ --> 
+      <context-variables>
+        <empty/>
+        <bla>BLU</bla>
+      </context-variables>
+      <endpoints>
+        <an_other_one>http://whats-o-ever.org</an_other_one>
+      </endpoints>
+      <execute>
+        <flow:call id="call_find" endpoint="resource_scope" service-operation="search" state-controlflow="execute"/>
+        <flow:call id="perform_select" endpoint="selector_service" http-method="get" http-status="200" group-by="//show">
+          <flow:resource-id xpath="//show/cinema_uri" endpoint="selected_cinema"/>
+          <flow:input message="list_shows"/>
+          <flow:output message="selected_show"/>
+        </flow:call>
+        <flow:call id="call_book" endpoint="selected_cinema" service-operation="book" state-controlflow="execute"/>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} --> 
+    </operation>
+    <operation name="book" short="book tickets for a given show and cinema">
+<!-- {{{ -->    
+      <execute>
+        <flow:call id="perform_book" endpoint="resource_scope" service-operation="book" state-controlflow="execute">
+          <flow:input message="book_tickets"/>
+          <flow:output message="reservation_result"/>
+        </flow:call>
+      </execute>
+      <compensate/>
+      <undo>
+        <flow:call id="book" endpoint="resource_scope" service-operation="book" state-controlflow="undo">
+          <flow:input message="book_tickets"/>
+          <flow:output message="reservation_result"/>
+        </flow:call>
+      </undo>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->       
+    </operation>
+    <operation name="order_popcorn" short="get popcorn to your seat">
+<!-- {{{ -->    
+      <execute>
+        <flow:call id="perform_order_popcorn" endpoint="resource_scope" service-operation="order_popcorn" state-controlflow="execute">
+          <flow:input message="popcorn_order"/>
+          <flow:output message="popcorn_result"/>
+        </flow:call>
+      </execute>
+      <compensate/>
+      <undo>
+        <flow:call id="perform_order_popcorn" endpoint="resource_scope" service-operation="order_popcorn" state-controlflow="undo">
+          <flow:input message="popcorn_undo"/>
+        </flow:call>
+      </undo>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->      
+    </operation>
+  </operations>
+</domain-description>
+

@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<service-description xmlns="http://rescue.org/ns/service/0.2" xmlns:flow="http://rescue.org/ns/controlflow/0.2">
+  <properties>
+    <longitude>4711</longitude>
+    <latitude>0815</latitude>
+    <carpark>true</carpark>
+  </properties>
+  <operations>
+    <search>
+      <execute>
+        <flow:endpoint id="search">super-kino.at/web-api</flow:endpoint>
+        <flow:context id="search-operation">suchen</flow:context>
+        <flow:context id="saal">keine Angabe</flow:context>
+        <flow:call id="search" endpoint="search" http-method="get" http-status="200">
+          <flow:input name="op" context="search-operation"/>
+          <flow:input name="titel" message-parameter="title"/>
+          <flow:input name="datum" message-parameter="date"/>
+          <flow:input name="zeit" message-parameter="preferred-time"/>
+          <flow:output name="titel" message-parameter="movie-title"/>
+          <flow:output name="id" message-parameter="show-id"/>
+          <flow:output name="start" message-parameter="starting-time"/>
+          <flow:output context="saal" message-parameter="hall"/>
+        </flow:call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </search>
+    <book>
+      <execute>
+        <flow:endpoint id="anmelden">super-kino.at/login</flow:endpoint>
+        <flow:endpoint id="buchen">super-kino.at/web-api</flow:endpoint>
+        <flow:context id="operation">buchen</flow:context>
+        <flow:context id="sitzungsID"/>
+        <flow:call id="login" endpoint="anmelden" http-method="get" http-status="200">
+          <flow:input name="name" message-parameter="username"/>
+          <flow:input name="pwd" message-parameter="password"/>
+          <flow:output name="id" context="sitzungsID"/>
+        </flow:call>
+        <flow:call id="buchen" endpoint="buchen" http-method="post" http-status="201">
+          <flow:input name="vorstellung" message-parameter="show-id"/>
+          <flow:input name="anzahl" message-parameter="number-of-seats"/>
+          <flow:input name="id" context="sitzungsID"/>
+          <flow:output name="reservierungsnummer" message-parameter="reservation-id"/>
+        </flow:call>
+      </execute>
+      <compensate/>
+      <undo>
+        <flow:endpoint id="anmelden">super-kino.at/login</flow:endpoint>
+        <flow:endpoint id="abbestellen">super-kino.at/{sinnlos}/bla/{reservation-id}</flow:endpoint>
+        <flow:context id="sitzungsID"/>
+        <flow:context id="sinnlos">macht-keinen-sinn</flow:context>
+        <flow:context id="kosten">5</flow:context>
+        <flow:call id="login" endpoint="anmelden" http-method="get" http-status="200">
+          <flow:input name="name" message-parameter="username"/>
+          <flow:input name="pwd" message-parameter="password"/>
+          <flow:output name="id" context="sitzungsID"/>
+        </flow:call>
+        <flow:call id="buchen" endpoint="abbestellen" http-method="delete" http-status="200">
+          <flow:input name="id" context="sitzungsID"/>
+          <flow:output context="kosten" message-parameter="cancelation-costs"/>
+        </flow:call>
+      </undo>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </book>
+    <popcorn>
+      <execute>
+        <flow:endpoint id="search">super-kino.at/popcorn-bestellen</flow:endpoint>
+        <flow:context id="search-operation">suchen</flow:context>
+        <flow:context id="saal">keine Angabe</flow:context>
+        <flow:call id="search" endpoint="search" http-method="get" http-status="200">
+          <flow:input name="op" context="search-operation"/>
+          <flow:input name="titel" message-parameter="title"/>
+          <flow:input name="datum" message-parameter="date"/>
+          <flow:input name="zeit" message-parameter="preferred-time"/>
+          <flow:output name="titel" message-parameter="movie-title"/>
+          <flow:output name="id" message-parameter="show-id"/>
+          <flow:output name="start" message-parameter="starting-time"/>
+          <flow:output context="saal" message-parameter="hall"/>
+        </flow:call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </popcorn>
+  </operations>
+</service-description>
