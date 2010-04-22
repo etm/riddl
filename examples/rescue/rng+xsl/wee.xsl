@@ -521,9 +521,12 @@ Recent changes:
       <xsl:value-of select="@service-operation"/>
       <xsl:text>', :controlflow => '</xsl:text>
       <xsl:value-of select="@state-controlflow"/>
-      <xsl:text>', :repository => endpoints[:</xsl:text>
-      <xsl:value-of select="child::flow:repository/@endpoint"/>
-      <xsl:text>]}</xsl:text>
+      <xsl:text>', :repository => </xsl:text>
+      <xsl:call-template name="resolve-variable">
+        <xsl:with-param name="var" select="child::flow:repository/@variable"/>
+        <xsl:with-param name="operation" select="'get'"/>
+      </xsl:call-template>
+      <xsl:text>}</xsl:text>
     </xsl:if>
     <xsl:if test="string(@group-by)">
       <xsl:text>, :group => {:group_selector => '</xsl:text>

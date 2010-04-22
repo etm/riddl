@@ -73,9 +73,10 @@
   </message>
 
   <message name="injection-request">
+    <parameter name="path" type="string"/>
+    <parameter name="repo" type="string"/>
+    <parameter name="instance" type="string"/>
     <parameter name="position" type="string"/>
-    <parameter name="cpee" type="string"/>
-    <parameter name="rescue" type="string"/>
   </message>
 
 <!--}}}--> 
@@ -90,7 +91,6 @@
     </resource>  
     <resource relative="injection">
       <get in="injection-request"/>
-      <post in="injection-request"/>
     </resource>
     <resource relative="groups">
 <!-- {{{ -->
@@ -111,11 +111,6 @@
             <get in="*" out="class-level-workflow"/>
             <get in="input" out="schema"/>
             <get in="output" out="schema"/>
-          </resource>
-        </resource>
-        <resource relative="messages">
-          <resource>
-            <get in="*" out="xml"/>
           </resource>
         </resource>
 <!--}}}-->
