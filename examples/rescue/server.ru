@@ -34,6 +34,7 @@ run(
       end
       on resource 'injection' do
         run Injection if method :get => 'injection-request'
+        run Injection if method :post => 'injection-request'
       end
       on resource 'groups' do
         # Generating the ATOM feed with groups
@@ -54,6 +55,11 @@ run(
               run GetInterface if method :get => '*'
               run GetInterface if method :get => 'input'
               run GetInterface if method :get => 'output'
+            end
+          end
+          on resource 'messages' do
+            on resource do
+              run GetMessage if method :get => '*'
             end
           end
           on resource do # Subgroup-level

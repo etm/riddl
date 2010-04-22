@@ -1,12 +1,20 @@
+class GetMessage < Riddl::Implementation
+  def response
+    xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
+    message = xml.find("//domain:message[@name = '#{@r[-1]}']", {"domain" => "http://rescue.org/ns/domain/0.2"}).first
+    schema = RNGSchema.new(true)
+    schema.append_schemablock(xml.find("//domain:message[@name = '#{@r[-1]}']", {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
+    Riddl::Parameter::Complex.new("xml","text/xml", schema.to_s)
+  end
+end
+
 class GetOperations < Riddl::Implementation
   def response
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-    schema = RNGSchema.new(true)
     ret = XML::Smart.string("<operations xmlns=\"http://rescue.org/ns/rescue/0.2\"/>")
     xml.find("/domain:domain-description/domain:operations/domain:operation", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |o|
       ret.root.add("operation", {"name" => o.attributes["name"]})
     end
-    schema.append_schemablock(xml.find("/domain:domain-description/domain:operations", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).first)
     Riddl::Parameter::Complex.new("xml","text/xml", ret.to_s)
   end
 end
@@ -79,9 +87,7 @@ class UpdateResource < Riddl::Implementation
   end
 end
 
-
 class GetInterface < Riddl::Implementation
-
   def response
     schema = RNGSchema.new(false)
     p = nil
