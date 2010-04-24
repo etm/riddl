@@ -1,4 +1,3 @@
-<?xml version="1.0"?>
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:flow="http://rescue.org/ns/controlflow/0.2">
@@ -16,7 +15,7 @@ Redistribution and use in source and binary forms, with or without modification,
     * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
     * Neither the name of Lenz Consulting Group nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
-	    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+      THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Recent changes:
 
@@ -314,7 +313,7 @@ Recent changes:
 
   <xsl:template match="/">
     <xsl:apply-templates select="//context-variables"/>
-    <xsl:apply-templates select="//endpoints"/> 
+    <xsl:apply-templates select="//endpoints"/>
     <xsl:apply-templates select="//flow:description/flow:*"/>
     <xsl:text>&#xa;</xsl:text>
   </xsl:template>
@@ -461,6 +460,18 @@ Recent changes:
     <!-- }}} --> 
   </xsl:template>
 
+  <xsl:template match="//flow:injected">
+    <!-- {{{ -->
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:text># ========== Code is injected from activity: </xsl:text>
+    <xsl:value-of select="@id"/>
+    <xsl:text> ==========</xsl:text>
+    <xsl:apply-templates select="child::flow:*[name() != 'interface']"/>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:text># ========================================</xsl:text>
+    <!-- }}} -->
+  </xsl:template>
+
   <xsl:template match="//flow:constraint">
     <!-- {{{ --> 
     <xsl:text>:</xsl:text>
@@ -510,7 +521,7 @@ Recent changes:
     <xsl:value-of select="@id"/>
     <xsl:text>, :call, :</xsl:text>
     <xsl:value-of select="@endpoint"/>
-    <xsl:text>, :input => input </xsl:text>
+    <xsl:text>, :input => input</xsl:text>
     <xsl:if test="string(@http-method)">
       <xsl:text>, :http-method => '</xsl:text>
       <xsl:value-of select="@http-method"/>
@@ -601,7 +612,7 @@ Recent changes:
             </xsl:choose>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:text>") # ERROR during assignment of output</xsl:text>
+            <xsl:text># ERROR during assignment of output</xsl:text>
           </xsl:otherwise>
         </xsl:choose>
       </xsl:when>
@@ -629,7 +640,7 @@ Recent changes:
             <xsl:call-template name="resolve-message-parameter"/>
           </xsl:when>
         </xsl:choose>
-        <xsl:text>, :xsl => &lt;&lt;-XSLT&#xa;</xsl:text>
+        <xsl:text>, :xsl => &#xa;&lt;&lt;XSLT&#xa;</xsl:text>
           <xsl:apply-templates select="child::flow:copy"/>
           <xsl:call-template name="prefix-whitespaces"/>
           <xsl:call-template name="xml-to-string">
@@ -817,7 +828,7 @@ Recent changes:
     <xsl:text>critical(:</xsl:text>
     <xsl:value-of select="@id"/>
     <xsl:text>) do </xsl:text>
-    <xsl:apply-templates select="child::flow:*[(name() != 'endpoint') and (name() != 'context')]"/>
+    <xsl:apply-templates select="child::flow:*"/>
     <xsl:text>&#xa;</xsl:text>
     <xsl:call-template name="prefix-whitespaces"/>
     <xsl:text>end</xsl:text>
@@ -974,5 +985,5 @@ Recent changes:
     </xsl:for-each>
      <!-- }}} -->
   </xsl:template>
-
 </xsl:stylesheet>
+<!-- }}} -->
