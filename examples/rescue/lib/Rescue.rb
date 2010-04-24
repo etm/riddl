@@ -12,7 +12,7 @@ class GetOperations < Riddl::Implementation
   def response
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     ret = XML::Smart.string("<operations xmlns=\"http://rescue.org/ns/rescue/0.2\"/>")
-    xml.find("/domain:domain-description/domain:operations/domain:operation", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |o|
+    xml.find("/domain:domain-description/domain:operations/*", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |o|
       ret.root.add("operation", {"name" => o.attributes["name"]})
     end
     Riddl::Parameter::Complex.new("xml","text/xml", ret.to_s)
@@ -97,8 +97,8 @@ class GetInterface < Riddl::Implementation
 
 
     if @p[0] == nil # If no parameter is given, the defition of the class-level-workflow 
-      schema = XML::Smart.string("<state-controlflow xmlns=\"http://rescue.org/ns/controlflow/0.2\" xmlns:flow=\"http://rescue.org/ns/controlflow/0.2\"/>")
-      o = xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{@r[3]}']", {"domain" => "http://rescue.org/ns/domain/0.2"}).first
+      schema = XML::Smart.string("<operation name='#{@r[3]}' xmlns=\"http://rescue.org/ns/controlflow/0.2\"/>")
+      o = xml.find("/domain:domain-description/domain:operations/flow:operation[@name='#{@r[3]}']/flow:*", {"domain" => "http://rescue.org/ns/domain/0.2", "flow"=>"http://rescue.org/ns/controlflow/0.2"})
       @status = 410 if o == nil
       schema.root.add(o) if o != nil
       out_name = "class-level-workflow"
@@ -135,7 +135,7 @@ class GetInterface < Riddl::Implementation
 
   def collect_input(operation_name, xml)
     params = Hash.new
-    xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{operation_name}']/descendant::flow:call", 
+    xml.find("/domain:domain-description/domain:operations/flow:operation[@name='#{operation_name}']/descendant::flow:call", 
             {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
       params.merge!(collect_input(call.attributes["service-operation"], xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes["service-operation"] # Call refers to another operation  of the service
       call.find("child::flow:input", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
@@ -154,7 +154,7 @@ class GetInterface < Riddl::Implementation
 
   def collect_output(operation_name, xml)
     params = Hash.new
-    xml.find("/domain:domain-description/domain:operations/domain:operation[@name='#{operation_name}']/descendant::flow:call", 
+    xml.find("/domain:domain-description/domain:operations/flow:operation[@name='#{operation_name}']/descendant::flow:call", 
             {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
       params.merge!(collect_output(call.attributes["service-operation"], xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes["service-operation"] # Call refers to another operation of the service
       call.find("child::flow:output", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
