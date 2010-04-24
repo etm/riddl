@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+
+<domain-description  xmlns="http://rescue.org/ns/domain/0.2"
+            xmlns:rng="http://relaxng.org/ns/structure/1.0">
+  <properties>
+<!-- {{{ -->
+    <rng:element name="longitude">
+      <caption lang="en">Longitude</caption>
+      <caption lang="de">Längengrad</caption>
+      <rng:data type="positiveInteger"/>
+    </rng:element>
+    <rng:element name="latitude">
+      <caption lang="en">Latitude</caption>
+      <caption lang="de">Breitengrad</caption>
+      <rng:data type="positiveInteger"/>
+    </rng:element>
+    <rng:element name="carpark">
+      <caption lang="en">Carpark</caption>
+      <caption lang="de">Parkplatz</caption>
+      <rng:data type="boolean"/>
+    </rng:element>
+<!-- }}} -->
+  </properties>
+  <messages>
+    <message name="in_op1">
+<!-- {{{ -->     
+      <rng:element name="paramA">
+        <caption lang="en">Title</caption>
+        <caption lang="de">Titel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="paramB">
+        <caption lang="en">Date</caption>
+        <caption lang="de">Datum</caption>
+        <rng:data type="date"/>
+      </rng:element>
+      <rng:element name="paramC">
+        <caption lang="en">preferred time</caption>
+        <caption lang="de">bevorzugte Zeit</caption>
+        <rng:data type="time"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+    <message name="out_op1">
+<!-- {{{ -->      
+      <rng:element name="paramD">
+        <caption lang="en">Movietitle</caption>
+        <caption lang="de">Filmtitel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="paramE">
+        <caption lang="en">Kino-WWW</caption>
+        <caption lang="de">Cinema-URI</caption>
+        <rng:data type="string"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+    <message name="in_op2">
+<!-- {{{ -->     
+      <rng:element name="paramF">
+        <caption lang="en">Movietitle</caption>
+        <caption lang="de">Filmtitel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="paramG">
+        <caption lang="en">Kino-WWW</caption>
+        <caption lang="de">Cinema-URI</caption>
+        <rng:data type="string"/>
+      </rng:element>
+<!-- }}} --> 
+    </message>
+    <message name="out_op2">
+<!-- {{{ -->     
+      <rng:element name="paramH">
+        <caption lang="en">Movietitle</caption>
+        <caption lang="de">Filmtitel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="paramI">
+        <caption lang="en">Kino-WWW</caption>
+        <caption lang="de">Cinema-URI</caption>
+        <rng:data type="string"/>
+      </rng:element>
+<!-- }}} --> 
+    </message>
+    <message name="in_op3">
+<!-- {{{ -->     
+      <rng:element name="paramJ">
+        <caption lang="en">Movietitle</caption>
+        <caption lang="de">Filmtitel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="paramK">
+        <caption lang="en">Kino-WWW</caption>
+        <caption lang="de">Cinema-URI</caption>
+        <rng:data type="string"/>
+      </rng:element>
+<!-- }}} --> 
+    </message>
+    <message name="out_op3">
+<!-- {{{ -->     
+      <rng:element name="paramL">
+        <caption lang="en">Movietitle</caption>
+        <caption lang="de">Filmtitel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="paramM">
+        <caption lang="en">Kino-WWW</caption>
+        <caption lang="de">Cinema-URI</caption>
+        <rng:data type="string"/>
+      </rng:element>
+<!-- }}} --> 
+    </message>
+  </messages>
+  <operations>
+    <operation name="op1" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
+<!-- {{{ --> 
+      <context-variables>
+        <op1/>
+      </context-variables>
+      <endpoints>
+        <resource_path/>
+        <e_op1>http://whats-o-ever.org</e_op1>
+      </endpoints>
+      <execute>
+        <call id="perform_op1" endpoint="resource_path" service-operation="op1" state-controlflow="execute">
+          <input name="bla" variable="blu" message="in_op1"/>
+          <output name="bli" varibale="ble" message="out_op1"/>
+        </call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} --> 
+    </operation>
+    <operation name="op2" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
+<!-- {{{ -->  
+      <context-variables>
+        <op2/>
+      </context-variables>
+      <endpoints>
+        <resource_path/>
+      </endpoints>
+      <execute>
+        <call id="op2" endpoint="resource_path"  service-operation="op2" state-controlflow="execute">
+          <input name="bla" variable="blu" message="in_op1"/>
+          <output name="bli" varibale="ble" message="out_op1"/>
+        </call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} --> 
+    </operation>
+    <operation name="op3" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
+<!-- {{{ --> 
+      <context-variables>
+      </context-variables>
+      <endpoints>
+        <resource_path/>
+        <e_op3>http://whats-o-ever.org</e_op3>
+      </endpoints>
+      <execute>
+        <call id="call_op1" endpoint="resource_path" service-operation="op1" state-controlflow="execute"/>
+        <call id="call_http" endpoint="e_op3" http-method="get">
+          <input name="bla" variable="blu" message="in_op1"/>
+          <output name="bli" varibale="ble" message="out_op1"/>
+        </call>
+        <call id="call_op2" endpoint="resource_path" service-operation="op2" state-controlflow="execute"/>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->  
+    </operation>
+  </operations>
+</domain-description>
+

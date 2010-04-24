@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<service-description xmlns="http://rescue.org/ns/service/0.2"
+                 xmlns:flow="http://rescue.org/ns/controlflow/0.2"
+                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <properties>
+  </properties>
+  <operations>
+    <op1>
+      <endpoints>
+        <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
+      </endpoints>
+      <context-variables>
+        <wait>5</wait>
+      </context-variables>
+      <execute>
+        <flow:call id="s1_op1" endpoint="search" http-method="get">
+          <flow:input name="timeout" variable="wait"/>
+        </flow:call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </op1>
+    <op2>
+      <endpoints>
+        <ep2>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep2>
+      </endpoints>
+      <context-variables>
+        <wait>5</wait>
+      </context-variables>
+      <execute>
+        <flow:call id="s1_op1" endpoint="search" http-method="get">
+          <flow:input name="timeout" variable="wait"/>
+        </flow:call>
+        <flow:call id="s1_op1_ext" endpoint="search" http-method="get">
+          <flow:input name="timeout" variable="wait"/>
+        </flow:call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </op2>
+  </operations>
+</service-description>
