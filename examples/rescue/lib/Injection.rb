@@ -2,8 +2,9 @@ require '../../lib/ruby/client'
 
 class Injection < Riddl::Implementation
   def response
-    inject(@p[0].value, @p[1].value, @p[2].value)
-    #Thread.new {Thread.pass; inject(@p[0].value, @p[1].value, @p[2].value);}
+    #inject(@p[0].value, @p[1].value, @p[2].value)
+
+    Thread.new {Thread.pass; inject(@p[0].value, @p[1].value, @p[2].value);}
     Riddl::Parameter::Simple.new("injecting", "true")
   end
 
@@ -11,6 +12,9 @@ class Injection < Riddl::Implementation
     cpee_client = Riddl::Client.new(cpee_uri)
     rescue_client = Riddl::Client.new(rescue_uri)
 
+    # Stop instance
+    status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "stopping")]
+    puts "=== stopping #{status}"
     # Get description# {{{
     status, resp = cpee_client.resource("/properties/values/description").get
     if status != 200
@@ -48,7 +52,7 @@ class Injection < Riddl::Implementation
       return
     end
     wf = XML::Smart.string(resp[0].value.read)
-    puts wf
+    #puts wf
 # }}}
     
     # Adapt wf 
@@ -88,20 +92,13 @@ class Injection < Riddl::Implementation
     call_node.add_after(injected)
 # }}}
 
-puts description
-    
-    # Stop instance
-puts "=== stoping instance"
-    status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "stopping")]
-    puts "=== stopping #{status}"
+#puts description
+
     
     # Set description
-puts "=== set description"
     status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("value", description.root.dump)]
     puts "=== seting description #{status}"
-    
     # Re-start instance
-puts "=== start instance"
     status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
     puts "=== starting #{status}"
   end
