@@ -22,46 +22,28 @@
       <condition test="wo_pattern" comparator="&lt;" fix-value="5"/>
       <parallel type="nowait">
         <parallel_branch>
-          <call id="call_01" endpoint="wo_pattern">
-            <parameter name="service-operation">so_1</parameter>
-            <parameter name="state-controlflow">execute</parameter>
-            <parameter name="constraint">
-              <parameter name="constraint1">
-                <parameter name="xpath">//some_property</parameter>
-                <parameter name="comparator">==</parameter>
-                <parameter name="fix-value">Time.new('20:15')</parameter>
-              </parameter>
-              <parameter name="constraint2">
-                <parameter name="xpath">//some_group/{@string}</parameter>
-                <parameter name="comparator">!=</parameter>
-                <parameter name="variable">wo_patern</parameter>
-              </parameter>
-              <parameter name="constraint3">
-                <parameter name="xpath">/some_group/some_other_property</parameter>
-                <parameter name="comparator">!=</parameter>
-                <parameter name="variable">one_more_context</parameter>
-              </parameter>
-            </parameter>
+          <call id="call_01" endpoint="wo_pattern" service-operation="op1">
+            <constraint xpath="//some_property" comparator="==" fix-value="some_value"/>
+            <constraint xpath="//some_group/#{@string}" comparator="!=" variable="wo_pattern"/>
+            <constraint xpath="//some_property" comparator="==" variable="one_more_context"/>
             <!-- wenn kein context oder endpouint dann fix-value -->
             <input name="in_context" variable="string"/>
             <input name="in_fix_num" fix-value="5"/>
             <input name="in_fix_string" fix-value="&quot;some input&quot;"/>
             <input name="in_one_more" variable="one_more_context"/>
-            <input name="in_call" variable="class_date"/>
+            <input name="in_call" message-parameter="class_date"/>
             <output name="properties" variable="some_prop_context"/>
             <output name="out1" variable="one_more_context"/> 
-            <output name="out" variable="one_more_context"/>
-            <output name="out" variable="one_more_context"/>
-            <output name="out2" variable="one_more_context"/>
+            <output fix-value="0815" variable="one_more_context"/> 
+            <output name="out" message-parameter="one_more_message"/>
+            <output fix-value="4711" message-parameter="one_more_message"/>
             <output name="out2" variable="with_pattern"/>
-            <output name="out2" variable="one_more_context"/>
             <output name="out5" variable="one_more_context"/>
           </call>
         </parallel_branch>
         <parallel_branch>
           <critical id="crit_01">
-            <call id="call_02" endpoint="with_pattern">
-              <parameter name="method">get</parameter>
+            <call id="call_02" endpoint="with_pattern" method="get">
               <input name="xml" message-parameter="xml_context" transformation-uri="transformation_service">
                 <copy xsl-name="some-variable" variable="some_context"/>
                 <copy xsl-name="some-context" variable="wo_pattern"/>
