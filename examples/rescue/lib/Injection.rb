@@ -1,8 +1,9 @@
 require '../../lib/ruby/client'
-
 class Injection < Riddl::Implementation
   def response
-    #inject(@p[0].value, @p[1].value, @p[2].value)
+    #analyze(@p[0].value, @p[1].value, @p[2].value)
+
+#Riddl::Parameter::Complex.new("xml", "text/xml",XML::Smart.open("wee-test/syntax.xml").transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl")))
 
     Thread.new {Thread.pass; analyze(@p[0].value, @p[1].value, @p[2].value);}
     Riddl::Parameter::Simple.new("injecting", "true")
@@ -22,12 +23,14 @@ class Injection < Riddl::Implementation
     end
     description = XML::Smart.string(resp[0].value.read)
     # Get call-node
-    call_node = description.find("//flow:call[@id = '#{position}']", {"flow" => "http://rescue.org/ns/controlflow/0.2"}).first
+    call_node = description.find("//cpee:call[@id = '#{position}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+    service_operation = call_node.find("descendant::cpee:service-operation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"',"")
     # }}}
-
+puts '='*80
 puts call_node.parent.name
-puts call_node.parent.attributes['service-operation']
-puts call_node.attributes['service-operation']
+#puts call_node.parent.attributes['service-operation']
+puts service_operation
+puts '='*80
     
     # Stop instance
     status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "stopping")]
@@ -50,11 +53,11 @@ puts call_node.attributes['service-operation']
     injected.children[0].add(call_node.children, XML::Smart::Dom::Element::COPY)
     # }}}
 
-    if (call_node.parent.name != 'injected' && call_node.parent.attributes['service-operation'] != call_node.attributes['service-operation']) 
+    if (call_node.parent.name != 'injected' && call_node.parent.attributes['service-operation'] != service_operation) 
       # Injecting class-level {{{
-      status, resp = rescue_client.resource("#{resource_path.split('/')[0]}/operations/#{call_node.attributes['service-operation']}").get
+      status, resp = rescue_client.resource("#{resource_path.split('/')[0]}/operations/#{service_operation}").get
       if status != 200
-        puts "Error receiving wf at #{rescue_uri}/#{resource_path.split('/')[0]}/operations/#{call_node.attributes['service-operation']}: #{status}"
+        puts "Error receiving wf at #{rescue_uri}/#{resource_path.split('/')[0]}/operations/#{service_operation}: #{status}"
         @status = 404
         return
       end
@@ -65,11 +68,14 @@ puts call_node.attributes['service-operation']
       # Injection instance-level {{{
       parallel = injected.add("parallel")
       add_service(parallel, resource_path, call_node, cpee_client, rescue_client)
-      # }}}
+      # }}} 
     end
     
+puts '='*80
+puts injected.to_doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl")) 
+puts '='*80
     # Set inject, description, position and re-start {{{
-    call_node.add_after(injected)
+    call_node.add_after(injected.to_doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl")))
     status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("value", description.root.dump)]
     puts "=== setting description #{status}"
     status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")]
@@ -77,7 +83,9 @@ puts call_node.attributes['service-operation']
     status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
     puts "=== starting #{status}"
     # }}} 
-    
+
+    Riddl::Parameter::Complex.new("xml", "text/xml", transformed.to_s)
+#
   end
 
   def add_service(parallel_node, resource_path, call_node, cpee_client, rescue_client)
@@ -127,13 +135,14 @@ puts call_node.attributes['service-operation']
     # }}}
     puts "repo-ep"
     # Add repositroy-node to new operation-calls {{{
-    repo_ep = nil
-    wf.find("//flow:call[string(@service-operation)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      repo_ep =  call_node.find("child::flow:repository", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.attributes['endpoint'] if repo_ep == nil
-      node.add("repository", {"endpoint"=> repo_ep})
+    wf.find("//flow:execute/flow:call", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
+      call.attributes['injection'] = call_node.find("string(child::cpee:parameters/cpee:service/cpee:injection)", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+      call.attributes['resources'] = call_node.find("string(child::cpee:parameters/cpee:service/cpee:resources)", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+      call.attributes['repository'] = call_node.find("string(child::cpee:parameters/cpee:service/cpee:repository)", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+      puts call.dump
     end
     # }}}
-    wf.find("//flow:#{call_node.attributes['state-controlflow']}/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"})
+    wf.find("//flow:execute/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"})
   end
 
   # renaming id's, endpoints, context, ....
