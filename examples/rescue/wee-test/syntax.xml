@@ -22,6 +22,7 @@
       <condition test="wo_pattern" comparator="&lt;" fix-value="5"/>
       <parallel type="nowait">
         <parallel_branch>
+<<<<<<< HEAD
           <call id="call_01" endpoint="wo_pattern">
             <parameter name="service-operation">so_1</parameter>
             <parameter name="state-controlflow">execute</parameter>
@@ -42,10 +43,17 @@
                 <parameter name="variable">one_more_context</parameter>
               </parameter>
             </parameter>
+=======
+          <call id="call_01" endpoint="wo_pattern" service-operation="op1">
+            <constraint xpath="//some_property" comparator="==" fix-value="some_value"/>
+            <constraint xpath="//some_group/#{@string}" comparator="!=" variable="wo_pattern"/>
+            <constraint xpath="//some_property" comparator="==" variable="one_more_context"/>
+>>>>>>> 0b775aa4aa475cf29b6aae23831eb904722f9384
             <!-- wenn kein context oder endpouint dann fix-value -->
             <input name="in_context" variable="string"/>
             <input name="in_fix_num" fix-value="5"/>
             <input name="in_fix_string" fix-value="&quot;some input&quot;"/>
+<<<<<<< HEAD
             <input name="in_one_more" variable="one_more_context"/>
             <input name="in_call" variable="class_date"/>
             <output name="properties" variable="some_prop_context"/>
@@ -55,13 +63,24 @@
             <output name="out2" variable="one_more_context"/>
             <output name="out2" variable="with_pattern"/>
             <output name="out2" variable="one_more_context"/>
+=======
+            <input name="in_one_more" variable="wo_pattern"/>
+            <output name="properties" variable="some_prop_context"/>
+            <output name="out1" variable="one_more_context"/> 
+            <output fix-value="0815" variable="one_more_context"/> 
+            <output name="out2" variable="with_pattern"/>
+>>>>>>> 0b775aa4aa475cf29b6aae23831eb904722f9384
             <output name="out5" variable="one_more_context"/>
           </call>
         </parallel_branch>
         <parallel_branch>
           <critical id="crit_01">
+<<<<<<< HEAD
             <call id="call_02" endpoint="with_pattern">
               <parameter name="method">get</parameter>
+=======
+            <call id="call_02" endpoint="with_pattern" method="get">
+>>>>>>> 0b775aa4aa475cf29b6aae23831eb904722f9384
               <input name="xml" message-parameter="xml_context" transformation-uri="transformation_service">
                 <copy xsl-name="some-variable" variable="some_context"/>
                 <copy xsl-name="some-context" variable="wo_pattern"/>
