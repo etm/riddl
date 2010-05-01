@@ -313,7 +313,9 @@ Recent changes:
 <!-- }}} -->
 
   <xsl:template match="/">
+    <xsl:element name="root">
       <xsl:apply-templates select="//flow:execute/flow:*"/>
+    </xsl:element>
   </xsl:template>
 
   <xsl:template name="attr2node">
@@ -490,7 +492,7 @@ Recent changes:
         </xsl:if>
         <xsl:if test="@service-operation">
           <xsl:element name="service">
-            <xsl:element name="serviceoperation"><xsl:value-of select="@service-operation"/></xsl:element>
+            <xsl:element name="serviceoperation">"<xsl:value-of select="@service-operation"/>"</xsl:element>
             <xsl:element name="repository"><xsl:value-of select="@repository"/></xsl:element>
             <xsl:element name="resources"><xsl:value-of select="@resources"/></xsl:element>
             <xsl:element name="injection"><xsl:value-of select="@injection"/></xsl:element>

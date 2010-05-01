@@ -120,11 +120,9 @@
       </context-variables>
       <endpoints>
         <resource_path/>
-        <e_op1>http://whats-o-ever.org</e_op1>
       </endpoints>
       <execute>
         <call id="perform_op1" endpoint="resource_path" service-operation="op1">
-          <input name="bla" variable="op1" message="in_op1"/>
         </call>
       </execute>
       <compensate/>
@@ -144,7 +142,6 @@
       </endpoints>
       <execute>
         <call id="op2" endpoint="resource_path"  service-operation="op2">
-          <input name="bla" variable="op2" message="in_op1"/>
         </call>
       </execute>
       <compensate/>
@@ -157,16 +154,16 @@
     <operation name="op3" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ -->  
       <context-variables>
-        <blu>4711</blu>
+        <blu>10</blu>
       </context-variables>
       <endpoints>
         <resource_path/>
-        <e_op3>http://whats-o-ever.org</e_op3>
+        <e_op3>http://www.pri.univie.ac.at/~mangler/services/timeout.php</e_op3>
       </endpoints>
       <execute>
         <call id="call_op1" endpoint="resource_path" service-operation="op1"/>
-        <call id="call_http" endpoint="e_op3" http-method="get">
-          <input name="bla" variable="blu" message="in_op1"/>
+        <call id="call_http" endpoint="e_op3" http-method="post">
+          <input name="timeout" variable="blu"/>
         </call>
         <call id="call_op2" endpoint="resource_path" service-operation="op2"/>
       </execute>

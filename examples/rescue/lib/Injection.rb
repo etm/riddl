@@ -21,11 +21,20 @@ class Injection < Riddl::Implementation
   end
 
   def analyze(position, cpee_uri, rescue_uri)
+    begin
     cpee_client = Riddl::Client.new(cpee_uri)
 
     # Stop instance {{{
     status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "stopping")]
-    puts "=== stopping #{status}" # }}}
+    puts "=== stopping #{status}" 
+    stopped = false
+    until stopped
+      status, resp = cpee_client.resource("/properties/values/state").get
+      stopped = true if resp[0].value == "stopped"
+      puts "state: #{resp[0].value}"
+      sleep(1) if not stopped
+    end
+    # }}}
 
     rescue_client = Riddl::Client.new(rescue_uri)
     injected = nil
@@ -62,8 +71,11 @@ class Injection < Riddl::Implementation
     # Check if injection is on class-level {{{
     class_level = true
     if(call_node.parent.name == 'injected')
-      parent_so = call_node.parent.find("child::cpee:interface/cpee:service/cpee:serviceoperation",  {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text
-      class_level = false if parent_so == service_operation
+      parent_so = call_node.parent.find("child::cpee:interface//cpee:serviceoperation",  {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text
+      puts " === INJECTED:"
+      puts "Parent-so: #{parent_so.gsub('"','')}"
+      puts "Call-Node-SO: #{service_operation}"
+      class_level = false if parent_so.gsub('"','') == service_operation
     end
     # }}}
 
@@ -75,10 +87,10 @@ class Injection < Riddl::Implementation
         @status = 404
         return
       end
-      injected.add(inject_class_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client))
+      injected.add(inject_class_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client).children)
       # }}} 
     else 
-      # Injection instance-level {{{
+      # Injection service-level {{{
       parallel = injected.add("parallel")
       add_service(parallel, resource_path, call_node, cpee_client, rescue_client)
       # }}} 
@@ -89,14 +101,17 @@ class Injection < Riddl::Implementation
     puts "=== setting description #{status}"
     status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")]
     puts "=== setting position: #{status}"
-#    status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
+    status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
     puts "=== starting #{status}"
     # }}} 
-
+  rescue => e
+    puts $!
+    puts e.backtrace
+    end
   end
 
   def add_service(parallel_node, resource_path, call_node, cpee_client, rescue_client)
-    # {{{
+    # {{{ 
     status, resp = rescue_client.resource(resource_path).get
     return if status != 200
     if resp[0].name == "atom-feed"
@@ -105,11 +120,8 @@ class Injection < Riddl::Implementation
         add_service(parallel_node, "#{resource_path}/#{link.text}", call_node, cpee_client, rescue_client)
       end
     else
-      branch = parallel_node.add("parallel_branch", {"pass"=>"", "local"=>""})
-      branch.add(inject_service_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client, resource_path))
-      puts "== branch ==" * 5
-      puts branch.dumpt
-      puts "== branch ==" * 5
+      branch = parallel_node.add("parallel_branch")
+      branch.add(inject_service_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client, resource_path).children)
     end
     # }}}
   end
@@ -156,9 +168,8 @@ class Injection < Riddl::Implementation
     wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+resource_path+'__'+a.value}
     # }}}   
     # Change e ndpoints  {{{
-    puts "ep -> service-level: #{call_node.attributes['id']}"
-    wf.find("//flow:#{call_node.attributes['service-operation']}/flow:endpoints/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      puts "ep -> service-level: #{call_node.attributes['id']+'__'+node.name.name}"
+    op = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','') 
+    wf.find("//flow:#{op}/flow:endpoints/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
       cpee_client.resource("/properties/values/endpoints/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+resource_path+'__'+node.name.name),
                                                                   Riddl::Parameter::Simple.new("value", node.text == nil ? "" : node.text)] if node.name != "resource_path"
     end
@@ -167,14 +178,17 @@ class Injection < Riddl::Implementation
     end
     # }}} 
     # Change context-variables: variables, test {{{ 
-    wf.find("//flow:#{call_node.attributes['service-operation']}/flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
+    wf.find("//flow:#{op}/flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
       cpee_client.resource("/properties/values/context-variables/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+resource_path+'__'+node.name.name),
                                                                   Riddl::Parameter::Simple.new("value", node.text)]
     end
     wf.find("//@variable").each {|a| a.value = call_node.attributes['id']+'__'+resource_path+'__'+a.value}
     wf.find("//@test").each {|a| a.value = call_node.attributes['id']+'__'+resource_path+'__'+a.value}
     # }}}
-    doc = wf.find("//flow:#{call_node.attributes['service-operation']}/flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
+    doc = wf.find("//flow:#{op}/flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
+    # Teh new doc seem's to have lost all namespace-information during document creation
+    ns = doc.root.namespaces.add("flow","http://rescue.org/ns/controlflow/0.2")
+    doc.find("//*").each { |node| node.namespace = ns }
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root
   end
 end
