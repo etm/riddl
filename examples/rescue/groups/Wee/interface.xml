@@ -122,8 +122,7 @@
         <resource_path/>
       </endpoints>
       <execute>
-        <call id="perform_op1" endpoint="resource_path" service-operation="op1">
-        </call>
+        <call id="perform_op1" endpoint="resource_path" service-operation="op1"/>
       </execute>
       <compensate/>
       <undo/>
