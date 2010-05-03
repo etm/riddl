@@ -355,7 +355,10 @@ Recent changes:
         <xsl:text>"]</xsl:text>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:text>@</xsl:text><xsl:value-of select="$var"/>
+        <xsl:if test="starts-with($var, '@') = false">
+          <xsl:text>@</xsl:text>
+        </xsl:if>
+        <xsl:value-of select="$var"/>
       </xsl:otherwise>
     </xsl:choose>
     <!-- }}} -->
@@ -376,6 +379,19 @@ Recent changes:
     <!-- }}} -->
   </xsl:template>
 
+  <xsl:template name="constraint">
+    <!-- {{{ --> 
+    <xsl:element name="constraint">
+      <xsl:for-each select="child::flow:constraint">
+        <xsl:variable name="name" select="generate-id()"/>
+        <xsl:element name="{$name}">
+          <xsl:call-template name="attr2node"/>
+        </xsl:element>
+      </xsl:for-each>
+    </xsl:element>
+    <!-- }}} -->
+  </xsl:template>
+
   <xsl:template name="input">
     <!-- {{{ -->
     <xsl:element name="parameters">
@@ -386,6 +402,12 @@ Recent changes:
             <xsl:call-template name="resolve-variable">
               <xsl:with-param name="var" select="@variable"/>
             </xsl:call-template>
+          </xsl:if>
+          <xsl:if test="@message-parameter">
+            <xsl:if test="starts-with(@message-parameter, '@') = false">
+              <xsl:text>@</xsl:text>
+            </xsl:if>
+            <xsl:value-of select="@message-parameter"/>
           </xsl:if>
           <xsl:if test="@fix-value">
             <xsl:value-of select="@fix-value"/>
@@ -468,57 +490,6 @@ Recent changes:
     <!-- }}} --> 
   </xsl:template>
 
-  <xsl:template name="constraint">
-    <!-- {{{ --> 
-    <xsl:element name="constraint">
-      <xsl:for-each select="child::flow:constraint">
-        <xsl:variable name="name" select="generate-id()"/>
-        <xsl:element name="{$name}">
-          <xsl:call-template name="attr2node"/>
-        </xsl:element>
-      </xsl:for-each>
-    </xsl:element>
-    <!-- }}} -->
-  </xsl:template>
-
-  <xsl:template match="//flow:call">
-    <!-- {{{ -->
-    <xsl:element name="call">
-      <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
-      <xsl:attribute name="endpoint"><xsl:value-of select="@endpoint"/></xsl:attribute>
-      <xsl:element name="parameters">
-        <xsl:if test="@http-method">
-          <xsl:element name="method"><xsl:value-of select="@http-method"/></xsl:element>
-        </xsl:if>
-        <xsl:if test="@service-operation">
-          <xsl:element name="service">
-            <xsl:element name="serviceoperation">"<xsl:value-of select="@service-operation"/>"</xsl:element>
-            <xsl:element name="repository"><xsl:value-of select="@repository"/></xsl:element>
-            <xsl:element name="resources"><xsl:value-of select="@resources"/></xsl:element>
-            <xsl:element name="injection"><xsl:value-of select="@injection"/></xsl:element>
-          </xsl:element>
-        </xsl:if>
-        <xsl:if test="@group-by">
-          <xsl:element name="group">
-            <xsl:element name="group_by"><xsl:value-of select="@group-by"/></xsl:element>
-            <xsl:element name="uri_xpath"><xsl:value-of select="child::flow:resource-id/@xpath"/></xsl:element>
-            <xsl:element name="target_endpoint"><xsl:value-of select="child::flow:resource-id/@endpoint"/></xsl:element>
-          </xsl:element>
-        </xsl:if>
-        <xsl:if test="child::flow:constraint">
-          <xsl:call-template name="constraint"/>
-        </xsl:if>
-        <xsl:if test="child::flow:input">
-          <xsl:call-template name="input"/>
-        </xsl:if>
-        <xsl:if test="child::flow:output">
-          <xsl:call-template name="output"/>
-        </xsl:if>
-      </xsl:element>
-    </xsl:element>
-     <!-- }}} --> 
-  </xsl:template>
-
   <xsl:template name="output">
     <!-- {{{ -->
     <xsl:element name="manipulate">
@@ -528,9 +499,10 @@ Recent changes:
       <xsl:for-each select="child::flow:output">
         <xsl:choose>
           <xsl:when test="@message-parameter">
-            <xsl:call-template name="resolve-variable">
-              <xsl:with-param name="var" select="@message-parameter"/>
-            </xsl:call-template>
+            <xsl:if test="starts-with(@message-parameter, '@') = false">
+              <xsl:text>@</xsl:text>
+            </xsl:if>
+            <xsl:value-of select="@message-parameter"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:call-template name="resolve-variable">
@@ -651,11 +623,83 @@ Recent changes:
       </xsl:when>
     </xsl:choose>
 -->
-    <!-- }}} -->
+    <!--  }}} -->
+  </xsl:template>
+
+  <xsl:template match="//flow:call">
+    <!-- {{{ -->
+    <xsl:element name="call">
+      <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
+      <xsl:attribute name="endpoint"><xsl:value-of select="@endpoint"/></xsl:attribute>
+      <xsl:element name="parameters">
+        <xsl:if test="@http-method">
+          <xsl:element name="method"><xsl:value-of select="@http-method"/></xsl:element>
+        </xsl:if>
+        <xsl:if test="@service-operation">
+          <xsl:element name="service">
+            <xsl:element name="serviceoperation">"<xsl:value-of select="@service-operation"/>"</xsl:element>
+            <xsl:element name="repository"><xsl:value-of select="@repository"/></xsl:element>
+            <xsl:element name="resources"><xsl:value-of select="@resources"/></xsl:element>
+            <xsl:element name="injection"><xsl:value-of select="@injection"/></xsl:element>
+          </xsl:element>
+        </xsl:if>
+        <xsl:if test="@group-by">
+          <xsl:element name="group">
+            <xsl:element name="group_by"><xsl:value-of select="@group-by"/></xsl:element>
+            <xsl:element name="uri_xpath"><xsl:value-of select="child::flow:resource-id/@xpath"/></xsl:element>
+            <xsl:element name="target_endpoint"><xsl:value-of select="child::flow:resource-id/@endpoint"/></xsl:element>
+          </xsl:element>
+        </xsl:if>
+        <xsl:if test="child::flow:constraint">
+          <xsl:call-template name="constraint"/>
+        </xsl:if>
+        <xsl:if test="child::flow:input">
+          <xsl:call-template name="input"/>
+        </xsl:if>
+      </xsl:element>
+      <xsl:if test="child::flow:output">
+        <xsl:call-template name="output"/>
+      </xsl:if>
+    </xsl:element>
+     <!-- }}} --> 
   </xsl:template>
 
   <xsl:template match="//flow:instruction">
-     <!-- {{{ -->
+    <!-- {{{ -->
+    <xsl:choose>
+      <xsl:when test="@message-parameter">
+        <xsl:value-of select="@message-parameter"/>
+        <xsl:if test="starts-with(@message-parameter, '@') != 'true'">
+          <xsl:text>@</xsl:text>
+        </xsl:if>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:call-template name="resolve-variable">
+          <xsl:with-param name="var" select="@variable"/>
+        </xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:text> = </xsl:text>
+    <xsl:choose>
+      <xsl:when test="@variable and @message-parameter">
+        <xsl:call-template name="resolve-variable">
+          <xsl:with-param name="var" select="@variable"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="@fix-value">
+        <xsl:value-of select="@fix-value"/>
+      </xsl:when>
+      <xsl:when test="@name">
+        <xsl:text>result[:</xsl:text>
+        <xsl:value-of select="@name"/>
+        <xsl:text>]</xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text># ERROR</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:text>&#xa;</xsl:text>
+<!--     
     <xsl:param name="mode"/>
     <xsl:variable name="var" select="@variable"/>
     <xsl:variable name="target" select="@target"/>
@@ -770,6 +814,7 @@ Recent changes:
         <xsl:value-of select="generate-id()"/>
       </xsl:otherwise>
     </xsl:choose>
+-->    
     <!-- }}} -->  
   </xsl:template>
 

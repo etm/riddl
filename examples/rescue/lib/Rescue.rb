@@ -101,6 +101,10 @@ class GetInterface < Riddl::Implementation
       o = xml.find("/domain:domain-description/domain:operations/flow:operation[@name='#{@r[3]}']/flow:*", {"domain" => "http://rescue.org/ns/domain/0.2", "flow"=>"http://rescue.org/ns/controlflow/0.2"})
       @status = 410 if o == nil
       schema.root.add(o) if o != nil
+      messages = schema.root.add("messages")
+      xml.find("//flow:operation[@name='#{@r[3]}']//flow:*[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |e|
+        messages.add(xml.find("//domain:message[@name = '#{e.attributes['message']}']",  {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
+      end
       out_name = "class-level-workflow"
     elsif @p[0].name == "properties"
       schema.append_schemablock(xml.find("/domain:domain-description/domain:properties", {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
