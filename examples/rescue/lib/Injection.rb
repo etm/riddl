@@ -102,7 +102,7 @@ class Injection < Riddl::Implementation
     puts "=== setting description #{status}"
     status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")]
     puts "=== setting position: #{status}"
- #   status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
+    status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
     puts "=== starting #{status}"
     # }}} 
   rescue => e
@@ -151,31 +151,23 @@ class Injection < Riddl::Implementation
     wf.find("//@test").each {|a| a.value = call_node.attributes['id']+'__'+a.value}
     # }}}
     # Resovle messages {{{
-    wf.find("//flow:input[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |p|
+    wf.find("//flow:input[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
       wf.find("//d:message[@name = '#{p.attributes['message']}']/rng:element", {"d"=>"http://rescue.org/ns/domain/0.2", "rng"=>"http://relaxng.org/ns/structure/1.0"}).each do |e|
         value = call_node.find("//cpee:#{e.attributes['name']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text
         p.add_after("input", {"name" => e.attributes['name'], "message-parameter" =>  value})
       end
+      true
     end
-    call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).each do |man|
-      puts '== ' * 20
-      txt = man.text.gsub(/^\s*[\r\n]/, '')
-      txt.each_line do |line|
-        if not line.strip.empty?
-          # @output = result[:message_out]
-          part = line.split("=")
-          part.each { |e| e.strip!}
-          p_name = part[1][man.attributes['output'].length + "[:".length .. -2]
-          msg = wf.find("//d:message[descendant::rng:element[@name = '#{p_name}']]", {"d"=>"http://rescue.org/ns/domain/0.2", "rng"=>"http://relaxng.org/ns/structure/1.0"}).first.attributes['name']
-          wf.find("//flow:call[child::flow:output[@message = '#{msg}']]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
-            call.add("output", {"name"=> p_name, "message-parameter"=> part[0]})
-            puts "added output node to #{call.attributes['id']}"
-          end
-        end
+    wf.find("//flow:output[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
+      wf.find("//d:message[@name = '#{p.attributes['message']}']/rng:element", {"d"=>"http://rescue.org/ns/domain/0.2", "rng"=>"http://relaxng.org/ns/structure/1.0"}).each do |e|
+        var = call_node.find("//cpee:outputs/cpee:output[@name = '#{e.attributes['name']}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+        puts var.dump
+        p.add_after("output", {"name"=>var.attributes['name'], "message-parameter"=>var.attributes['variable']})
+        puts p.parent.dump
       end
-      puts '== ' * 20
+      true
     end
-    wf.find("//flow:*[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! {true}
+    #wf.find("//flow:*[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! {true}
     # }}}
     # Add repositroy-node to new operation-calls {{{
     wf.find("//flow:execute/flow:call", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
@@ -185,9 +177,9 @@ class Injection < Riddl::Implementation
     end
     # }}}
     doc = wf.find("//flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
-    puts '== ' * 10
+    puts '==TR== ' * 10
     puts XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl")))
-    puts '== ' * 10
+    puts '==TR== ' * 10
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root
   end
 
@@ -222,9 +214,13 @@ class Injection < Riddl::Implementation
       p.parent.add("input", {"name"=>p.attributes['name'], "variable"=>var})
       true
     end
-    call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).each do |man|
+#    call_node.find("ancestor::cpee:injected/cpee:interface/cpee:outputs/
+    wf.find("//flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
+      var =  call_node.find("//cpee:parameters/cpee:#{p.attributes['message-parameter']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text
+      p.parent.add("input", {"name"=>p.attributes['name'], "variable"=>var})
+      true
     end
-    wf.find("//flow:*[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! {true}
+    wf.find("//flow:*[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! {true}
     # }}}
     doc = wf.find("//flow:#{op}/flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
     # The new doc seem's to have lost all namespace-information during document creation

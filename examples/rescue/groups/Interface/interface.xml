@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+
+<domain-description  xmlns="http://rescue.org/ns/domain/0.2"
+            xmlns:rng="http://relaxng.org/ns/structure/1.0">
+  <properties>
+<!-- {{{ -->
+    <rng:element name="longitude">
+      <caption lang="en">Longitude</caption>
+      <caption lang="de">Längengrad</caption>
+      <rng:data type="positiveInteger"/>
+    </rng:element>
+    <rng:element name="latitude">
+      <caption lang="en">Latitude</caption>
+      <caption lang="de">Breitengrad</caption>
+      <rng:data type="positiveInteger"/>
+    </rng:element>
+    <rng:element name="carpark">
+      <caption lang="en">Carpark</caption>
+      <caption lang="de">Parkplatz</caption>
+      <rng:data type="boolean"/>
+    </rng:element>
+<!-- }}} -->
+  </properties>
+  <messages>
+    <message name="in_op1">
+<!-- {{{ -->      
+      <rng:element name="message_in">
+        <caption lang="en">Title</caption>
+        <caption lang="de">Titel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+<!-- }}} --> 
+    </message>
+    <message name="out_op1">
+<!-- {{{ -->      
+      <rng:element name="message_out">
+        <caption lang="en">Movietitle</caption>
+        <caption lang="de">Filmtitel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+<!-- }}} -->
+    </message>
+    <message name="in_op2">
+<!-- {{{ -->     
+      <rng:element name="paramF">
+        <caption lang="en">Movietitle</caption>
+        <caption lang="de">Filmtitel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="paramG">
+        <caption lang="en">Kino-WWW</caption>
+        <caption lang="de">Cinema-URI</caption>
+        <rng:data type="string"/>
+      </rng:element>
+<!-- }}} --> 
+    </message>
+    <message name="out_op2">
+<!-- {{{ -->     
+      <rng:element name="paramH">
+        <caption lang="en">Movietitle</caption>
+        <caption lang="de">Filmtitel</caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="paramI">
+        <caption lang="en">Kino-WWW</caption>
+        <caption lang="de">Cinema-URI</caption>
+        <rng:data type="string"/>
+      </rng:element>
+<!-- }}} --> 
+    </message>
+  </messages>
+  <operations>
+    <operation name="op1" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
+<!-- {{{ --> 
+      <context-variables>
+        <additional_op1>47</additional_op1>
+      </context-variables>
+      <endpoints/>
+      <execute>
+        <call id="perform_op1" endpoint="resource_path" service-operation="op1">
+          <input message="in_op1"/>
+          <intput name="add" variable="additional_op1"/>
+          <output message="out_op1"/>
+        </call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} --> 
+    </operation>
+    <operation name="op2" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
+<!-- {{{ -->  
+      <context-variables>
+        <op2/>
+      </context-variables>
+      <endpoints>
+        <resource_path/>
+      </endpoints>
+      <execute>
+        <call id="op2" endpoint="resource_path"  service-operation="op2">
+        </call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} --> 
+    </operation>
+  </operations>
+</domain-description>
+
