@@ -26,7 +26,7 @@
     </op1>
     <op2>
       <endpoints>
-        <ep2>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep2>
+        <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
       </endpoints>
       <context-variables>
         <wait>5</wait>
