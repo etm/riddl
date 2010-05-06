@@ -14,8 +14,8 @@
       </context-variables>
       <execute>
         <call id="s1_op1" endpoint="ep" http-method="post">
-          <input name="timeout" message-parameter="message_in"/>
-          <output name="out_s1" message-parameter="message_out"/>
+          <input name="timeout" message-parameter="pi1"/>
+          <output name="out_s1" message-parameter="po1"/>
         </call>
       </execute>
       <compensate/>
@@ -32,11 +32,9 @@
         <wait>5</wait>
       </context-variables>
       <execute>
-        <call id="s1_op1" endpoint="ep2" http-method="post">
-          <input name="timeout" variable="wait"/>
-        </call>
-        <call id="s1_op1_ext" endpoint="ep2" http-method="post">
-          <input name="timeout" variable="wait"/>
+        <call id="s1_op2" endpoint="ep" http-method="post">
+          <input name="timeout" message-parameter="pi2"/>
+          <output name="out_s2" message-parameter="po2"/>
         </call>
       </execute>
       <compensate/>

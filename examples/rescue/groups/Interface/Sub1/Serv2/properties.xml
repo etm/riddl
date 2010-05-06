@@ -17,7 +17,8 @@
           <input name="timeout" variable="wait"/>
         </call>
         <call id="s2_op1_ext" endpoint="ep" http-method="post">
-          <input name="timeout" message-parameter="message_in"/>
+          <input name="timeout" message-parameter="pi1"/>
+          <output name="s2_out" message-parameter="po1"/>
         </call>
       </execute>
       <compensate/>
@@ -28,14 +29,12 @@
     </op1>
     <op2>
       <endpoints>
-        <ep2>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep2>
       </endpoints>
       <context-variables>
-        <wait>5</wait>
       </context-variables>
       <execute>
-        <call id="s2_op1" endpoint="ep2" http-method="post">
-          <input name="timeout" variable="wait"/>
+        <call id="s2_op2" endpoint="ep" http-method="post">
+          <input name="timeout" message-parameter="pi2"/>
         </call>
       </execute>
       <compensate/>

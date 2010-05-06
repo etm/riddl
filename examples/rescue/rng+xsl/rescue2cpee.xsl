@@ -420,7 +420,7 @@ Recent changes:
     <xsl:for-each select="$input">
       <xsl:variable name="id" select="generate-id()"/>
       <xsl:choose>
-        <xsl:when test="string(@transformation-uri)">
+        xsl:when test="string(@transformation-uri)">
           <xsl:text>&#xa;</xsl:text>
           <xsl:text>parallel_branch do&#xa;</xsl:text>
           <xsl:text>var_</xsl:text>

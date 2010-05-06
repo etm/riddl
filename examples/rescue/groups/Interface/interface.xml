@@ -24,7 +24,7 @@
   <messages>
     <message name="in_op1">
 <!-- {{{ -->      
-      <rng:element name="message_in">
+      <rng:element name="pi1">
         <caption lang="en">Title</caption>
         <caption lang="de">Titel</caption>
         <rng:data type="string"/>
@@ -33,7 +33,7 @@
     </message>
     <message name="out_op1">
 <!-- {{{ -->      
-      <rng:element name="message_out">
+      <rng:element name="po1">
         <caption lang="en">Movietitle</caption>
         <caption lang="de">Filmtitel</caption>
         <rng:data type="string"/>
@@ -42,28 +42,18 @@
     </message>
     <message name="in_op2">
 <!-- {{{ -->     
-      <rng:element name="paramF">
+      <rng:element name="pi2">
         <caption lang="en">Movietitle</caption>
         <caption lang="de">Filmtitel</caption>
-        <rng:data type="string"/>
-      </rng:element>
-      <rng:element name="paramG">
-        <caption lang="en">Kino-WWW</caption>
-        <caption lang="de">Cinema-URI</caption>
         <rng:data type="string"/>
       </rng:element>
 <!-- }}} --> 
     </message>
     <message name="out_op2">
 <!-- {{{ -->     
-      <rng:element name="paramH">
+      <rng:element name="po2">
         <caption lang="en">Movietitle</caption>
         <caption lang="de">Filmtitel</caption>
-        <rng:data type="string"/>
-      </rng:element>
-      <rng:element name="paramI">
-        <caption lang="en">Kino-WWW</caption>
-        <caption lang="de">Cinema-URI</caption>
         <rng:data type="string"/>
       </rng:element>
 <!-- }}} --> 
@@ -79,7 +69,7 @@
       <execute>
         <call id="perform_op1" endpoint="resource_path" service-operation="op1">
           <input message="in_op1"/>
-          <intput name="add" variable="additional_op1"/>
+          <input name="add" variable="additional_op1"/>
           <output message="out_op1"/>
         </call>
       </execute>
@@ -99,7 +89,14 @@
         <resource_path/>
       </endpoints>
       <execute>
+        <call id="perform_op1" endpoint="resource_path" service-operation="op1">
+          <input message="in_op1"/>
+          <input name="add" variable="additional_op1"/>
+          <output message="out_op1"/>
+        </call>
         <call id="op2" endpoint="resource_path"  service-operation="op2">
+          <input message="in_op2"/>
+          <output message="out_op2"/>
         </call>
       </execute>
       <compensate/>
