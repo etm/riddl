@@ -1,7 +1,7 @@
 require '../../lib/ruby/client'
 class Injection < Riddl::Implementation
   def response
-
+# {{{
     # Stop instance {{{
     # cpee_client = Riddl::Client.new(@p[1].value)
     # puts "stoping before trhead"
@@ -16,9 +16,12 @@ class Injection < Riddl::Implementation
       end
     }
     Riddl::Parameter::Simple.new("injecting", "true")
+# }}}
   end
 
   def analyze(position, cpee_uri, rescue_uri)
+  restart = true
+# {{{
     begin
       cpee_client = Riddl::Client.new(cpee_uri)
       rescue_client = Riddl::Client.new(rescue_uri)
@@ -55,6 +58,9 @@ class Injection < Riddl::Implementation
       class_level = false if parent_so.gsub('"','') == service_operation
     end
     # }}}
+puts "==CALL-NODE=="*5
+puts call_node.dump
+puts "==CALL-NODE=="*5
 puts "CLASS-Level: #{class_level}"
     if (class_level) 
       #  Injecting class-level {{{
@@ -87,34 +93,20 @@ puts "CLASS-Level: #{class_level}"
     puts "=== setting description #{status}"
     status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")]
     puts "=== setting position: #{status}"
-    status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
+    status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")] if restart
     puts "=== starting #{status}"
     # }}} 
     rescue => e
       puts $!
       puts e.backtrace
     end
-  end
-
-  def add_service(parallel_node, resource_path, call_node, cpee_client, rescue_client)
-    # {{{ 
-    status, resp = rescue_client.resource(resource_path).get
-    return if status != 200
-    if resp[0].name == "atom-feed"
-      feed = XML::Smart.string(resp[0].value.read)
-      feed.find("//a:entry/a:link", {"a"=>"http://www.w3.org/2005/Atom"}).each do |link|
-        add_service(parallel_node, "#{resource_path}/#{link.text}", call_node, cpee_client, rescue_client)
-      end
-    else
-      branch = parallel_node.add("parallel_branch")
-      branch.add(inject_service_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client, resource_path).children)
-    end
-    # }}}
+# }}}
   end
 
   # renaming id's, endpoints, context, ....
   # return controlflow of injected wf
   def inject_class_level(wf, call_node, cpee_client, rescue_client)
+# {{{
     # Change id's {{{
     wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+a.value}
     # }}}  
@@ -136,13 +128,18 @@ puts "CLASS-Level: #{class_level}"
     wf.find("//@test").each {|a| a.value = call_node.attributes['id']+'__'+a.value}
     # }}}
     # Resolve messages input/output {{{ 
+puts "==RESOLVE-MESSAGE=="*5
     wf.find("//flow:input[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
       wf.find("//d:message[@name = '#{p.attributes['message']}']/rng:element", {"d"=>"http://rescue.org/ns/domain/0.2", "rng"=>"http://relaxng.org/ns/structure/1.0"}).each do |e|
-        value = call_node.find("//cpee:parameters/cpee:#{e.attributes['name']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-        p.add_after("input", {"name" => e.attributes['name'], "message-parameter" =>  value.text}) if value
+      puts call_node.dump
+        value = call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{e.attributes['name']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+        temp = p.add_after("input", {"name" => e.attributes['name'], "message-parameter" =>  value.text}) if value
+        puts temp.dump if value
+        puts value.dump if value
       end
       true
     end
+puts "==RESOLVE-MESSAGE=="*5
     wf.find("//flow:output[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
       wf.find("//d:message[@name = '#{p.attributes['message']}']/rng:element", {"d"=>"http://rescue.org/ns/domain/0.2", "rng"=>"http://relaxng.org/ns/structure/1.0"}).each do |e|
         #var = call_node.find("//cpee:manipulate/cpee:output[@name = '#{e.attributes['name']}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
@@ -151,7 +148,11 @@ puts "CLASS-Level: #{class_level}"
       true
     end
     # }}}
-     # Add repositroy-information to new operation-calls {{{
+    # Resolve message-parameter {{{
+    wf.find("//flow:*[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |e|
+    end
+    # }}}
+    # Add repositroy-information to new operation-calls {{{
     wf.find("//flow:execute/flow:call", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
       call.attributes['repository'] = call_node.find("string(child::cpee:parameters/cpee:service/cpee:repository)", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
       call.attributes['resources'] = call_node.find("string(child::cpee:parameters/cpee:service/cpee:resources)", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
@@ -160,11 +161,13 @@ puts "CLASS-Level: #{class_level}"
     # }}}
     doc = wf.find("//flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root
+# }}}
   end
 
   # renaming id's, endpoints, context, ....
   # return controlflow of injected wf
   def inject_service_level(wf, call_node, cpee_client, resource_path)
+# {{{
     resource_path.gsub!('/', '__')
     # Change id's {{{ 
     wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+resource_path+'__'+a.value}
@@ -189,10 +192,10 @@ puts "CLASS-Level: #{class_level}"
     # }}}
     # Resovle message-parameter {{{
     wf.find("//flow:input[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
-    puts call_node.dump
-    puts p.attributes['message-parameter']
-      var =  call_node.find("//cpee:parameters/cpee:#{p.attributes['message-parameter']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text
-      p.parent.add("input", {"name"=>p.attributes['name'], "variable"=>var})
+      var =  call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{p.attributes['message-parameter']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+      temp = p.parent.add("input", {"name"=>p.attributes['name'], "variable"=>var.text}) if var
+      puts "Variable named #{p.attributes['message-parameter']} could not be resolved" if not var
+      puts temp.dump if var
       true
     end
 =begin    
@@ -202,15 +205,28 @@ puts "CLASS-Level: #{class_level}"
       true
     end
 =end
-    wf.find("//flow:*[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! {true}
-    # }}}
     doc = wf.find("//flow:#{op}/flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
     # The new doc seem's to have lost all namespace-information during document creation
     ns = doc.root.namespaces.add("flow","http://rescue.org/ns/controlflow/0.2")
     doc.find("//*").each { |node| node.namespace = ns }
-    puts '== ' * 10
-    puts wf.root.dump
-    puts '== ' * 10
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root
+# }}}
   end
+
+  def add_service(parallel_node, resource_path, call_node, cpee_client, rescue_client)
+    # {{{ 
+    status, resp = rescue_client.resource(resource_path).get
+    return if status != 200
+    if resp[0].name == "atom-feed"
+      feed = XML::Smart.string(resp[0].value.read)
+      feed.find("//a:entry/a:link", {"a"=>"http://www.w3.org/2005/Atom"}).each do |link|
+        add_service(parallel_node, "#{resource_path}/#{link.text}", call_node, cpee_client, rescue_client)
+      end
+    else
+      branch = parallel_node.add("parallel_branch")
+      branch.add(inject_service_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client, resource_path).children)
+    end
+    # }}}
+  end
+
 end

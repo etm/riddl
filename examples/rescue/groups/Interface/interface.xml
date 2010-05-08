@@ -38,7 +38,7 @@
         <caption lang="de">Filmtitel</caption>
         <rng:data type="string"/>
       </rng:element>
-<!-- }}} -->
+<!-- }}} --> 
     </message>
     <message name="in_op2">
 <!-- {{{ -->     
@@ -63,13 +63,11 @@
     <operation name="op1" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
       <context-variables>
-        <additional_op1>47</additional_op1>
       </context-variables>
       <endpoints/>
       <execute>
         <call id="perform_op1" endpoint="resource_path" service-operation="op1">
           <input message="in_op1"/>
-          <input name="add" variable="additional_op1"/>
           <output message="out_op1"/>
         </call>
       </execute>
@@ -83,20 +81,19 @@
     <operation name="op2" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ -->  
       <context-variables>
-        <op2/>
+        <class>7</class>
+        <class_out/>
       </context-variables>
       <endpoints>
         <resource_path/>
       </endpoints>
       <execute>
         <call id="perform_op1" endpoint="resource_path" service-operation="op1">
-          <input message="in_op1"/>
-          <input name="add" variable="additional_op1"/>
-          <output message="out_op1"/>
+          <input name="pi1" variable="class"/>
+          <output name="out" variable="class_out"/>
         </call>
         <call id="op2" endpoint="resource_path"  service-operation="op2">
           <input message="in_op2"/>
-          <output message="out_op2"/>
         </call>
       </execute>
       <compensate/>
