@@ -20,7 +20,7 @@ class Injection < Riddl::Implementation
   end
 
   def analyze(position, cpee_uri, rescue_uri)
-  restart = true
+  restart = false
 # {{{
     begin
       cpee_client = Riddl::Client.new(cpee_uri)
@@ -128,29 +128,26 @@ puts "CLASS-Level: #{class_level}"
     wf.find("//@test").each {|a| a.value = call_node.attributes['id']+'__'+a.value}
     # }}}
     # Resolve messages input/output {{{ 
-puts "==RESOLVE-MESSAGE=="*5
     wf.find("//flow:input[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
       wf.find("//d:message[@name = '#{p.attributes['message']}']/rng:element", {"d"=>"http://rescue.org/ns/domain/0.2", "rng"=>"http://relaxng.org/ns/structure/1.0"}).each do |e|
-      puts call_node.dump
         value = call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{e.attributes['name']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-        temp = p.add_after("input", {"name" => e.attributes['name'], "message-parameter" =>  value.text}) if value
-        puts temp.dump if value
-        puts value.dump if value
+        p.add_after("input", {"name" => e.attributes['name'], "message-parameter" =>  value.text}) if value
       end
       true
     end
 puts "==RESOLVE-MESSAGE=="*5
     wf.find("//flow:output[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
       wf.find("//d:message[@name = '#{p.attributes['message']}']/rng:element", {"d"=>"http://rescue.org/ns/domain/0.2", "rng"=>"http://relaxng.org/ns/structure/1.0"}).each do |e|
-        #var = call_node.find("//cpee:manipulate/cpee:output[@name = '#{e.attributes['name']}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-        #p.add_after("output", {"name"=>var.attributes['name'], "message-parameter"=>var.attributes['variable']})
+        var = call_node.find("child::cpee:manipulate/cpee:output[@message-parameter = '#{e.attributes['name']}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+        #p.add_after("output", {"variable"=>var.attributes['variable'], "message-parameter"=>var.attributes['message-parameter']}) if var
+        p.add_after(var)
+        puts var.dump if var
+        man_block= call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+        man_block.text = "\n# Output-Parameter #{var.attributes['message-parameter']} will be stored into #{var.attributes['variable']}"+man_block.text 
       end
       true
     end
-    # }}}
-    # Resolve message-parameter {{{
-    wf.find("//flow:*[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |e|
-    end
+puts "==RESOLVE-MESSAGE=="*5
     # }}}
     # Add repositroy-information to new operation-calls {{{
     wf.find("//flow:execute/flow:call", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
