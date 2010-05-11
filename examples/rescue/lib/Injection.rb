@@ -63,7 +63,7 @@ puts call_node.dump
 puts "==CALL-NODE=="*5
 puts "CLASS-Level: #{class_level}"
     if (class_level) 
-      #  Injecting class-level {{{
+      # Injecting class-level {{{
       status, resp = rescue_client.resource("#{resource_path.split('/')[0]}/operations/#{service_operation}").get
       if status != 200
         puts "Error receiving wf at #{rescue_uri}/#{resource_path.split('/')[0]}/operations/#{service_operation}: #{status}"
@@ -71,13 +71,15 @@ puts "CLASS-Level: #{class_level}"
       end
       injected.add(inject_class_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client, rescue_client).children)
       # }}} 
-      # Move manipulate into seperate node {{{
+      # Move manipulate into seperate node, set result-attribute for injected and create output context-variable {{{
       man_block = call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
       if man_block
         man_block.attributes['id'] = "man_block_from_#{call_node.attributes['id']}"
-        man_block.attributes['output'] = "@result_#{call_node.attributes['id']}"
+        man_block.attributes['context'] = "@result_#{call_node.attributes['id']}"
+        injected.attributes['result'] = "@result_#{call_node.attributes['id']}"
         call_node.add_after(man_block)
-        man_block.find("child::*").delete_if! {true}
+#        man_block.find("child::*").delete_if! {true}
+        injected.children[0].add_before("manipulate", {"id"=>"create_result_for_#{call_node.attributes['id']}"}, "context :\"result_#{call_node.attributes['id']}\" => Hash.new")
       end
       # }}}
     else 
@@ -139,11 +141,14 @@ puts "==RESOLVE-MESSAGE=="*5
     wf.find("//flow:output[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
       wf.find("//d:message[@name = '#{p.attributes['message']}']/rng:element", {"d"=>"http://rescue.org/ns/domain/0.2", "rng"=>"http://relaxng.org/ns/structure/1.0"}).each do |e|
         var = call_node.find("child::cpee:manipulate/cpee:output[@message-parameter = '#{e.attributes['name']}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-        #p.add_after("output", {"variable"=>var.attributes['variable'], "message-parameter"=>var.attributes['message-parameter']}) if var
-        p.add_after(var)
-        puts var.dump if var
-        man_block= call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-        man_block.text = "\n# Output-Parameter #{var.attributes['message-parameter']} will be stored into #{var.attributes['variable']}"+man_block.text 
+        if var
+          p.add_after(var)
+          puts var.dump
+          man_block= call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+          man_block.text = "\n@#{var.attributes['variable']} = #{man_block.attributes['output']}[:#{var.attributes['message-parameter']}]"+man_block.text 
+          #man_block.add(var)
+          puts man_block.dump
+        end
       end
       true
     end
@@ -166,11 +171,11 @@ puts "==RESOLVE-MESSAGE=="*5
   def inject_service_level(wf, call_node, cpee_client, resource_path)
 # {{{
     resource_path.gsub!('/', '__')
+    op = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','') 
     # Change id's {{{ 
     wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+resource_path+'__'+a.value}
     # }}}   
     # Change endpoints  {{{
-    op = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','') 
     wf.find("//flow:#{op}/flow:endpoints/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
       cpee_client.resource("/properties/values/endpoints/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+resource_path+'__'+node.name.name),
                                                                   Riddl::Parameter::Simple.new("value", node.text == nil ? "" : node.text)] if node.name != "resource_path"
@@ -188,24 +193,27 @@ puts "==RESOLVE-MESSAGE=="*5
     wf.find("//@test").each {|a| a.value = call_node.attributes['id']+'__'+resource_path+'__'+a.value}
     # }}}
     # Resovle message-parameter {{{
-    wf.find("//flow:input[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
+    wf.find("//flow:#{op}/descendant::flow:input[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
       var =  call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{p.attributes['message-parameter']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
       temp = p.parent.add("input", {"name"=>p.attributes['name'], "variable"=>var.text}) if var
       puts "Variable named #{p.attributes['message-parameter']} could not be resolved" if not var
       puts temp.dump if var
       true
     end
-=begin    
-    wf.find("//flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
-      var = call_node.find("ancestor::cpee:injected[1]/cpee:interface/cpee:manipulate/cpee:output[@name = '#{p.attributes['message-parameter']}']",{"cpee" => "http://cpee.org/ns/description/1.0"}).first.attributes['variable']
-      p.parent.add("output", {"name"=>p.attributes['name'], "variable"=>var})
-      true
+    wf.find("//flow:#{op}/descendant::flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
+      res_object = call_node.find("//ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).first
+      if res_object 
+        p.attributes['variable'] = "#{res_object.attributes['result']}[:#{p.attributes['message-parameter']}]"
+        p.attributes['message-parameter'] = ""
+        puts p.parent.dump
+      end
+      false
     end
-=end
     doc = wf.find("//flow:#{op}/flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
     # The new doc seem's to have lost all namespace-information during document creation
     ns = doc.root.namespaces.add("flow","http://rescue.org/ns/controlflow/0.2")
     doc.find("//*").each { |node| node.namespace = ns }
+    puts XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root.dump
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root
 # }}}
   end

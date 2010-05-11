@@ -961,7 +961,7 @@ Recent changes:
     <xsl:for-each select="child::*">
       <xsl:text>&#xa;</xsl:text>
       <xsl:call-template name="prefix-whitespaces"/>
-      <xsl:text>context:"</xsl:text><xsl:value-of select="name()"/><xsl:text>" => </xsl:text>
+      <xsl:text>context :"</xsl:text><xsl:value-of select="name()"/><xsl:text>" => </xsl:text>
       <xsl:if test="not(string(text()))">
         <xsl:text> nil</xsl:text>
       </xsl:if>

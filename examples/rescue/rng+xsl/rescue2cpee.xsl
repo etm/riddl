@@ -498,7 +498,7 @@ Recent changes:
       </xsl:attribute>
       <xsl:for-each select="child::flow:output">
         <xsl:choose>
-          <xsl:when test="@message-parameter">
+          <xsl:when test="@message-parameter != ''">
             <xsl:if test="starts-with(@message-parameter, '@') = false">
               <xsl:text>@</xsl:text>
             </xsl:if>
@@ -512,7 +512,7 @@ Recent changes:
         </xsl:choose>
         <xsl:text> = </xsl:text>
         <xsl:choose>
-          <xsl:when test="@variable and @message-parameter">
+          <xsl:when test="@variable and @message-parameteri != ''">
             <xsl:call-template name="resolve-variable">
               <xsl:with-param name="var" select="@variable"/>
             </xsl:call-template>
