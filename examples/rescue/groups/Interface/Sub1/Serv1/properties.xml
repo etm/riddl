@@ -14,7 +14,8 @@
       </context-variables>
       <execute>
         <call id="s1_op1" endpoint="ep" http-method="post">
-          <input name="timeout" variable="wait"/>
+          <input name="senseless" variable="wait"/>
+          <input name="timeout" message-parameter="pi1"/>
           <output message-parameter="po1" fix-value="4711"/>
         </call>
       </execute>

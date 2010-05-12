@@ -76,12 +76,12 @@
       <redo/>
       <suspend/>
       <abort/>
-<!-- }}} --> 
+<!-- }}} -->  
     </operation>
     <operation name="op2" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ -->  
       <context-variables>
-        <class>7</class>
+        <class_input>3</class_input>
         <class_out/>
       </context-variables>
       <endpoints>
@@ -89,7 +89,7 @@
       </endpoints>
       <execute>
         <call id="perform_op1" endpoint="resource_path" service-operation="op1">
-          <input name="pi1" variable="class"/>
+          <input name="pi1" variable="class_input"/>
           <output name="out" variable="class_out"/>
         </call>
         <call id="op2" endpoint="resource_path"  service-operation="op2">

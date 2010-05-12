@@ -15,7 +15,7 @@
       <execute>
         <call id="s2_op1" endpoint="ep" http-method="post">
           <input name="timeout" message-parameter="pi1"/>
-          <output variable="out_s1" message-parameter="po1"/>
+          <output message-parameter="po1" variable="out"/>
         </call>
       </execute>
       <compensate/>

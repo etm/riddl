@@ -512,7 +512,7 @@ Recent changes:
         </xsl:choose>
         <xsl:text> = </xsl:text>
         <xsl:choose>
-          <xsl:when test="@variable and @message-parameteri != ''">
+          <xsl:when test="@variable and @message-parameter != ''">
             <xsl:call-template name="resolve-variable">
               <xsl:with-param name="var" select="@variable"/>
             </xsl:call-template>
