@@ -90,7 +90,7 @@
       <execute>
         <call id="perform_op1" endpoint="resource_path" service-operation="op1">
           <input name="pi1" variable="class_input"/>
-          <output name="out" variable="class_out"/>
+          <output name="po1" variable="class_out"/>
         </call>
         <call id="op2" endpoint="resource_path"  service-operation="op2">
           <input message="in_op2"/>

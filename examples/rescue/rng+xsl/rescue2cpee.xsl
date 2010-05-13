@@ -498,131 +498,50 @@ Recent changes:
       </xsl:attribute>
       <xsl:for-each select="child::flow:output">
         <xsl:choose>
-          <xsl:when test="@message-parameter != ''">
-            <xsl:if test="starts-with(@message-parameter, '@') = false">
-              <xsl:text>@</xsl:text>
-            </xsl:if>
-            <xsl:value-of select="@message-parameter"/>
+          <xsl:when test="@variable and @name">
+            <xsl:element name="output">
+              <xsl:attribute name="variable"><xsl:value-of select="@variable"/></xsl:attribute>
+              <xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>
+            </xsl:element>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:call-template name="resolve-variable">
-              <xsl:with-param name="var" select="@variable"/>
-            </xsl:call-template>
-          </xsl:otherwise>
-        </xsl:choose>
-        <xsl:text> = </xsl:text>
-        <xsl:choose>
-          <xsl:when test="@variable and @message-parameter != ''">
-            <xsl:call-template name="resolve-variable">
-              <xsl:with-param name="var" select="@variable"/>
-            </xsl:call-template>
-          </xsl:when>
-          <xsl:when test="@fix-value">
-            <xsl:value-of select="@fix-value"/>
-          </xsl:when>
-          <xsl:when test="@name">
-            <xsl:text>result[:</xsl:text>
-            <xsl:value-of select="@name"/>
-            <xsl:text>]</xsl:text>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:text># ERROR</xsl:text>
+            <xsl:choose>
+              <xsl:when test="@message-parameter != ''">
+                <xsl:if test="starts-with(@message-parameter, '@') = false">
+                  <xsl:text>@</xsl:text>
+                </xsl:if>
+                <xsl:value-of select="@message-parameter"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:call-template name="resolve-variable">
+                  <xsl:with-param name="var" select="@variable"/>
+                </xsl:call-template>
+              </xsl:otherwise>
+            </xsl:choose>
+            <xsl:text> = </xsl:text>
+            <xsl:choose>
+              <xsl:when test="@variable and @message-parameter != ''">
+                <xsl:call-template name="resolve-variable">
+                  <xsl:with-param name="var" select="@variable"/>
+                </xsl:call-template>
+              </xsl:when>
+              <xsl:when test="@fix-value">
+                <xsl:value-of select="@fix-value"/>
+              </xsl:when>
+              <xsl:when test="@name">
+                <xsl:text>result[:</xsl:text>
+                <xsl:value-of select="@name"/>
+                <xsl:text>]</xsl:text>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:text># ERROR</xsl:text>
+              </xsl:otherwise>
+            </xsl:choose>
           </xsl:otherwise>
         </xsl:choose>
         <xsl:text>&#xa;</xsl:text>
       </xsl:for-each>
     </xsl:element>
-<!--
-    <xsl:param name="mode"/>
-    <xsl:choose>
-      <xsl:when test="$mode = 'assign'">
-        <xsl:text>&#xa;</xsl:text>
-        <xsl:choose>
-          <xsl:when test="string(@message-parameter)">
-            <xsl:call-template name="resolve-message-parameter"/>
-            <xsl:text> = </xsl:text>
-            <xsl:choose>
-              <xsl:when test="string(@variable)">
-                <xsl:call-template name="resolve-variable">
-                  <xsl:with-param name="var" select="@variable"/>
-                </xsl:call-template>
-              </xsl:when>
-              <xsl:when test="string(@name)">
-                <xsl:text>result[:</xsl:text>
-                <xsl:value-of select="@name"/>
-                <xsl:text>]</xsl:text>
-              </xsl:when>
-              <xsl:when test="string(@fix-value)">
-                <xsl:value-of select="@fix-value"/>
-              </xsl:when>
-            </xsl:choose>
-          </xsl:when>
-          <xsl:when test="not(string(@message-parameter))and (string(@variable))">
-            <xsl:call-template name="resolve-variable">
-              <xsl:with-param name="var" select="@variable"/>
-            </xsl:call-template>
-            <xsl:text> = </xsl:text>
-            <xsl:choose>
-              <xsl:when test="string(@name)">
-                <xsl:text>result[:</xsl:text>
-                <xsl:value-of select="@name"/>
-                <xsl:text>]</xsl:text>
-              </xsl:when>
-            </xsl:choose>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:text># ERROR during assignment of output</xsl:text>
-          </xsl:otherwise>
-        </xsl:choose>
-      </xsl:when>
-      <xsl:when test="($mode = 'transform') and (child::xsl:*)">
-        <xsl:text>&#xa;</xsl:text>
-        <xsl:text>parallel_branch do&#xa;</xsl:text>
-        <xsl:text>activity :transform_output_</xsl:text>
-        <xsl:value-of select="@name"/>
-        <xsl:text>_</xsl:text>
-        <xsl:value-of select="parent::flow:call/@id"/>
-        <xsl:text>_</xsl:text>
-        <xsl:value-of select="generate-id()"/>
-        <xsl:text>, :</xsl:text>
-        <xsl:value-of select="@transformation-uri"/>
-        <xsl:text>, inputs = {:xml => </xsl:text>
-        <xsl:choose>
-          <xsl:when test="string(@variable)">
-            <xsl:call-template name="resolve-variable">
-              <xsl:with-param name="var" select="@variable"/>
-            </xsl:call-template>
-          </xsl:when>
-          <xsl:when test="string(@message-parameter)">
-            <xsl:call-template name="resolve-message-parameter"/>
-          </xsl:when>
-        </xsl:choose>
-        <xsl:text>, :xsl => &#xa;&lt;&lt;XSLT&#xa;</xsl:text>
-          <xsl:apply-templates select="child::flow:copy"/>
-          <xsl:call-template name="xml-to-string">
-            <xsl:with-param name="node-set" select="child::xsl:*"/>
-          </xsl:call-template>
-          <xsl:text>&#xa;XSLT&#xa;</xsl:text>
-        <xsl:text>}</xsl:text>
-        <xsl:text> do |result|&#xa;</xsl:text>
-          <xsl:text>  </xsl:text>
-          <xsl:choose>
-            <xsl:when test="string(@variable)">
-              <xsl:call-template name="resolve-variable">
-                <xsl:with-param name="var" select="@variable"/>
-              </xsl:call-template>
-            </xsl:when>
-            <xsl:when test="string(@message-parameter)">
-              <xsl:call-template name="resolve-message-parameter"/>
-            </xsl:when>
-          </xsl:choose>
-          <xsl:text> = result.values[0]&#xa;</xsl:text>
-        <xsl:text>end&#xa;</xsl:text>
-        <xsl:text>&#xa;</xsl:text>
-        <xsl:text>end&#xa;</xsl:text>
-      </xsl:when>
-    </xsl:choose>
--->
     <!--  }}} -->
   </xsl:template>
 
