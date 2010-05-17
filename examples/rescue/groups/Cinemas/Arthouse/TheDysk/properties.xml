@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+
+<service-description xmlns="http://rescue.org/ns/service/0.2"
+                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <properties>
+  </properties>
+  <operations xmlns="http://rescue.org/ns/controlflow/0.2">
+    <search>
+      <endpoints>
+        <ep>http://localhost/Testservices/Cinema.php</ep>
+      </endpoints>
+      <context-variables>
+        <prefix>Dysk</prefix>
+      </context-variables>
+      <execute>
+        <call id="search" endpoint="ep" http-method="get">
+          <input name="title" message-parameter="title"/>
+          <input name="date" message-parameter="date"/>
+          <input name="prefix" variable="prefix"/>
+          <output message-parameter="list" name="out"/>
+        </call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </search>
+    <book>
+      <endpoints>
+        <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
+      </endpoints>
+      <context-variables>
+        <wait>5</wait>
+      </context-variables>
+      <execute>
+        <call id="s1_op2" endpoint="ep" http-method="post">
+          <input name="timeout" message-parameter="pi2"/>
+        </call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </book>
+  </operations>
+</service-description>

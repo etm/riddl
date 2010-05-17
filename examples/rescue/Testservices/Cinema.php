@@ -3,12 +3,14 @@
   $s = new RiddlServerSimple();
   $params = $s->request();
 #  print_r($params);
-
+#  error_log(print_r($_SERVER, 1));
   if(strcasecmp($_SERVER['REQUEST_METHOD'], "GET") == 0) { # A list of shows is returned 
     # Expected Parameters (in order): title, datei, prefix_id
+error_log(print_r($params, 1));
     $title = $params[0]->value();
     $date = $params[1]->value();
     $prefix = $params[2]->value();
+  #error_log($prefix);
     $number_of_shows = rand(1, 5);
     $response = "<list_of_shows>\n";
     for($i = 0; $i < $number_of_shows; $i++) {
