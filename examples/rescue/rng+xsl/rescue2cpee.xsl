@@ -529,9 +529,12 @@ Recent changes:
                 <xsl:value-of select="@fix-value"/>
               </xsl:when>
               <xsl:when test="@name">
-                <xsl:text>result[:</xsl:text>
+                <xsl:text>result.value('</xsl:text>
                 <xsl:value-of select="@name"/>
-                <xsl:text>]</xsl:text>
+                <xsl:text>')</xsl:text>
+                <xsl:if test="not(@type) or (@type != 'simple')">
+                  <xsl:text>.read</xsl:text>
+                </xsl:if>
               </xsl:when>
               <xsl:otherwise>
                 <xsl:text># ERROR</xsl:text>
@@ -609,9 +612,9 @@ Recent changes:
         <xsl:value-of select="@fix-value"/>
       </xsl:when>
       <xsl:when test="@name">
-        <xsl:text>result[:</xsl:text>
+        <xsl:text>result.value('</xsl:text>
         <xsl:value-of select="@name"/>
-        <xsl:text>]</xsl:text>
+        <xsl:text>')</xsl:text>
       </xsl:when>
       <xsl:otherwise>
         <xsl:text># ERROR</xsl:text>
