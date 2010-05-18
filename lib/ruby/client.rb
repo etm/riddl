@@ -193,7 +193,6 @@ module Riddl
 
       def make_request(url,riddl_method,parameters,headers,qparams)
         #{{{
-        puts "URL: #{url}"
         url = URI.parse(url)
         qs = qparams.join('&')
         req = Riddl::Client::Request.new(riddl_method,url.path,parameters,headers,qs)
