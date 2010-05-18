@@ -7,7 +7,7 @@
   <operations xmlns="http://rescue.org/ns/controlflow/0.2">
     <search>
       <endpoints>
-        <ep>http://localhost/Testservices/Cinema.php</ep>
+        <ep>http://www.pri.univie.ac.at/~ralph/Testservices/Cinema.php</ep>
       </endpoints>
       <context-variables>
       </context-variables>
@@ -15,7 +15,7 @@
         <call id="find" endpoint="ep" http-method="get">
           <input name="title" message-parameter="title"/>
           <input name="date" message-parameter="date"/>
-          <input name="prefix" fix-value="&quot;BLACK&quot;"/>
+          <input name="pre" fix-value="&quot;BLACK&quot;"/>
           <output message-parameter="list" name="out"/>
         </call>
       </execute>

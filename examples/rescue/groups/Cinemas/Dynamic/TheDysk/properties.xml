@@ -7,15 +7,16 @@
   <operations xmlns="http://rescue.org/ns/controlflow/0.2">
     <search>
       <endpoints>
-        <ep>http://localhost/Testservices/static.xml</ep>
+        <ep>http://www.pri.univie.ac.at/~ralph/Testservices/Cinema.php</ep>
       </endpoints>
       <context-variables>
+        <prefix>Dysk</prefix>
       </context-variables>
       <execute>
-        <call id="find" endpoint="ep" http-method="get">
+        <call id="search" endpoint="ep" http-method="get">
           <input name="title" message-parameter="title"/>
           <input name="date" message-parameter="date"/>
-          <input name="prefix" fix-value="&quot;STATIC&quot;"/>
+          <input name="pre" variable="prefix"/>
           <output message-parameter="list" name="out"/>
         </call>
       </execute>

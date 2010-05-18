@@ -39,25 +39,27 @@
     </message>
     <message name="list_shows">
 <!-- {{{ -->     
-      <rng:zeroOrMore>
-        <rng:element name="show">
-          <rng:element name="show_id">
-            <caption lang="en">ShowID</caption>
-            <caption lang="de">VorstellungsID</caption>
-            <rng:data type="string"/>
+      <rng:element name="list">
+        <rng:zeroOrMore>
+          <rng:element name="show">
+            <rng:element name="show_id">
+              <caption lang="en">ShowID</caption>
+              <caption lang="de">VorstellungsID</caption>
+              <rng:data type="string"/>
+            </rng:element>
+            <rng:element name="title">
+              <caption lang="en">Movietitle</caption>
+              <caption lang="de">Filmtitel</caption>
+              <rng:data type="string"/>
+            </rng:element>
+            <rng:element name="time">
+              <caption lang="en">Starting time</caption>
+              <caption lang="de">Beginzeit</caption>
+              <rng:data type="time"/>
+            </rng:element>
           </rng:element>
-          <rng:element name="title">
-            <caption lang="en">Movietitle</caption>
-            <caption lang="de">Filmtitel</caption>
-            <rng:data type="string"/>
-          </rng:element>
-          <rng:element name="time">
-            <caption lang="en">Starting time</caption>
-            <caption lang="de">Beginzeit</caption>
-            <rng:data type="time"/>
-          </rng:element>
-        </rng:element>
-      </rng:zeroOrMore>
+        </rng:zeroOrMore>
+      </rng:element>
 <!-- }}} -->
     </message>
     <message name="selected_show">
