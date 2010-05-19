@@ -28,14 +28,15 @@
     </search>
     <book>
       <endpoints>
-        <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
+        <ep>http://www.pri.univie.ac.at/~ralph/Testservices/Cinema.php</ep>
       </endpoints>
       <context-variables>
         <wait>5</wait>
       </context-variables>
       <execute>
-        <call id="s1_op2" endpoint="ep" http-method="post">
-          <input name="timeout" message-parameter="pi2"/>
+        <call id="book" endpoint="ep" http-method="post">
+          <input name="showID" message-parameter="show_id"/>
+          <output message-parameter="reservation_number" name="resID" type="simple"/>
         </call>
       </execute>
       <compensate/>

@@ -93,11 +93,6 @@
         <caption lang="de">VorstellungsID</caption>
         <rng:data type="string"/>
       </rng:element>
-      <rng:element name="number_of_persons">
-        <caption lang="en">Hall</caption>
-        <caption lang="de">Saal</caption>
-        <rng:data type="positiveInteger"/>
-      </rng:element>
 <!-- }}} --> 
     </message>
     <message name="reservation_result">
@@ -191,21 +186,11 @@
     <operation name="book" short="book tickets for a given show and cinema" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ -->    
       <execute>
-        <flow:call id="perform_book" endpoint="resource_scope" service-operation="book" state-controlflow="execute">
+        <flow:call id="perform_book" endpoint="resource_path" service-operation="book" state-controlflow="execute">
           <flow:input message="book_tickets"/>
           <flow:output message="reservation_result"/>
         </flow:call>
       </execute>
-      <compensate/>
-      <undo>
-        <flow:call id="book" endpoint="resource_scope" service-operation="book" state-controlflow="undo">
-          <flow:input message="book_tickets"/>
-          <flow:output message="reservation_result"/>
-        </flow:call>
-      </undo>
-      <redo/>
-      <suspend/>
-      <abort/>
 <!-- }}} -->       
     </operation>
     <operation name="order_popcorn" short="get popcorn to your seat" xmlns="http://rescue.org/ns/controlflow/0.2">
