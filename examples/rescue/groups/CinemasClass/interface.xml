@@ -24,7 +24,7 @@
   </properties>
   <messages>
     <message name="search_parameters">
-<!-- {{{ -->     
+<!-- {{{ -->      
       <rng:element name="title">
         <caption lang="en">Title</caption>
         <caption lang="de">Titel</caption>
@@ -60,7 +60,7 @@
           </rng:element>
         </rng:zeroOrMore>
       </rng:element>
-<!-- }}} -->
+<!-- }}} --> 
     </message>
     <message name="selected_show">
 <!-- {{{ -->    
@@ -102,7 +102,7 @@
         <caption lang="de">Reservierungsnummer</caption>
         <rng:data type="string"/>
       </rng:element>
-<!-- }}} -->
+<!-- }}} --> 
     </message>
     <message name="popcorn_order">
 <!-- {{{ -->      
@@ -161,30 +161,33 @@
     <operation name="search_and_book" short="search for shows, select show and book tickets" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
       <context-variables>
-        <empty/>
-        <bla>BLU</bla>
+        <show_id/>
+        <list/>
       </context-variables>
       <endpoints>
-        <an_other_one>http://whats-o-ever.org</an_other_one>
+        <selected_cinema/>
       </endpoints>
       <execute>
-        <flow:call id="call_find" endpoint="resource_scope" service-operation="search" state-controlflow="execute"/>
-        <flow:call id="perform_select" endpoint="selector_service" http-method="get" http-status="200" group-by="//show">
+        <flow:call id="call_find" endpoint="resource_path" service-operation="search">
+          <flow:input name="title" message-parameter="title"/>
+          <flow:input name="date" message-parameter="date"/>
+          <flow:output name="list" variable="list"/>
+        </flow:call>
+        <flow:call id="perform_select" endpoint="selector_service" http-method="get" group-by="//show">
           <flow:resource-id xpath="//show/cinema_uri" endpoint="selected_cinema"/>
           <flow:input message="list_shows"/>
           <flow:output message="selected_show"/>
         </flow:call>
-        <flow:call id="call_book" endpoint="selected_cinema" service-operation="book" state-controlflow="execute"/>
+        <flow:call id="call_book" endpoint="selected_cinema" service-operation="book">
+          <flow:input name="show_id" variable="show_id"/>
+          <flow:output name="reservation_id" message-parameter="reservation_id"/>
+        </flow:call>
       </execute>
-      <compensate/>
-      <undo/>
-      <redo/>
-      <suspend/>
       <abort/>
 <!-- }}} --> 
     </operation>
     <operation name="book" short="book tickets for a given show and cinema" xmlns="http://rescue.org/ns/controlflow/0.2">
-<!-- {{{ -->    
+<!-- {{{ -->     
       <execute>
         <flow:call id="perform_book" endpoint="resource_path" service-operation="book" state-controlflow="execute">
           <flow:input message="book_tickets"/>
