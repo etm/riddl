@@ -1,6 +1,30 @@
 require '../../lib/ruby/client'
 class Injection < Riddl::Implementation
   def response
+    # {{{
+    # Stop instance {{{
+    # cpee_client = Riddl::Client.new(@p[1].value)
+    # puts "stoping before trhead"
+    # status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "stopping")]
+    # }}}  
+    Thread.new {
+      Thread.pass; 
+      begin
+        stopped = false
+        cpee = Riddl::Client.new(@p.value('cpee'))
+        until stopped
+          status, resp = cpee.resource('properties/values/state').get
+          puts "CPEE-State: #{resp[0].value} (#{status})"
+          stopped = true if resp[0].value == "stopped"
+          sleep(0.1)
+        end
+        analyze(@p.value('position'), @p.value('cpee'), @p.value('rescue'))
+      rescue Execption => e
+        puts e.backtrace
+      end
+    }
+    Riddl::Parameter::Simple.new("injecting", "true")
+# }}}
   end
 
   def analyze(position, cpee_uri, rescue_uri)
@@ -64,7 +88,7 @@ class Injection < Riddl::Implementation
     end
     call_node.add_after(injected)
     # Set inject, description, position and re-start {{{
-      puts description.root.dump
+      #puts description.root.dump
     status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("value", description.root.dump)]
     puts "=== setting description #{status}"
     status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")] if continue
