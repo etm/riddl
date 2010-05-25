@@ -97,20 +97,20 @@ class GetInterface < Riddl::Implementation
 
 
     if @p[0] == nil # If no parameter is given, the defition of the class-level-workflow 
-      schema = XML::Smart.string("<operation name='#{@r[3]}' xmlns=\"http://rescue.org/ns/controlflow/0.2\"/>")
-      o = xml.find("/domain:domain-description/domain:operations/flow:operation[@name='#{@r[3]}']/flow:*", {"domain" => "http://rescue.org/ns/domain/0.2", "flow"=>"http://rescue.org/ns/controlflow/0.2"})
+      schema = XML::Smart.string("<operation name='#{@r[-1]}' xmlns=\"http://rescue.org/ns/controlflow/0.2\"/>")
+      o = xml.find("/domain:domain-description/domain:operations/flow:operation[@name='#{@r[-1]}']/flow:*", {"domain" => "http://rescue.org/ns/domain/0.2", "flow"=>"http://rescue.org/ns/controlflow/0.2"})
       @status = 410 if o == nil
       schema.root.add(o) if o != nil
       messages = schema.root.add("messages")
-      xml.find("//flow:operation[@name='#{@r[3]}']//flow:*[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |e|
+      xml.find("//flow:operation[@name='#{@r[-1]}']//flow:*[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |e|
         messages.add(xml.find("//domain:message[@name = '#{e.attributes['message']}']",  {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
       end
       out_name = "class-level-workflow"
     elsif @p[0].name == "properties"
       schema.append_schemablock(xml.find("/domain:domain-description/domain:properties", {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
     else 
-      input = collect_input(@r[3], xml)
-      output = collect_output(@r[3], xml)
+      input = collect_input(@r[-1], xml)
+      output = collect_output(@r[-1], xml)
       if input.length == 0 && output.length == 0
         @status = 404 # not found
         return
@@ -153,6 +153,7 @@ class GetInterface < Riddl::Implementation
         end
       end  
     end
+    puts "INPUT for #{operation_name}: " + params.inspect
     params
   end
 
@@ -172,7 +173,7 @@ class GetInterface < Riddl::Implementation
         end
       end  
     end
-    puts "OUTPUT: " + params.inspect
+    puts "OUTPUT for #{operation_name}: " + params.inspect
     params
   end
 end

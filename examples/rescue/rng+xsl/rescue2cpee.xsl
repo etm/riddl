@@ -560,16 +560,14 @@ Recent changes:
         <xsl:if test="@service-operation">
           <xsl:element name="service">
             <xsl:element name="serviceoperation">"<xsl:value-of select="@service-operation"/>"</xsl:element>
-            <xsl:element name="repository"><xsl:value-of select="@repository"/></xsl:element>
-            <xsl:element name="resources"><xsl:value-of select="@resources"/></xsl:element>
             <xsl:element name="injection"><xsl:value-of select="@injection"/></xsl:element>
           </xsl:element>
         </xsl:if>
         <xsl:if test="@group-by">
           <xsl:element name="group">
-            <xsl:element name="group_by"><xsl:value-of select="@group-by"/></xsl:element>
-            <xsl:element name="uri_xpath"><xsl:value-of select="child::flow:resource-id/@xpath"/></xsl:element>
-            <xsl:element name="target_endpoint"><xsl:value-of select="child::flow:resource-id/@endpoint"/></xsl:element>
+            <xsl:element name="group_by"><xsl:text>&quot;</xsl:text><xsl:value-of select="@group-by"/><xsl:text>&quot;</xsl:text></xsl:element>
+            <xsl:element name="uri_xpath"><xsl:text>&quot;</xsl:text><xsl:value-of select="child::flow:resource-id/@xpath"/><xsl:text>&quot;</xsl:text></xsl:element>
+            <xsl:element name="target_endpoint"><xsl:text>&quot;</xsl:text><xsl:value-of select="child::flow:resource-id/@endpoint"/><xsl:text>&quot;</xsl:text></xsl:element>
           </xsl:element>
         </xsl:if>
         <xsl:if test="child::flow:constraint">

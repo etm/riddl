@@ -67,12 +67,38 @@ run(
             run DeleteResource if method :delete => '*'
             run UpdateResource if method :put => 'rename'
             run AddResource if method :post => 'service'
+            on resource 'operations' do
+              run GetOperations if method :get => "*"
+              on resource do
+                run GetInterface if method :get => '*'
+                run GetInterface if method :get => 'input'
+                run GetInterface if method :get => 'output'
+              end
+            end
+            on resource 'messages' do
+              on resource do
+                run GetMessage if method :get => '*'
+              end
+            end
   
             on resource do # Service-level
               run GetServiceDescription if method :get => '*'
               run UpdateResource if method :put => 'rename'
               run UpdateResource if method :put => 'service-description'
               run DeleteResource if method :delete => '*'
+              on resource 'operations' do
+                run GetOperations if method :get => "*"
+                on resource do
+                  run GetInterface if method :get => '*'
+                  run GetInterface if method :get => 'input'
+                  run GetInterface if method :get => 'output'
+                end
+              end
+              on resource 'messages' do
+                on resource do
+                  run GetMessage if method :get => '*'
+                end
+              end
             end      
           end      
         end      

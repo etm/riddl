@@ -1,22 +1,6 @@
 require '../../lib/ruby/client'
 class Injection < Riddl::Implementation
   def response
-# {{{
-    # Stop instance {{{
-    # cpee_client = Riddl::Client.new(@p[1].value)
-    # puts "stoping before trhead"
-    # status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "stopping")]
-    # }}}  
-    Thread.new {
-      Thread.pass; 
-      begin
-        analyze(@p[0].value, @p[1].value, @p[2].value);
-      rescue Execption => e
-        puts e.backtrace
-      end
-    }
-    Riddl::Parameter::Simple.new("injecting", "true")
-# }}}
   end
 
   def analyze(position, cpee_uri, rescue_uri)
@@ -40,15 +24,7 @@ class Injection < Riddl::Implementation
     call_node = description.find("//cpee:call[@id = '#{position}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
     service_operation = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','')
     # }}}
-    # Get resource-path {{{
-    status, resp = cpee_client.resource("/properties/values/endpoints/#{call_node.attributes['endpoint']}").get
-    if status != 200
-      puts "Error receiving endpoint at #{cpee_uri}/properties/values/endpoints/#{call_node.attributes['endpoint']}: #{status}"
-      return
-    end
-    resource_path = resp[0].value
-    # }}}
-     # Create injected-block {{{
+    # Create injected-block {{{
     injected = description.root.add("injected")
     injected.attributes['source'] = call_node.attributes['id']
     # }}}
@@ -61,7 +37,7 @@ class Injection < Riddl::Implementation
     # }}}
     if (class_level) 
       # Injecting class-level {{{
-      puts " == Injecting operation #{service_operation} of domain #{resource_path.split('/')[0]}"
+      puts " == Injecting operation #{service_operation} of domain #{rescue_uri}"
       # Move manipulate into seperate node, set result-attribute for injected and create output context-variable {{{
       man_block = call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
       if man_block
@@ -73,21 +49,22 @@ class Injection < Riddl::Implementation
         injected.add("manipulate", {"id"=>"create_result_for_#{call_node.attributes['id']}"}, "context :\"result_#{call_node.attributes['id']}\" => Hash.new")
       end
       # }}}
-      status, resp = rescue_client.resource("#{resource_path.split('/')[0]}/operations/#{service_operation}").get  # {{{
+      status, resp = rescue_client.resource("operations/#{service_operation}").get  # {{{
       if status != 200
-        puts "Error receiving wf at #{rescue_uri}/#{resource_path.split('/')[0]}/operations/#{service_operation}: #{status}"
+        puts "Error receiving wf at #{rescue_uri}/operations/#{service_operation}: #{status}"
         return
       end # }}}
-      injected.add(inject_class_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client, rescue_client).children)
+      injected.add(inject_class_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client).children)
       # }}} 
     else 
       # Injection service-level {{{
       parallel = injected.add("parallel")
-      add_service(parallel, resource_path, call_node, cpee_client, rescue_client)
+      add_service(parallel, rescue_uri, call_node, cpee_client)
       # }}} 
     end
     call_node.add_after(injected)
     # Set inject, description, position and re-start {{{
+      puts description.root.dump
     status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("value", description.root.dump)]
     puts "=== setting description #{status}"
     status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")] if continue
@@ -104,7 +81,7 @@ class Injection < Riddl::Implementation
 
   # renaming id's, endpoints, context, ....
   # return controlflow of injected wf
-  def inject_class_level(wf, call_node, cpee_client, rescue_client)
+  def inject_class_level(wf, call_node, cpee_client)
 # {{{
     # Change id's {{{
     wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+a.value}
@@ -136,7 +113,7 @@ class Injection < Riddl::Implementation
     wf.find("//flow:execute/descendant::flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |p|
       res_object = call_node.find("ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).first
       if res_object 
-        p.attributes['message-parameter'] = "#{call_node.parent.attributes['result']}[:\"#{resource_path.gsub("__","/")}\"][:#{p.attributes['message-parameter']}]"
+        p.attributes['message-parameter'] = "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"][:#{p.attributes['message-parameter']}]"
       end
       puts "Ancestor Injected not found" if not res_object
     end
@@ -179,28 +156,28 @@ class Injection < Riddl::Implementation
   # return controlflow of injected wf
   def inject_service_level(wf, call_node, cpee_client, resource_path)
 # {{{
-    resource_path.gsub!('/', '__')
+    index = resource_path.gsub("/","_").gsub(":","_")
     op = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','') 
     puts " == Injecting operation #{op} of service #{resource_path}"
     # Change id's {{{ 
-    wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+resource_path+'__'+a.value}
+    wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value}
     # }}}   
     # Change endpoints  {{{
     wf.find("//flow:#{op}/flow:endpoints/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      cpee_client.resource("/properties/values/endpoints/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+resource_path+'__'+node.name.name),
-                                                                  Riddl::Parameter::Simple.new("value", node.text == nil ? "" : node.text)] if node.name != "resource_path"
+      cpee_client.resource("/properties/values/endpoints/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+index+'__'+node.name.name),
+                                                                  Riddl::Parameter::Simple.new("value", node.text == nil ? "" : node.text)] 
     end
     wf.find("//@endpoint").each do |a|
-      a.value = a.value == "resource_path" ? call_node.attributes['endpoint'] : call_node.attributes['id']+'__'+resource_path+'__'+a.value
+      a.value = call_node.attributes['id']+'__'+index+'__'+a.value
     end
     # }}} 
     # Change context-variables: variables, test {{{ 
     wf.find("//flow:#{op}/flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      cpee_client.resource("/properties/values/context-variables/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+resource_path+'__'+node.name.name),
+      cpee_client.resource("/properties/values/context-variables/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+index+'__'+node.name.name),
                                                                   Riddl::Parameter::Simple.new("value", node.text)]
     end
-    wf.find("//@variable").each {|a| a.value = call_node.attributes['id']+'__'+resource_path+'__'+a.value}
-    wf.find("//@test").each {|a| a.value = call_node.attributes['id']+'__'+resource_path+'__'+a.value}
+    wf.find("//@variable").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value}
+    wf.find("//@test").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value}
     # }}}
     # Resovle message-parameter {{{
     wf.find("//flow:#{op}/descendant::flow:input[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
@@ -212,7 +189,7 @@ class Injection < Riddl::Implementation
     wf.find("//flow:#{op}/descendant::flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |p|
       res_object = call_node.find("ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).first
       if res_object 
-        p.attributes['message-parameter'] = "#{call_node.parent.attributes['result']}[:\"#{resource_path.gsub("__","/")}\"][:#{p.attributes['message-parameter']}]"
+        p.attributes['message-parameter'] = "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"][:#{p.attributes['message-parameter']}]"
       end
     end
 # }}}
@@ -226,21 +203,26 @@ class Injection < Riddl::Implementation
 #  }}}
   end
 
-  def add_service(parallel_node, resource_path, call_node, cpee_client, rescue_client)
-    # {{{ 
-    status, resp = rescue_client.resource(resource_path).get
+  def add_service(parallel_node, resource_path, call_node, cpee_client)
+    # {{{
+    rescue_client = Riddl::Client.new(resource_path)
+    status, resp = rescue_client.get
     return if status != 200
+    puts "="*50
+    puts "RP: '#{resource_path}'"
+    p cpee_client
+    puts "="*50
     if resp[0].name == "atom-feed"
       feed = XML::Smart.string(resp[0].value.read)
       feed.find("//a:entry/a:link", {"a"=>"http://www.w3.org/2005/Atom"}).each do |link|
-        add_service(parallel_node, "#{resource_path}/#{link.text}", call_node, cpee_client, rescue_client)
+        add_service(parallel_node, "#{resource_path}/#{link.text}", call_node, cpee_client)
       end
     else
       branch = parallel_node.add("parallel_branch")
-      branch.add("manipulate", {"id"=>"result_for_#{call_node.attributes['id']}_service_#{resource_path.gsub("/","_")}"}, "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"] = Hash.new")
+      branch.add("manipulate", {"id"=>"result_for_#{call_node.attributes['id']}_service_#{resource_path.gsub("/","_").gsub(":","_")}"}, "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"] = Hash.new")
       branch.add(inject_service_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client, resource_path).children)
     end
-    # }}}
+    # }}} 
   end
   
   def check_properties

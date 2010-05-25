@@ -125,6 +125,19 @@
           <delete in="*"/>
           <put in="rename"/>
           <post in="service"/>
+          <resource relative="operations">
+            <get in="*" out="xml"/>
+            <resource>
+              <get in="*" out="class-level-workflow"/>
+              <get in="input" out="schema"/>
+              <get in="output" out="schema"/>
+            </resource>
+          </resource>
+          <resource relative="messages">
+            <resource>
+              <get in="*" out="xml"/>
+            </resource>
+          </resource>
 <!--}}}-->
           <resource> <!-- Service-level -->
 <!-- {{{ -->
@@ -132,6 +145,19 @@
             <put in="rename"/>
             <put in="service-description"/>
             <delete in="*"/>
+            <resource relative="operations">
+              <get in="*" out="xml"/>
+              <resource>
+                <get in="*" out="class-level-workflow"/>
+                <get in="input" out="schema"/>
+                <get in="output" out="schema"/>
+              </resource>
+            </resource>
+            <resource relative="messages">
+              <resource>
+                <get in="*" out="xml"/>
+              </resource>
+            </resource>
 <!--}}}--> 
           </resource>  
 

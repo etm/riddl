@@ -19,6 +19,7 @@
     $response = "<list_of_shows>\n";
     for($i = 0; $i < $number_of_shows; $i++) {
       $response .= "<show>";
+      $response .= "<cinema_uri>".$_SERVER['REQUEST_URI']."</cinema_uri>";
       $response .= "<show_id>". $prefix ."_" . rand(1, 200). "</show_id>";
       $response .= "<title>". $title . "</title>";
       $response .= "<date>". $date . "</date>";
