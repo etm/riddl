@@ -115,8 +115,21 @@ class Injection < Riddl::Implementation
       cpee_client.resource("/properties/values/endpoints/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+node.name.name),
                                                                   Riddl::Parameter::Simple.new("value", node.text == nil ? "" : node.text)]
     end
-    wf.find("//@endpoint").each do |a|
-      a.value = a.value == "resource_path" ? call_node.attributes['endpoint'] : call_node.attributes['id']+'__'+a.value
+    wf.find("//flow:call", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
+      if a.attributes.include?('endpoint-type') and a.attributes['endpoint-type'] == "outside"
+        ep = call_node.find("child::cpee:parameters/cpee:additional_endpoints/cpee:#{a.attributes['endpoint']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text
+        a.attributes['endpoint'] = ep.gsub('"', "")
+      else
+        a.attributes['endpoint'] = a.attributes['endpoint'] == "resource_path" ? call_node.attributes['endpoint'] : call_node.attributes['id']+'__'+a.attributes['endpoint']
+      end
+    end
+    wf.find("//flow:call/flow:resource-id", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
+      if a.attributes.include?('endpoint-type') and a.attributes['endpoint-type'] == "outside"
+        ep = call_node.find("child::cpee:parameters/cpee:additional_endpoints/cpee:#{a.attributes['endpoint']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text
+        a.attributes['endpoint'] = ep.gsub('"', "")
+      else
+        a.attributes['endpoint'] = a.attributes['endpoint'] == "resource_path" ? call_node.attributes['endpoint'] : call_node.attributes['id']+'__'+a.attributes['endpoint']
+      end
     end
     # }}} 
     # Change context-variables: variables, test {{{

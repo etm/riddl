@@ -84,7 +84,7 @@
         <caption lang="de">Saal</caption>
         <rng:data type="positiveInteger"/>
       </rng:element>
-<!-- }}} --> 
+<!-- }}} -->  
     </message>
     <message name="book_tickets">
 <!-- {{{ -->    
@@ -173,10 +173,10 @@
           <flow:input name="date" message-parameter="date"/>
           <flow:output name="list" variable="list"/>
         </flow:call>
-        <flow:call id="perform_select" endpoint="selector_service" http-method="get" group-by="//show">
+        <flow:call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="get" group-by="//show">
           <flow:resource-id xpath="//show/cinema_uri" endpoint="selected_cinema"/>
-          <flow:input message="list_shows"/>
-          <flow:output message="selected_show"/>
+          <flow:input name="list" variable="list"/>
+          <flow:output name="movie_title" message-parameter="movie_title"/>
         </flow:call>
         <flow:call id="call_book" endpoint="selected_cinema" service-operation="book">
           <flow:input name="show_id" variable="show_id"/>
