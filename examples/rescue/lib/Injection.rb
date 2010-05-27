@@ -132,13 +132,24 @@ class Injection < Riddl::Implementation
       end
     end
     # }}} 
-    # Change context-variables: variables, test {{{
+    # Change context-variables: variables, test, context (within manipulate) {{{
     wf.find("//flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
       cpee_client.resource("/properties/values/context-variables/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+node.name.name),
                                                                   Riddl::Parameter::Simple.new("value", node.text)] if node.name != "resource_path"
     end
     wf.find("//@variable").each {|a| a.value = call_node.attributes['id']+'__'+a.value}
     wf.find("//@test").each {|a| a.value = call_node.attributes['id']+'__'+a.value}
+    wf.find("//@context").each do |a|
+      con = a.value.split(",")
+      i = 0
+      s = ""
+      while i < con.length
+        s += '@'+call_node.attributes['id']+'__'+con[i].strip
+        s += "," if i < con.length-1
+        i = i+1
+      end
+      a.value = s
+    end
     # }}}
     # Resovle message-parameter {{{
     wf.find("//flow:execute/descendant::flow:input[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
@@ -148,11 +159,12 @@ class Injection < Riddl::Implementation
       true
     end
     wf.find("//flow:execute/descendant::flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |p|
+      puts "OUTPUT: "
       res_object = call_node.find("ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).first
-      if res_object 
-        p.attributes['message-parameter'] = "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"][:#{p.attributes['message-parameter']}]"
-      end
-      puts "Ancestor Injected not found" if not res_object
+        str = "#{call_node.parent.attributes['result']}[:#{p.attributes['message-parameter']}]" if not res_object.nil?
+        str = "@result_#{call_node.attributes['id']}[:#{p.attributes['message-parameter']}]" if res_object.nil?
+      p.attributes['message-parameter'] = str
+      puts "Message-Parameter: #{p.attributes['message-parameter']}"
     end
 # }}}
     # Resolve messages input/output {{{ 
@@ -245,10 +257,6 @@ class Injection < Riddl::Implementation
     rescue_client = Riddl::Client.new(resource_path)
     status, resp = rescue_client.get
     return if status != 200
-    puts "="*50
-    puts "RP: '#{resource_path}'"
-    p cpee_client
-    puts "="*50
     if resp[0].name == "atom-feed"
       feed = XML::Smart.string(resp[0].value.read)
       feed.find("//a:entry/a:link", {"a"=>"http://www.w3.org/2005/Atom"}).each do |link|

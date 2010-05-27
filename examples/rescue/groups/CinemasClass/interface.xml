@@ -161,8 +161,9 @@
     <operation name="search_and_book" short="search for shows, select show and book tickets" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
       <context-variables>
-        <show_id/>
+        <show_id>BAL_4711</show_id>
         <list/>
+        <list_merge>''</list_merge>
       </context-variables>
       <endpoints>
         <selected_cinema/>
@@ -173,10 +174,23 @@
           <flow:input name="date" message-parameter="date"/>
           <flow:output name="list" variable="list"/>
         </flow:call>
+        <flow:manipulate id="merge_result" context="list, list_merge" output="list, m_list">
+          puts m_list
+          xml = XML::Smart.string("&lt;list_of_shows/&gt;")
+          list.each do |k,v|
+            l = XML::Smart.string(v)
+            xml.root.add(l.find("//show"))
+          end
+          m_list.clear
+          m_list &lt;&lt; xml.to_s
+        </flow:manipulate>
         <flow:call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="get" group-by="//show">
-          <flow:resource-id xpath="//show/cinema_uri" endpoint="selected_cinema"/>
-          <flow:input name="list" variable="list"/>
-          <flow:output name="movie_title" message-parameter="movie_title"/>
+          <flow:resource-id xpath="//show/cinema_uri" endpoint="selected_cinema" name="target"/>
+          <flow:input name="data" variable="list_merge"/>
+          <flow:output name="movie_title" message-parameter="movie_title" type="simple"/>
+          <flow:output name="hall" message-parameter="hall" type="simple"/>
+          <flow:output name="starting_time" message-parameter="starting_time" type="simple"/>
+          <!-- flow:output name="show_id" variable="show_id" type="simple"/ -->
         </flow:call>
         <flow:call id="call_book" endpoint="selected_cinema" service-operation="book">
           <flow:input name="show_id" variable="show_id"/>

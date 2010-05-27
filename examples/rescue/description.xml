@@ -92,6 +92,14 @@
       <get in="injection-request"/>
       <post in="injection-request"/>
     </resource>
+    <resource relative="select">
+      <get in="*"/>
+      <post in="*"/>
+      <resource relative="random">
+        <get in="*"/>
+        <post in="*"/>
+      </resource>
+    </resource>
     <resource relative="groups">
 <!-- {{{ -->
       <get in="*" out="atom-feed"/>

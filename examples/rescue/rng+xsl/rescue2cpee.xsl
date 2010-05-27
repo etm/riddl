@@ -496,6 +496,13 @@ Recent changes:
       <xsl:attribute name="output">
         <xsl:text>result</xsl:text>
       </xsl:attribute>
+      <xsl:for-each select="child::flow:resource-id">
+        <xsl:text>endpoints[:</xsl:text>
+        <xsl:value-of select="@endpoint"/>
+        <xsl:text>] = result[:</xsl:text>
+        <xsl:value-of select="@name"/>
+        <xsl:text>]&#xa;</xsl:text>
+      </xsl:for-each>
       <xsl:for-each select="child::flow:output">
         <xsl:choose>
           <xsl:when test="@variable and @name">

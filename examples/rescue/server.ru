@@ -13,7 +13,7 @@ require 'pp'
 
 
 require 'lib/Rescue'
-require 'lib/Execution'
+require 'lib/Selection'
 require 'lib/Injection'
 
 use Rack::ShowStatus
@@ -35,6 +35,14 @@ run(
       on resource 'injection' do
         run Injection if method :get => 'injection-request'
         run Injection if method :post => 'injection-request'
+      end
+      on resource 'select' do
+        run Select if method :get => '*'
+        run Select if method :post => '*'
+        on resource 'random' do
+          run SelectByRandom if method :get => '*'
+          run SelectByRandom if method :post => '*'
+        end
       end
       on resource 'groups' do
         # Generating the ATOM feed with groups
