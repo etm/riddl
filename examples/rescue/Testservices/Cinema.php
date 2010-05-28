@@ -16,13 +16,24 @@
     if($date == "") $date = "not given";
     if($prefix == "") $prefix = "not given";
     $number_of_shows = rand(1, 5);
+    $uri = "";
+    if($prefix == "HW") {
+      $uri ="Arthouse/Hogwarts";
+    } elseif($prefix == "BLACK") {
+      $uri ="Arthouse/Blacks";
+    } elseif($prefix == "STATIC") {
+      $uri ="Static/Static";
+    } elseif($prefix == "TheDysk") {
+      $uri ="Dynamic/Dysk";
+    }
     $response = "<list_of_shows>\n";
     for($i = 0; $i < $number_of_shows; $i++) {
       $response .= "<show>";
-      $response .= "<cinema_uri>".$_SERVER['REQUEST_URI']."</cinema_uri>";
+      $response .= "<cinema_uri>http://localhost:9290/groups/CinemasClass/".$uri."</cinema_uri>";
       $response .= "<show_id>". $prefix ."_" . rand(1, 200). "</show_id>";
       $response .= "<title>". $title . "</title>";
       $response .= "<date>". $date . "</date>";
+      $response .= "<hall>". rand(1, 10) . "</hall>";
       $response .= "<time>". sprintf("%02d",rand(13, 23)) .":" . sprintf("%02d",rand(0, 3)*15) . "</time>";
       $response .= "</show>";
     }

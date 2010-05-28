@@ -499,9 +499,9 @@ Recent changes:
       <xsl:for-each select="child::flow:resource-id">
         <xsl:text>endpoints[:</xsl:text>
         <xsl:value-of select="@endpoint"/>
-        <xsl:text>] = result[:</xsl:text>
+        <xsl:text>] = result.value('</xsl:text>
         <xsl:value-of select="@name"/>
-        <xsl:text>]&#xa;</xsl:text>
+        <xsl:text>')&#xa;</xsl:text>
       </xsl:for-each>
       <xsl:for-each select="child::flow:output">
         <xsl:choose>
@@ -574,7 +574,8 @@ Recent changes:
           <xsl:element name="group">
             <xsl:element name="group_by"><xsl:text>&quot;</xsl:text><xsl:value-of select="@group-by"/><xsl:text>&quot;</xsl:text></xsl:element>
             <xsl:element name="uri_xpath"><xsl:text>&quot;</xsl:text><xsl:value-of select="child::flow:resource-id/@xpath"/><xsl:text>&quot;</xsl:text></xsl:element>
-            <xsl:element name="target_endpoint"><xsl:text>&quot;</xsl:text><xsl:value-of select="child::flow:resource-id/@endpoint"/><xsl:text>&quot;</xsl:text></xsl:element>
+            <!-- xsl:variable name="ep_name" select="child::flow:resource-id/@name"/>
+            <xsl:element name="{$ep_name}"><xsl:text>&quot;</xsl:text><xsl:value-of select="child::flow:resource-id/@endpoint"/><xsl:text>&quot;</xsl:text></xsl:element -->
           </xsl:element>
         </xsl:if>
         <xsl:if test="child::flow:constraint">
