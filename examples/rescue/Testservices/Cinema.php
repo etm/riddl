@@ -23,8 +23,10 @@
       $uri ="Arthouse/Blacks";
     } elseif($prefix == "STATIC") {
       $uri ="Static/Static";
-    } elseif($prefix == "TheDysk") {
-      $uri ="Dynamic/Dysk";
+    } elseif($prefix == "Dysk") {
+      $uri ="Dynamic/TheDysk";
+    } else {
+      $uri = $prefix;
     }
     $response = "<list_of_shows>\n";
     for($i = 0; $i < $number_of_shows; $i++) {

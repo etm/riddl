@@ -176,7 +176,6 @@
           <flow:output name="list" variable="list"/>
         </flow:call>
         <flow:manipulate id="merge_result" context="list, list_merge" output="list, m_list">
-          puts m_list
           xml = XML::Smart.string("&lt;list_of_shows/&gt;")
           list.each do |k,v|
             l = XML::Smart.string(v)

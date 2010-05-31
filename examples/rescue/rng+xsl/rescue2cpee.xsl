@@ -492,10 +492,6 @@ Recent changes:
 
   <xsl:template name="output">
     <!-- {{{ -->
-    <xsl:element name="manipulate">
-      <xsl:attribute name="output">
-        <xsl:text>result</xsl:text>
-      </xsl:attribute>
       <xsl:for-each select="child::flow:resource-id">
         <xsl:text>endpoints[:</xsl:text>
         <xsl:value-of select="@endpoint"/>
@@ -551,7 +547,6 @@ Recent changes:
         </xsl:choose>
         <xsl:text>&#xa;</xsl:text>
       </xsl:for-each>
-    </xsl:element>
     <!--  }}} -->
   </xsl:template>
 
@@ -574,8 +569,6 @@ Recent changes:
           <xsl:element name="group">
             <xsl:element name="group_by"><xsl:text>&quot;</xsl:text><xsl:value-of select="@group-by"/><xsl:text>&quot;</xsl:text></xsl:element>
             <xsl:element name="uri_xpath"><xsl:text>&quot;</xsl:text><xsl:value-of select="child::flow:resource-id/@xpath"/><xsl:text>&quot;</xsl:text></xsl:element>
-            <!-- xsl:variable name="ep_name" select="child::flow:resource-id/@name"/>
-            <xsl:element name="{$ep_name}"><xsl:text>&quot;</xsl:text><xsl:value-of select="child::flow:resource-id/@endpoint"/><xsl:text>&quot;</xsl:text></xsl:element -->
           </xsl:element>
         </xsl:if>
         <xsl:if test="child::flow:constraint">
@@ -586,7 +579,16 @@ Recent changes:
         </xsl:if>
       </xsl:element>
       <xsl:if test="child::flow:output">
-        <xsl:call-template name="output"/>
+        <xsl:element name="manipulate">
+          <xsl:attribute name="output">
+            <xsl:text>result</xsl:text>
+          </xsl:attribute>
+          <xsl:if test="@http-method">
+            <!-- setting hash for output with index of endpoint -->
+
+          </xsl:if>
+          <xsl:call-template name="output"/>
+        </xsl:element>
       </xsl:if>
     </xsl:element>
      <!-- }}} --> 

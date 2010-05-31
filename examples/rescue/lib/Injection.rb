@@ -158,13 +158,16 @@ class Injection < Riddl::Implementation
       puts "Variable named #{p.attributes['message-parameter']} could not be resolved" if not var
       true
     end
-    wf.find("//flow:execute/descendant::flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |p|
-      puts "OUTPUT: "
+    wf.find("//flow:execute/descendant::flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
+      call = output.parent
       res_object = call_node.find("ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).first
-        str = "#{call_node.parent.attributes['result']}[:#{p.attributes['message-parameter']}]" if not res_object.nil?
-        str = "@result_#{call_node.attributes['id']}[:#{p.attributes['message-parameter']}]" if res_object.nil?
-      p.attributes['message-parameter'] = str
-      puts "Message-Parameter: #{p.attributes['message-parameter']}"
+      str = res_object.nil? ? "@result_#{call_node.attributes['id']}" : "#{res_object.attributes['result']}"
+      str << "[:#{output.attributes['message-parameter']}]"
+      if call.attributes.include?('http-method')
+        str << "[endpoints[:#{call.attributes['endpoint']}].to_sym]"
+      end
+      output.attributes['message-parameter'] = "#{str}[:#{output.attributes['message-parameter']}]"
+      puts "OUTPUT: Message-Parameter #{output.attributes['message-parameter']} for #{call.attributes['id']}"
     end
 # }}}
     # Resolve messages input/output {{{ 
@@ -238,7 +241,7 @@ class Injection < Riddl::Implementation
     wf.find("//flow:#{op}/descendant::flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |p|
       res_object = call_node.find("ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).first
       if res_object 
-        p.attributes['message-parameter'] = "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"][:#{p.attributes['message-parameter']}]"
+        p.attributes['message-parameter'] = "#{call_node.parent.attributes['result']}[:#{p.attributes['message-parameter']}][:\"#{resource_path}\"]"
       end
     end
 # }}}
@@ -264,6 +267,7 @@ class Injection < Riddl::Implementation
       end
     else
       branch = parallel_node.add("parallel_branch")
+# TODO --- Manipulate has wrong parameter -> parameter-name instead resource-path      
       branch.add("manipulate", {"id"=>"result_for_#{call_node.attributes['id']}_service_#{resource_path.gsub("/","_").gsub(":","_")}"}, "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"] = Hash.new")
       branch.add(inject_service_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client, resource_path).children)
     end
