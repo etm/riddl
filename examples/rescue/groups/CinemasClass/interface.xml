@@ -177,7 +177,7 @@
         </flow:call>
         <flow:manipulate id="merge_result" context="list, list_merge" output="list, m_list">
           xml = XML::Smart.string("&lt;list_of_shows/&gt;")
-          list.each do |k,v|
+          list.each do |v|
             l = XML::Smart.string(v)
             xml.root.add(l.find("//show"))
           end
@@ -187,14 +187,14 @@
         <flow:call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="get" group-by="//show">
           <flow:resource-id xpath="cinema_uri" endpoint="selected_cinema" name="target"/>
           <flow:input name="data" variable="list_merge"/>
-          <flow:output name="movie_title" message-parameter="movie_title" type="simple"/>
+          <flow:output name="movie_title" message-parameter="movie_title"/>
           <flow:output name="hall" message-parameter="hall" type="simple"/>
-          <flow:output name="starting_time" message-parameter="starting_time" type="simple"/>
-          <flow:output name="show_id" variable="show_id" type="simple"/>
+          <flow:output name="starting_time" message-parameter="starting_time"/>
+          <flow:output name="show_id" variable="show_id"/>
         </flow:call>
         <flow:call id="call_book" endpoint="selected_cinema" service-operation="book">
           <flow:input name="show_id" variable="show_id"/>
-          <flow:output name="reservation_id" message-parameter="reservation_id" type="simple"/>
+          <flow:output name="reservation_id" message-parameter="reservation_id"/>
         </flow:call>
       </execute>
       <abort/>

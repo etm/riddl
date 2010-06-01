@@ -535,7 +535,7 @@ Recent changes:
                 <xsl:text>result.value('</xsl:text>
                 <xsl:value-of select="@name"/>
                 <xsl:text>')</xsl:text>
-                <xsl:if test="not(@type) or (@type != 'simple')">
+                <xsl:if test="@type = 'complex'">
                   <xsl:text>.read</xsl:text>
                 </xsl:if>
               </xsl:when>

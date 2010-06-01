@@ -10,6 +10,7 @@ class Injection < Riddl::Implementation
     Thread.new {
       Thread.pass; 
       begin
+        # TODO: neue Idee: Handler subsribed repo auf stoped -> repo injected ->
         stopped = false
         cpee = Riddl::Client.new(@p.value('cpee'))
         until stopped
@@ -24,7 +25,7 @@ class Injection < Riddl::Implementation
       end
     }
     Riddl::Parameter::Simple.new("injecting", "true")
-# }}}
+# }}} 
   end
 
   def analyze(position, cpee_uri, rescue_uri)
@@ -69,8 +70,6 @@ class Injection < Riddl::Implementation
         man_block.attributes['context'] = "@result_#{call_node.attributes['id']}"
         injected.attributes['result'] = "@result_#{call_node.attributes['id']}"
         call_node.add_after(man_block)
-#        man_block.find("child::*").delete_if! {true}
-        injected.add("manipulate", {"id"=>"create_result_for_#{call_node.attributes['id']}"}, "context :\"result_#{call_node.attributes['id']}\" => Hash.new")
       end
       # }}}
       status, resp = rescue_client.resource("operations/#{service_operation}").get  # {{{
@@ -78,17 +77,21 @@ class Injection < Riddl::Implementation
         puts "Error receiving wf at #{rescue_uri}/operations/#{service_operation}: #{status}"
         return
       end # }}}
-      injected.add(inject_class_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client).children)
+      wf = XML::Smart.string(resp[0].value.read)
+      injected.add(inject_class_level(wf, call_node, injected).children)
       # }}} 
     else 
       # Injection service-level {{{
       parallel = injected.add("parallel")
-      add_service(parallel, rescue_uri, call_node, cpee_client)
+      add_service(parallel, rescue_uri, call_node)
+      if parallel.children.length == 0
+        restart = false
+# TODO: PUT auf die CPEE in ERROR mit ID, Message und struct. Data
+      end  
       # }}} 
     end
     call_node.add_after(injected)
     # Set inject, description, position and re-start {{{
-      #puts description.root.dump
     status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("value", description.root.dump)]
     puts "=== setting description #{status}"
     status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")] if continue
@@ -105,15 +108,15 @@ class Injection < Riddl::Implementation
 
   # renaming id's, endpoints, context, ....
   # return controlflow of injected wf
-  def inject_class_level(wf, call_node, cpee_client)
+  def inject_class_level(wf, call_node, injected)
 # {{{
+    man_text = "context :\"result_#{call_node.attributes['id']}\" => RescueHash.new\n"
     # Change id's {{{
     wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+a.value}
     # }}}  
     # Change endpoints  {{{
     wf.find("//flow:endpoints/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      cpee_client.resource("/properties/values/endpoints/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+node.name.name),
-                                                                  Riddl::Parameter::Simple.new("value", node.text == nil ? "" : node.text)]
+      man_text << "endpoint :\"#{call_node.attributes['id']+'__'+node.name.name}\" => \"#{node.text.nil? ? node.text : ""}\"\n"
     end
     wf.find("//flow:call", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
       if a.attributes.include?('endpoint-type') and a.attributes['endpoint-type'] == "outside"
@@ -134,8 +137,7 @@ class Injection < Riddl::Implementation
     # }}} 
     # Change context-variables: variables, test, context (within manipulate) {{{
     wf.find("//flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      cpee_client.resource("/properties/values/context-variables/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+node.name.name),
-                                                                  Riddl::Parameter::Simple.new("value", node.text)] if node.name != "resource_path"
+      man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => \"#{node.text.nil? ? node.text : ""}\"\n"
     end
     wf.find("//@variable").each {|a| a.value = call_node.attributes['id']+'__'+a.value}
     wf.find("//@test").each {|a| a.value = call_node.attributes['id']+'__'+a.value}
@@ -158,14 +160,11 @@ class Injection < Riddl::Implementation
       puts "Variable named #{p.attributes['message-parameter']} could not be resolved" if not var
       true
     end
+    done = Hash.new
     wf.find("//flow:execute/descendant::flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
       call = output.parent
       res_object = call_node.find("ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).first
       str = res_object.nil? ? "@result_#{call_node.attributes['id']}" : "#{res_object.attributes['result']}"
-      str << "[:#{output.attributes['message-parameter']}]"
-      if call.attributes.include?('http-method')
-        str << "[endpoints[:#{call.attributes['endpoint']}].to_sym]"
-      end
       output.attributes['message-parameter'] = "#{str}[:#{output.attributes['message-parameter']}]"
       puts "OUTPUT: Message-Parameter #{output.attributes['message-parameter']} for #{call.attributes['id']}"
     end
@@ -184,7 +183,6 @@ class Injection < Riddl::Implementation
         if var
           p.add_after(var)
           man_block= call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-#          man_block.text = "\n@#{var.attributes['variable']} = #{man_block.attributes['output']}[:#{var.attributes['message-parameter']}]"+man_block.text           
         end
       end
       true
@@ -198,16 +196,16 @@ class Injection < Riddl::Implementation
     end
     # }}}
     doc = wf.find("//flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
-#puts doc
-#puts XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl")))
+    injected.add("manipulate", {"id"=>"create_result_for_#{call_node.attributes['id']}"}, man_text)
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root
 # }}}
   end
 
   # renaming id's, endpoints, context, ....
   # return controlflow of injected wf
-  def inject_service_level(wf, call_node, cpee_client, resource_path)
+  def inject_service_level(wf, call_node, resource_path, branch)
 # {{{
+    man_text = "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"] = RescueHash.new\n"
     index = resource_path.gsub("/","_").gsub(":","_")
     op = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','') 
     puts " == Injecting operation #{op} of service #{resource_path}"
@@ -216,8 +214,7 @@ class Injection < Riddl::Implementation
     # }}}   
     # Change endpoints  {{{
     wf.find("//flow:#{op}/flow:endpoints/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      cpee_client.resource("/properties/values/endpoints/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+index+'__'+node.name.name),
-                                                                  Riddl::Parameter::Simple.new("value", node.text == nil ? "" : node.text)] 
+      man_text << "endpoint :\"#{ call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.nil? ? '' : node.text}\"\n"
     end
     wf.find("//@endpoint").each do |a|
       a.value = call_node.attributes['id']+'__'+index+'__'+a.value
@@ -225,8 +222,7 @@ class Injection < Riddl::Implementation
     # }}} 
     # Change context-variables: variables, test {{{ 
     wf.find("//flow:#{op}/flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      cpee_client.resource("/properties/values/context-variables/").post [Riddl::Parameter::Simple.new("key", call_node.attributes['id']+'__'+index+'__'+node.name.name),
-                                                                  Riddl::Parameter::Simple.new("value", node.text)]
+      man_text << "context :\"#{ call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.nil? ? '' : node.text}\"\n"
     end
     wf.find("//@variable").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value}
     wf.find("//@test").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value}
@@ -241,7 +237,7 @@ class Injection < Riddl::Implementation
     wf.find("//flow:#{op}/descendant::flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |p|
       res_object = call_node.find("ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).first
       if res_object 
-        p.attributes['message-parameter'] = "#{call_node.parent.attributes['result']}[:#{p.attributes['message-parameter']}][:\"#{resource_path}\"]"
+        p.attributes['message-parameter'] = "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"][:#{p.attributes['message-parameter']}]"
       end
     end
 # }}}
@@ -249,13 +245,12 @@ class Injection < Riddl::Implementation
     # The new doc seem's to have lost all namespace-information during document creation
     ns = doc.root.namespaces.add("flow","http://rescue.org/ns/controlflow/0.2")
     doc.find("//*").each { |node| node.namespace = ns }
-#puts doc
-#puts XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl")))
+    branch.add("manipulate", {"id"=>"result_for_#{call_node.attributes['id']}_service_#{resource_path.gsub("/","_").gsub(":","_")}"}, man_text)
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root
 #  }}}
   end
 
-  def add_service(parallel_node, resource_path, call_node, cpee_client)
+  def add_service(parallel_node, resource_path, call_node)
     # {{{
     rescue_client = Riddl::Client.new(resource_path)
     status, resp = rescue_client.get
@@ -263,13 +258,11 @@ class Injection < Riddl::Implementation
     if resp[0].name == "atom-feed"
       feed = XML::Smart.string(resp[0].value.read)
       feed.find("//a:entry/a:link", {"a"=>"http://www.w3.org/2005/Atom"}).each do |link|
-        add_service(parallel_node, "#{resource_path}/#{link.text}", call_node, cpee_client)
+        add_service(parallel_node, "#{resource_path}/#{link.text}", call_node)
       end
     else
       branch = parallel_node.add("parallel_branch")
-# TODO --- Manipulate has wrong parameter -> parameter-name instead resource-path      
-      branch.add("manipulate", {"id"=>"result_for_#{call_node.attributes['id']}_service_#{resource_path.gsub("/","_").gsub(":","_")}"}, "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"] = Hash.new")
-      branch.add(inject_service_level(XML::Smart.string(resp[0].value.read), call_node, cpee_client, resource_path).children)
+      branch.add(inject_service_level(XML::Smart.string(resp[0].value.read), call_node, resource_path, branch).children)
     end
     # }}} 
   end

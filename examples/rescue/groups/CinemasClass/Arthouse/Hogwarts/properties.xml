@@ -17,7 +17,7 @@
           <input name="title" message-parameter="title"/>
           <input name="date" message-parameter="date"/>
           <input name="pre" variable="prefix"/>
-          <output message-parameter="list" name="out"/>
+          <output message-parameter="list" name="out" type="complex"/>
         </call>
       </execute>
       <compensate/>
@@ -35,7 +35,7 @@
       <execute>
         <call id="book" endpoint="ep" http-method="post">
           <input name="showID" message-parameter="show_id"/>
-          <output message-parameter="reservation_id" name="resID" type="simple"/>
+          <output message-parameter="reservation_id" name="resID"/>
         </call>
       </execute>
       <compensate/>

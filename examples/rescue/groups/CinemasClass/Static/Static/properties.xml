@@ -13,7 +13,7 @@
       </context-variables>
       <execute>
         <call id="find" endpoint="ep" http-method="get">
-          <output message-parameter="list" name=""/>
+          <output message-parameter="list" name="" type="complex"/>
         </call>
       </execute>
       <compensate/>
@@ -31,7 +31,7 @@
       <execute>
         <call id="book" endpoint="ep" http-method="post">
           <input name="showID" message-parameter="show_id"/>
-          <output message-parameter="reservation_id" name="resID" type="simple"/>
+          <output message-parameter="reservation_id" name="resID"/>
         </call>
       </execute>
       <compensate/>
