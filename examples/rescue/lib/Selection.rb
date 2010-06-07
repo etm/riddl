@@ -13,10 +13,10 @@ class SelectByRandom < Riddl::Implementation
       show = elements[num]
       puts "=== SELECTED SHOW:"
       puts show.dump
-      title = ""
-      show_id = ""
-      starting_time =""
-      hall = ""
+      title = "n.a."
+      show_id = "n.a."
+      starting_time ="n.a."
+      hall = "n.a."
       show.children.each do |e| 
         title = e.text if e.name.name == "title" 
         show_id = e.text if e.name.name == "show_id" 

@@ -10,11 +10,26 @@
         <ep>http://www.pri.univie.ac.at/~ralph/Testservices/static.xml</ep>
       </endpoints>
       <context-variables>
+        <out/>
       </context-variables>
       <execute>
         <call id="find" endpoint="ep" http-method="get">
-          <output message-parameter="list" name="" type="complex"/>
+          <output variable="out" name="" type="complex"/>
         </call>
+        <manipulate id="filter">
+          <variable context="out" local="result"/>
+          <variable input-parameter="title" local="title"/>
+          <variable output-parameter="list" local="output"/>
+          list = XML::Smart.string(result)
+          list.find("//show").delete_if! do |s|
+            s.find(&quot;child::title&quot;).first.text != title
+          end
+          puts &quot;=&quot;*60
+          output = list.root.dump
+          puts output
+          puts list.root.dump
+          puts &quot;=&quot;*60
+        </manipulate>
       </execute>
       <compensate/>
       <undo/>

@@ -161,10 +161,10 @@
     <operation name="search_and_book" short="search for shows, select show and book tickets" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
       <context-variables>
-        <show_id>BAL_4711</show_id>
+        <show_id/>
         <list/>
         <res/>
-        <list_merge>''</list_merge>
+        <list_merge/>
       </context-variables>
       <endpoints>
         <selected_cinema/>
@@ -175,14 +175,20 @@
           <flow:input name="date" message-parameter="date"/>
           <flow:output name="list" variable="list"/>
         </flow:call>
-        <flow:manipulate id="merge_result" context="list, list_merge" output="list, m_list">
-          xml = XML::Smart.string("&lt;list_of_shows/&gt;")
-          list.each do |v|
-            l = XML::Smart.string(v)
-            xml.root.add(l.find("//show"))
+        <flow:manipulate id="merge_result">
+          <variable context="list" local="list"/>
+          <variable context="list_merge" local="m_list"/>
+          if list.class == Array
+            xml = XML::Smart.string("&lt;list_of_shows/&gt;")
+            list.each do |v|
+              l = XML::Smart.string(v)
+              xml.root.add(l.find("//show"))
+            end
+            m_list = xml.root.dump
+          else
+            puts list.class
+            m_list = list
           end
-          m_list.clear
-          m_list &lt;&lt; xml.to_s
         </flow:manipulate>
         <flow:call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="get" group-by="//show">
           <flow:resource-id xpath="cinema_uri" endpoint="selected_cinema" name="target"/>

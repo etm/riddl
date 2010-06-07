@@ -27,8 +27,26 @@
   <show>
     <cinema_uri>http://localhost:9290/groups/CinemasClass/Static/Static</cinema_uri>
     <show_id>STATIC_78</show_id>
-    <title>Going Postal</title>
+    <title>Going Postal 2</title>
     <time>18:00</time>
+  </show>
+  <show>
+    <cinema_uri>http://localhost:9290/groups/CinemasClass/Static/Static</cinema_uri>
+    <show_id>STATIC_199</show_id>
+    <title>Going Postal 2</title>
+    <time>22:45</time>
+  </show>
+  <show>
+    <cinema_uri>http://localhost:9290/groups/CinemasClass/Static/Static</cinema_uri>
+    <show_id>STATIC_264</show_id>
+    <title>Going Postal 2</title>
+    <time>21:45</time>
+  </show>
+  <show>
+    <cinema_uri>http://localhost:9290/groups/CinemasClass/Static/Static</cinema_uri>
+    <show_id>STATIC_349</show_id>
+    <title>Going Postal 2</title>
+    <time>15:30</time>
   </show>
 </list_of_shows>
 
