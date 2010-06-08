@@ -178,7 +178,7 @@
         <flow:manipulate id="merge_result">
           <variable context="list" local="list"/>
           <variable context="list_merge" local="m_list"/>
-          if list.class == Array
+          if list.class = Array
             xml = XML::Smart.string("&lt;list_of_shows/&gt;")
             list.each do |v|
               l = XML::Smart.string(v)

@@ -3,6 +3,10 @@
 <service-description xmlns="http://rescue.org/ns/service/0.2"
                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <properties>
+    <adress>
+      <zip>7654</zip>
+      <city>Ankh-Morpork</city>
+    </adress>
   </properties>
   <operations xmlns="http://rescue.org/ns/controlflow/0.2">
     <search>

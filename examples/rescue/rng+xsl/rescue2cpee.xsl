@@ -402,6 +402,7 @@ Recent changes:
     <xsl:element name="call">
       <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
       <xsl:attribute name="endpoint"><xsl:value-of select="@endpoint"/></xsl:attribute>
+      <xsl:attribute name="oid"><xsl:value-of select="@oid"/></xsl:attribute>
       <xsl:element name="parameters">
         <xsl:if test="@http-method">
           <xsl:element name="method"><xsl:value-of select="@http-method"/></xsl:element>
