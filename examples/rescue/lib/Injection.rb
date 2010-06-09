@@ -272,7 +272,7 @@ class Injection < Riddl::Implementation
     prop = call_node.find("ancestor::cpee:injected", {"cpee" => "http://cpee.org/ns/description/1.0"}).last.attributes['properties']
     prop_code = ""
     prop_code << "#{prop}[:\"#{call_node.attributes['oid']}\"][:\"#{resource_path}\"] = RescueHash.new\n"
-
+    prop_code << fill_properties(wf.find("//p:properties", {"p"=>"http://rescue.org/ns/properties/0.2"}).first, "#{prop}[:\"#{call_node.attributes['oid']}\"][:\"#{resource_path}\"]")
     branch.add("manipulate", {"id"=>"create_properties_for_#{call_node.attributes['id']}_service_#{index}"}, prop_code)  #}}}
     doc = wf.find("//flow:#{op}/flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
     # The new doc seem's to have lost all namespace-information during document creation
@@ -306,6 +306,19 @@ class Injection < Riddl::Implementation
       puts "==check_properties=="*5
       true
     # }}}
+  end
+
+  def fill_properties(node, index)
+    code = ""
+    node.find("child::*").each do |e|
+      if e.text.strip == ""
+        code << "#{index}[:\"#{e.name.name}\"] = RescueHash.new\n"
+        code << fill_properties(e, "#{index}[:\"#{e.name.name}\"]")
+      else
+        code << "#{index}[:\"#{e.name.name}\"] = \"#{e.text}\"\n"
+      end
+    end
+    code
   end
 
 end

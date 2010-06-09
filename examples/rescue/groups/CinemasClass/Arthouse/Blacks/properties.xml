@@ -2,7 +2,7 @@
 
 <service-description xmlns="http://rescue.org/ns/service/0.2"
                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-  <properties>
+  <properties xmlns="http://rescue.org/ns/properties/0.2">
     <adress>
       <zip>34567</zip>
       <city>HarryP</city>
