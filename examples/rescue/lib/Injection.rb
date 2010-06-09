@@ -37,7 +37,7 @@ class Injection < Riddl::Implementation
       rescue_client = Riddl::Client.new(rescue_uri)
       injected = nil
 
-    # Get description# {{{
+    # Get description {{{
     status, resp = cpee_client.resource("/properties/values/description").get
     if status != 200
       puts "Error receiving description at #{cpee_uri}/properties/values/description: #{status}"
@@ -78,6 +78,8 @@ class Injection < Riddl::Implementation
         return
       end # }}}
       wf = XML::Smart.string(resp[0].value.read)
+      call_node.find("child::cpee:constraint", {"cpee" => "http://cpee.org/ns/description/1.0"}).each {|c| puts c.dump}
+      injected.add(call_node.find("child::cpee:constraint", {"cpee" => "http://cpee.org/ns/description/1.0"}), XML::Smart::Dom::Element::COPY)
       injected.add(inject_class_level(wf, call_node, injected).children)
       man_block.attributes['properties'] = "#{injected.attributes['properties']}" if man_block
       # }}} 
@@ -86,9 +88,10 @@ class Injection < Riddl::Implementation
       parallel = injected.add("parallel")
       prop = call_node.find("ancestor::cpee:injected", {"cpee" => "http://cpee.org/ns/description/1.0"}).last.attributes['properties']
       injected.attributes['properties'] = "#{prop}[:\"#{call_node.attributes['oid']}\"]"
-      add_service(parallel, rescue_uri, call_node)
+      add_service(parallel, rescue_client, call_node, cpee_client, "")
       if parallel.children.length == 0
         restart = false
+        puts "No fitting service found"
 # TODO: PUT auf die CPEE in ERROR mit ID, Message und struct. Data
       end  
       # }}} 
@@ -124,7 +127,7 @@ class Injection < Riddl::Implementation
       puts $!
       puts e.backtrace
     end
-# }}}
+# }} }
   end
 
   # renaming id's, endpoints, context, ....
@@ -268,7 +271,7 @@ class Injection < Riddl::Implementation
       res_object = call_node.find("ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).last
       p.attributes['message-parameter'] = "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"][:#{p.attributes['message-parameter']}]" if not res_object.nil?
     end # }}}
-     # Create and fill properties-object {{{
+     # Create and fill properties-object {{{ 
     prop = call_node.find("ancestor::cpee:injected", {"cpee" => "http://cpee.org/ns/description/1.0"}).last.attributes['properties']
     prop_code = ""
     prop_code << "#{prop}[:\"#{call_node.attributes['oid']}\"][:\"#{resource_path}\"] = RescueHash.new\n"
@@ -283,32 +286,49 @@ class Injection < Riddl::Implementation
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root # }}}
   end
 
-  def add_service(parallel_node, resource_path, call_node)  # {{{
-    rescue_client = Riddl::Client.new(resource_path)
-    status, resp = rescue_client.get
+  def add_service(parallel_node, rescue_client, call_node, cpee_client, resource_path)  # {{{
+    status, resp = rescue_client.resource(resource_path).get
     return if status != 200
     if resp[0].name == "atom-feed"
       feed = XML::Smart.string(resp[0].value.read)
       feed.find("//a:entry/a:link", {"a"=>"http://www.w3.org/2005/Atom"}).each do |link|
-        add_service(parallel_node, "#{resource_path}/#{link.text}", call_node)
+        add_service(parallel_node, rescue_client, call_node, cpee_client, "#{resource_path}/#{link.text}")
       end
     else
-      branch = parallel_node.add("parallel_branch")
       wf = XML::Smart.string(resp[0].value.read)
-      branch.add(inject_service_level(wf, call_node, resource_path, branch).children) if check_properties(wf, call_node)
-    end # }}} 
+      if check_properties(wf, call_node, cpee_client)
+        branch = parallel_node.add("parallel_branch")
+        branch.add(inject_service_level(wf, call_node, "#{rescue_client.instance_variable_get("@base")}/#{resource_path}", branch).children)
+      end
+    end # }}}  
   end
   
-  def check_properties(wf, call_node)
-    # {{{
+  def check_properties(wf, call_node, cpee_client)    # {{{
       puts "==check_properties=="*5
-      puts wf
+      call_node.find("ancestor::cpee:injected/cpee:constraint", {"cpee" => "http://cpee.org/ns/description/1.0"}).each do |con|
+        xpath = ""
+        value = con.attributes.include?('value') ? con.attributes['value'] : ""
+        if con.attributes.include?('variable')
+          status, resp = cpee_client.resource("properties/values/context-variables/#{con.attributes['variable']}").get
+          if status != 200
+            puts "Could not find variable named #{con.attributes['variable']}"
+            return false
+          end
+          value = resp[0].value
+        end
+        con.attributes['xpath'].split('/').each {|p| xpath << "p:#{p}/"}
+        xpath.chop! # remove trailing '/'
+        puts "===== XPATH: //p:properties/#{xpath}"
+        puts "===== COMP: #{con.attributes['comparator']}"
+        puts "===== VALUE: #{value}"
+        puts "===== RESULT: #{wf.find("//p:properties/#{xpath}", {"p"=>"http://rescue.org/ns/properties/0.2"}).first.text.send(con.attributes['comparator'], value)}"
+        return false if not wf.find("//p:properties/#{xpath}", {"p"=>"http://rescue.org/ns/properties/0.2"}).first.text.send(con.attributes['comparator'], value)
+      end
       puts "==check_properties=="*5
       true
-    # }}}
-  end
+  end  # }}}
 
-  def fill_properties(node, index)
+  def fill_properties(node, index) #{{{
     code = ""
     node.find("child::*").each do |e|
       if e.text.strip == ""
@@ -319,6 +339,6 @@ class Injection < Riddl::Implementation
       end
     end
     code
-  end
+  end #}}}
 
 end
