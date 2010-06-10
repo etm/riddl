@@ -330,24 +330,6 @@ Recent changes:
     <!-- }}} -->
   </xsl:template>
 
-  <xsl:template name="constraint">
-    <!-- {{{ --> 
-    <xsl:element name="constraint">
-      <xsl:for-each select="child::flow:constraint">
-        <xsl:variable name="name" select="generate-id()"/>
-        <xsl:element name="{$name}">
-          <xsl:for-each select="@*[name() != 'id' and name() != 'endpoint' and name() != 'serviceoperation' and name() != 'repository' and name() != 'injection' and name() != 'method']">
-            <xsl:variable name="qname" select="name()"/>
-            <xsl:element name="{$qname}">
-              <xsl:value-of select="."/>
-            </xsl:element>
-          </xsl:for-each>
-        </xsl:element>
-      </xsl:for-each>
-    </xsl:element>
-    <!-- }}} -->
-  </xsl:template>
-
   <xsl:template name="input">
     <!-- {{{ -->
     <xsl:element name="parameters">
@@ -404,6 +386,9 @@ Recent changes:
       <xsl:attribute name="endpoint"><xsl:value-of select="@endpoint"/></xsl:attribute>
       <xsl:attribute name="oid"><xsl:value-of select="@oid"/></xsl:attribute>
       <xsl:element name="parameters">
+        <xsl:if test="@soap">
+          <xsl:element name="soap_operation"><xsl:value-of select="@soap"/></xsl:element>
+        </xsl:if>
         <xsl:if test="@http-method">
           <xsl:element name="method"><xsl:value-of select="@http-method"/></xsl:element>
         </xsl:if>
