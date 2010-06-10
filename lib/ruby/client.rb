@@ -19,6 +19,7 @@ module Riddl
         @wrapper.load_necessary_handlers!
       end
     end
+    attr_reader :base
 
     def self::location(base)
       new(base)
@@ -57,6 +58,7 @@ module Riddl
         @rpath = @rpath == '/' ? '' : @rpath 
         #}}}
       end
+      attr_reader :rpath
 
       def get(parameters = [])
         exec_request('GET',parameters)
@@ -116,7 +118,7 @@ module Riddl
         qparams = []
         parameters.delete_if do |p|
           if p.class == Riddl::Parameter::Simple && p.type == :query
-            qparams << HttpGenerator::escape(p.name) + '=' + HttpGenerator::escape(p.value)
+            qparams << HttpGenerator::escape(p.name) + (p.value.nil? ? '' : '=' + HttpGenerator::escape(p.value))
             true
           else
             false
