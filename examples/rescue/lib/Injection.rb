@@ -74,7 +74,8 @@ class Injection < Riddl::Implementation
         call_node.add_after(man_block)
       end
       # }}}
-      status, resp = rescue_client.resource("operations/#{service_operation}").get  # {{{
+      puts rescue_client.inspect
+      status, resp = rescue_client.resource("operations/#{service_operation}").get [] # {{{
       if status != 200
         puts "Error receiving wf at #{rescue_uri}/operations/#{service_operation}: #{status}"
         return
@@ -166,6 +167,9 @@ class Injection < Riddl::Implementation
         a.attributes['endpoint'] = a.attributes['endpoint'] == "resource_path" ? call_node.attributes['endpoint'] : call_node.attributes['id']+'__'+a.attributes['endpoint']
       end
     end
+    wf.find("//flow:call/@wsdl", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
+      a.value = call_node.attributes['id']+'__'+a.value
+    end
     wf.find("//flow:call/flow:resource-id", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
       if a.attributes.include?('endpoint-type') and a.attributes['endpoint-type'] == "outside"
         ep = call_node.find("child::cpee:parameters/cpee:additional_endpoints/cpee:#{a.attributes['endpoint']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text
@@ -176,7 +180,11 @@ class Injection < Riddl::Implementation
     end  # }}} 
     # Change context-variables: variables, test, context (within manipulate) {{{
     wf.find("//flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => \"#{node.text.nil? ? node.text : ""}\"\n"
+      if node.attributes.include?('class')
+        man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => #{node.attributes['class']}\n"
+      else
+        man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => \"#{node.text.nil? ? node.text : ""}\"\n"
+      end
     end
     wf.find("//@variable").each {|a| a.value = "@#{call_node.attributes['id']}__#{a.value}"} 
     wf.find("//@test").each {|a| a.value = "@#{call_node.attributes['id']}__#{a.value}"}
@@ -246,9 +254,16 @@ class Injection < Riddl::Implementation
     wf.find("//@endpoint").each do |a|
       a.value = call_node.attributes['id']+'__'+index+'__'+a.value
     end # }}} 
+    wf.find("//flow:call/@wsdl", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
+      a.value = call_node.attributes['id']+'__'+index+'__'+a.value
+    end
     # Change context-variables: variables, test {{{ 
     wf.find("//flow:#{op}/flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.nil? ? '' : node.text}\"\n"
+      if node.attributes.include?('class')
+        man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => #{node.attributes['class']}\n" 
+      else
+        man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.nil? ? '' : node.text}\"\n"
+      end
     end
     wf.find("//flow:#{op}/descendant::flow:*/@variable",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "@#{call_node.attributes['id']}__#{index}__#{a.value}"}
     wf.find("//flow:#{op}/descendant::flow:*/@test",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "@#{call_node.attributes['id']}__#{index}__#{a.value}"}
@@ -284,7 +299,13 @@ class Injection < Riddl::Implementation
     ns = doc.root.namespaces.add("flow","http://rescue.org/ns/controlflow/0.2")
     doc.find("//*").each { |node| node.namespace = ns }
     branch.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}_service_#{index}"}, man_text)
-
+=begin
+    puts "="*100
+    puts branch.dump
+    puts "="*100
+    puts XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root.dump 
+    puts "="*100
+=end
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root # }}}
   end
 

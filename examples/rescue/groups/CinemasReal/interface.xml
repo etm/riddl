@@ -178,17 +178,22 @@
         <flow:manipulate id="merge_result">
           <variable context="list" local="list"/>
           <variable context="list_merge" local="m_list"/>
+          <variable input-parameter="title" local="title"/>
+          <variable input-parameter="date" local="date"/>
+          xml = XML::Smart.string("&lt;list_of_shows/&gt;")
           if list.class == Array
-            xml = XML::Smart.string("&lt;list_of_shows/&gt;")
             list.each do |v|
               l = XML::Smart.string(v)
               xml.root.add(l.find("//show"))
             end
-            m_list = xml.root.dump
+          elsif list.class == String
+            l = XML::Smart.string(list)
+            xml.root.add(l.find("//show"))
           else
-            puts list.class
-            m_list = list
+            raise "Unecpected class of return-value - class: #{list.class}"
           end
+          raise "No fitting shows found for #{title} in #{date}" if xml.root.children.length == 0
+          m_list = xml.root.dump
         </flow:manipulate>
         <flow:call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="get" group-by="//show">
           <flow:resource-id xpath="cinema_uri" endpoint="selected_cinema" name="target"/>
