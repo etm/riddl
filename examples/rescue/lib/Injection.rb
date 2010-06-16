@@ -1,4 +1,6 @@
 require '../../lib/ruby/client'
+require 'soap/wsdlDriver'
+
 class Injection < Riddl::Implementation
   def response
     # {{{
@@ -72,14 +74,15 @@ class Injection < Riddl::Implementation
         call_node.add_after(man_block)
       end
       # }}}
-      status, resp = rescue_client.resource("operations/#{service_operation}").get  # {{{
+      puts rescue_client.inspect
+      status, resp = rescue_client.resource("operations/#{service_operation}").get [] # {{{
       if status != 200
         puts "Error receiving wf at #{rescue_uri}/operations/#{service_operation}: #{status}"
         return
       end # }}}
       wf = XML::Smart.string(resp[0].value.read)
-      call_node.find("child::cpee:constraint", {"cpee" => "http://cpee.org/ns/description/1.0"}).each {|c| puts c.dump}
-      injected.add(call_node.find("child::cpee:constraint", {"cpee" => "http://cpee.org/ns/description/1.0"}), XML::Smart::Dom::Element::COPY)
+      call_node.find("child::cpee:constraints", {"cpee" => "http://cpee.org/ns/description/1.0"}).each {|c| puts c.dump}
+      injected.add(call_node.find("child::cpee:constraints", {"cpee" => "http://cpee.org/ns/description/1.0"}), XML::Smart::Dom::Element::COPY)
       injected.add(inject_class_level(wf, call_node, injected).children)
       man_block.attributes['properties'] = "#{injected.attributes['properties']}" if man_block
       # }}} 
@@ -127,7 +130,7 @@ class Injection < Riddl::Implementation
       puts $!
       puts e.backtrace
     end
-# }} }
+# }}}
   end
 
   # renaming id's, endpoints, context, ....
@@ -164,6 +167,9 @@ class Injection < Riddl::Implementation
         a.attributes['endpoint'] = a.attributes['endpoint'] == "resource_path" ? call_node.attributes['endpoint'] : call_node.attributes['id']+'__'+a.attributes['endpoint']
       end
     end
+    wf.find("//flow:call/@wsdl", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
+      a.value = call_node.attributes['id']+'__'+a.value
+    end
     wf.find("//flow:call/flow:resource-id", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
       if a.attributes.include?('endpoint-type') and a.attributes['endpoint-type'] == "outside"
         ep = call_node.find("child::cpee:parameters/cpee:additional_endpoints/cpee:#{a.attributes['endpoint']}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text
@@ -174,7 +180,11 @@ class Injection < Riddl::Implementation
     end  # }}} 
     # Change context-variables: variables, test, context (within manipulate) {{{
     wf.find("//flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => \"#{node.text.nil? ? node.text : ""}\"\n"
+      if node.attributes.include?('class')
+        man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => #{node.attributes['class']}\n"
+      else
+        man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => \"#{node.text.nil? ? node.text : ""}\"\n"
+      end
     end
     wf.find("//@variable").each {|a| a.value = "@#{call_node.attributes['id']}__#{a.value}"} 
     wf.find("//@test").each {|a| a.value = "@#{call_node.attributes['id']}__#{a.value}"}
@@ -244,9 +254,16 @@ class Injection < Riddl::Implementation
     wf.find("//@endpoint").each do |a|
       a.value = call_node.attributes['id']+'__'+index+'__'+a.value
     end # }}} 
+    wf.find("//flow:call/@wsdl", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
+      a.value = call_node.attributes['id']+'__'+index+'__'+a.value
+    end
     # Change context-variables: variables, test {{{ 
     wf.find("//flow:#{op}/flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.nil? ? '' : node.text}\"\n"
+      if node.attributes.include?('class')
+        man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => #{node.attributes['class']}\n" 
+      else
+        man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.nil? ? '' : node.text}\"\n"
+      end
     end
     wf.find("//flow:#{op}/descendant::flow:*/@variable",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "@#{call_node.attributes['id']}__#{index}__#{a.value}"}
     wf.find("//flow:#{op}/descendant::flow:*/@test",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "@#{call_node.attributes['id']}__#{index}__#{a.value}"}
@@ -282,7 +299,13 @@ class Injection < Riddl::Implementation
     ns = doc.root.namespaces.add("flow","http://rescue.org/ns/controlflow/0.2")
     doc.find("//*").each { |node| node.namespace = ns }
     branch.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}_service_#{index}"}, man_text)
-
+=begin
+    puts "="*100
+    puts branch.dump
+    puts "="*100
+    puts XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root.dump 
+    puts "="*100
+=end
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root # }}}
   end
 
@@ -296,37 +319,67 @@ class Injection < Riddl::Implementation
       end
     else
       wf = XML::Smart.string(resp[0].value.read)
-      if check_properties(wf, call_node, cpee_client)
+      if check_constraints(wf, call_node, cpee_client)
         branch = parallel_node.add("parallel_branch")
         branch.add(inject_service_level(wf, call_node, "#{rescue_client.instance_variable_get("@base")}/#{resource_path}", branch).children)
       end
     end # }}}  
   end
   
-  def check_properties(wf, call_node, cpee_client)    # {{{
-      puts "==check_properties=="*5
-      call_node.find("ancestor::cpee:injected/cpee:constraint", {"cpee" => "http://cpee.org/ns/description/1.0"}).each do |con|
-        xpath = ""
-        value = con.attributes.include?('value') ? con.attributes['value'] : ""
-        if con.attributes.include?('variable')
-          status, resp = cpee_client.resource("properties/values/context-variables/#{con.attributes['variable']}").get
-          if status != 200
-            puts "Could not find variable named #{con.attributes['variable']}"
-            return false
-          end
-          value = resp[0].value
+  def check_constraints(wf, call_node, cpee_client)    # {{{
+      puts "==check_constraints=="*5
+      call_node.find("ancestor::cpee:injected/cpee:constraints", {"cpee" => "http://cpee.org/ns/description/1.0"}).each do |cons|
+        bool = true
+        cons.children.each do |child|
+          bool = check_group(child, cpee_client, wf) if child.name.name == "group"
+          bool = check_constraint(child, cpee_client, wf) if child.name.name == "constraint"
+          puts "======Constraints: #{bool}"
+          return false if bool == false
         end
-        con.attributes['xpath'].split('/').each {|p| xpath << "p:#{p}/"}
-        xpath.chop! # remove trailing '/'
-        puts "===== XPATH: //p:properties/#{xpath}"
-        puts "===== COMP: #{con.attributes['comparator']}"
-        puts "===== VALUE: #{value}"
-        puts "===== RESULT: #{wf.find("//p:properties/#{xpath}", {"p"=>"http://rescue.org/ns/properties/0.2"}).first.text.send(con.attributes['comparator'], value)}"
-        return false if not wf.find("//p:properties/#{xpath}", {"p"=>"http://rescue.org/ns/properties/0.2"}).first.text.send(con.attributes['comparator'], value)
       end
-      puts "==check_properties=="*5
+      puts "==check_constraints=="*5
       true
   end  # }}}
+
+  def check_group(group, cpee_client, wf)# {{{
+    bool = true
+    connector = group.attributes['connector']
+    group.children.each do |child|
+      bool = check_constraint(child, cpee_client, wf) if child.name.name == "constraint"
+      bool = check_group(child, cpee_client) if child.name.name == "group"
+      return false if connector == "and" and bool == false
+      return true if connector =="or" and bool == true
+    end
+    bool
+  end# }}}
+
+  def is_a_number?(s)
+    s.to_s.match(/\A[+-]?\d+?(\.\d+)?\Z/) == nil ? false : true 
+  end
+
+  def check_constraint(con, cpee_client, wf)
+    xpath = ""
+    value1 = con.attributes.include?('value') ? con.attributes['value'] : ""
+    if con.attributes.include?('variable')
+      status, resp = cpee_client.resource("properties/values/context-variables/#{con.attributes['variable']}").get
+      if status != 200
+        puts "Could not find variable named #{con.attributes['variable']}"
+        return false
+      end
+      value1 = resp[0].value
+    end
+    con.attributes['xpath'].split('/').each {|p| xpath << "p:#{p}/"}
+    xpath.chop! # remove trailing '/'
+    value1 = value1.to_f if is_a_number?(value1.strip)
+    value2 =  wf.find("//p:properties/#{xpath}", {"p"=>"http://rescue.org/ns/properties/0.2"}).first.text
+    value2 = value2.to_f if is_a_number?(value2.strip)
+    puts "===== XPATH: //p:properties/#{xpath}"
+    puts "===== COMP: #{con.attributes['comparator']}"
+    puts "===== VALUE1: #{value1} (#{value1.class})"
+    puts "===== VALUE2: #{value2} (#{value2.class})"
+    puts "===== RESULT: #{value2.send(con.attributes['comparator'], value1)}"
+    value2.send(con.attributes['comparator'], value1)
+  end
 
   def fill_properties(node, index) #{{{
     code = ""
