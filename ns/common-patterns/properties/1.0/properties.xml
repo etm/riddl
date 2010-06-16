@@ -6,13 +6,13 @@
         <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
           <start>
             <choice>
-              <element name="values">
-                <ref name="value-list"/>
-              </element>
-              <element name="content">
+              <element name="complex">
                 <ref name="content"/>
               </element>
-              <element name="value">
+              <element name="arbitrary">
+                <ref name="content"/>
+              </element>
+              <element name="simple">
                 <ref name="value"/>
               </element>
               <element name="not-existing">
@@ -25,21 +25,9 @@
             <text/>
           </define>  
                  
-          <define name="value-list">
-            <zeroOrMore>
-              <element>
-                <anyName/>
-                <text/>
-              </element>
-            </zeroOrMore>
-          </define>
-          
           <define name="content">
             <zeroOrMore>
-              <choice>
-                <text/>
-                <ref name="any"/>
-              </choice>
+              <ref name="any"/>
             </zeroOrMore>
           </define>
           
@@ -47,11 +35,14 @@
             <element>
               <anyName/>
               <zeroOrMore>
-                <attribute>
-                  <anyName/>
-                </attribute>
+                <choice>
+                  <attribute>
+                    <anyName/>
+                  </attribute>
+                  <text/>
+                  <ref name="any"/>
+                </choice>
               </zeroOrMore>
-              <ref name="content"/>
             </element>
           </define>
 
@@ -90,11 +81,19 @@
       </grammar>
     </parameter>
   </message>
-  <message name="key-value">
-    <parameter name="key" type="string">
+  <message name="piece">
+    <parameter name="name" type="string">
       <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
     </parameter>
-    <parameter name="value" type="string"/>
+    <zeroOrMore>
+      <parameter name="attribute" type="string">
+        <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
+      </parameter>
+      <parameter name="value" type="string">
+        <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
+      </parameter>
+    </zeroOrMore>  
+    <parameter name="content" type="string"/>
   </message>
   <message name="key">
     <parameter name="key" type="string">
@@ -119,11 +118,11 @@
     </resource>
     <resource relative="values">
       <get in="*" out="keys"/>
-      <post in="key-value" out="key"/>
-      <resource recursive="true">
+      <post in="key" out="key"/>
+      <resource>
         <get in="*" out="value"/>
         <delete in="*"/>
-        <post in="key-value" out="key"/>
+        <post in="piece" out="key"/>
         <put in="value"/>
       </resource>
     </resource>

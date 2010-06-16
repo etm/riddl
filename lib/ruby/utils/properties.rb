@@ -21,9 +21,9 @@ module Riddl
           end
           on resource 'values' do
             run   Riddl::Utils::Properties::Keys,      properties, schema,         handler        if get
-            run   Riddl::Utils::Properties::AddPair,   properties, schema, strans, handler, level if post   'key-value'
+            run   Riddl::Utils::Properties::AddProp,   properties, schema, strans, handler, level if post   'key'
             on resource do
-              run Riddl::Utils::Properties::AddPair,   properties, schema, strans, handler, level if post   'key-value'
+              run Riddl::Utils::Properties::AddPiece,  properties, schema, strans, handler, level if post   'piece'
               run Riddl::Utils::Properties::Values,    properties, schema,         handler, level if get
               run Riddl::Utils::Properties::Delete,    properties, schema, strans, handler, level if delete
               run Riddl::Utils::Properties::Put,       properties, schema, strans, handler, level if put    'value'
@@ -62,6 +62,14 @@ module Riddl
       end
       def self::is_state?(schema,property)
         schema.find("boolean(/p:properties/p:#{property}[@type='state'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}[@type='state'])")
+      end
+      def self::property_type(schema,property)
+        exis = schema.find("/p:properties/*[name()='#{property}']|/p:properties/p:optional/*[name()='#{property}']")
+        if exis.any?
+          return exis.first.attributes['type'].to_sym
+        else
+          return nil
+        end
       end
 
       class HandlerBase
@@ -173,33 +181,33 @@ module Riddl
             add = decision = nil
             if minor.nil?
               add = ''
-              decision = property_type(schema,property)
+              decision = Riddl::Utils::Properties::property_type(schema,property)
             else
               add = "/*[name()=\"#{minor}\"]"
               decision = :value
             end
 
             case decision
-              when :map, :list
+              when :complex
                 res = pdoc.find("/p:properties/*[name()=\"#{property}\"]#{add}")
                 if res.any?
-                  prop = XML::Smart::string("<values xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+                  prop = XML::Smart::string("<complex xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
                   prop.root.add(res.first.find("*"))
                 else
                   prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
                 end
                 return Riddl::Parameter::Complex.new("value","text/xml",prop.to_s)
-              when :value, :state
+              when :simple, :state
                 res = pdoc.find("string(/p:properties/*[name()=\"#{property}\"]#{add})")
                 return Riddl::Parameter::Simple.new("value",res.to_s)
-              when :content
+              when :arbitrary
                 res = pdoc.find("/p:properties/*[name()=\"#{property}\"]#{add}")
                 if res.any?
                   c = res.first.children
                   if c.length == 1 && c.first.class == XML::Smart::Dom::Element
-                    return Riddl::Parameter::Complex.new("content","text/xml",c.first.dump)
+                    return Riddl::Parameter::Complex.new("arbitrary","text/xml",c.first.dump)
                   else
-                    prop = XML::Smart::string("<content xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+                    prop = XML::Smart::string("<complex xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
                     prop.root.add c
                     prop = prop.to_s
                   end
@@ -213,19 +221,10 @@ module Riddl
         end
         private :extract_values
 
-        def property_type(schema,property)
-          exis = schema.find("/p:properties/*[name()='#{property}']|/p:properties/p:optional/*[name()='#{property}']")
-          if exis.any?
-            return exis.first.attributes['type'].to_sym
-          else
-            return nil
-          end
-        end
-        private :property_type
       end #}}}
       
       # Modifiable
-      class AddPair < Riddl::Implementation #{{{
+      class AddPiece < Riddl::Implementation #{{{
         def response
           properties = @a[0]
           schema     = @a[1]
@@ -234,8 +233,12 @@ module Riddl
           level      = @a[4]
           relpath    = @r[level..-1]
 
-          key      = @p.detect{|p| p.name == 'key'}.value
-          value    = @p.detect{|p| p.name == 'value'}.value
+          key     = @p.detect{|p| p.name == 'name'}.value
+          value    = @p.detect{|p| p.name == 'content'}.value
+
+          @p.delete_if{|p| p.name == 'name'}
+          @p.delete_if{|p| p.name == 'content'}
+
           property = relpath[1]
 
           unless Riddl::Utils::Properties::modifiable?(schema,property.nil? ? key : property)
@@ -259,12 +262,7 @@ module Riddl
               end
             else
               node = doc.root.find("p:#{property}")
-              if node.any?
-                if node.first.find("p:#{key}").any?
-                  @status = 500
-                  return # don't misuse post
-                end
-              else
+              if !node.any?
                 @status = 404
                 return # this property does not exist
               end

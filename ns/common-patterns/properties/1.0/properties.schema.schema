@@ -23,7 +23,7 @@
         <ref name="modifiable"/>
         <attribute name="type">
           <choice>
-            <value>value</value>
+            <value>simple</value>
           </choice>
         </attribute>
         <choice>
@@ -47,19 +47,25 @@
             <ref name="data"/>
           </element>
         </choice>  
-        <ref name="other-inside"/>
       </element>
       <element>
         <anyName/>
         <ref name="modifiable"/>
         <attribute name="type">
           <choice>
-            <value>content</value>
-            <value>map</value>
-            <value>list</value>
+            <value>arbitrary</value>
           </choice>
         </attribute>
-        <ref name="other-inside"/>
+      </element>
+      <element>
+        <anyName/>
+        <ref name="modifiable"/>
+        <attribute name="type">
+          <choice>
+            <value>complex</value>
+          </choice>
+        </attribute>
+        <ref name="same-inside"/>
       </element>
       <element>
         <anyName/>
@@ -114,14 +120,10 @@
     </choice>  
   </define>
     
-  <define name="other-inside">
+  <define name="same-inside">
     <zeroOrMore>
       <element>
-        <anyName>
-          <except>
-            <nsName/>
-          </except>
-        </anyName>
+        <anyName/>
         <zeroOrMore>
           <choice>
             <attribute>
