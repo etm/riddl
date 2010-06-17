@@ -30,14 +30,14 @@ module Riddl
     EOL = "\r\n"
     D = '&;'
 
-    def unescape(s)
+    def self::unescape(s)
       #{{{
+      return s if s.nil?  
       s.tr('+', ' ').gsub(/((?:%[0-9a-fA-F]{2})+)/n){
         [$1.delete('%')].pack('H*')
       }
       #}}}
     end
-    private :unescape
 
     def parse_content(input,ctype,content_length,content_disposition,content_id,riddl_type)
       #{{{
@@ -162,7 +162,7 @@ module Riddl
     def parse_nested_query(qs, type)
       #{{{
       (qs || '').split(/[#{D}] */n).each do |p|
-        k, v = unescape(p).split('=', 2)
+        k, v = HttpParser::unescape(p).split('=', 2)
         @params << Parameter::Simple.new(k,v,type)
       end
       #}}}

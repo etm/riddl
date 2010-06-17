@@ -6,12 +6,6 @@
         <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
           <start>
             <choice>
-              <element name="values">
-                <ref name="value-list"/>
-              </element>
-              <element name="content">
-                <ref name="content"/>
-              </element>
               <element name="value">
                 <ref name="value"/>
               </element>
@@ -22,19 +16,6 @@
           </start>
 
           <define name="value">
-            <text/>
-          </define>  
-                 
-          <define name="value-list">
-            <zeroOrMore>
-              <element>
-                <anyName/>
-                <text/>
-              </element>
-            </zeroOrMore>
-          </define>
-          
-          <define name="content">
             <zeroOrMore>
               <choice>
                 <text/>
@@ -51,14 +32,16 @@
                   <anyName/>
                 </attribute>
               </zeroOrMore>
-              <ref name="content"/>
+              <ref name="value"/>
             </element>
           </define>
 
         </grammar>
       </parameter>
       <parameter name="value" type="string"/>
+
       <parameter name="content" mimetype="text/xml"/>
+      <parameter name="content" mimetype="text/plain"/>
     </choice>
   </message>
 
@@ -69,18 +52,18 @@
     <parameter name="document-schema" mimetype="text/xml"/>
   </message>
 
-  <message name="keys">
-    <parameter name="keys" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+  <message name="properties">
+    <parameter name="properties" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
         <start>
-          <element name="keys">
+          <element name="properties">
             <zeroOrMore>
-              <ref name="key"/>
+              <ref name="property"/>
             </zeroOrMore>  
           </element>
         </start>
 
-        <define name="key">
+        <define name="property">
           <element>
             <anyName/>
             <data type="string"/>
@@ -90,14 +73,22 @@
       </grammar>
     </parameter>
   </message>
-  <message name="key-value">
-    <parameter name="key" type="string">
-      <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
-    </parameter>
-    <parameter name="value" type="string"/>
+  <message name="addcontent">
+    <choice>
+      <parameter name="value" type="string"/>
+      <parameter name="value" mimetype="text/xml"/>
+    </choice>  
   </message>
-  <message name="key">
-    <parameter name="key" type="string">
+  <message name="updcontent">
+    <choice>
+      <parameter name="value" type="string"/>
+      <parameter name="value" mimetype="text/plain"/>
+      <parameter name="content" mimetype="text/xml"/> <!-- add everything inside the root tag -->
+      <parameter name="content" type="string"/> <!-- add everything inside the root tag -->
+    </choice>  
+  </message>
+  <message name="property">
+    <parameter name="property" type="string">
       <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
     </parameter>
   </message>
@@ -118,13 +109,18 @@
       </resource>
     </resource>
     <resource relative="values">
-      <get in="*" out="keys"/>
-      <post in="key-value" out="key"/>
-      <resource recursive="true">
+      <get in="*" out="properties"/>
+      <post in="property"/>
+      <resource>
         <get in="*" out="value"/>
         <delete in="*"/>
-        <post in="key-value" out="key"/>
-        <put in="value"/>
+        <post in="addcontent"/>
+        <put in="updcontent"/>
+        <resource>
+          <get in="*" out="value"/>
+          <put in="updcontent"/>
+          <delete in="*"/>
+        </resource>
       </resource>
     </resource>
   </resource>  

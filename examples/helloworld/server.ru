@@ -1,5 +1,5 @@
 require 'rack'
-require '../../lib/ruby/riddl'
+require '../../lib/ruby/server'
 require 'pp'
 
 use Rack::ShowStatus

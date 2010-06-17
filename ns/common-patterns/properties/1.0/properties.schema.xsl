@@ -40,14 +40,6 @@
         </element>
       </define>
 
-      <define name="values">
-        <zeroOrMore>
-          <element>
-            <anyName/>
-            <data type="string"/>
-          </element>  
-        </zeroOrMore>  
-      </define>  
     </grammar>  
   </xsl:template>
 
@@ -64,17 +56,13 @@
         <xsl:value-of select="name()"/>
       </xsl:attribute>
 
-      <xsl:if test="@type='map'">
-        <ref name="values"/>
-      </xsl:if>
-
-      <xsl:if test="@type='list'">
-        <ref name="values"/>
-      </xsl:if>
-      
-      <xsl:if test="@type='content'">
+      <xsl:if test="@type='arbitrary'">
         <ref name="arbitrary"/>
       </xsl:if>
+        
+      <xsl:if test="@type='complex'">
+        <xsl:apply-templates mode="copy-no-ns"/>
+      </xsl:if>  
 
       <xsl:if test="@type='state'">
         <choice>
@@ -84,7 +72,7 @@
         </choice>
       </xsl:if>
 
-      <xsl:if test="@type='value'">
+      <xsl:if test="@type='simple'">
         <xsl:apply-templates mode="copy-no-ns"/>
       </xsl:if>
 
