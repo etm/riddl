@@ -6,13 +6,7 @@
         <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
           <start>
             <choice>
-              <element name="complex">
-                <ref name="content"/>
-              </element>
-              <element name="arbitrary">
-                <ref name="content"/>
-              </element>
-              <element name="simple">
+              <element name="value">
                 <ref name="value"/>
               </element>
               <element name="not-existing">
@@ -22,12 +16,11 @@
           </start>
 
           <define name="value">
-            <text/>
-          </define>  
-                 
-          <define name="content">
             <zeroOrMore>
-              <ref name="any"/>
+              <choice>
+                <text/>
+                <ref name="any"/>
+              </choice>
             </zeroOrMore>
           </define>
           
@@ -35,21 +28,20 @@
             <element>
               <anyName/>
               <zeroOrMore>
-                <choice>
-                  <attribute>
-                    <anyName/>
-                  </attribute>
-                  <text/>
-                  <ref name="any"/>
-                </choice>
+                <attribute>
+                  <anyName/>
+                </attribute>
               </zeroOrMore>
+              <ref name="value"/>
             </element>
           </define>
 
         </grammar>
       </parameter>
       <parameter name="value" type="string"/>
+
       <parameter name="content" mimetype="text/xml"/>
+      <parameter name="content" mimetype="text/plain"/>
     </choice>
   </message>
 
@@ -60,18 +52,18 @@
     <parameter name="document-schema" mimetype="text/xml"/>
   </message>
 
-  <message name="keys">
-    <parameter name="keys" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+  <message name="properties">
+    <parameter name="properties" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
         <start>
-          <element name="keys">
+          <element name="properties">
             <zeroOrMore>
-              <ref name="key"/>
+              <ref name="property"/>
             </zeroOrMore>  
           </element>
         </start>
 
-        <define name="key">
+        <define name="property">
           <element>
             <anyName/>
             <data type="string"/>
@@ -81,22 +73,22 @@
       </grammar>
     </parameter>
   </message>
-  <message name="piece">
-    <parameter name="name" type="string">
-      <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
-    </parameter>
-    <zeroOrMore>
-      <parameter name="attribute" type="string">
-        <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
-      </parameter>
-      <parameter name="value" type="string">
-        <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
-      </parameter>
-    </zeroOrMore>  
-    <parameter name="content" type="string"/>
+  <message name="addcontent">
+    <choice>
+      <parameter name="value" type="string"/>
+      <parameter name="value" mimetype="text/xml"/>
+    </choice>  
   </message>
-  <message name="key">
-    <parameter name="key" type="string">
+  <message name="updcontent">
+    <choice>
+      <parameter name="value" type="string"/>
+      <parameter name="value" mimetype="text/plain"/>
+      <parameter name="content" mimetype="text/xml"/> <!-- add everything inside the root tag -->
+      <parameter name="content" type="string"/> <!-- add everything inside the root tag -->
+    </choice>  
+  </message>
+  <message name="property">
+    <parameter name="property" type="string">
       <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
     </parameter>
   </message>
@@ -117,13 +109,18 @@
       </resource>
     </resource>
     <resource relative="values">
-      <get in="*" out="keys"/>
-      <post in="key" out="key"/>
+      <get in="*" out="properties"/>
+      <post in="property"/>
       <resource>
         <get in="*" out="value"/>
         <delete in="*"/>
-        <post in="piece" out="key"/>
-        <put in="value"/>
+        <post in="addcontent"/>
+        <put in="updcontent"/>
+        <resource>
+          <get in="*" out="value"/>
+          <put in="updcontent"/>
+          <delete in="*"/>
+        </resource>
       </resource>
     </resource>
   </resource>  
