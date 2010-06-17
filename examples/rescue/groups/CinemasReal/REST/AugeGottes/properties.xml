@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+
+<service-description xmlns="http://rescue.org/ns/service/0.2"
+                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <properties xmlns="http://rescue.org/ns/properties/0.2">
+    <adress>
+      <street>Nußdorfer Straße 73</street>
+      <zip>1090</zip>
+      <city>Vienna</city>
+      <state>Austria</state>
+    </adress>
+    <vendor>
+      <name>Das Auge Gottes Center Wien</name>
+      <phone>+43-1-3176344</phone>
+      <url>http://www.cineplexx.at/content/kinos/kinodetails.aspx?id=6</url>
+      <mail>village.wienmitte@villagekinos.at</mail>
+    </vendor>
+  </properties>
+  <operations xmlns="http://rescue.org/ns/controlflow/0.2">
+    <search>
+      <endpoints>
+        <service>http://www.cineplexx.at/content/kinos/kinos_programme.aspx</service>
+      </endpoints>
+      <context-variables>
+        <response/>
+      </context-variables>
+      <execute>
+        <call id="Programm" endpoint="service" http-method="get">
+          <input name="id" value="6"/>
+          <input name="datum" message-parameter="date"/>
+          <output variable="response" name="" type="complex"/>
+        </call>
+        <manipulate id="parse_programm">
+          <variable context="response" local="response"/>
+          <variable input-parameter="date" local="date"/> 
+          <variable input-parameter="title" local="title"/> 
+          <variable output-parameter="list" local="list"/>
+          resp = XML::Smart.string(CGI::unescapeHTML(response))
+          list = XML::Smart.string("&lt;list_of_shows/&gt;")
+          resp.find("//x:div[@id='uclKinoprogramm_P_Filme']/x:table[descaendant::x:td/x:a[contains(text(),'#{title}')]]", {"x"=&gt;"http://www.w3.org/1999/xhtml"}).each do |b| 
+            show_title = b.find("descaendant::x:td/x:a", {"x"=&gt;"http://www.w3.org/1999/xhtml"}).first.text
+            show_hall = b.find("descendant::x:h4/x:a").first.text
+# Check if date is right?
+            show_date = Date.parse(resp.find("//x:select[@name='uclKinoprogramm$DDL_Datum']/x:option[@selected=''selected]/@value",  {"x"=&gt;"http://www.w3.org/1999/xhtml"}).first.text)
+            puts show_date
+            if show_date == date
+              b.find("descendant::x:span/x:a").each do |show|
+                show = list.root.add("show")
+                show.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/REST/AugeGottes")
+                show.add("show_id", show.attributes['href'])
+                show.add("title", show_title)
+                show.add("hall", show_hall)
+                show.add("time", show.text)
+                show.add("date", show_date.to_s)
+              end
+            end
+          end
+          puts list.root.dump
+          list = list.root.dump
+        </manipulate>
+        <!-- manipulate id="generate_output">
+          <variable output-parameter="list" local="list"/>
+          <variable context="xml" local="xml"/>
+          list = XML::Smart.string("&lt;list_of_shows/&gt;")
+          xml.each do |e|
+            res = XML::Smart.string(e)
+            node = list.root.add("show")
+            node.add("title", res.find("//filmname").first.text)
+            node.add("hall", res.find("//hall").first.text)
+            node.add("time", res.find("//time").first.text)
+            node.add("date", res.find("//date").first.text)
+            node.add("show_id", res.find("//id").first.text)
+            node.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/Soap/LugnerCityKino")
+          end
+          list = list.root.dump
+        </manipulate -->
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </search>
+    <book>
+      <endpoints>
+        <ep>http://www.pri.univie.ac.at/~ralph/Testservices/Cinema.php</ep>
+      </endpoints>
+      <context-variables>
+      </context-variables>
+      <execute>
+        <call id="book" endpoint="ep" http-method="post">
+          <input name="showID" message-parameter="show_id"/>
+          <output message-parameter="reservation_id" name="resID"/>
+        </call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </book>
+  </operations>
+</service-description>

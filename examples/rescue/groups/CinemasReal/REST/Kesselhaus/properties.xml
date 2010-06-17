@@ -50,28 +50,13 @@
               show.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/REST/Kesselhaus")
               show.add("show_id", id)
               show.add("title", show_title)
+              show.add("time", show_time)
               show.add("hall", "n.a.")
               show.add("date", "#{date.year()}-#{date.mon()}-#{date.mday() &lt; 10 ? "0#{date.mday()}": date.mday()}.#{date.mon()}")
             end
           end
           list = list.root.dump
         </manipulate>
-        <!-- manipulate id="generate_output">
-          <variable output-parameter="list" local="list"/>
-          <variable context="xml" local="xml"/>
-          list = XML::Smart.string("&lt;list_of_shows/&gt;")
-          xml.each do |e|
-            res = XML::Smart.string(e)
-            node = list.root.add("show")
-            node.add("title", res.find("//filmname").first.text)
-            node.add("hall", res.find("//hall").first.text)
-            node.add("time", res.find("//time").first.text)
-            node.add("date", res.find("//date").first.text)
-            node.add("show_id", res.find("//id").first.text)
-            node.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/Soap/LugnerCityKino")
-          end
-          list = list.root.dump
-        </manipulate -->
       </execute>
       <compensate/>
       <undo/>
