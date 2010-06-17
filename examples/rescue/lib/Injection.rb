@@ -119,7 +119,7 @@ class Injection < Riddl::Implementation
     puts "== Text =="*10
 =end
     # Set inject, description, position and re-start {{{
-    status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("value", description.root.dump)]
+    status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("content", "<content>#{description.root.dump}</content>")]
     puts "=== setting description #{status}"
     status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")] if continue
     puts "=== setting position: #{status}"
@@ -366,7 +366,8 @@ class Injection < Riddl::Implementation
         puts "Could not find variable named #{con.attributes['variable']}"
         return false
       end
-      value1 = resp[0].value
+      value1 = XML::Smart.string(resp[0].value.read)
+      value1 = value1.find("p:value",{"p"=>"http://riddl.org/ns/common-patterns/properties/1.0"}).first.text   #TODO: maybe it would be better to YAML the vaule of the XML?
     end
     con.attributes['xpath'].split('/').each {|p| xpath << "p:#{p}/"}
     xpath.chop! # remove trailing '/'

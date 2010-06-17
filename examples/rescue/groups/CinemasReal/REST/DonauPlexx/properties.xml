@@ -4,16 +4,16 @@
                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <properties xmlns="http://rescue.org/ns/properties/0.2">
     <adress>
-      <street>Nußdorfer Straße 73</street>
-      <zip>1090</zip>
+      <street>Wagramerstraße 79</street>
+      <zip>1220</zip>
       <city>Vienna</city>
       <state>Austria</state>
     </adress>
     <vendor>
-      <name>Das Auge Gottes Center Wien</name>
-      <phone>+43-1-3176344</phone>
+      <name>Cineplexx Doanuplex</name>
+      <phone>+43-1-2033322</phone>
       <url>http://www.cineplexx.at/content/kinos/kinodetails.aspx</url>
-      <mail>village.wienmitte@villagekinos.at</mail>
+      <mail>village.donauplex@villagekinos.at</mail>
     </vendor>
   </properties>
   <operations xmlns="http://rescue.org/ns/controlflow/0.2">
@@ -32,7 +32,7 @@
           datum = "#{date.mday &lt; 10 ? "0#{date.mday}" : date.mday}.#{date.mon &lt; 10 ? "0#{date.mon}" : date.mon}.#{date.year}"
         </manipulate>
         <call id="Programm" endpoint="service" http-method="get">
-          <input name="id" value="6"/>
+          <input name="id" value="346"/>
           <input name="datum" variable="datum"/>
           <input name="uhrzeit" value="&quot;00:00:00&quot;"/>
           <input name="version" value="&quot;&quot;"/>
@@ -66,6 +66,7 @@
             if show_date == date
               b.find("child::tr/td[3]/div/table").each do |show|
                 show_hall = show.find("child::tr/td[1]/h4/span").first.text.strip
+                puts "Hall: #{show_hall}"
                 show.find("child::tr/td[2]/span/a[text()]").each do |s|
                   show = list.root.add("show")
                   show.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/REST/AugeGottes")
@@ -80,6 +81,22 @@
           end
           list = list.root.dump
         </manipulate>
+        <!-- manipulate id="generate_output">
+          <variable output-parameter="list" local="list"/>
+          <variable context="xml" local="xml"/>
+          list = XML::Smart.string("&lt;list_of_shows/&gt;")
+          xml.each do |e|
+            res = XML::Smart.string(e)
+            node = list.root.add("show")
+            node.add("title", res.find("//filmname").first.text)
+            node.add("hall", res.find("//hall").first.text)
+            node.add("time", res.find("//time").first.text)
+            node.add("date", res.find("//date").first.text)
+            node.add("show_id", res.find("//id").first.text)
+            node.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/Soap/LugnerCityKino")
+          end
+          list = list.root.dump
+        </manipulate -->
       </execute>
       <compensate/>
       <undo/>

@@ -70,12 +70,12 @@
           xml.each do |e|
             res = XML::Smart.string(e)
             node = list.root.add("show")
-            node.add("title", res.find("//filmname").first.text)
-            node.add("hall", res.find("//hall").first.text)
-            node.add("time", res.find("//time").first.text)
-            node.add("date", res.find("//date").first.text)
-            node.add("show_id", res.find("//id").first.text)
             node.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/Soap/SCNHollywood")
+            node.add("show_id", res.find("//id").first.text)
+            node.add("title", res.find("//filmname").first.text)
+            node.add("date", res.find("//date").first.text)
+            node.add("time", res.find("//time").first.text)
+            node.add("hall", res.find("//hall").first.text)
           end
           list = list.root.dump
         </manipulate>

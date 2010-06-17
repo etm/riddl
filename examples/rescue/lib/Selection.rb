@@ -3,11 +3,12 @@ class SelectByRandom < Riddl::Implementation
   def response
     # {{{
       puts "==SelectByRandom=="*5
+      data = XML::Smart.string(@p.value('data'))
+      puts "=== LIST:\n #{data}"
       group_by = @p.value('group_by')
       puts "=== GROUP_BY: #{group_by}"
       uri_xpath = @p.value('uri_xpath')
       puts "=== URI-XPATH: #{uri_xpath}"
-      data = XML::Smart.string(@p.value('data'))
       elements = data.find(group_by)
       num = rand(elements.length)
       show = elements[num]

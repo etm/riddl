@@ -195,7 +195,7 @@
           raise "No fitting shows found for #{title} in #{date}" if xml.root.children.length == 0
           m_list = xml.root.dump
         </flow:manipulate>
-        <flow:call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="get" group-by="//show">
+        <flow:call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post" group-by="//show">
           <flow:resource-id xpath="cinema_uri" endpoint="selected_cinema" name="target"/>
           <flow:input name="data" variable="list_merge"/>
           <flow:output name="movie_title" message-parameter="movie_title"/>

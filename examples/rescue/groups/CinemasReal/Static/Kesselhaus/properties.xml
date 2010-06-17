@@ -47,12 +47,12 @@
             id = id.attributes['href'] if id
             if id != "n.a." and show_title.downcase.include?(title.downcase) and show_date == "#{date.mday() &lt; 10 ? "0#{date.mday()}": date.mday()}.#{date.mon() &lt; 10 ? "0#{date.mon()}": date.mon()}"
               show = list.root.add("show")
-              show.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/REST/Kesselhaus")
+              show.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/Static/Kesselhaus")
               show.add("show_id", id)
               show.add("title", show_title)
+              show.add("date", "#{date.year()}-#{date.mon() &lt; 10 ? "0#{date.mon()}": date.mon()}-#{date.mday() &lt; 10 ? "0#{date.mday()}": date.mday()}")
               show.add("time", show_time)
               show.add("hall", "n.a.")
-              show.add("date", "#{date.year()}-#{date.mon()}-#{date.mday() &lt; 10 ? "0#{date.mday()}": date.mday()}.#{date.mon()}")
             end
           end
           list = list.root.dump
