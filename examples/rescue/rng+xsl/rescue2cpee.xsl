@@ -330,24 +330,6 @@ Recent changes:
     <!-- }}} -->
   </xsl:template>
 
-  <xsl:template name="constraint">
-    <!-- {{{ --> 
-    <xsl:element name="constraint">
-      <xsl:for-each select="child::flow:constraint">
-        <xsl:variable name="name" select="generate-id()"/>
-        <xsl:element name="{$name}">
-          <xsl:for-each select="@*[name() != 'id' and name() != 'endpoint' and name() != 'serviceoperation' and name() != 'repository' and name() != 'injection' and name() != 'method']">
-            <xsl:variable name="qname" select="name()"/>
-            <xsl:element name="{$qname}">
-              <xsl:value-of select="."/>
-            </xsl:element>
-          </xsl:for-each>
-        </xsl:element>
-      </xsl:for-each>
-    </xsl:element>
-    <!-- }}} -->
-  </xsl:template>
-
   <xsl:template name="input">
     <!-- {{{ -->
     <xsl:element name="parameters">
@@ -363,8 +345,8 @@ Recent changes:
             </xsl:if>
             <xsl:value-of select="@message-parameter"/>
           </xsl:if>
-          <xsl:if test="@fix-value">
-            <xsl:value-of select="@fix-value"/>
+          <xsl:if test="@value">
+            <xsl:value-of select="@value"/>
           </xsl:if>
         </xsl:element>
       </xsl:for-each>
@@ -382,16 +364,44 @@ Recent changes:
         <xsl:text>')&#xa;</xsl:text>
       </xsl:for-each>
       <xsl:for-each select="child::flow:output">
-        <xsl:if test="@message-parameter">
-          <xsl:value-of select="@message-parameter"/>
-        </xsl:if>
-        <xsl:if test="@variable">
-          <xsl:value-of select="@variable"/>
-        </xsl:if>
-        <xsl:text> = result.value('</xsl:text><xsl:value-of select="@name"/><xsl:text>')</xsl:text>
-        <xsl:if test="@type = 'complex'">
-          <xsl:text>.read</xsl:text>
-        </xsl:if>
+        <xsl:choose>
+          <xsl:when test="parent::flow:call/@soap-operation">
+            <xsl:if test="@message-parameter">
+              <xsl:value-of select="@message-parameter"/>
+            </xsl:if>
+            <xsl:if test="@variable">
+              <xsl:value-of select="@variable"/>
+            </xsl:if>
+            <xsl:text> = Array.new&#xa;</xsl:text>
+            <xsl:choose>
+              <xsl:when test="@namespace">
+                <xsl:text>result.find('</xsl:text><xsl:value-of select="@name"/><xsl:text>', {'tns'=>'</xsl:text><xsl:value-of select="@namespace"/><xsl:text>'}).each {|n| </xsl:text>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:text>result.find('</xsl:text><xsl:value-of select="@name"/><xsl:text>').each {|n| </xsl:text>
+              </xsl:otherwise>
+            </xsl:choose>
+            <xsl:if test="@message-parameter">
+              <xsl:value-of select="@message-parameter"/>
+            </xsl:if>
+            <xsl:if test="@variable">
+              <xsl:value-of select="@variable"/>
+            </xsl:if>
+            <xsl:text> &lt;&lt; "#{n.dump}"}</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:if test="@message-parameter">
+              <xsl:value-of select="@message-parameter"/>
+            </xsl:if>
+            <xsl:if test="@variable">
+              <xsl:value-of select="@variable"/>
+            </xsl:if>
+            <xsl:text> = result.value('</xsl:text><xsl:value-of select="@name"/><xsl:text>')</xsl:text>
+            <xsl:if test="@type = 'complex'">
+              <xsl:text>.read</xsl:text>
+            </xsl:if>
+          </xsl:otherwise>
+        </xsl:choose>
         <xsl:text>&#xa;</xsl:text>
       </xsl:for-each>
     <!--  }}} -->
@@ -404,6 +414,10 @@ Recent changes:
       <xsl:attribute name="endpoint"><xsl:value-of select="@endpoint"/></xsl:attribute>
       <xsl:attribute name="oid"><xsl:value-of select="@oid"/></xsl:attribute>
       <xsl:element name="parameters">
+        <xsl:if test="@soap-operation">
+          <xsl:element name="soap_operation"><xsl:value-of select="@soap-operation"/></xsl:element>
+          <xsl:element name="wsdl"><xsl:text>#{endpoints[:</xsl:text><xsl:value-of select="@wsdl"/><xsl:text>]}</xsl:text></xsl:element>
+        </xsl:if>
         <xsl:if test="@http-method">
           <xsl:element name="method"><xsl:value-of select="@http-method"/></xsl:element>
         </xsl:if>
@@ -513,10 +527,10 @@ Recent changes:
     <!-- {{{ -->
     <xsl:element name="loop">
       <xsl:attribute name="pre_test">
-        <xsl:apply-templates select="child::flow:group"/>
-        <xsl:apply-templates select="child::flow:condition"/>
+        <xsl:apply-templates select="child::flow:group" mode="true"/>
+        <xsl:apply-templates select="child::flow:condition" mode="true"/>
       </xsl:attribute>
-      <xsl:apply-templates select="child::flow:*[(name() != 'group') and (name() != 'condition')]"/>
+      <xsl:apply-templates select="child::flow:*"/>
     </xsl:element>
      <!-- }}} -->
   </xsl:template>
@@ -534,10 +548,10 @@ Recent changes:
     <!-- {{{ -->
     <xsl:element name="alternative">
       <xsl:attribute name="condition">
-        <xsl:apply-templates select="child::flow:group"/>
-        <xsl:apply-templates select="child::flow:condition"/>
+        <xsl:apply-templates select="child::flow:group" mode="true"/>
+        <xsl:apply-templates select="child::flow:condition" mode="true"/>
       </xsl:attribute>
-      <xsl:apply-templates select="child::flow:*[(name() != 'group') and (name() != 'condition')]"/>
+      <xsl:apply-templates select="child::flow:*"/>
     </xsl:element>
     <!-- }}} -->
   </xsl:template>
@@ -550,15 +564,17 @@ Recent changes:
     <!-- }}} -->
   </xsl:template>
   
-  <xsl:template match="//flow:group">
+  <xsl:template match="//flow:group" mode="true">
     <!-- {{{ -->
     <xsl:text>(</xsl:text>
     <xsl:apply-templates select="child::flow:*"/>
     <xsl:text>)</xsl:text>
+  </xsl:template>
+  <xsl:template match="//flow:group">
     <!-- }}} -->
   </xsl:template>
 
-  <xsl:template match="//flow:condition">
+  <xsl:template match="//flow:condition" mode="true">
     <!-- {{{ -->
     <xsl:text>(</xsl:text>
     <xsl:value-of select="@test"/>
@@ -566,21 +582,22 @@ Recent changes:
     <xsl:value-of select="@comparator"/>
     <xsl:text>(</xsl:text>
     <xsl:choose>
-      <xsl:when test="string(@fix-value)">
-        <xsl:value-of select="@fix-value"/>
+      <xsl:when test="string(@value)">
+        <xsl:value-of select="@value"/>
       </xsl:when>
       <xsl:when test="string(@variable)">
         <xsl:value-of name="var" select="@variable"/>
       </xsl:when>
     </xsl:choose>
-    <xsl:text>)</xsl:text>
-    <xsl:text>)</xsl:text>
-    <xsl:if test="(name(parent::flow:*) = 'group') and (position() != last())">
+    <xsl:text>))</xsl:text>
+    <xsl:if test="((name(parent::flow:*) = 'group') or (name(parent::flow:*) = 'flow:group')) and (position() != last())">
       <xsl:text> </xsl:text>
       <xsl:value-of select="parent::flow:group/@connector"/>
       <xsl:text> </xsl:text>
     </xsl:if>
-    <!-- }}} --> 
+  </xsl:template>
+  <xsl:template match="//flow:condition">
+  <!-- }}} --> 
   </xsl:template>
 </xsl:stylesheet>
 <!-- }}} -->

@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+
+<service-description xmlns="http://rescue.org/ns/service/0.2"
+                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <properties xmlns="http://rescue.org/ns/properties/0.2">
+    <adress>
+      <street>Ignaz Köck-Straße 1</street>
+      <zip>1210</zip>
+      <city>Vienna</city>
+      <state>Austria</state>
+    </adress>
+    <vendor>
+      <name>SCN HollywoodMegaplex</name>
+      <phone>+43-1-27166790</phone>
+      <url>http://www.hollywood-megaplex.at/scn/index.html</url>
+      <mail>office@hollywood-megaplex.at</mail>
+    </vendor>
+  </properties>
+  <operations xmlns="http://rescue.org/ns/controlflow/0.2">
+    <search>
+      <endpoints>
+        <wsdl>http://scn.hollywood-megaplex.at/sinemaweb/service.asmx?WSDL</wsdl>
+        <soap_service>http://scn.hollywood-megaplex.at/sinemaweb/service.asmx</soap_service>
+      </endpoints>
+      <context-variables>
+        <soap_response/>
+        <xml class="Array.new"/>
+        <film_ids class="Array.new"/>
+        <date2/>
+      </context-variables>
+      <execute>
+        <call id="FilmInfo" endpoint="soap_service" soap-operation="FilmInfo" wsdl="wsdl">
+          <input name="SearchItem" message-parameter="title"/>
+          <!--input name="SearchItem" variable="input_FilmInfo"/-->
+          <output variable="soap_response" name="descendant::tns:FilmInfoResult" namespace="http://sitec.at/Service"/>
+        </call>
+        <manipulate id="pares_response">
+          <variable context="soap_response" local="soap"/>
+          <variable context="film_ids" local="ids"/>
+          <variable input-parameter="date" local="from"/> 
+          <variable context="date2" local="to"/>
+          resp = XML::Smart.string(CGI::unescapeHTML(soap[0]))
+          resp.find("//film/ID").each do |id|
+            ids &lt;&lt; id.text
+          end
+          to = from
+        </manipulate>
+        <loop>
+          <condition test="film_ids.length" comparator="&gt;" value="0"/>
+          <call id="Schedule" endpoint="soap_service" soap-operation="Schedule" wsdl="wsdl">
+            <input name="FilmID" variable="film_ids.pop"/>
+            <input name="dFrom" message-parameter="date"/>
+            <input name="dTo" variable="date2"/>
+            <!--input name="SearchItem" variable="input_FilmInfo"/-->
+            <output variable="soap_response" name="descendant::tns:ScheduleResponse" namespace="http://sitec.at/Service"/>
+          </call>
+          <manipulate id="search_shows">
+            <variable context="soap_response" local="soap"/>
+            <variable context="xml" local="xml"/>
+            resp = XML::Smart.string(CGI::unescapeHTML(soap[0]))
+            resp.find("descendant::tns:show", {"tns"=&gt;"http://sitec.at/Service"}).each do |show|
+              xml &lt;&lt; show.dump
+            end
+          </manipulate>
+        </loop>
+        <manipulate id="generate_output">
+          <variable output-parameter="list" local="list"/>
+          <variable context="xml" local="xml"/>
+          list = XML::Smart.string("&lt;list_of_shows/&gt;")
+          xml.each do |e|
+            res = XML::Smart.string(e)
+            node = list.root.add("show")
+            node.add("title", res.find("//filmname").first.text)
+            node.add("hall", res.find("//hall").first.text)
+            node.add("time", res.find("//time").first.text)
+            node.add("date", res.find("//date").first.text)
+            node.add("show_id", res.find("//id").first.text)
+            node.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/Soap/SCNHollywood")
+          end
+          list = list.root.dump
+        </manipulate>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </search>
+    <book>
+      <endpoints>
+        <ep>http://www.pri.univie.ac.at/~ralph/Testservices/Cinema.php</ep>
+      </endpoints>
+      <context-variables>
+      </context-variables>
+      <execute>
+        <call id="book" endpoint="ep" http-method="post">
+          <input name="showID" message-parameter="show_id"/>
+          <output message-parameter="reservation_id" name="resID"/>
+        </call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </book>
+  </operations>
+</service-description>
