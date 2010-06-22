@@ -83,9 +83,9 @@ class Injection < Riddl::Implementation
       injected.add(call_node.find("child::cpee:constraints", {"cpee" => "http://cpee.org/ns/description/1.0"}), XML::Smart::Dom::Element::COPY)
       injected.add(inject_class_level(wf, call_node, injected).children)
       mb = injected.find("//cpee:manipulate[@id = 'manipulate_from_#{call_node.attributes['id']}']", {"cpee"=>"http://cpee.org/ns/description/1.0"}).first
-      mb.add_after(injected.find("//cpee:manipulate[@id = 'delete_objects_of_#{call_node.attributes['id']}']", {"cpee"=>"http://cpee.org/ns/description/1.0"}))
+      mb.add_after(injected.find("child::cpee:manipulate[@id = 'delete_objects_of_#{call_node.attributes['id']}']", {"cpee"=>"http://cpee.org/ns/description/1.0"})) # move del-blockt o last position (after man-block of call)
       man_block.attributes['properties'] = "#{injected.attributes['properties']}" if man_block
-      # }}} 
+       # }}} 
     else 
       # Injection service-level {{{
       parallel = injected.add("parallel")
@@ -229,6 +229,7 @@ class Injection < Riddl::Implementation
   # return controlflow of injected wf
    def inject_service_level(wf, call_node, resource_path, branch)# {{{
     man_text = "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"] = RescueHash.new\n"
+    man_text_delete = ""
     index = resource_path.gsub("/","_").gsub(":","_")
     op = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','') 
     puts " == Injecting operation #{op} of service #{resource_path}"
@@ -237,6 +238,7 @@ class Injection < Riddl::Implementation
     # Change endpoints  {{{
     wf.find("//flow:#{op}/flow:endpoints/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
       man_text << "endpoint :\"#{ call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.nil? ? '' : node.text}\"\n"
+      man_text_delete << "endpoints.delete(:\"#{ call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
     end
     wf.find("//@endpoint").each do |a|
       a.value = call_node.attributes['id']+'__'+index+'__'+a.value
@@ -251,6 +253,7 @@ class Injection < Riddl::Implementation
       else
         man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.nil? ? '' : node.text}\"\n"
       end
+      man_text_delete << "context.delete(:\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
     end
     wf.find("//flow:#{op}/descendant::flow:*/@variable",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "@#{call_node.attributes['id']}__#{index}__#{a.value}"}
     wf.find("//flow:#{op}/descendant::flow:*/@test",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "@#{call_node.attributes['id']}__#{index}__#{a.value}"}
@@ -286,13 +289,7 @@ class Injection < Riddl::Implementation
     ns = doc.root.namespaces.add("flow","http://rescue.org/ns/controlflow/0.2")
     doc.find("//*").each { |node| node.namespace = ns }
     branch.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}_service_#{index}"}, man_text)
-=begin
-    puts "="*100
-    puts branch.dump
-    puts "="*100
-    puts XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root.dump 
-    puts "="*100
-=end
+    branch.add("manipulate", {"id"=>"delete_objects_of_#{call_node.attributes['id']}_service_#{index}"}, man_text_delete)
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root # }}}
   end
 
@@ -309,22 +306,21 @@ class Injection < Riddl::Implementation
       if check_constraints(wf, call_node, cpee_client)
         branch = parallel_node.add("parallel_branch")
         branch.add(inject_service_level(wf, call_node, "#{rescue_client.instance_variable_get("@base")}/#{resource_path}", branch).children)
+        del_block = branch.find("child::cpee:manipulate[@id='delete_objects_of_#{call_node.attributes['id']}_service_#{"#{rescue_client.instance_variable_get("@base")}/#{resource_path}".gsub("/","_").gsub(":","_")}']", {"cpee"=>"http://cpee.org/ns/description/1.0"}).first
+        branch.add(del_block) # Move del-block to last psoition in branch
       end
     end # }}}  
   end
   
   def check_constraints(wf, call_node, cpee_client)    # {{{
-      puts "==check_constraints=="*5
       call_node.find("ancestor::cpee:injected/cpee:constraints", {"cpee" => "http://cpee.org/ns/description/1.0"}).each do |cons|
         bool = true
         cons.children.each do |child|
           bool = check_group(child, cpee_client, wf) if child.name.name == "group"
           bool = check_constraint(child, cpee_client, wf) if child.name.name == "constraint"
-          puts "======Constraints: #{bool}"
           return false if bool == false
         end
       end
-      puts "==check_constraints=="*5
       true
   end  # }}}
 
@@ -361,11 +357,6 @@ class Injection < Riddl::Implementation
     value1 = value1.to_f if is_a_number?(value1.strip)
     value2 =  wf.find("//p:properties/#{xpath}", {"p"=>"http://rescue.org/ns/properties/0.2"}).first.text
     value2 = value2.to_f if is_a_number?(value2.strip)
-    puts "===== XPATH: //p:properties/#{xpath}"
-    puts "===== COMP: #{con.attributes['comparator']}"
-    puts "===== VALUE1: #{value1} (#{value1.class})"
-    puts "===== VALUE2: #{value2} (#{value2.class})"
-    puts "===== RESULT: #{value2.send(con.attributes['comparator'], value1)}"
     value2.send(con.attributes['comparator'], value1)
   end
 
