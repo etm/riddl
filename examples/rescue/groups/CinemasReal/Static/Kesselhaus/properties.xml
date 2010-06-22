@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 
-<service-description xmlns="http://rescue.org/ns/service/0.2"
-                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<service-description xmlns="http://rescue.org/ns/service/0.2">
   <properties xmlns="http://rescue.org/ns/properties/0.2">
     <adress>
       <street>Dr.-Karl-Dorrek-Straße 30</street>

@@ -1,0 +1,64 @@
+<?xml version ='1.0' encoding ='UTF-8' ?>
+<definitions name='Scramble' 
+  targetNamespace='http://www.joelhainley.com/examples/soap/scramble.wdsl' 
+  xmlns:tns='http://www.joelhainley.com/examples/soap/scramble.wdsl' 
+  xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' 
+  xmlns='http://schemas.xmlsoap.org/wsdl/'> 
+
+<message name='getRot13Request'> 
+  <part name='symbol' type='xsd:string'/> 
+</message> 
+<message name='getRot13Response'> 
+  <part name='Result' type='xsd:string'/> 
+</message> 
+<message name='getMirrorRequest'> 
+  <part name='symbol' type='xsd:string'/> 
+</message> 
+<message name='getMirrorResponse'> 
+  <part name='Result' type='xsd:string'/> 
+</message> 
+
+<portType name='ScramblePortType'> 
+  <operation name='getRot13'>
+    <input message='tns:getRot13Request'/> 
+    <output message='tns:getRot13Response'/>   
+  </operation>
+  <operation name='getMirror'>
+    <input message='tns:getMirrorRequest'/> 
+    <output message='tns:getMirrorResponse'/>   
+  </operation>    
+</portType> 
+
+<binding name='ScrambleBinding' type='tns:ScramblePortType'> 
+  <soap:binding style='rpc' 
+    transport='http://schemas.xmlsoap.org/soap/http'/> 
+  <operation name='getRot13'> 
+    <soap:operation soapAction='urn:localhost-scramble#getRot13'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-scramble' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-scramble' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>
+  <operation name='getMirror'> 
+    <soap:operation soapAction='urn:localhost-scramble#getMirror'/> 
+    <input> 
+      <soap:body use='encoded' namespace='urn:localhost-scramble' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </input> 
+    <output> 
+      <soap:body use='encoded' namespace='urn:localhost-scramble' 
+        encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'/> 
+    </output> 
+  </operation>       
+</binding> 
+
+<service name='ScrambleService'> 
+  <port name='ScramblePort' binding='ScrambleBinding'> 
+    <soap:address location='http://localhost/Testservices/Soap.php'/> 
+  </port> 
+</service>
+</definitions> 
