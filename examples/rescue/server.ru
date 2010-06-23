@@ -14,7 +14,8 @@ require 'pp'
 
 require 'lib/Rescue'
 require 'lib/Selection'
-require 'lib/Injection'
+require 'lib/InjectionService'
+require 'lib/InjectionHandler'
 
 use Rack::ShowStatus
 
@@ -34,10 +35,17 @@ run(
       end
       on resource 'injection' do
         on resource 'handler' do
-          run InjectionHandler if method :post => '*'
+          run InjectionHandler if method :post => 'injection-handler-request'
+          run InjectionHandler if method :put => 'monitor'
+          on resource do
+            run InjectionHandler if method :post => '*' # here comes the syning_after_message
+          end
         end
         on resource 'service' do
-          run InjectionService if method :post => 'injection-request'
+          run InjectionService if method :post => 'injection-service-request' 
+          on resource do
+            run InjectionService if method :post => '*' # here come an activity-state changed message
+          end
         end
       end
       on resource 'select' do

@@ -3,12 +3,15 @@ RESUCE: open tasks
 
 
 *) Connect RESCUE via subscriptions to CPEE
-  -> Handler subscribes RESCUE whenever an injection is nedded, afterwards the subsription will be removed
+  -> Handler subscribes RESCUE whenever an injection is nedded, afterwards the subsription will be removed - OK
+    # All injections are now deoensing on subsriptions
+    # Also a monitor to avoid more than one inkjections at a time on the same instance is impelemnted
 
 *) RESCUE log's into CPEE
   -> Log what nodes are injected by this step
     # e.g. "Injection caused by a01 results in a01_find, a01_select, a01_book", "Injection caused by a02 has no fitting services explored", ...
-  -> Log if WF is in a state where it could not be executed any further (class and instance level)
+
+*) Log if WF is in a state where it could not be executed any further (class and instance level)
     # I think there is an CPEE function necessary
       + Message works in CPEE (only for programmatic/technical erros during injection)
       + Semantic control of the workflow is in behalv of the designer and executed using status-codes in the result object"
@@ -34,6 +37,7 @@ RESUCE: open tasks
 
 *) Cinemas-Example:
   -> Show the whole controlflow-set provided by RESCUE (call, manipulate, loop, critical, parallel)
+    # Use if to check if search leaded to results on class-level
   -> Show properties dependencies between two calls
 
 *) Injection within a loop? 

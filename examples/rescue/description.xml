@@ -72,12 +72,22 @@
     <parameter name="service-description" mimetype="text/xml"/>
   </message>
 
-  <message name="injection-request">
+  <message name="injection-handler-request">
     <parameter name="position" type="string"/>
-    <parameter name="cpee" type="string"/>
-    <parameter name="rescue" type="string"/>
   </message>
 
+  <message name="injection-service-request">
+    <parameter name="position" type="string"/>
+    <parameter name="monitor" type="string"/>
+  </message>
+  <message name="injection-response">
+    <parameter name="id" type="string"/>
+  </message>
+
+  <message name="monitor">
+    <parameter name="instance" type="string"/>
+    <parameter name="operation" type="string"/>
+  </message>
 <!--}}}--> 
 <!-- Resources -->
 <!-- {{{ -->
@@ -90,10 +100,17 @@
     </resource>  
     <resource relative="injection">
       <resource relative="handler">
-        <post in="*"/>
+        <post in="injection-handler-request" out="injection-response"/>
+        <put in="monitor"/>
+        <resource>
+          <post in="*"/>
+        </resource>
       </resource>
       <resource relative="service">
-        <post in="injection-request"/>
+        <post in="injection-service-request" out="injection-response"/>
+        <resource>
+          <post in="*"/>
+        </resource>
       </resource>
     </resource>
     <resource relative="select">

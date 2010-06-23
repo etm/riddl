@@ -1,66 +1,57 @@
 require '../../lib/ruby/client'
-require 'soap/wsdlDriver'
-
-class InjectionHandler < Riddl::Implementation
-# This class allows a dynmic distribution to differetn injection service. Inthoery here could be some logic to decied wich service to use for injection. Cloudify Everything!
-  def response
-    puts "Received sunscripton"
-    puts @p.inspect
-
-    p = YAML.load(@p.value('notification'))
-    cpee = Riddl::Client.new(p[:instance])
-    puts p["callback"]
-    injection_service_uri = "http://localhost:9290/injection/service" # This could be any other injection service
-    injection_client = Riddl::Client.new(injection_service_uri)
-    puts "=== Injecting with service: #{injection_service_uri}"
-    puts "=== Injecting at position: #{p[:activity]}"
-    puts "=== Injecting at CPEE: #{p[:instance]}"
-    puts "=== Injecting using RESCUE: #{p[:endpoint]}"
-    status, resp = injection_client.post [
-      Riddl::Parameter::Simple.new('position', p[:activity]),
-      Riddl::Parameter::Simple.new('cpee', p[:instance]),
-      Riddl::Parameter::Simple.new('rescue', p[:endpoint])
-    ]
-    puts "ERROR finding an injection-service" if resp.value('injecting') != "true"
-    status, resp = cpee.resource("notifications/subscriptions/#{@p.value('key')}").delete [
-      Riddl::Parameter::Simple.new("message-uid","ralph"),
-      Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
-    ]
-    puts "ERROR deleting subscription" if status != 200 
-    Riddl::Parameter::Simple.new("continue","false")
-  end
-end
 
 class InjectionService < Riddl::Implementation
+  $is_resources = {}
   def response
-    puts "=== Starting injection"
-    Thread.new {
-      Thread.pass; 
-      begin
-        stopped = false
-        cpee = Riddl::Client.new(@p.value('cpee'))
-        until stopped
-          status, resp = cpee.resource('properties/values/state').get
-          puts "CPEE-State: #{resp[0].value} (#{status})"
-          stopped = true if resp[0].value == "stopped"
-          sleep(0.1)
-        end
-        analyze(@p.value('position'), @p.value('cpee'), @p.value('rescue'))
-      rescue Execption => e
-        puts e.backtrace
+    if @p.value('position') && @p.value('monitor')# received subscription-request
+      puts "== Injection-service: received subsription-request"
+      resource = Digest::MD5.hexdigest(rand(Time.now).to_s)
+      $is_resources[resource] = {:position => @p.value('position'), :monitor => @p.value('monitor')}
+      puts "\t=== Injection-service: Created resource: #{resource}"
+      @status = 200
+      return Riddl::Parameter::Simple.new('id', resource)
+    elsif @p.value('event') == "change" && @p.value('topic') == "properties/state"# received notification
+      notification = YAML::load(@p.value('notification'))
+      if notification[:state] == :stopped
+        puts "== Injection-service: Received notification for injection at '#{$is_resources[@r[-1]][:position]}'on instance '#{notification[:instance]}'"
+        puts "\t=== Injection-service: Delete subscription for properties/state - change" 
+        cpee = Riddl::Client.new(notification[:instance])
+        status, resp = cpee.resource("notifications/subscriptions/#{@p.value('key')}").delete [
+          Riddl::Parameter::Simple.new("message-uid","ralph"),
+          Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
+        ]
+        puts "Injection-service: ERROR deleting subscription (#{status})" unless status == 200 # Needs to be logged into the CPEE as well
+        monitor = Riddl::Client.new($is_resources[@r[-1]][:monitor])
+        retries = 0
+        begin
+          status, resp = monitor.put [
+            Riddl::Parameter::Simple.new("instance", notification[:instance]),
+            Riddl::Parameter::Simple.new("operation", 'lock')
+          ]
+          sleep 0.1
+          retries += 1
+          puts "Injection-service: INFO requesting lock for instance '#{notification[:instance]} failed (residual retries: #{50-retries})"
+        end while status == 503 and retries < 50
+        puts "Injection-service: ERROR during requesting lock for instance '#{notification[:instance]}' (#{status})" unless status == 200 or status == 503
+        puts "Injection-service: ERROR during requesting lock for instance '#{notification[:instance]}' (#{status}) after 50 retries" if status == 503
+        analyze($is_resources[@r[-1]][:position], cpee) if status == 200
+        status, resp = monitor.put [
+          Riddl::Parameter::Simple.new("instance", notification[:instance]),
+          Riddl::Parameter::Simple.new("operation", 'release')
+        ]
+        puts "Injection-service: ERROR during releasing lock for instance '#{notification[:instance]}' (#{status})" unless status == 200
       end
-    }
-    Riddl::Parameter::Simple.new("injecting", "true")
+    else # some other request
+      @status = 404
+    end
 # }}} 
   end
 
-  def analyze(position, cpee_uri, rescue_uri)
-  restart = true
+  def analyze(position, cpee_client)
+  restart = false
   continue = true
 # {{{ 
     begin
-      cpee_client = Riddl::Client.new(cpee_uri)
-      rescue_client = Riddl::Client.new(rescue_uri)
       injected = nil
 
     # Get description {{{
@@ -74,6 +65,10 @@ class InjectionService < Riddl::Implementation
     # Get call-node  and service_operation {{{ 
     call_node = description.find("//cpee:call[@id = '#{position}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
     service_operation = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','')
+    status, resp = cpee_client.resource("properties/values/endpoints/#{call_node.attributes['endpoint']}").get 
+    puts "ERROR receiving endpoint named #{call_node.attributes['endpoint']}" unless status == 200
+    rescue_uri = XML::Smart.string(resp.value('value').read).root.text
+    rescue_client = Riddl::Client.new(rescue_uri)
     # }}} 
     # Create injected-block {{{
     injected = description.root.add("injected")
@@ -147,7 +142,9 @@ class InjectionService < Riddl::Implementation
     puts "=== setting description #{status}"
     status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")] if continue
     puts "=== setting position: #{status}"
-    sleep 1
+    # to avoid timing issue with the cockpit here is a sleep
+    puts "=== to avoid timing issue with the cockpit here is a sleep" if restart
+    sleep 8 if restart
     status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")] if restart
     puts "=== starting: #{status}"
     # }}} 
@@ -361,11 +358,11 @@ class InjectionService < Riddl::Implementation
     bool
   end# }}}
 
-  def is_a_number?(s)
+  def is_a_number?(s) #{{{
     s.to_s.match(/\A[+-]?\d+?(\.\d+)?\Z/) == nil ? false : true 
-  end
+  end#}}}
 
-  def check_constraint(con, cpee_client, wf)
+  def check_constraint(con, cpee_client, wf) #{{{
     xpath = ""
     value1 = con.attributes.include?('value') ? con.attributes['value'] : ""
     if con.attributes.include?('variable')
@@ -383,7 +380,7 @@ class InjectionService < Riddl::Implementation
     value2 =  wf.find("//p:properties/#{xpath}", {"p"=>"http://rescue.org/ns/properties/0.2"}).first.text
     value2 = value2.to_f if is_a_number?(value2.strip)
     value2.send(con.attributes['comparator'], value1)
-  end
+  end#}}}
 
   def fill_properties(node, index) #{{{
     code = ""
