@@ -65,11 +65,6 @@ run(
               run GetInterface if method :get => 'output'
             end
           end
-          on resource 'messages' do
-            on resource do
-              run GetMessage if method :get => '*'
-            end
-          end
           on resource do # Subgroup-level
             run GenerateFeed if method :get => '*'
             run DeleteResource if method :delete => '*'

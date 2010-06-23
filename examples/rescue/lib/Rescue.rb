@@ -1,17 +1,11 @@
-class GetMessage < Riddl::Implementation
-  def response
-    xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-    message = xml.find("//domain:message[@name = '#{@r[-1]}']", {"domain" => "http://rescue.org/ns/domain/0.2"}).first
-    schema = RNGSchema.new(true)
-    schema.append_schemablock(xml.find("//domain:message[@name = '#{@r[-1]}']", {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
-    Riddl::Parameter::Complex.new("xml","text/xml", schema.to_s)
-  end
-end
-
 class GetOperations < Riddl::Implementation
   def response
+    if not File.exists?("#{@r[0..1].join("/")}/interface.xml")
+      @status = 410
+      return
+    end
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-    ret = XML::Smart.string("<operations xmlns=\"http://rescue.org/ns/rescue/0.2\"/>")
+    ret = XML::Smart.string("<operations xmlns=\"http://rescue.org/ns/domain/0.2\"/>")
     xml.find("/domain:domain-description/domain:operations/*", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |o|
       ret.root.add("operation", {"name" => o.attributes["name"]})
     end
@@ -91,6 +85,10 @@ class GetInterface < Riddl::Implementation
   def response
     schema = RNGSchema.new(false)
     p = nil
+    if not File.exists?("#{@r[0..1].join("/")}/interface.xml")
+      @status = 410
+      return
+    end
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
     params = nil
     out_name = "schema"
@@ -99,12 +97,11 @@ class GetInterface < Riddl::Implementation
     if @p[0] == nil # If no parameter is given, the defition of the class-level-workflow 
       schema = XML::Smart.string("<operation name='#{@r[-1]}' xmlns=\"http://rescue.org/ns/controlflow/0.2\"/>")
       o = xml.find("/domain:domain-description/domain:operations/flow:operation[@name='#{@r[-1]}']/flow:*", {"domain" => "http://rescue.org/ns/domain/0.2", "flow"=>"http://rescue.org/ns/controlflow/0.2"})
-      @status = 410 if o == nil
-      schema.root.add(o) if o != nil
-      messages = schema.root.add("messages")
-      xml.find("//flow:operation[@name='#{@r[-1]}']//flow:*[string(@message)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |e|
-        messages.add(xml.find("//domain:message[@name = '#{e.attributes['message']}']",  {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
+      if o.first.nil?
+        @status = 410 
+        return
       end
+      schema.root.add(o)
       out_name = "class-level-workflow"
     elsif @p[0].name == "properties"
       schema.append_schemablock(xml.find("/domain:domain-description/domain:properties", {"domain" => "http://rescue.org/ns/domain/0.2"}).first)
@@ -121,6 +118,24 @@ class GetInterface < Riddl::Implementation
         s = XML::Smart.string("<rng:element name='input-message' xmlns:rng='http://relaxng.org/ns/structure/1.0'/>")
         input.delete_if{|k,v| output.key?(k)}
         params = input
+        ep_node = Hash.new 
+        ep_xml = nil
+        xml.find("//flow:operation[@name='#{@r[-1]}']/descendant::flow:call[@endpoint-type = 'outside']", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
+          if ep_node[call.attributes['endpoint']].nil?
+            ep_node[call.attributes['endpoint']] = call.attributes['id']
+          else
+            ep_node[call.attributes['endpoint']] << ", #{call.attributes['id']}"
+          end
+        end
+        if ep_node.length > 0
+          ep_xml = XML::Smart.string("<rng:element name='additional_endpoints' xmlns:rng='http://relaxng.org/ns/structure/1.0'/>")
+          ep_node.each do |k,v|  
+            node = ep_xml.root.add("element", {"name"=>k})
+            c = node.add("caption", "Used at call(s): #{v}")
+            c.namespaces.add("domain", "http://rescue.org/ns/domain/0.2")
+          end
+        end
+        schema.append_schemablock(ep_xml.root) if ep_xml
       end
       
       # Select output of all state-controlflows with an given operation and remove all call-inputs
@@ -129,7 +144,7 @@ class GetInterface < Riddl::Implementation
         output.delete_if{|k,v| input.key?(k)}
         params = output
       end
-      params.sort.each do |k,v|
+      params.each do |k,v|
         s.root.add(v)
       end
       schema.append_schemablock(s.root)
@@ -139,41 +154,17 @@ class GetInterface < Riddl::Implementation
 
   def collect_input(operation_name, xml)
     params = Hash.new
-    xml.find("/domain:domain-description/domain:operations/flow:operation[@name='#{operation_name}']/descendant::flow:call", 
-            {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
-      params.merge!(collect_input(call.attributes["service-operation"], xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes["service-operation"] # Call refers to another operation  of the service
-      call.find("child::flow:input", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
-        if input.attributes.include?("message") # call uses a message
-          xml.find("/domain:domain-description/domain:messages/domain:message[@name='#{input.attributes["message"]}']/rng:*",
-                  {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlfow/0.2"}).each do |p|
-            params[p.attributes["name"]] = p
-          end
-        else
-          params[input.attributes['message-parameter']] = xml.find("//rng:element[@name='#{input.attributes['message-parameter']}']", {"rng"=>"http://relaxng.org/ns/structure/1.0"}).first if input.attributes.include?('message-parameter')
-        end
-      end  
+    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:call/flow:input", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
+      params[input.attributes['message-parameter']] = input.children.first if input.attributes.include?('message-parameter')
     end
-    puts "INPUT for #{operation_name}: " + params.inspect
     params
   end
 
   def collect_output(operation_name, xml)
     params = Hash.new
-    xml.find("/domain:domain-description/domain:operations/flow:operation[@name='#{operation_name}']/descendant::flow:call", 
-            {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
-      params.merge!(collect_output(call.attributes["service-operation"], xml)) if call.attributes.include?("service-operation") && operation_name != call.attributes["service-operation"] # Call refers to another operation of the service
-      call.find("child::flow:output", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
-        if output.attributes.include?("message") # call uses a message
-          xml.find("/domain:domain-description/domain:messages/domain:message[@name='#{output.attributes["message"]}']/rng:*",
-                  {"domain" => "http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0", "flow"=>"http://rescue.org/ns/controlfow/0.2"}).each do |p|
-            params[p.attributes["name"]] = p
-          end
-        else
-          params[output.attributes['message-parameter']] = xml.find("//rng:element[@name='#{output.attributes['message-parameter']}']", {"rng"=>"http://relaxng.org/ns/structure/1.0"}).first if output.attributes.include?('message-parameter')
-        end
-      end  
+    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:call/flow:output", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
+      params[output.attributes['message-parameter']] = output.children.first if output.attributes.include?('message-parameter')
     end
-    puts "OUTPUT for #{operation_name}: " + params.inspect
     params
   end
 end
@@ -201,13 +192,13 @@ class RNGSchema
   def initialize(remove_captions)
     @__remove_captions = remove_captions
     @__schema = XML::Smart.string("<grammar/>")
-    @__schema.root.attributes.add("xmlns", "http://relaxng.org/ns/structure/1.0")
-    @__schema.root.attributes.add("xmlns:rng", "http://relaxng.org/ns/structure/1.0")
-    @__schema.root.attributes.add("xmlns:domain", "http://rescue.org/ns/domain/0.2")
-    @__schema.root.attributes.add("xmlns:service", "http://rescue.org/ns/service/0.2")
-    @__schema.root.attributes.add("xmlns:exec", "http://rescue.org/ns/execution/0.2")
-    @__schema.root.attributes.add("xmlns:wf", "http://rescue.org/ns/workflow/0.2")
-    @__schema.root.attributes.add("datatypeLibrary", "http://www.w3.org/2001/XMLSchema-datatypes")
+=begin
+    @__schema.root.namespaces.add("domain", "http://rescue.org/ns/domain/0.2")
+    @__schema.root.namespaces.add("service", "http://rescue.org/ns/service/0.2")
+    @__schema.root.namespaces.add("flow", "http://rescue.org/ns/controlflow/0.2")
+=end
+    @__schema.root.namespaces.add("datatypeLibrary", "http://www.w3.org/2001/XMLSchema-datatypes")
+    @__schema.root.namespaces.add("rng", "http://relaxng.org/ns/structure/1.0")
     @__schema.root.add("start")
     @__start_node = @__schema.root.children[0] 
   end
@@ -274,6 +265,10 @@ class GenerateFeed < Riddl::Implementation
   end
 
   def parse_interface(group_name, url)
+    if not File.exists?("groups/#{group_name}/interface.xml")
+      @status = 410
+      return
+    end
     xml = XML::Smart.open("groups/#{group_name}/interface.xml")
     schema_ do
       operations = xml.find("/interface/operations/*")

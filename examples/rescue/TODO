@@ -1,0 +1,37 @@
+RESUCE: open tasks
+==================
+
+
+*) Connect RESCUE via subscriptions to CPEE
+  -> Handler subscribes RESCUE whenever an injection is nedded, afterwards the subsription will be removed
+
+*) RESCUE log's into CPEE
+  -> Log what nodes are injected by this step
+    # e.g. "Injection caused by a01 results in a01_find, a01_select, a01_book", "Injection caused by a02 has no fitting services explored", ...
+  -> Log if WF is in a state where it could not be executed any further (class and instance level)
+    # I think there is an CPEE function necessary
+
+*) REST-Api of RESCUE validation
+  -> Input- and output messages - Generation: OK
+    # Validation of the in- and output during runtime necessary? When yes, should it be performed within the handler?
+  -> Schemes needs to be updated
+  -> Properties interface - OK
+  -> Additional endpoints must be provided in the schema - OK
+
+*) Extend RESCUE instruction-set to provide same features as CPEE
+
+*) Check where and how properties are and should (not) be accessible on user-, class- and instance-level
+
+*) Implement a selection service using the callback function of CPEE
+  -> an URI should be polled from the client where the data is formated as given in group-by parameters
+
+*) Should the context and endpoints be cleaned up after an injected block is finished?
+  -> PRO: context is not exploding in number
+  -> CONTRA: historical information about the results are lost (are they of interest for any repair service?)
+
+*) Cinemas-Example:
+  -> Show the whole controlflow-set provided by RESCUE (call, manipulate, loop, critical, parallel)
+  -> Show properties dependencies between two calls
+
+*) Injection within a loop? 
+  -> How schould this be handeled in a strictly progressiv way?

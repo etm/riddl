@@ -121,11 +121,6 @@
             <get in="output" out="schema"/>
           </resource>
         </resource>
-        <resource relative="messages">
-          <resource>
-            <get in="*" out="xml"/>
-          </resource>
-        </resource>
 <!--}}}-->
         <resource> <!-- Subgroup-level -->
 <!-- {{{ -->
