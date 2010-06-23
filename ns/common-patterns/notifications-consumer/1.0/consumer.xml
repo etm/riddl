@@ -85,7 +85,7 @@
   </message>
 
   <message name="acknowledgment">
-    <parameter name="message-uid" type="integer"/>
+    <parameter name="message-uid" type="string"/>
     <parameter name="fingerprint-with-consumer-secret" type="string"/>
   </message>
 
