@@ -96,18 +96,18 @@
       </grammar>
     </parameter>
     <optional>
-      <parameter name="message-uid" type="integer"/>
+      <parameter name="message-uid" type="string"/>
       <parameter name="fingerprint-with-producer-secret" type="string"/>
     </optional>  
   </message>
   
   <message name="delete">
-    <parameter name="message-uid" type="integer"/>
+    <parameter name="message-uid" type="string"/>
     <parameter name="fingerprint-with-producer-secret" type="string"/>
   </message>
   <message name="request">
     <optional>
-      <parameter name="message-uid" type="integer"/>
+      <parameter name="message-uid" type="string"/>
       <parameter name="fingerprint-with-producer-secret" type="string"/>
     </optional>  
   </message>
@@ -135,7 +135,7 @@
   </message>
 
   <message name="details">
-    <parameter name="message-uid" type="integer"/>
+    <parameter name="message-uid" type="string"/>
     <parameter name="url" type="string"/>
     <oneOrMore>
       <parameter name="topic" type="string"/>

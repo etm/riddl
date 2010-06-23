@@ -21,8 +21,8 @@ module Riddl
               run Riddl::Utils::Notifications::Producer::CreateSubscription, data, handler if post 'subscribe'
               on resource do
                 run Riddl::Utils::Notifications::Producer::Subscription, data, xsls[:subscription], details if get 'request'
-                run Riddl::Utils::Notifications::Producer::UpdateSubscription, data, handler if put
-                run Riddl::Utils::Notifications::Producer::DeleteSubscription, data, handler if delete
+                run Riddl::Utils::Notifications::Producer::UpdateSubscription, data, handler if put 'details'
+                run Riddl::Utils::Notifications::Producer::DeleteSubscription, data, handler if delete 'delete'
                 on resource 'ws' do
                   run Riddl::Utils::Notifications::Producer::WS, data, handler if websocket
                 end
@@ -154,8 +154,10 @@ module Riddl
             data    = @a[0]
             handler = @a[1]
             key     = @r.last
-            topics  = []
-            handler.new(data,key,topics).delete
+
+            FileUtils::rm_rf(data + '/' + key)
+            handler.new(data,key,nil).delete
+            return
           end
         end #}}}
         
