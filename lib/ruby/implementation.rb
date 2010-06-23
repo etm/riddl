@@ -34,6 +34,10 @@ module Riddl
       @a =     ws[:a]     # args to run command
     end
 
+    def closed?
+      @ws[:io].closed?
+    end
+
     def onopen;end
     def onclose;end
     def on;end
