@@ -1,18 +1,42 @@
 require '../../lib/ruby/client'
 require 'soap/wsdlDriver'
 
-class Injection < Riddl::Implementation
+class InjectionHandler < Riddl::Implementation
+# This class allows a dynmic distribution to differetn injection service. Inthoery here could be some logic to decied wich service to use for injection. Cloudify Everything!
   def response
-    # {{{
-    # Stop instance {{{
-    # cpee_client = Riddl::Client.new(@p[1].value)
-    # puts "stoping before trhead"
-    # status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "stopping")]
-    # }}}  
+    puts "Received sunscripton"
+    puts @p.inspect
+
+    p = YAML.load(@p.value('notification'))
+    cpee = Riddl::Client.new(p[:instance])
+    puts p["callback"]
+    injection_service_uri = "http://localhost:9290/injection/service" # This could be any other injection service
+    injection_client = Riddl::Client.new(injection_service_uri)
+    puts "=== Injecting with service: #{injection_service_uri}"
+    puts "=== Injecting at position: #{p[:activity]}"
+    puts "=== Injecting at CPEE: #{p[:instance]}"
+    puts "=== Injecting using RESCUE: #{p[:endpoint]}"
+    status, resp = injection_client.post [
+      Riddl::Parameter::Simple.new('position', p[:activity]),
+      Riddl::Parameter::Simple.new('cpee', p[:instance]),
+      Riddl::Parameter::Simple.new('rescue', p[:endpoint])
+    ]
+    puts "ERROR finding an injection-service" if resp.value('injecting') != "true"
+    status, resp = cpee.resource("notifications/subscriptions/#{@p.value('key')}").delete [
+      Riddl::Parameter::Simple.new("message-uid","ralph"),
+      Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
+    ]
+    puts "ERROR deleting subscription" if status != 200 
+    Riddl::Parameter::Simple.new("continue","false")
+  end
+end
+
+class InjectionService < Riddl::Implementation
+  def response
+    puts "=== Starting injection"
     Thread.new {
       Thread.pass; 
       begin
-        # TODO: neue Idee: Handler subsribed repo auf stoped -> repo injected ->
         stopped = false
         cpee = Riddl::Client.new(@p.value('cpee'))
         until stopped
@@ -31,7 +55,7 @@ class Injection < Riddl::Implementation
   end
 
   def analyze(position, cpee_uri, rescue_uri)
-  restart = false
+  restart = true
   continue = true
 # {{{ 
     begin
@@ -88,7 +112,7 @@ class Injection < Riddl::Implementation
        # }}} 
     else 
       # Injection service-level {{{
-      parallel = injected.add("parallel")
+      parallel = injected.add("parallel", {"generated"=>"true"})
       prop = call_node.find("ancestor::cpee:injected", {"cpee" => "http://cpee.org/ns/description/1.0"}).last.attributes['properties']
       injected.attributes['properties'] = "#{prop}[:\"#{call_node.attributes['oid']}\"]"
       add_service(parallel, rescue_client, call_node, cpee_client, "")
@@ -123,8 +147,9 @@ class Injection < Riddl::Implementation
     puts "=== setting description #{status}"
     status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")] if continue
     puts "=== setting position: #{status}"
+    sleep 1
     status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")] if restart
-    puts "=== starting #{status}"
+    puts "=== starting: #{status}"
     # }}} 
     rescue => e
       puts $!
@@ -217,11 +242,11 @@ class Injection < Riddl::Implementation
     end # }}}
     # Add repositroy-information to new operation-calls {{{
     wf.find("//flow:execute/descendant::flow:call", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |call|
-      call.attributes['injection'] = call_node.find("string(child::cpee:parameters/cpee:service/cpee:injection)", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+      call.attributes['injection_handler'] = call_node.find("string(child::cpee:parameters/cpee:service/cpee:injection_handler)", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
     end # }}}
     doc = wf.find("//flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
-    injected.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}"}, man_text)
-    injected.add("manipulate", {"id"=>"delete_objects_of_#{call_node.attributes['id']}"}, man_text_del)
+    injected.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}", "generated"=>"true"}, man_text)
+    injected.add("manipulate", {"id"=>"delete_objects_of_#{call_node.attributes['id']}", "generated"=>"true"}, man_text_del)
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root # }}}
   end
 
@@ -283,13 +308,13 @@ class Injection < Riddl::Implementation
     prop_code = ""
     prop_code << "#{prop}[:\"#{call_node.attributes['oid']}\"][:\"#{resource_path}\"] = RescueHash.new\n"
     prop_code << fill_properties(wf.find("//p:properties", {"p"=>"http://rescue.org/ns/properties/0.2"}).first, "#{prop}[:\"#{call_node.attributes['oid']}\"][:\"#{resource_path}\"]")
-    branch.add("manipulate", {"id"=>"create_properties_for_#{call_node.attributes['id']}_service_#{index}"}, prop_code)  #}}}
+    branch.add("manipulate", {"id"=>"create_properties_for_#{call_node.attributes['id']}_service_#{index}", "generated"=>"true"}, prop_code)  #}}}
     doc = wf.find("//flow:#{op}/flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
     # The new doc seem's to have lost all namespace-information during document creation
     ns = doc.root.namespaces.add("flow","http://rescue.org/ns/controlflow/0.2")
     doc.find("//*").each { |node| node.namespace = ns }
-    branch.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}_service_#{index}"}, man_text)
-    branch.add("manipulate", {"id"=>"delete_objects_of_#{call_node.attributes['id']}_service_#{index}"}, man_text_delete)
+    branch.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}_service_#{index}", "generated"=>"true"}, man_text)
+    branch.add("manipulate", {"id"=>"delete_objects_of_#{call_node.attributes['id']}_service_#{index}", "generated"=>"true"}, man_text_delete)
     XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root # }}}
   end
 
@@ -304,7 +329,7 @@ class Injection < Riddl::Implementation
     else
       wf = XML::Smart.string(resp[0].value.read)
       if check_constraints(wf, call_node, cpee_client)
-        branch = parallel_node.add("parallel_branch")
+        branch = parallel_node.add("parallel_branch", {"generated"=>"true"})
         branch.add(inject_service_level(wf, call_node, "#{rescue_client.instance_variable_get("@base")}/#{resource_path}", branch).children)
         del_block = branch.find("child::cpee:manipulate[@id='delete_objects_of_#{call_node.attributes['id']}_service_#{"#{rescue_client.instance_variable_get("@base")}/#{resource_path}".gsub("/","_").gsub(":","_")}']", {"cpee"=>"http://cpee.org/ns/description/1.0"}).first
         branch.add(del_block) # Move del-block to last psoition in branch

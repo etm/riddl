@@ -192,11 +192,6 @@ class RNGSchema
   def initialize(remove_captions)
     @__remove_captions = remove_captions
     @__schema = XML::Smart.string("<grammar/>")
-=begin
-    @__schema.root.namespaces.add("domain", "http://rescue.org/ns/domain/0.2")
-    @__schema.root.namespaces.add("service", "http://rescue.org/ns/service/0.2")
-    @__schema.root.namespaces.add("flow", "http://rescue.org/ns/controlflow/0.2")
-=end
     @__schema.root.namespaces.add("datatypeLibrary", "http://www.w3.org/2001/XMLSchema-datatypes")
     @__schema.root.namespaces.add("rng", "http://relaxng.org/ns/structure/1.0")
     @__schema.root.add("start")
@@ -244,7 +239,8 @@ class GenerateFeed < Riddl::Implementation
       groups << File::basename(f) if File::directory? f
     end
     Riddl::Parameter::Complex.new("atom-feed","text/xml") do
-      feed__ :xmlns => 'http://www.w3.org/2005/Atom' do
+      text_! "<?xml-stylesheet href=\"http://localhost:9290/xsl/instances.xsl\" type=\"text/xsl\"?>"
+      feed_ :xmlns => 'http://www.w3.org/2005/Atom' do
         title_ "Resourcelist at #{url}#{@r.join("/")}"
         updated_ File.mtime("#{@r.join("/")}").xmlschema
         generator_ 'RESCUE', :uri => "#{url}"
@@ -254,7 +250,7 @@ class GenerateFeed < Riddl::Implementation
         groups.each do |g|
           entry_ do 
             title_ "#{g}"
-            author_ do name_ "RESCUE" end
+            author_ do name_ "RESCUEv0.2" end
             id_ "#{url}#{@r.join("/")}/#{g}/"
             link_ g, :href=>"#{url}#{@r.join("/")}/#{g}/"
             updated_ File.mtime("#{@r.join("/")}/#{g}").xmlschema

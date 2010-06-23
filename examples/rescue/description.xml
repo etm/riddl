@@ -89,8 +89,12 @@
       <get in="*" out="xml"/>
     </resource>  
     <resource relative="injection">
-      <get in="injection-request"/>
-      <post in="injection-request"/>
+      <resource relative="handler">
+        <post in="*"/>
+      </resource>
+      <resource relative="service">
+        <post in="injection-request"/>
+      </resource>
     </resource>
     <resource relative="select">
       <get in="*"/>

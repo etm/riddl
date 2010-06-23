@@ -33,8 +33,12 @@ run(
         run Riddl::Utils::ERBServe, 'rng+xsl' if method :get => '*'
       end
       on resource 'injection' do
-        run Injection if method :get => 'injection-request'
-        run Injection if method :post => 'injection-request'
+        on resource 'handler' do
+          run InjectionHandler if method :post => '*'
+        end
+        on resource 'service' do
+          run InjectionService if method :post => 'injection-request'
+        end
       end
       on resource 'select' do
         run Select if method :get => '*'

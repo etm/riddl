@@ -424,7 +424,7 @@ Recent changes:
         <xsl:if test="@service-operation">
           <xsl:element name="service">
             <xsl:element name="serviceoperation">"<xsl:value-of select="@service-operation"/>"</xsl:element>
-            <xsl:element name="injection"><xsl:value-of select="@injection"/></xsl:element>
+            <xsl:element name="injection_handler"><xsl:value-of select="@injection_handler"/></xsl:element>
           </xsl:element>
         </xsl:if>
         <xsl:if test="@group-by">
