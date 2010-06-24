@@ -102,12 +102,14 @@
       <resource relative="handler">
         <post in="injection-handler-request" out="injection-response"/>
         <put in="monitor"/>
+        <get in="*"/>
         <resource>
           <post in="*"/>
         </resource>
       </resource>
       <resource relative="service">
         <post in="injection-service-request" out="injection-response"/>
+        <get in="*"/>
         <resource>
           <post in="*"/>
         </resource>

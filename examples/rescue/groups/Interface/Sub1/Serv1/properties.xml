@@ -2,8 +2,7 @@
 
 <service-description xmlns="http://rescue.org/ns/service/0.2"
                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-  <properties>
-  </properties>
+  <properties xmlns="http://rescue.org/ns/properties/0.2"/>
   <operations xmlns="http://rescue.org/ns/controlflow/0.2">
     <op1>
       <endpoints>
@@ -16,8 +15,11 @@
         <call id="s1_op1" endpoint="ep" http-method="post">
           <input name="senseless" variable="wait"/>
           <input name="timeout" message-parameter="pi1"/>
-          <output message-parameter="po1" fix-value="4711"/>
         </call>
+        <manipulate id="set_output">
+          <variable output-parameter="mpo1" local="out"/>
+          out = 2
+        </manipulate>
       </execute>
       <compensate/>
       <undo/>

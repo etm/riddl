@@ -3,13 +3,21 @@ require '../../lib/ruby/client'
 class InjectionService < Riddl::Implementation
   $is_resources = {}
   def response
-    if @p.value('position') && @p.value('monitor')# received subscription-request
+    if @p.length == 0 # Give a Liste of subscirbed injections
+      xml = XML::Smart.string('<injection-services/>')
+      $is_resources.each do |k,v|
+        node = xml.root.add('resource', {'id'=>k})
+        node.add('monitor', v[:monitor])
+        node.add('position', v[:position])
+      end
+      return Riddl::Parameter::Complex.new("services","text/xml", xml.to_s)
+    elsif @p.value('position') && @p.value('monitor')# received subscription-request
       puts "== Injection-service: received subsription-request"
       resource = Digest::MD5.hexdigest(rand(Time.now).to_s)
       $is_resources[resource] = {:position => @p.value('position'), :monitor => @p.value('monitor')}
       puts "\t=== Injection-service: Created resource: #{resource}"
       @status = 200
-      return Riddl::Parameter::Simple.new('id', resource)
+      Riddl::Parameter::Simple.new('id', resource)
     elsif @p.value('event') == "change" && @p.value('topic') == "properties/state"# received notification
       notification = YAML::load(@p.value('notification'))
       if notification[:state] == :stopped
@@ -28,13 +36,14 @@ class InjectionService < Riddl::Implementation
             Riddl::Parameter::Simple.new("instance", notification[:instance]),
             Riddl::Parameter::Simple.new("operation", 'lock')
           ]
-          sleep 0.1
+          sleep 1
           retries += 1
-          puts "Injection-service: INFO requesting lock for instance '#{notification[:instance]} failed (residual retries: #{50-retries})"
+#          puts "Injection-service: INFO requesting lock for instance '#{notification[:instance]} failed (residual retries: #{50-retries})"
         end while status == 503 and retries < 50
         puts "Injection-service: ERROR during requesting lock for instance '#{notification[:instance]}' (#{status})" unless status == 200 or status == 503
         puts "Injection-service: ERROR during requesting lock for instance '#{notification[:instance]}' (#{status}) after 50 retries" if status == 503
         analyze($is_resources[@r[-1]][:position], cpee) if status == 200
+        $is_resources.delete(@r[-1])
         status, resp = monitor.put [
           Riddl::Parameter::Simple.new("instance", notification[:instance]),
           Riddl::Parameter::Simple.new("operation", 'release')

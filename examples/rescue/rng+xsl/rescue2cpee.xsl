@@ -396,9 +396,11 @@ Recent changes:
             <xsl:if test="@variable">
               <xsl:value-of select="@variable"/>
             </xsl:if>
-            <xsl:text> = result.value('</xsl:text><xsl:value-of select="@name"/><xsl:text>')</xsl:text>
-            <xsl:if test="@type = 'complex'">
-              <xsl:text>.read</xsl:text>
+            <xsl:if test="@name">
+              <xsl:text> = result.value('</xsl:text><xsl:value-of select="@name"/><xsl:text>')</xsl:text>
+              <xsl:if test="@type = 'complex'">
+                <xsl:text>.read</xsl:text>
+              </xsl:if>
             </xsl:if>
           </xsl:otherwise>
         </xsl:choose>

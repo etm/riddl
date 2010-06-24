@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <domain-description  xmlns="http://rescue.org/ns/domain/0.2"
+            xmlns:domain="http://rescue.org/ns/domain/0.2"
             xmlns:rng="http://relaxng.org/ns/structure/1.0">
   <properties>
 <!-- {{{ -->
@@ -21,44 +22,6 @@
     </rng:element>
 <!-- }}} -->
   </properties>
-  <messages>
-    <message name="in_op1">
-<!-- {{{ -->      
-      <rng:element name="pi1">
-        <caption lang="en">Title</caption>
-        <caption lang="de">Titel</caption>
-        <rng:data type="string"/>
-      </rng:element>
-<!-- }}} --> 
-    </message>
-    <message name="out_op1">
-<!-- {{{ -->      
-      <rng:element name="po1">
-        <caption lang="en">Movietitle</caption>
-        <caption lang="de">Filmtitel</caption>
-        <rng:data type="string"/>
-      </rng:element>
-<!-- }}} --> 
-    </message>
-    <message name="in_op2">
-<!-- {{{ -->     
-      <rng:element name="pi2">
-        <caption lang="en">Movietitle</caption>
-        <caption lang="de">Filmtitel</caption>
-        <rng:data type="string"/>
-      </rng:element>
-<!-- }}} --> 
-    </message>
-    <message name="out_op2">
-<!-- {{{ -->     
-      <rng:element name="po2">
-        <caption lang="en">Movietitle</caption>
-        <caption lang="de">Filmtitel</caption>
-        <rng:data type="string"/>
-      </rng:element>
-<!-- }}} --> 
-    </message>
-  </messages>
   <operations>
     <operation name="op1" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
@@ -67,8 +30,14 @@
       <endpoints/>
       <execute>
         <call id="perform_op1" endpoint="resource_path" service-operation="op1">
-          <input message="in_op1"/>
-          <output message="out_op1"/>
+          <input name="pi1" message-parameter="op1">
+            <domain:caption lang="en">pi1</domain:caption>
+            <rng:data type="string"/>
+          </input>
+          <output name="po1" message-parameter="mpo1">
+            <domain:caption lang="en">po2</domain:caption>
+            <rng:data type="string"/>
+          </output>
         </call>
       </execute>
       <compensate/>
@@ -84,16 +53,23 @@
         <class_input>3</class_input>
         <class_out/>
       </context-variables>
-      <endpoints>
-        <resource_path/>
-      </endpoints>
+      <endpoints/>
       <execute>
         <call id="perform_op1" endpoint="resource_path" service-operation="op1">
-          <input name="pi1" variable="class_input"/>
-          <output name="po1" variable="class_out"/>
+          <input name="mpi1" message-parameter="op2">
+            <domain:caption lang="en">op2</domain:caption>
+            <rng:data type="string"/>
+          </input>
+          <output name="mpo2" variable="class_out">
+            <domain:caption lang="en">class_op2</domain:caption>
+            <rng:data type="string"/>
+          </output>
         </call>
         <call id="op2" endpoint="resource_path"  service-operation="op2">
-          <input message="in_op2"/>
+          <input name="pi2" variable="class_out">
+            <domain:caption lang="en">op2</domain:caption>
+            <rng:data type="string"/>
+          </input>
         </call>
       </execute>
       <compensate/>

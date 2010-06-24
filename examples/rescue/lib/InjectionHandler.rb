@@ -4,7 +4,17 @@ class InjectionHandler < Riddl::Implementation
   $ih_resources = {}
   $ih_instance_locked = {}
   def response
-    if @p.value('position') # received subscription-request
+    if @p.length == 0 # Give a Liste of subscirbed injections
+      xml = XML::Smart.string('<injection-handler/>')
+      notfifications = xml.root.add("notifications")
+      $is_resources.each { |k,v| notfifications.add('resource', v)}
+      locks = xml.root.add('instance-locks')
+      $ih_instance_locked.each { |k,v| locks.add('instance', k)}
+      client = Riddl::Client.new("http://#{@env['HTTP_HOST']}/#{@r[0..-2].join('/')}/service")
+      status, resp = client.get
+      xml.root.add(XML::Smart.string(resp.value('services').read).root)
+      return Riddl::Parameter::Complex.new("bla","text/xml", xml.to_s)
+    elsif @p.value('position') # received subscription-request
       puts "== Injection-handler: received subsription-request"
       resource = Digest::MD5.hexdigest(rand(Time.now).to_s)
       $ih_resources[resource] = @p.value('position')
@@ -47,7 +57,7 @@ class InjectionHandler < Riddl::Implementation
       end
     else # some other request
       puts "\t=== Injection-handler: ERROR: unkonwn request"
-      puts @p.inpstect
+      puts @p.inspect
       @status = 404
     end
     Riddl::Parameter::Simple.new("continue",continue)
