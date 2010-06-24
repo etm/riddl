@@ -60,6 +60,12 @@ class InjectionService < Riddl::Implementation
         # to avoid timing issue with the cockpit here is a sleep
         puts "\t=== Injection-service: starting the instance ist not alloed becaqus of pending injections to this instance" unless restart
         if restart
+          status, resp = cpee.resource("/properties/values/positions").get
+          positions = XML::Smart.string(resp[0].value.read)
+          positions.find("/p:value/p:*", {'p'=>'http://riddl.org/ns/common-patterns/properties/1.0'}).each {|pos| pos.text = 'after'}
+          puts positions
+          status, resp = cpee.resource("/properties/values/positions").put [Riddl::Parameter::Simple.new("content", positions.root.dump)]
+          puts "\t=== setting positions to after: #{status}"
           puts "\t=== Injection-service: to avoid timing issue with the cockpit here is a sleep" if restart
           sleep 3 
 #          status, resp = cpee.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
@@ -164,8 +170,6 @@ class InjectionService < Riddl::Implementation
     # Set inject, description, position and re-start {{{
     status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("content", "<content>#{description.root.dump}</content>")]
     puts "=== setting description #{status}"
-    status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")] if continue
-    puts "=== setting position: #{status}"
     # }}} 
     rescue => e
       puts $!
