@@ -9,18 +9,23 @@ class InjectionService < Riddl::Implementation
         node = xml.root.add('resource', {'id'=>k})
         node.add('monitor', v[:monitor])
         node.add('position', v[:position])
+        node.add('instance', v[:instance])
       end
       return Riddl::Parameter::Complex.new("services","text/xml", xml.to_s)
-    elsif @p.value('position') && @p.value('monitor')# received subscription-request
+    elsif @p.value('position') && @p.value('monitor') && @p.value('instance')# received subscription-request
       puts "== Injection-service: received subsription-request"
       resource = Digest::MD5.hexdigest(rand(Time.now).to_s)
-      $is_resources[resource] = {:position => @p.value('position'), :monitor => @p.value('monitor')}
+      semaphore = Mutex.new
+      semaphore.synchronize {
+        $is_resources[resource] = {:position => @p.value('position'), :monitor => @p.value('monitor'), :instance => @p.value('instance')}
+      }
       puts "\t=== Injection-service: Created resource: #{resource}"
       @status = 200
       Riddl::Parameter::Simple.new('id', resource)
     elsif @p.value('event') == "change" && @p.value('topic') == "properties/state"# received notification
+      restart = true
       notification = YAML::load(@p.value('notification'))
-      if notification[:state] == :stopped
+      if (notification[:state] == :stopped) && ($is_resources[@r[-1]])
         puts "== Injection-service: Received notification for injection at '#{$is_resources[@r[-1]][:position]}'on instance '#{notification[:instance]}'"
         puts "\t=== Injection-service: Delete subscription for properties/state - change" 
         cpee = Riddl::Client.new(notification[:instance])
@@ -42,13 +47,30 @@ class InjectionService < Riddl::Implementation
         end while status == 503 and retries < 50
         puts "Injection-service: ERROR during requesting lock for instance '#{notification[:instance]}' (#{status})" unless status == 200 or status == 503
         puts "Injection-service: ERROR during requesting lock for instance '#{notification[:instance]}' (#{status}) after 50 retries" if status == 503
-        analyze($is_resources[@r[-1]][:position], cpee) if status == 200
+        analyze($is_resources[@r[-1]][:position], cpee) if (status == 200) && ($is_resources[@r[-1]])
         $is_resources.delete(@r[-1])
         status, resp = monitor.put [
           Riddl::Parameter::Simple.new("instance", notification[:instance]),
           Riddl::Parameter::Simple.new("operation", 'release')
         ]
+        $is_resources.each do |k,v|
+          restart = false if v[:instance] == notification[:instance] # means if an other sunscription is registered for this instance => restart is not allowed
+        end
         puts "Injection-service: ERROR during releasing lock for instance '#{notification[:instance]}' (#{status})" unless status == 200
+        # to avoid timing issue with the cockpit here is a sleep
+        puts "\t=== Injection-service: starting the instance ist not alloed becaqus of pending injections to this instance" unless restart
+        if restart
+          status, resp = cpee.resource("/properties/values/positions").get
+          positions = XML::Smart.string(resp[0].value.read)
+          positions.find("/p:value/p:*", {'p'=>'http://riddl.org/ns/common-patterns/properties/1.0'}).each {|pos| pos.text = 'after'}
+          puts positions
+          status, resp = cpee.resource("/properties/values/positions").put [Riddl::Parameter::Simple.new("content", positions.root.dump)]
+          puts "\t=== setting positions to after: #{status}"
+          puts "\t=== Injection-service: to avoid timing issue with the cockpit here is a sleep" if restart
+          sleep 3 
+#          status, resp = cpee.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
+          puts "\t=== Injection-service: starting instance '#{notification[:instance]}': #{status}"
+        end
       end
     else # some other request
       @status = 404
@@ -57,7 +79,6 @@ class InjectionService < Riddl::Implementation
   end
 
   def analyze(position, cpee_client)
-  restart = false
   continue = true
 # {{{ 
     begin
@@ -149,13 +170,6 @@ class InjectionService < Riddl::Implementation
     # Set inject, description, position and re-start {{{
     status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("content", "<content>#{description.root.dump}</content>")]
     puts "=== setting description #{status}"
-    status, resp = cpee_client.resource("/properties/values/positions/#{call_node.attributes['id']}").put [Riddl::Parameter::Simple.new("value", "after")] if continue
-    puts "=== setting position: #{status}"
-    # to avoid timing issue with the cockpit here is a sleep
-    puts "=== to avoid timing issue with the cockpit here is a sleep" if restart
-    sleep 8 if restart
-    status, resp = cpee_client.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")] if restart
-    puts "=== starting: #{status}"
     # }}} 
     rescue => e
       puts $!

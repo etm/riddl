@@ -23,8 +23,12 @@ class InjectionHandler < Riddl::Implementation
       return Riddl::Parameter::Simple.new('id', resource)
     elsif @p.value('instance') # received request for injceting an instance
       if @p.value('operation') == 'lock'
-        proceed = ($ih_instance_locked.include?(@p.value('instance')) ? false : true)
-        $ih_instance_locked[@p.value('instance')] = "locked"
+        proceed = false
+        semaphore = Mutex.new
+        semaphore.synchronize {
+          proceed = ($ih_instance_locked.include?(@p.value('instance')) ? false : true)
+          $ih_instance_locked[@p.value('instance')] = "locked"
+        }
         puts "== Injection-handler: service asked for request to inject instance #{@p.value('instance')} => proceed: #{proceed}"
         @status = 503 unless proceed # 503: temporary not allowd
       elsif @p.value('operation') == 'release'
@@ -70,6 +74,7 @@ class InjectionHandler < Riddl::Implementation
     client = Riddl::Client.new(service_uri)
     status, resp = client.post [
       Riddl::Parameter::Simple.new('position', notification[:activity]), 
+      Riddl::Parameter::Simple.new('instance', notification[:instance]), 
       Riddl::Parameter::Simple.new('monitor', "http://localhost:9290/injection/handler")
     ]
     puts "Injection-handler: ERROR creating injection-resource (#{status})" unless status == 200 # Needs to be logged into the CPEE as well
