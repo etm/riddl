@@ -13,8 +13,9 @@ module Riddl
     WS_HANDSHAKE = "HTTP/1.1 101 Web Socket Protocol Handshake" + EOL +
                    "Upgrade: WebSocket" + EOL +
                    "Connection: Upgrade" + EOL +
-                   "WebSocket-Origin: %s" + EOL +
-                   "WebSocket-Location: %s" + EOL + EOL
+                   "Sec-WebSocket-Origin: %s" + EOL +
+                   "Sec-WebSocket-Location: %s" + EOL + EOL +
+                   "%s"
 
     def initialize(riddl,&blk)# {{{
       @riddl_norun = true
@@ -73,8 +74,11 @@ module Riddl
         ).params
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
 
-        if @riddl_env["HTTP_CONNECTION"] =~ /\AUpgrade\z/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/ && @riddl_env["HTTP_ORIGIN"] && @riddl_env["HTTP_HOST"]
-          @riddl_env["rack.io"].write(WS_HANDSHAKE % [@riddl_env["HTTP_ORIGIN"], ws_location])
+        if @riddl_env["HTTP_CONNECTION"] =~ /\AUpgrade\z/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/ && @riddl_env["HTTP_ORIGIN"] && @riddl_env["HTTP_HOST"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY1"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY2"]
+          sec1 = @riddl_env["HTTP_SEC_WEBSOCKET_KEY1"]
+          sec2 = @riddl_env["HTTP_SEC_WEBSOCKET_KEY2"]
+          key  = @riddl_env["rack.input"].read(8)
+          @riddl_env["rack.io"].write(WS_HANDSHAKE % [@riddl_env["HTTP_ORIGIN"], ws_location, ws_security_digest(sec1,sec2,key)])
           @riddl_env["rack.io"].flush
 
           @riddl_path = '/'
@@ -224,6 +228,16 @@ module Riddl
     end# }}}
 
   private
+    def ws_security_digest(key1, key2, key3)
+      bytes1 = ws_key_to_bytes(key1)
+      bytes2 = ws_key_to_bytes(key2)
+      return Digest::MD5.digest(bytes1 + bytes2 + key3)
+    end
+    def ws_key_to_bytes(key)
+      num = key.gsub(/\D/n, '').to_i() / key.scan(/ /).size
+      return [num].pack("N")
+    end
+
     def ws_location
       host   = @riddl_env['SERVER_NAME']
       scheme = @riddl_env['rack.url_scheme'] == "https" ? "wss" : "ws"

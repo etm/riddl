@@ -2,6 +2,7 @@
 require 'pp'
 require 'fileutils'
 require '../../lib/ruby/server'
+require 'digest/md5'
 
 use Rack::ShowStatus
 
