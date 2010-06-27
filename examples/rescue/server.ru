@@ -36,18 +36,11 @@ run(
       on resource 'injection' do
         on resource 'handler' do
           run InjectionHandler if method :post => 'injection-handler-request'
-          run InjectionHandler if method :put => 'monitor'
           run InjectionHandler if method :get => '*'
-          on resource do
-            run InjectionHandler if method :post => '*' # here comes the syning_after_message
-          end
+          run InjectionHandler if method :post => '*'
         end
         on resource 'service' do
           run InjectionService if method :post => 'injection-service-request' 
-          run InjectionService if method :get => '*'
-          on resource do
-            run InjectionService if method :post => '*' # here come an activity-state changed message
-          end
         end
       end
       on resource 'select' do

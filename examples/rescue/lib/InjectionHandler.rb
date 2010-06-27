@@ -1,90 +1,118 @@
 require '../../lib/ruby/client'
 
 class InjectionHandler < Riddl::Implementation
-  $ih_resources = {}
-  $ih_instance_locked = {}
+  $injection_queue = Hash.new
+  $notification_keys = Array.new
+  $registration_semaphore = Mutex.new # this semaphore prevents timing issues when a call leades to an injection which is directly followed by a sync_after event
   def response
-    if @p.length == 0 # Give a Liste of subscirbed injections
-      xml = XML::Smart.string('<injection-handler/>')
-      notfifications = xml.root.add("notifications")
-      $is_resources.each { |k,v| notfifications.add('resource', v)}
-      locks = xml.root.add('instance-locks')
-      $ih_instance_locked.each { |k,v| locks.add('instance', k)}
-      client = Riddl::Client.new("http://#{@env['HTTP_HOST']}/#{@r[0..-2].join('/')}/service")
-      status, resp = client.get
-      xml.root.add(XML::Smart.string(resp.value('services').read).root)
-      return Riddl::Parameter::Complex.new("bla","text/xml", xml.to_s)
-    elsif @p.value('position') # received subscription-request
-      puts "== Injection-handler: received subsription-request"
-      resource = Digest::MD5.hexdigest(rand(Time.now).to_s)
-      $ih_resources[resource] = @p.value('position')
-      puts "\t=== Injection-handler: Created resource: #{resource}"
-      @status = 200
-      return Riddl::Parameter::Simple.new('id', resource)
-    elsif @p.value('instance') # received request for injceting an instance
-      if @p.value('operation') == 'lock'
-        proceed = false
-        semaphore = Mutex.new
-        semaphore.synchronize {
-          proceed = ($ih_instance_locked.include?(@p.value('instance')) ? false : true)
-          $ih_instance_locked[@p.value('instance')] = "locked"
-        }
-        puts "== Injection-handler: service asked for request to inject instance #{@p.value('instance')} => proceed: #{proceed}"
-        @status = 503 unless proceed # 503: temporary not allowd
-      elsif @p.value('operation') == 'release'
-        puts "== Injection-handler: service released instance #{@p.value('instance')}"
-        $ih_instance_locked.delete(@p.value('instance'))
-      else
-        puts "Injection-handler: ERROR unknown operation requested"
-        puts @p.inspect
-        @status = 404
+    notification = YAML::load(@p.value('notification')) if @p.value('notification')
+    cpee = Riddl::Client.new(notification[:instance]) if notification
+    injection_service_uri = "http://#{@env['HTTP_HOST']}/injection/service"
+
+    if @p.length == 0 # Give a Liste of subscirbed injections {{{
+      xml = XML::Smart.string('<injection-queue/>')
+      $injection_queue.each do |uri, instance|
+        instance_node = xml.root.add('instance', {'uri' => uri})
+        instance.each do |pos,v|
+          instance_node.add(pos.to_s, v.to_s)
+        end
       end
-      return Riddl::Parameter::Simple.new("proceed", proceed)
-    elsif @p.value('vote') == "syncing_after" && @p.value('topic') == "running"# received notification
-      notification = YAML::load(@p.value('notification'))
-      puts "== Injection-handler: Received notification for '#{@p.value('vote')}' at position '#{notification[:activity]}'"
-      continue = nil
-      if $ih_resources.include?(@r[-1]) && $ih_resources[@r[-1]].to_s == notification[:activity].to_s
-        puts "\t=== Injection-handler: Position subscribed at this resource => vote continue: false"
-        continue = false
-        cpee = Riddl::Client.new(notification[:instance])
-        subscribe_injection_service(cpee, notification)
-        puts "\t=== Injection-handler: Delete subscription for running - syncing_after" 
+      callbacks = xml.root.add('outstanding-callbacks')
+      $notification_keys.each {|v| callbacks.add('callback', {'key'=>v})}
+      Riddl::Parameter::Complex.new("bla","text/xml", xml.to_s)
+# }}}
+    elsif @p.value('vote') == "syncing_after" && @p.value('topic') == "running"# received notification for sync_after {{{
+      registered = nil
+      $registration_semaphore.synchronize { registered = $notification_keys.include?(@p.value('key')) }
+      if registered
+        $notification_keys.delete(@p.value('key'))
+        puts "== Injection-handler: Received notification for '#{@p.value('vote')}' at position '#{notification[:activity]}'"
         status, resp = cpee.resource("notifications/subscriptions/#{@p.value('key')}").delete [
           Riddl::Parameter::Simple.new("message-uid","ralph"),
           Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
         ]
-        puts "Injection-handler: ERROR deleting subscription (#{status})" unless status == 200 # Needs to be logged into the CPEE as well
+        puts "Injection-handler: ERROR deleting subscription (#{status})" unless status == 200 # Needs to be logged into the CPEE as well 
+        puts "Instance: #{notification[:instance]}"
+        puts $injection_queue.inspect
+        unless $injection_queue.include?(notification[:instance])
+          puts "\t=== Injection-handler: Subscribing injection-service for state-changed event"
+          $injection_queue[notification[:instance]] = Hash.new
+          status, resp = cpee.resource("notifications/subscriptions").post [
+            Riddl::Parameter::Simple.new("url", "http://#{@env['HTTP_HOST']}#{@env['PATH_INFO']}"),
+            Riddl::Parameter::Simple.new("topic", "properties/state"),
+            Riddl::Parameter::Simple.new("events", "change")
+          ]
+          puts "Injection-handler: ERROR subscribing state/changed (#{status})" unless status == 200 # Needs to be logged into the CPEE as well
+          puts resp.inspect
+        end
+        $injection_queue[notification[:instance]][notification[:activity]] = 'at'
+        Riddl::Parameter::Simple.new('continue','false')
       else
-        puts "\t=== Injection-handler: Position not subscribed at this resource => vote continue: true"
-        continue = true
+        puts "\t=== Injection-handler: Callback with key '#{@p.value('key')}' not subscribed"
+        puts $notification_keys
+        Riddl::Parameter::Simple.new('continue','true')
       end
+# }}}
+    elsif @p.value('event') == "change" && @p.value('topic') == "properties/state"# received notification for instance stopped{{{
+      if notification[:state] != :stopped
+        puts "State of instance #{notification[:instance]} changed to #{notification[:state]}"
+        return
+      else
+        puts "Injection-handler: #{notification[:instance]} informed about state stopped"
+        status, resp = cpee.resource("notifications/subscriptions/#{@p.value('key')}").delete [
+          Riddl::Parameter::Simple.new("message-uid","ralph"),
+          Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
+        ]
+        puts "Injection-handler: ERROR deleting subscription (#{status})" unless status == 200 # Needs to be logged into the CPEE as well 
+        $injection_queue[notification[:instance]].each do |position, state|
+          puts "\t=== Injection-handler: Injecting on position #{position} at instance #{notification[:instance]}"
+          status, resp = Riddl::Client.new(injection_service_uri).post [
+            Riddl::Parameter::Simple.new('position', position),
+            Riddl::Parameter::Simple.new('instance', notification[:instance])
+          ]
+          puts "Injection-handler: ERROR injection failed with status: #{status}" unless status == 200
+          puts "Resp of Injection:"
+          puts resp.inspect
+          if resp.value('position') == position.to_s
+            $injection_queue[notification[:instance]][position] = resp.value('state')
+          else
+            $injection_queue[notification[:instance]][position] = {:new_position => resp.value('position'), :state => resp.value('state')}
+          end
+        end
+        puts  $injection_queue.inspect
+        # Setting positions
+        status, resp = cpee.resource('properties/values/positions').get
+        puts "Injection-handler: ERROR receiving postions (#{status})" unless status == 200 # Needs to be logged into the CPEE as well 
+        positions = XML::Smart.string(resp[0].value.read)
+        positions.find('p:value/p:*', {'p'=>'http://riddl.org/ns/common-patterns/properties/1.0'}).each do |pos|
+          name = pos.name.name.to_sym
+          if  $injection_queue[notification[:instance]].include?(name) # something was injected at this position
+            if $injection_queue[notification[:instance]][name].class == String
+              pos.text = $injection_queue[notification[:instance]][name]
+            elsif $injection_queue[notification[:instance]][name].class == Hash # the position was changed -> e.g. during a loop-onjection
+              pos.find('.').delete_if!{true}
+              puts $injection_queue[notification[:instance]]
+              np = positions.root.add( $injection_queue[notification[:instance]][name][:new_position], $injection_queue[notification[:instance]][name][:state])
+            end
+          else
+            pos.text = 'after'
+          end
+        end
+        puts positions.root.dump
+        status, resp = cpee.resource("properties/values/positions").put [Riddl::Parameter::Simple.new("content", positions.root.dump)]
+        puts "Injection-handler: ERROR setting positions (#{status})" unless status == 200 # Needs to be logged into the CPEE as well 
+        # Restarting the instance
+        $injection_queue.delete(notification[:instance])
+      end
+# }}} 
+    elsif @p.value('notification-key' ) # received subsription for sync_after {{{
+      $registration_semaphore.synchronize { $notification_keys << @p.value('notification-key') }
+      puts "\t=== Injection-handler: Receiving key of sync_after notification #{@p.value('notification-key')}" # without this puts the call back may come to fast will not be subscribed then      
+    # }}}
     else # some other request
       puts "\t=== Injection-handler: ERROR: unkonwn request"
-      puts @p.inspect
+      @p.each {|param| puts param.inspect }
       @status = 404
     end
-    Riddl::Parameter::Simple.new("continue",continue)
-  end#}}}
-
-  def subscribe_injection_service(cpee, notification) #{{{
-    puts "\t=== Injection-handler: Subscribe instance for injection service"
-    # This class allows a dynmic distribution to differetn injection service. In theory here could be some logic to decied wich service to use for injection. Cloudify Everything!
-    service_uri = "http://localhost:9290/injection/service"
-    client = Riddl::Client.new(service_uri)
-    status, resp = client.post [
-      Riddl::Parameter::Simple.new('position', notification[:activity]), 
-      Riddl::Parameter::Simple.new('instance', notification[:instance]), 
-      Riddl::Parameter::Simple.new('monitor', "http://localhost:9290/injection/handler")
-    ]
-    puts "Injection-handler: ERROR creating injection-resource (#{status})" unless status == 200 # Needs to be logged into the CPEE as well
-    res_id = resp.value('id')
-    puts "\t=== Injection-handler: Subscribing injection-service(#{service_uri}/#{res_id}) for state-changed event"
-    status, resp = cpee.resource("notifications/subscriptions").post [
-      Riddl::Parameter::Simple.new("url", "#{service_uri}/#{res_id}"),
-      Riddl::Parameter::Simple.new("topic", "properties/state"),
-      Riddl::Parameter::Simple.new("events", "change")
-    ]
-    puts "Injection-handler: ERROR subscribing state/changed (#{status})" unless status == 200 # Needs to be logged into the CPEE as well
   end#}}}
 end

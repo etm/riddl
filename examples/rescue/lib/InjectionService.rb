@@ -1,89 +1,18 @@
 require '../../lib/ruby/client'
 
 class InjectionService < Riddl::Implementation
-  $is_resources = {}
-  def response
-    if @p.length == 0 # Give a Liste of subscirbed injections
-      xml = XML::Smart.string('<injection-services/>')
-      $is_resources.each do |k,v|
-        node = xml.root.add('resource', {'id'=>k})
-        node.add('monitor', v[:monitor])
-        node.add('position', v[:position])
-        node.add('instance', v[:instance])
-      end
-      return Riddl::Parameter::Complex.new("services","text/xml", xml.to_s)
-    elsif @p.value('position') && @p.value('monitor') && @p.value('instance')# received subscription-request
-      puts "== Injection-service: received subsription-request"
-      resource = Digest::MD5.hexdigest(rand(Time.now).to_s)
-      semaphore = Mutex.new
-      semaphore.synchronize {
-        $is_resources[resource] = {:position => @p.value('position'), :monitor => @p.value('monitor'), :instance => @p.value('instance')}
-      }
-      puts "\t=== Injection-service: Created resource: #{resource}"
-      @status = 200
-      Riddl::Parameter::Simple.new('id', resource)
-    elsif @p.value('event') == "change" && @p.value('topic') == "properties/state"# received notification
-      restart = true
-      notification = YAML::load(@p.value('notification'))
-      if (notification[:state] == :stopped) && ($is_resources[@r[-1]])
-        puts "== Injection-service: Received notification for injection at '#{$is_resources[@r[-1]][:position]}'on instance '#{notification[:instance]}'"
-        puts "\t=== Injection-service: Delete subscription for properties/state - change" 
-        cpee = Riddl::Client.new(notification[:instance])
-        status, resp = cpee.resource("notifications/subscriptions/#{@p.value('key')}").delete [
-          Riddl::Parameter::Simple.new("message-uid","ralph"),
-          Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
-        ]
-        puts "Injection-service: ERROR deleting subscription (#{status})" unless status == 200 # Needs to be logged into the CPEE as well
-        monitor = Riddl::Client.new($is_resources[@r[-1]][:monitor])
-        retries = 0
-        begin
-          status, resp = monitor.put [
-            Riddl::Parameter::Simple.new("instance", notification[:instance]),
-            Riddl::Parameter::Simple.new("operation", 'lock')
-          ]
-          sleep 1
-          retries += 1
-#          puts "Injection-service: INFO requesting lock for instance '#{notification[:instance]} failed (residual retries: #{50-retries})"
-        end while status == 503 and retries < 50
-        puts "Injection-service: ERROR during requesting lock for instance '#{notification[:instance]}' (#{status})" unless status == 200 or status == 503
-        puts "Injection-service: ERROR during requesting lock for instance '#{notification[:instance]}' (#{status}) after 50 retries" if status == 503
-        analyze($is_resources[@r[-1]][:position], cpee) if (status == 200) && ($is_resources[@r[-1]])
-        $is_resources.delete(@r[-1])
-        status, resp = monitor.put [
-          Riddl::Parameter::Simple.new("instance", notification[:instance]),
-          Riddl::Parameter::Simple.new("operation", 'release')
-        ]
-        $is_resources.each do |k,v|
-          restart = false if v[:instance] == notification[:instance] # means if an other sunscription is registered for this instance => restart is not allowed
-        end
-        puts "Injection-service: ERROR during releasing lock for instance '#{notification[:instance]}' (#{status})" unless status == 200
-        # to avoid timing issue with the cockpit here is a sleep
-        puts "\t=== Injection-service: starting the instance ist not alloed becaqus of pending injections to this instance" unless restart
-        if restart
-          status, resp = cpee.resource("/properties/values/positions").get
-          positions = XML::Smart.string(resp[0].value.read)
-          positions.find("/p:value/p:*", {'p'=>'http://riddl.org/ns/common-patterns/properties/1.0'}).each {|pos| pos.text = 'after'}
-          puts positions
-          status, resp = cpee.resource("/properties/values/positions").put [Riddl::Parameter::Simple.new("content", positions.root.dump)]
-          puts "\t=== setting positions to after: #{status}"
-          puts "\t=== Injection-service: to avoid timing issue with the cockpit here is a sleep" if restart
-          sleep 3 
-#          status, resp = cpee.resource("/properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
-          puts "\t=== Injection-service: starting instance '#{notification[:instance]}': #{status}"
-        end
-      end
-    else # some other request
-      @status = 404
-    end
-# }}} 
-  end
+  def response  #{{{
+    puts "== Injection-service: injecting position #{@p.value('position')} on instance #{@p.value('instance')}"
+    pos, state =  analyze(@p.value('position'), @p.value('instance'))
+    [Riddl::Parameter::Simple.new('position', pos), Riddl::Parameter::Simple.new('state', state)]
+  end# }}} 
 
-  def analyze(position, cpee_client)
-  continue = true
-# {{{ 
+  def analyze(position, instance)# {{{ 
+    new_position = nil
+    new_state = nil
     begin
       injected = nil
-
+      cpee_client = Riddl::Client.new(instance)
     # Get description {{{
     status, resp = cpee_client.resource("/properties/values/description").get
     if status != 200
@@ -92,94 +21,121 @@ class InjectionService < Riddl::Implementation
     end
     description = XML::Smart.string(resp[0].value.read)
     # }}}
-    # Get call-node  and service_operation {{{ 
-    call_node = description.find("//cpee:call[@id = '#{position}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-    service_operation = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','')
-    status, resp = cpee_client.resource("properties/values/endpoints/#{call_node.attributes['endpoint']}").get 
-    puts "ERROR receiving endpoint named #{call_node.attributes['endpoint']}" unless status == 200
-    rescue_uri = XML::Smart.string(resp.value('value').read).root.text
-    rescue_client = Riddl::Client.new(rescue_uri)
-    # }}} 
+      # Get call-node  and service_operation {{{ 
+      call_node = description.find("//cpee:call[@id = '#{position}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+      service_operation = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','')
+      status, resp = cpee_client.resource("properties/values/endpoints/#{call_node.attributes['endpoint']}").get 
+      puts "ERROR receiving endpoint named #{call_node.attributes['endpoint']}" unless status == 200
+      rescue_uri = XML::Smart.string(resp.value('value').read).root.text
+      rescue_client = Riddl::Client.new(rescue_uri)
+      # }}} 
     # Create injected-block {{{
     injected = description.root.add("injected")
     injected.attributes['source'] = call_node.attributes['id']
      # }}}
     # Check if injection is on class-level {{{
     class_level = true
-    if(call_node.parent.name == 'injected')
-      parent_so = description.find("//cpee:call[@id = '#{call_node.parent.attributes['source']}']//cpee:service/cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text
-      class_level = false if parent_so.gsub('"','') == service_operation
+    parent_injected = call_node.find('ancestor::cpee:injected', {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+    if(parent_injected)
+      parent_so = description.find("//cpee:call[@id = '#{parent_injected.attributes['source']}']//cpee:service/cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+      if parent_so
+        class_level = false if parent_so.text.gsub('"','') == service_operation
+      end
     end
     # }}}
-    if (class_level) 
-      # Injecting class-level {{{
-      puts " == Injecting operation #{service_operation} of domain #{rescue_uri}"
-      # Move manipulate into seperate node, set result-attribute for injected and create output context-variable {{{
-      man_block = call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-      if man_block
-        man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
-        man_block.attributes['context'] = "@result_#{call_node.attributes['id']}"
-        injected.attributes['result'] = "@result_#{call_node.attributes['id']}"
-        call_node.add_after(man_block)
-      end
-      # }}}
-      status, resp = rescue_client.resource("operations/#{service_operation}").get [] # {{{
-      if status != 200
-        puts "Error receiving description at #{rescue_uri}/operations/#{service_operation}: #{status}"
-        return
-      end # }}}
-      wf = XML::Smart.string(resp[0].value.read)
-      injected.add(call_node.find("child::cpee:constraints", {"cpee" => "http://cpee.org/ns/description/1.0"}), XML::Smart::Dom::Element::COPY)
-      injected.add(inject_class_level(wf, call_node, injected).children)
-      mb = injected.find("//cpee:manipulate[@id = 'manipulate_from_#{call_node.attributes['id']}']", {"cpee"=>"http://cpee.org/ns/description/1.0"}).first
-      mb.add_after(injected.find("child::cpee:manipulate[@id = 'delete_objects_of_#{call_node.attributes['id']}']", {"cpee"=>"http://cpee.org/ns/description/1.0"})) # move del-blockt o last position (after man-block of call)
-      man_block.attributes['properties'] = "#{injected.attributes['properties']}" if man_block
-       # }}} 
-    else 
-      # Injection service-level {{{
-      parallel = injected.add("parallel", {"generated"=>"true"})
-      prop = call_node.find("ancestor::cpee:injected", {"cpee" => "http://cpee.org/ns/description/1.0"}).last.attributes['properties']
-      injected.attributes['properties'] = "#{prop}[:\"#{call_node.attributes['oid']}\"]"
-      add_service(parallel, rescue_client, call_node, cpee_client, "")
-      if parallel.children.length == 0
-        restart = false
-        puts "No fitting service found"
-# TODO: PUT auf die CPEE in ERROR mit ID, Message und struct. Data
-      end  
-      # }}} 
-    end
-    call_node.add_after(injected)
-=begin
-    # Insert leading spaces
-    puts "== Text =="*10
-    injected.find("descendant::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).each do |man| 
-      spaces = "&nbsp;&nbsp;"*man.find("count(ancestor::*)")
-      puts "'#{spaces}'"
-      man.find("text()").each do |text|
-        text.text.each do |line|
-          if line.gsub(/^(?!\s)/)
-            line.insert 0, spaces
-            puts "'#{line}'"
-          end
+      first_ancestor_loop = call_node.find("ancestor::cpee:loop", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+      if (class_level) 
+        # Injecting class-level {{{
+        puts " == Injecting operation #{service_operation} of domain #{rescue_uri}"
+        status, resp = rescue_client.resource("operations/#{service_operation}").get [] # {{{
+        if status != 200
+          puts "Error receiving description at #{rescue_uri}/operations/#{service_operation}: #{status}"
+          return
+        end # }}}
+        wf = XML::Smart.string(resp[0].value.read)
+        injected.add(call_node.find("child::cpee:constraints", {"cpee" => "http://cpee.org/ns/description/1.0"}), XML::Smart::Dom::Element::COPY)
+        sub_controlflow = inject_class_level(wf, call_node, injected).children
+        injected.add(sub_controlflow)
+        if first_ancestor_loop.nil?
+          man_block = call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+          if man_block # Move manipulate into sep erate node, set result-attribute for injected and create output context-variable {{{
+            man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
+            man_block.attributes['context'] = "@result_#{call_node.attributes['id']}"
+            injected.attributes['result'] = "@result_#{call_node.attributes['id']}"
+            man_block.attributes['properties'] = "#{injected.attributes['properties']}"
+            call_node.add_after(man_block)
+            man_block.add_after(injected.find("child::cpee:manipulate[@id = 'delete_objects_of_#{call_node.attributes['id']}']", {"cpee"=>"http://cpee.org/ns/description/1.0"})) # move del-blockt o last position (after man-block of call)
+          end  # }}}
+          call_node.add_after(injected)
+        else
+          puts "== Loop-Service-Injection =="*5
+          new_loop_block = first_ancestor_loop.add_before("injected")
+          new_loop_block.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY)
+          call_node = new_loop_block.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+          pre_siblings = first_ancestor_loop.find("count(preceding-sibling::cpee:injected[@source = 'loop_#{call_node.attributes['id']}'])", {"cpee" => "http://cpee.org/ns/description/1.0"}).to_i
+          puts "Found #{pre_siblings} pre-injected for loop"
+          new_loop_block.find('descendant::cpee:*[string(@id)]', {"cpee" => "http://cpee.org/ns/description/1.0"}).each {|node| node.attributes['id']  = "#{node.attributes['id']}_#{pre_siblings}"}
+          man_block = call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+          if man_block # Move manipulate into seperate node, set result-attribute for injected and create output context-variable {{{
+            man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
+            man_block.attributes['context'] = "@result_#{call_node.attributes['id']}"
+            injected.attributes['result'] = "@result_#{call_node.attributes['id']}"
+            man_block.attributes['properties'] = "#{injected.attributes['properties']}"
+            call_node.add_after(man_block)
+            man_block.add_after(injected.find("child::cpee:manipulate[@id = 'delete_objects_of_#{call_node.attributes['id']}']", {"cpee"=>"http://cpee.org/ns/description/1.0"})) # move del-blockt o last position (after man-block of call)
+          end  # }}}
+          injected.attributes.each {|a|new_loop_block.attributes[a.name] = a.value}
+          call_node.add_after(injected)
+          puts new_loop_block.dump
+          puts "== Loop-Service-Injection =="*5
         end
+      # }}}
+      else 
+        # Injection service-level {{{ 
+        parallel = injected.add("parallel", {"generated"=>"true"})
+        prop = call_node.find("ancestor::cpee:injected", {"cpee" => "http://cpee.org/ns/description/1.0"}).last.attributes['properties']
+        injected.attributes['properties'] = "#{prop}[:\"#{call_node.attributes['oid']}\"]"
+        if first_ancestor_loop.nil?
+          add_service(parallel, rescue_client, call_node, cpee_client, "", parent_injected)
+          call_node.add_after(injected)
+        else
+          puts "== Loop-Service-Injection =="*5
+          new_loop_block = first_ancestor_loop.add_before("injected", {'source'=>"#{call_node.attributes['id']}"})
+          new_loop_block.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY)
+          puts call_node.dump
+          call_node = new_loop_block.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+          pre_siblings = first_ancestor_loop.find("count(preceding-sibling::cpee:injected[@source = 'loop_#{call_node.attributes['id']}'])", {"cpee" => "http://cpee.org/ns/description/1.0"}).to_i
+          puts "Found #{pre_siblings} pre-injected for loop"
+          new_loop_block.find('descendant::cpee:*[string(@id)]', {"cpee" => "http://cpee.org/ns/description/1.0"}).each {|node| node.attributes['id']  = "#{node.attributes['id']}_#{pre_siblings}"}
+          add_service(parallel, rescue_client, call_node, cpee_client, "", parent_injected)
+          first_ancestor_loop.add_before(injected)
+          parent = 0
+          while new_position.nil?
+            xpath = "#{'parent::cpee:*/'*parent}preceding-sibling::cpee:*/@id"
+            puts "\ŧ\t\t\t Searching postiion: #{xpath}"
+            new_position = injected.find(xpath, {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+            parent += 1
+          end
+          puts "== Loop-Service-Injection =="*5
+        end
+        # }}} 
       end
-    end
-    puts injected.dump
-    puts "== Text =="*10
-=end
-    # Set inject, description, position and re-start {{{
-    status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("content", "<content>#{description.root.dump}</content>")]
-    puts "=== setting description #{status}"
-    # }}} 
+      new_position = call_node.attributes['id']
+      new_state = 'after'
+      # Set description {{{
+      puts "Setting description to instance"
+      status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("content", "<content>#{description.root.dump}</content>")]
+      puts "=== setting description #{status}"
+      # }}} 
+      puts "\t\t\t\t\t New Position: #{new_position}"
+      puts "\t\t\t\t\t New State: #{new_state}"
+      [new_position, new_state]
     rescue => e
       puts $!
       puts e.backtrace
     end
-# }}}
-  end
+  end# }}}
 
-  # renaming id's, endpoints, context, ....
-  # return controlflow of injected wf
   def inject_class_level(wf, call_node, injected) # {{{
     man_text = "context :\"result_#{call_node.attributes['id']}\" => RescueHash.new\n"
     man_text_del = "context.delete(:\"result_#{call_node.attributes['id']}\")\n"
@@ -231,7 +187,7 @@ class InjectionService < Riddl::Implementation
       if node.attributes.include?('class')
         man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => #{node.attributes['class']}\n"
       else
-        man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => \"#{node.text.nil? ? node.text : ""}\"\n"
+        man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => #{node.text.empty? ? "''" : node.text}\n"
       end
       man_text_del << "context.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
     end
@@ -267,13 +223,11 @@ class InjectionService < Riddl::Implementation
     doc = wf.find("//flow:execute", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).first.to_doc
     injected.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}", "generated"=>"true"}, man_text)
     injected.add("manipulate", {"id"=>"delete_objects_of_#{call_node.attributes['id']}", "generated"=>"true"}, man_text_del)
-    XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root # }}}
-  end
+    XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root 
+  end# }}}
 
-  # renaming id's, endpoints, context, ....
-  # return controlflow of injected wf
-   def inject_service_level(wf, call_node, resource_path, branch)# {{{
-    man_text = "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"] = RescueHash.new\n"
+   def inject_service_level(wf, call_node, resource_path, branch, parent_injected)# {{{
+    man_text = "#{parent_injected.attributes['result']}[:\"#{resource_path}\"] = RescueHash.new #here\n"
     man_text_delete = ""
     index = resource_path.gsub("/","_").gsub(":","_")
     op = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','') 
@@ -296,7 +250,7 @@ class InjectionService < Riddl::Implementation
       if node.attributes.include?('class')
         man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => #{node.attributes['class']}\n" 
       else
-        man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.nil? ? '' : node.text}\"\n"
+        man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.empty? ? "''" : node.text}\"\n"
       end
       man_text_delete << "context.delete(:\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
     end
@@ -310,7 +264,7 @@ class InjectionService < Riddl::Implementation
     end
     wf.find("//flow:#{op}/descendant::flow:*/@output-parameter",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
       res_object = call_node.find("ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).last
-      a.value = "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"][:#{a.value}]" if not res_object.nil?
+      a.value = "#{parent_injected.attributes['result']}[:\"#{resource_path}\"][:#{a.value}]" if not res_object.nil?
     end # }}}
     # Resovle message-parameter {{{
     wf.find("//flow:#{op}/descendant::flow:input[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
@@ -321,7 +275,7 @@ class InjectionService < Riddl::Implementation
     end
     wf.find("//flow:#{op}/descendant::flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |p|
       res_object = call_node.find("ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).last
-      p.attributes['message-parameter'] = "#{call_node.parent.attributes['result']}[:\"#{resource_path}\"][:#{p.attributes['message-parameter']}]" if not res_object.nil?
+      p.attributes['message-parameter'] = "#{parent_injected.attributes['result']}[:\"#{resource_path}\"][:#{p.attributes['message-parameter']}]" if not res_object.nil?
     end # }}}
      # Create and fill properties-object {{{ 
     prop = call_node.find("ancestor::cpee:injected", {"cpee" => "http://cpee.org/ns/description/1.0"}).last.attributes['properties']
@@ -335,27 +289,27 @@ class InjectionService < Riddl::Implementation
     doc.find("//*").each { |node| node.namespace = ns }
     branch.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}_service_#{index}", "generated"=>"true"}, man_text)
     branch.add("manipulate", {"id"=>"delete_objects_of_#{call_node.attributes['id']}_service_#{index}", "generated"=>"true"}, man_text_delete)
-    XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root # }}}
-  end
+    XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root 
+  end# }}}
 
-  def add_service(parallel_node, rescue_client, call_node, cpee_client, resource_path)  # {{{
+  def add_service(parallel_node, rescue_client, call_node, cpee_client, resource_path, parent_injected)  # {{{
     status, resp = rescue_client.resource(resource_path).get
     return if status != 200
     if resp[0].name == "atom-feed"
       feed = XML::Smart.string(resp[0].value.read)
       feed.find("//a:entry/a:link", {"a"=>"http://www.w3.org/2005/Atom"}).each do |link|
-        add_service(parallel_node, rescue_client, call_node, cpee_client, "#{resource_path}/#{link.text}")
+        add_service(parallel_node, rescue_client, call_node, cpee_client, "#{resource_path}/#{link.text}", parent_injected)
       end
     else
       wf = XML::Smart.string(resp[0].value.read)
       if check_constraints(wf, call_node, cpee_client)
         branch = parallel_node.add("parallel_branch", {"generated"=>"true"})
-        branch.add(inject_service_level(wf, call_node, "#{rescue_client.instance_variable_get("@base")}/#{resource_path}", branch).children)
+        branch.add(inject_service_level(wf, call_node, "#{rescue_client.instance_variable_get("@base")}/#{resource_path}", branch, parent_injected).children)
         del_block = branch.find("child::cpee:manipulate[@id='delete_objects_of_#{call_node.attributes['id']}_service_#{"#{rescue_client.instance_variable_get("@base")}/#{resource_path}".gsub("/","_").gsub(":","_")}']", {"cpee"=>"http://cpee.org/ns/description/1.0"}).first
         branch.add(del_block) # Move del-block to last psoition in branch
       end
-    end # }}}  
-  end
+    end 
+  end# }}}  
   
   def check_constraints(wf, call_node, cpee_client)    # {{{
       call_node.find("ancestor::cpee:injected/cpee:constraints", {"cpee" => "http://cpee.org/ns/description/1.0"}).each do |cons|
@@ -417,5 +371,4 @@ class InjectionService < Riddl::Implementation
     end
     code
   end #}}}
-
 end

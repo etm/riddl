@@ -27,6 +27,28 @@
       <suspend/>
       <abort/>
     </op1>
+    <loop>
+      <endpoints>
+        <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
+      </endpoints>
+      <context-variables>
+        <wait>2</wait>
+      </context-variables>
+      <execute>
+        <call id="s1_op1" endpoint="ep" http-method="post">
+          <input name="timeout" message-parameter="pi1"/>
+        </call>
+        <manipulate id="set_output">
+          <variable output-parameter="mpo1" local="out"/>
+          out = 2
+        </manipulate>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </loop>
     <op2>
       <endpoints>
         <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>

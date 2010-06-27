@@ -73,21 +73,17 @@
   </message>
 
   <message name="injection-handler-request">
-    <parameter name="position" type="string"/>
+    <parameter name="notification-key" type="string"/>
   </message>
 
   <message name="injection-service-request">
     <parameter name="position" type="string"/>
     <parameter name="instance" type="string"/>
-    <parameter name="monitor" type="string"/>
-  </message>
-  <message name="injection-response">
-    <parameter name="id" type="string"/>
   </message>
 
-  <message name="monitor">
-    <parameter name="instance" type="string"/>
-    <parameter name="operation" type="string"/>
+  <message name="injection-service-response">
+    <parameter name="position" type="string"/>
+    <parameter name="state" type="string"/>
   </message>
 <!--}}}--> 
 <!-- Resources -->
@@ -101,19 +97,12 @@
     </resource>  
     <resource relative="injection">
       <resource relative="handler">
-        <post in="injection-handler-request" out="injection-response"/>
-        <put in="monitor"/>
+        <post in="injection-handler-request"/>
         <get in="*"/>
-        <resource>
-          <post in="*"/>
-        </resource>
+        <post in="*"/><!-- this is for the cpee-notifiaction -->
       </resource>
       <resource relative="service">
-        <post in="injection-service-request" out="injection-response"/>
-        <get in="*"/>
-        <resource>
-          <post in="*"/>
-        </resource>
+        <post in="injection-service-request" out="injection-service-response"/>
       </resource>
     </resource>
     <resource relative="select">

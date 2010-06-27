@@ -47,6 +47,38 @@
       <abort/>
 <!-- }}} -->  
     </operation>
+    <operation name="loop" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
+<!-- {{{ --> 
+      <context-variables>
+        <loop_count>2</loop_count>
+      </context-variables>
+      <endpoints/>
+      <execute>
+        <loop>
+          <condition test="loop_count" comparator="&gt;" value="0"/>
+          <call id="loop_op1" endpoint="resource_path" service-operation="loop">
+            <input name="pi1" message-parameter="op1">
+              <domain:caption lang="en">pi1</domain:caption>
+              <rng:data type="string"/>
+            </input>
+            <output name="po1" message-parameter="mpo1">
+              <domain:caption lang="en">po2</domain:caption>
+              <rng:data type="string"/>
+            </output>
+          </call>
+          <manipulate id="reduce_counter">
+            <variable context="loop_count" local="count"/>
+            count -= 1
+          </manipulate>
+        </loop>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->  
+    </operation>
     <operation name="op2" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ -->  
       <context-variables>
