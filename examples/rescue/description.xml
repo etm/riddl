@@ -76,6 +76,10 @@
     <parameter name="notification-key" type="string"/>
   </message>
 
+  <message name="injection-instance-queue-request">
+    <parameter name="instance" type="string"/>
+  </message>
+
   <message name="injection-service-request">
     <parameter name="position" type="string"/>
     <parameter name="instance" type="string"/>
@@ -85,7 +89,12 @@
     <parameter name="position" type="string"/>
     <parameter name="state" type="string"/>
   </message>
-<!--}}}--> 
+
+  <message name="change-position">
+    <parameter name="instance" type="string"/>
+    <parameter name="new-position" type="string"/>
+  </message>
+<!--}}}-->  
 <!-- Resources -->
 <!-- {{{ -->
   <resource>
@@ -99,7 +108,9 @@
       <resource relative="handler">
         <post in="injection-handler-request"/>
         <get in="*"/>
-        <post in="*"/><!-- this is for the cpee-notifiaction -->
+        <get in="injection-instance-queue-request"/>
+        <post in="*"/><!-- this is for the cpee-notification --> 
+        <put in="change-position"/>
       </resource>
       <resource relative="service">
         <post in="injection-service-request" out="injection-service-response"/>

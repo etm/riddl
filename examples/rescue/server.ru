@@ -36,8 +36,10 @@ run(
       on resource 'injection' do
         on resource 'handler' do
           run InjectionHandler if method :post => 'injection-handler-request'
+          run InjectionHandler if method :get => 'injection-instance-queue-request'
           run InjectionHandler if method :get => '*'
           run InjectionHandler if method :post => '*'
+          run InjectionHandler if method :put => 'change-position'
         end
         on resource 'service' do
           run InjectionService if method :post => 'injection-service-request' 
