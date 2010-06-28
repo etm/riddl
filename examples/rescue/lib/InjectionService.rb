@@ -35,7 +35,7 @@ class InjectionService < Riddl::Implementation
      # }}}
     # Check if injection is on class-level {{{
     class_level = true
-    parent_injected = call_node.find('ancestor::cpee:injected', {"cpee" => "http://cpee.org/ns/description/1.0"}).first
+    parent_injected = call_node.find('ancestor::cpee:injected', {"cpee" => "http://cpee.org/ns/description/1.0"}).last
     if(parent_injected)
       parent_so = description.find("//cpee:call[@id = '#{parent_injected.attributes['source']}']//cpee:service/cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
       if parent_so
@@ -54,40 +54,25 @@ class InjectionService < Riddl::Implementation
         end # }}}
         wf = XML::Smart.string(resp[0].value.read)
         injected.add(call_node.find("child::cpee:constraints", {"cpee" => "http://cpee.org/ns/description/1.0"}), XML::Smart::Dom::Element::COPY)
+        puts "INJECTING"*10
+        puts call_node.dump
+        puts "INJECTING"*10
         sub_controlflow = inject_class_level(wf, call_node, injected).children
         injected.add(sub_controlflow)
         if first_ancestor_loop.nil?
           man_block = call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-          if man_block # Move manipulate into sep erate node, set result-attribute for injected and create output context-variable {{{
+          if man_block # Move manipulate into seperate node, set result-attribute for injected and create output context-variable {{{
             man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
-            man_block.attributes['context'] = "@result_#{call_node.attributes['id']}"
-            injected.attributes['result'] = "@result_#{call_node.attributes['id']}"
+            man_block.attributes['context'] = "context.result_#{call_node.attributes['id']}"
+            injected.attributes['result'] = "context.result_#{call_node.attributes['id']}"
             man_block.attributes['properties'] = "#{injected.attributes['properties']}"
             call_node.add_after(man_block)
             man_block.add_after(injected.find("child::cpee:manipulate[@id = 'delete_objects_of_#{call_node.attributes['id']}']", {"cpee"=>"http://cpee.org/ns/description/1.0"})) # move del-blockt o last position (after man-block of call)
           end  # }}}
           call_node.add_after(injected)
         else
-          puts "== Loop-Service-Injection =="*5
-          new_loop_block = first_ancestor_loop.add_before("injected")
-          new_loop_block.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY)
-          call_node = new_loop_block.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-          pre_siblings = first_ancestor_loop.find("count(preceding-sibling::cpee:injected[@source = 'loop_#{call_node.attributes['id']}'])", {"cpee" => "http://cpee.org/ns/description/1.0"}).to_i
-          puts "Found #{pre_siblings} pre-injected for loop"
-          new_loop_block.find('descendant::cpee:*[string(@id)]', {"cpee" => "http://cpee.org/ns/description/1.0"}).each {|node| node.attributes['id']  = "#{node.attributes['id']}_#{pre_siblings}"}
-          man_block = call_node.find("child::cpee:manipulate", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-          if man_block # Move manipulate into seperate node, set result-attribute for injected and create output context-variable {{{
-            man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
-            man_block.attributes['context'] = "@result_#{call_node.attributes['id']}"
-            injected.attributes['result'] = "@result_#{call_node.attributes['id']}"
-            man_block.attributes['properties'] = "#{injected.attributes['properties']}"
-            call_node.add_after(man_block)
-            man_block.add_after(injected.find("child::cpee:manipulate[@id = 'delete_objects_of_#{call_node.attributes['id']}']", {"cpee"=>"http://cpee.org/ns/description/1.0"})) # move del-blockt o last position (after man-block of call)
-          end  # }}}
-          injected.attributes.each {|a|new_loop_block.attributes[a.name] = a.value}
-          call_node.add_after(injected)
-          puts new_loop_block.dump
-          puts "== Loop-Service-Injection =="*5
+          puts "== Loop-Class-Injection =="*5
+          puts "== Loop-Class-Injection =="*5
         end
       # }}}
       else 
@@ -99,24 +84,8 @@ class InjectionService < Riddl::Implementation
           add_service(parallel, rescue_client, call_node, cpee_client, "", parent_injected)
           call_node.add_after(injected)
         else
-          puts "== Loop-Service-Injection =="*5
-          new_loop_block = first_ancestor_loop.add_before("injected", {'source'=>"#{call_node.attributes['id']}"})
-          new_loop_block.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY)
-          puts call_node.dump
-          call_node = new_loop_block.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-          pre_siblings = first_ancestor_loop.find("count(preceding-sibling::cpee:injected[@source = 'loop_#{call_node.attributes['id']}'])", {"cpee" => "http://cpee.org/ns/description/1.0"}).to_i
-          puts "Found #{pre_siblings} pre-injected for loop"
-          new_loop_block.find('descendant::cpee:*[string(@id)]', {"cpee" => "http://cpee.org/ns/description/1.0"}).each {|node| node.attributes['id']  = "#{node.attributes['id']}_#{pre_siblings}"}
-          add_service(parallel, rescue_client, call_node, cpee_client, "", parent_injected)
-          first_ancestor_loop.add_before(injected)
-          parent = 0
-          while new_position.nil?
-            xpath = "#{'parent::cpee:*/'*parent}preceding-sibling::cpee:*/@id"
-            puts "\ŧ\t\t\t Searching postiion: #{xpath}"
-            new_position = injected.find(xpath, {"cpee" => "http://cpee.org/ns/description/1.0"}).first
-            parent += 1
-          end
-          puts "== Loop-Service-Injection =="*5
+          puts "== Loop-Instance-Injection =="*5
+          puts "== Loop-Instance-Injection =="*5
         end
         # }}} 
       end
@@ -137,13 +106,13 @@ class InjectionService < Riddl::Implementation
   end# }}}
 
   def inject_class_level(wf, call_node, injected) # {{{
-    man_text = "context :\"result_#{call_node.attributes['id']}\" => RescueHash.new\n"
+    man_text = "context.result_#{call_node.attributes['id']} => RescueHash.new\n"
     man_text_del = "context.delete(:\"result_#{call_node.attributes['id']}\")\n"
     # Create Property-Objects {{{
     prop = call_node.find("ancestor::cpee:injected", {"cpee" => "http://cpee.org/ns/description/1.0"}).last
     if prop.nil?
-      prop = "@properties_#{call_node.attributes['id']}"
-      man_text << "context :\"#{prop[1..-1]}\" => RescueHash.new\n"
+      prop = "context.properties_#{call_node.attributes['id']}"
+      man_text << "context.#{prop[1..-1]} => RescueHash.new\n"
       man_text_del << "context.delete(:\"#{prop[1..-1]}\")\n"
     else
       prop = "#{prop.attributes['properties']}[:\"#{call_node.attributes['oid']}\"]"
@@ -160,7 +129,7 @@ class InjectionService < Riddl::Implementation
     end  # }}}  
     # Change endpoints  {{{
     wf.find("//flow:endpoints/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      man_text << "endpoint :\"#{call_node.attributes['id']+'__'+node.name.name}\" => \"#{node.text.nil? ? node.text : ""}\"\n"
+      man_text << "endpoints.#{call_node.attributes['id']+'__'+node.name.name} => \"#{node.text.nil? ? node.text : ""}\"\n"
       man_text_del << "endpoints.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
     end
     wf.find("//flow:call", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
@@ -185,22 +154,22 @@ class InjectionService < Riddl::Implementation
     # Change context-variables: variables, test, context (within manipulate) {{{
     wf.find("//flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
       if node.attributes.include?('class')
-        man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => #{node.attributes['class']}\n"
+        man_text << "context.#{call_node.attributes['id']+'__'+node.name.name} => #{node.attributes['class']}\n"
       else
-        man_text << "context :\"#{call_node.attributes['id']+'__'+node.name.name}\" => #{node.text.empty? ? "''" : node.text}\n"
+        man_text << "context.#{call_node.attributes['id']+'__'+node.name.name} => #{node.text.empty? ? "''" : node.text}\n"
       end
       man_text_del << "context.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
     end
-    wf.find("//@variable").each {|a| a.value = "@#{call_node.attributes['id']}__#{a.value}"} 
-    wf.find("//@test").each {|a| a.value = "@#{call_node.attributes['id']}__#{a.value}"}
-    wf.find("//@context").each {|a| a.value = "@#{call_node.attributes['id']}__#{a.value}"}
+    wf.find("//@variable").each {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"} 
+    wf.find("//@test").each {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"}
+    wf.find("//@context").each {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"}
     wf.find("//@input-parameter").each do |a| 
       p = call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{a.value}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
       a.value = p.text if not p.nil?
       puts "Variable for manipulate-block #{a.parent.parent.attributes['id']} named #{a.value} not found" if p.nil?
     end
     wf.find("//@output-parameter").each do |a|
-      a.value = "@result_#{call_node.attributes['id']}[:#{a.value}]"
+      a.value = "context.result_#{call_node.attributes['id']}[:#{a.value}]"
     end # }}}
     # Resovle message-parameter {{{
     wf.find("//flow:execute/descendant::flow:input[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).delete_if! do |p|
@@ -213,7 +182,7 @@ class InjectionService < Riddl::Implementation
     wf.find("//flow:execute/descendant::flow:output[string(@message-parameter)]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
       call = output.parent
       res_object = call_node.find("ancestor::cpee:injected[string(@result)]",{"cpee" => "http://cpee.org/ns/description/1.0"}).last
-      str = res_object.nil? ? "@result_#{call_node.attributes['id']}" : "#{res_object.attributes['result']}"
+      str = res_object.nil? ? "context.result_#{call_node.attributes['id']}" : "#{res_object.attributes['result']}"
       output.attributes['message-parameter'] = "#{str}[:#{output.attributes['message-parameter']}]"
     end # }}}
     # Add repositroy-information to new operation-calls {{{
@@ -236,7 +205,7 @@ class InjectionService < Riddl::Implementation
     wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value} # }}}   
     # Change endpoints  {{{
     wf.find("//flow:#{op}/flow:endpoints/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      man_text << "endpoint :\"#{ call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.nil? ? '' : node.text}\"\n"
+      man_text << "endpoints.#{ call_node.attributes['id']+'__'+index+'__'+node.name.name} => \"#{node.text.nil? ? '' : node.text}\"\n"
       man_text_delete << "endpoints.delete(:\"#{ call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
     end
     wf.find("//@endpoint").each do |a|
@@ -248,15 +217,15 @@ class InjectionService < Riddl::Implementation
     # Change context-variables: variables, test {{{ 
     wf.find("//flow:#{op}/flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
       if node.attributes.include?('class')
-        man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => #{node.attributes['class']}\n" 
+        man_text << "context.#{call_node.attributes['id']+'__'+index+'__'+node.name.name} => #{node.attributes['class']}\n" 
       else
-        man_text << "context :\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\" => \"#{node.text.empty? ? "''" : node.text}\"\n"
+        man_text << "context.#{call_node.attributes['id']+'__'+index+'__'+node.name.name} => \"#{node.text.empty? ? "''" : node.text}\"\n"
       end
       man_text_delete << "context.delete(:\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
     end
-    wf.find("//flow:#{op}/descendant::flow:*/@variable",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "@#{call_node.attributes['id']}__#{index}__#{a.value}"}
-    wf.find("//flow:#{op}/descendant::flow:*/@test",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "@#{call_node.attributes['id']}__#{index}__#{a.value}"}
-    wf.find("//flow:#{op}/descendant::flow:*/@context",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "@#{call_node.attributes['id']}__#{index}__#{a.value}"}
+    wf.find("//flow:#{op}/descendant::flow:*/@variable",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "context.#{call_node.attributes['id']}__#{index}__#{a.value}"}
+    wf.find("//flow:#{op}/descendant::flow:*/@test",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "context.#{call_node.attributes['id']}__#{index}__#{a.value}"}
+    wf.find("//flow:#{op}/descendant::flow:*/@context",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each {|a| a.value = "context.#{call_node.attributes['id']}__#{index}__#{a.value}"}
     wf.find("//flow:#{op}/descendant::flow:*/@input-parameter",{"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a| 
       p = call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{a.value}", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
       a.value = p.text if not p.nil?

@@ -340,8 +340,8 @@ Recent changes:
             <xsl:value-of select="@variable"/>
           </xsl:if>
           <xsl:if test="@message-parameter">
-            <xsl:if test="starts-with(@message-parameter, '@') = false">
-              <xsl:text>@</xsl:text>
+            <xsl:if test="starts-with(@message-parameter, 'context.') = false">
+              <xsl:text>context.</xsl:text>
             </xsl:if>
             <xsl:value-of select="@message-parameter"/>
           </xsl:if>
@@ -357,9 +357,9 @@ Recent changes:
   <xsl:template name="output">
     <!-- {{{ -->
       <xsl:for-each select="child::flow:resource-id">
-        <xsl:text>endpoints[:</xsl:text>
+        <xsl:text>endpoints.</xsl:text>
         <xsl:value-of select="@endpoint"/>
-        <xsl:text>] = result.value('</xsl:text>
+        <xsl:text> = result.value('</xsl:text>
         <xsl:value-of select="@name"/>
         <xsl:text>')&#xa;</xsl:text>
       </xsl:for-each>
@@ -418,7 +418,8 @@ Recent changes:
       <xsl:element name="parameters">
         <xsl:if test="@soap-operation">
           <xsl:element name="soap_operation"><xsl:value-of select="@soap-operation"/></xsl:element>
-          <xsl:element name="wsdl"><xsl:text>#{endpoints[:</xsl:text><xsl:value-of select="@wsdl"/><xsl:text>]}</xsl:text></xsl:element>
+          <!-- WHY IS IT  NECESSARY TO DO THIS IN CURLEY-BRACKETS? -->
+          <xsl:element name="wsdl"><xsl:text>endpoints.</xsl:text><xsl:value-of select="@wsdl"/><xsl:text></xsl:text></xsl:element>
         </xsl:if>
         <xsl:if test="@http-method">
           <xsl:element name="method"><xsl:value-of select="@http-method"/></xsl:element>
