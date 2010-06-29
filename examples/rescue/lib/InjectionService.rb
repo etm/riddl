@@ -46,7 +46,6 @@ class InjectionService < Riddl::Implementation
       first_ancestor_loop = call_node.find("ancestor::cpee:loop", {"cpee" => "http://cpee.org/ns/description/1.0"}).first
       if (class_level) 
         # Injecting class-level {{{
-        puts " == Injecting operation #{service_operation} of domain #{rescue_uri}"
         status, resp = rescue_client.resource("operations/#{service_operation}").get [] # {{{
         if status != 200
           puts "Error receiving description at #{rescue_uri}/operations/#{service_operation}: #{status}"
@@ -54,9 +53,6 @@ class InjectionService < Riddl::Implementation
         end # }}}
         wf = XML::Smart.string(resp[0].value.read)
         injected.add(call_node.find("child::cpee:constraints", {"cpee" => "http://cpee.org/ns/description/1.0"}), XML::Smart::Dom::Element::COPY)
-        puts "INJECTING"*10
-        puts call_node.dump
-        puts "INJECTING"*10
         sub_controlflow = inject_class_level(wf, call_node, injected).children
         injected.add(sub_controlflow)
         if first_ancestor_loop.nil?
@@ -92,12 +88,8 @@ class InjectionService < Riddl::Implementation
       new_position = call_node.attributes['id']
       new_state = 'after'
       # Set description {{{
-      puts "Setting description to instance"
       status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("content", "<content>#{description.root.dump}</content>")]
-      puts "=== setting description #{status}"
       # }}} 
-      puts "\t\t\t\t\t New Position: #{new_position}"
-      puts "\t\t\t\t\t New State: #{new_state}"
       [new_position, new_state]
     rescue => e
       puts $!
@@ -200,7 +192,6 @@ class InjectionService < Riddl::Implementation
     man_text_delete = ""
     index = resource_path.gsub("/","_").gsub(":","_")
     op = call_node.find("descendant::cpee:serviceoperation", {"cpee" => "http://cpee.org/ns/description/1.0"}).first.text.gsub('"','') 
-    puts " == Injecting operation #{op} of service #{resource_path}"
     # Change id's {{{ 
     wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value} # }}}   
     # Change endpoints  {{{

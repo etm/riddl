@@ -45,9 +45,7 @@ class InjectionHandler < Riddl::Implementation
           Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
         ]
         puts "Injection-handler: ERROR deleting subscription (#{status})" unless status == 200 # Needs to be logged into the CPEE as well 
-        puts "Instance: #{notification[:instance]}"
         unless $injection_queue.include?(notification[:instance])
-          puts "\t=== Injection-handler: Subscribing injection-service for state-changed event"
           $injection_queue[notification[:instance]] = Hash.new
           status, resp = cpee.resource("notifications/subscriptions").post [
             Riddl::Parameter::Simple.new("url", "http://#{@env['HTTP_HOST']}#{@env['PATH_INFO']}"),
@@ -60,16 +58,12 @@ class InjectionHandler < Riddl::Implementation
         Riddl::Parameter::Simple.new('continue','false')
       else
         puts "\t=== Injection-handler: Callback with key '#{@p.value('key')}' not subscribed"
-        puts $notification_keys
         Riddl::Parameter::Simple.new('continue','true')
       end
 # }}}
     elsif @p.value('event') == "change" && @p.value('topic') == "properties/state"# received notification for instance stopped{{{
-      if notification[:state] != :stopped
-        puts "State of instance #{notification[:instance]} changed to #{notification[:state]}"
-        return
-      else
-        puts "Injection-handler: #{notification[:instance]} informed about state stopped"
+      unless notification[:state] != :stopped
+        puts "== Injection-handler: #{notification[:instance]} informed about state stopped"
         status, resp = cpee.resource("notifications/subscriptions/#{@p.value('key')}").delete [
           Riddl::Parameter::Simple.new("message-uid","ralph"),
           Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
@@ -99,14 +93,12 @@ class InjectionHandler < Riddl::Implementation
               pos.text = $injection_queue[notification[:instance]][name]
             elsif $injection_queue[notification[:instance]][name].class == Hash # the position was changed -> e.g. during a loop-onjection
               pos.find('.').delete_if!{true}
-              puts $injection_queue[notification[:instance]]
               np = positions.root.add( $injection_queue[notification[:instance]][name][:new_position], $injection_queue[notification[:instance]][name][:state])
             end
           else
             pos.text = 'after'
           end
         end
-        puts positions.root.dump
         status, resp = cpee.resource("properties/values/positions").put [Riddl::Parameter::Simple.new("content", positions.root.dump)]
         puts "Injection-handler: ERROR setting positions (#{status})" unless status == 200 # Needs to be logged into the CPEE as well 
         # Restarting the instance
