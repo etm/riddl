@@ -418,8 +418,10 @@ Recent changes:
       <xsl:element name="parameters">
         <xsl:if test="@soap-operation">
           <xsl:element name="soap_operation"><xsl:value-of select="@soap-operation"/></xsl:element>
-          <!-- WHY IS IT  NECESSARY TO DO THIS IN CURLEY-BRACKETS? -->
-          <xsl:element name="wsdl"><xsl:text>endpoints.</xsl:text><xsl:value-of select="@wsdl"/><xsl:text></xsl:text></xsl:element>
+          <xsl:element name="wsdl">
+            <xsl:attribute name="type">symbolic</xsl:attribute>
+            <xsl:text>endpoints.</xsl:text><xsl:value-of select="@wsdl"/><xsl:text></xsl:text>
+          </xsl:element>
         </xsl:if>
         <xsl:if test="@http-method">
           <xsl:element name="method"><xsl:value-of select="@http-method"/></xsl:element>

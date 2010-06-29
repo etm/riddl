@@ -99,9 +99,11 @@ class InjectionHandler < Riddl::Implementation
             pos.text = 'after'
           end
         end
+        puts positions.root.dump
         status, resp = cpee.resource("properties/values/positions").put [Riddl::Parameter::Simple.new("content", positions.root.dump)]
         puts "Injection-handler: ERROR setting positions (#{status})" unless status == 200 # Needs to be logged into the CPEE as well 
         # Restarting the instance
+        status, resp = cpee.resource("properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
         $injection_queue.delete(notification[:instance])
       end
 # }}} 

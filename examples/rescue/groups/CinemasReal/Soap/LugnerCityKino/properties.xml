@@ -26,6 +26,7 @@
         <soap_response/>
         <xml class="Array.new"/>
         <film_ids class="Array.new"/>
+        <film_id/>
         <date2/>
       </context-variables>
       <execute>
@@ -47,8 +48,13 @@
         </manipulate>
         <loop>
           <condition test="film_ids.length" comparator="&gt;" value="0"/>
+          <manipulate id="get_film_id">
+            <variable context="film_ids" local="ids"/>
+            <variable context="film_id" local="id"/>
+            id = ids.pop
+          </manipulate>
           <call id="Schedule" endpoint="soap_service" soap-operation="Schedule" wsdl="wsdl">
-            <input name="FilmID" variable="film_ids.pop"/>
+            <input name="FilmID" variable="film_id"/>
             <input name="dFrom" message-parameter="date"/>
             <input name="dTo" variable="date2"/>
             <!--input name="SearchItem" variable="input_FilmInfo"/-->
