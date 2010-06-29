@@ -106,14 +106,14 @@ class InjectionService < Riddl::Implementation
   end# }}}
 
   def inject_class_level(wf, call_node, injected) # {{{
-    man_text = "context.result_#{call_node.attributes['id']} => RescueHash.new\n"
+    man_text = "context.result_#{call_node.attributes['id']} = RescueHash.new\n"
     man_text_del = "context.delete(:\"result_#{call_node.attributes['id']}\")\n"
     # Create Property-Objects {{{
     prop = call_node.find("ancestor::cpee:injected", {"cpee" => "http://cpee.org/ns/description/1.0"}).last
     if prop.nil?
       prop = "context.properties_#{call_node.attributes['id']}"
-      man_text << "context.#{prop[1..-1]} => RescueHash.new\n"
-      man_text_del << "context.delete(:\"#{prop[1..-1]}\")\n"
+      man_text << "#{prop} = RescueHash.new\n"
+      man_text_del << "context.delete(:\"#{prop.split('.')[1]}\")\n"
     else
       prop = "#{prop.attributes['properties']}[:\"#{call_node.attributes['oid']}\"]"
     end
@@ -129,7 +129,7 @@ class InjectionService < Riddl::Implementation
     end  # }}}  
     # Change endpoints  {{{
     wf.find("//flow:endpoints/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      man_text << "endpoints.#{call_node.attributes['id']+'__'+node.name.name} => \"#{node.text.nil? ? node.text : ""}\"\n"
+      man_text << "endpoints.#{call_node.attributes['id']+'__'+node.name.name} = \"#{node.text.nil? ? node.text : ""}\"\n"
       man_text_del << "endpoints.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
     end
     wf.find("//flow:call", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |a|
@@ -154,9 +154,9 @@ class InjectionService < Riddl::Implementation
     # Change context-variables: variables, test, context (within manipulate) {{{
     wf.find("//flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
       if node.attributes.include?('class')
-        man_text << "context.#{call_node.attributes['id']+'__'+node.name.name} => #{node.attributes['class']}\n"
+        man_text << "context.#{call_node.attributes['id']+'__'+node.name.name} = #{node.attributes['class']}\n"
       else
-        man_text << "context.#{call_node.attributes['id']+'__'+node.name.name} => #{node.text.empty? ? "''" : node.text}\n"
+        man_text << "context.#{call_node.attributes['id']+'__'+node.name.name} = #{node.text.empty? ? "''" : node.text}\n"
       end
       man_text_del << "context.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
     end
@@ -205,7 +205,7 @@ class InjectionService < Riddl::Implementation
     wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value} # }}}   
     # Change endpoints  {{{
     wf.find("//flow:#{op}/flow:endpoints/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
-      man_text << "endpoints.#{ call_node.attributes['id']+'__'+index+'__'+node.name.name} => \"#{node.text.nil? ? '' : node.text}\"\n"
+      man_text << "endpoints.#{ call_node.attributes['id']+'__'+index+'__'+node.name.name} = \"#{node.text.nil? ? '' : node.text}\"\n"
       man_text_delete << "endpoints.delete(:\"#{ call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
     end
     wf.find("//@endpoint").each do |a|
@@ -217,9 +217,9 @@ class InjectionService < Riddl::Implementation
     # Change context-variables: variables, test {{{ 
     wf.find("//flow:#{op}/flow:context-variables/*", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |node|
       if node.attributes.include?('class')
-        man_text << "context.#{call_node.attributes['id']+'__'+index+'__'+node.name.name} => #{node.attributes['class']}\n" 
+        man_text << "context.#{call_node.attributes['id']+'__'+index+'__'+node.name.name} = #{node.attributes['class']}\n" 
       else
-        man_text << "context.#{call_node.attributes['id']+'__'+index+'__'+node.name.name} => \"#{node.text.empty? ? "''" : node.text}\"\n"
+        man_text << "context.#{call_node.attributes['id']+'__'+index+'__'+node.name.name} = \"#{node.text.empty? ? "''" : node.text}\"\n"
       end
       man_text_delete << "context.delete(:\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
     end
