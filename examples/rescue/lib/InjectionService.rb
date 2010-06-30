@@ -26,7 +26,7 @@ class InjectionService < Riddl::Implementation
       puts "ERROR receiving endpoint named #{call_node.attributes['endpoint']}" unless status == 200
       rescue_uri = XML::Smart.string(resp.value('value').read).root.text
       rescue_client = Riddl::Client.new(rescue_uri)  # }}} 
-      parent_injected = call_node.find('ancestor::cpee:injected').last
+      parent_injected = call_node.find("ancestor::cpee:injected[@type='injection']").last
       class_level = parent_injected.nil? || parent_injected.attributes['serviceoperation'] != call_node.find('descendant::cpee:serviceoperation').first.text # Check if it is an class-level or instance-level injection
       first_ancestor_loop = call_node.find("ancestor::cpee:loop").first # Check if injections is within a loop
 # puts first_ancestor_loop.dump
@@ -45,27 +45,29 @@ class InjectionService < Riddl::Implementation
         else
           puts "== Loop-Class-Injection =="*5
 # Copy loop-block to new block
-          loop_copy = wf.add('loop_copy')
-          loop_copy.add(first_ancestor_loop.children)
+          preceding_loops = call_node.find("count(preceding-sibling::cpee:injected[@type='loop' and @source='#{call_node.attributes['id']}'])").to_i
+          loop_copy =  call_node.find('/*').first.add('injected', {'type' => 'loop', 'source' => call_node.attributes['id'], 'cycle' => preceding_loops})
+          loop_copy.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY)
 # Find new call-block
           call_node = loop_copy.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']").first
 # Performe injection
-          injected = inject_class_level(wf, call_node)
-          create, remove = maintain_class_level(call_node,wf, injected)
-          injected.children.first.add_before(create)
-          call_node.add_after(remove)
+          inject_class_level(wf, call_node)
 # Change ID's
+          loop_copy.find('//cpee:*[@id]').each {|node| node.attributes['id'] =  "#{node.attributes['id']}_#{preceding_loops}"}
+          puts call_node.dump 
 # Check if an other position is within the block
 # Add block before ancestor_loop
+          first_ancestor_loop.add_before(loop_copy)
           puts "== Loop-Class-Injection =="*5
         end
       # }}}
       else   # Injection service-level {{{ 
         injected = description.root.add("injected") # Create injected-block {{{
         injected.attributes['source'] = call_node.attributes['id'] 
+        injected.attributes['type'] = 'injection' 
         injected.attributes['serviceoperation'] = call_node.find('descendant::cpee:serviceoperation').first.text  # }}}
         parallel = injected.add("parallel", {"generated"=>"true"})
-        prop = call_node.find("ancestor::cpee:injected", {"cpee" => "http://cpee.org/ns/description/1.0"}).last.attributes['properties']
+        prop = call_node.find("ancestor::cpee:injected[@type='injection']", {"cpee" => "http://cpee.org/ns/description/1.0"}).last.attributes['properties']
         injected.attributes['properties'] = "#{prop}[:\"#{call_node.attributes['oid']}\"]"
         if first_ancestor_loop.nil?
           add_service(parallel, rescue_client, call_node, cpee_client, "", parent_injected)
@@ -88,13 +90,13 @@ class InjectionService < Riddl::Implementation
     end
   end# }}}
 
-  def maintain_class_level (call_node, wf, injected) # {{{
+  def maintain_class_level (call_node, wf, injected)  # {{{
     blanks = call_node.find('count(ancestor::cpee:*)').to_i
     blanks_create = ' '*(blanks+1)*2
     blanks_remove = ' '*(blanks)*2
     create = ''
     remove = ''
-    parent_injected = call_node.find("ancestor::cpee:injected").last # Create/Remove Property-Objects {{{
+    parent_injected = call_node.find("ancestor::cpee:injected[@type='injection']").last # Create/Remove Property-Objects {{{
     if parent_injected.nil?
       create << "#{blanks_create}#{injected.attributes['properties']} = RescueHash.new\n"
       remove << "#{blanks_remove}context.delete(:\"properties_#{call_node.attributes['id']}\")\n"
@@ -121,10 +123,11 @@ class InjectionService < Riddl::Implementation
 
   def inject_class_level(wf, call_node) # {{{
     injected = call_node.add("injected") # Create injected-block {{{
+    injected.attributes['type'] = 'injection'
     injected.attributes['source'] = call_node.attributes['id'] 
     injected.attributes['serviceoperation'] = call_node.find('descendant::cpee:serviceoperation').first.text 
     injected.attributes['result'] = "context.result_#{call_node.attributes['id']}"
-    parent_injected = call_node.find("ancestor::cpee:injected").last
+    parent_injected = call_node.find("ancestor::cpee:injected[@type='injection']").last
     if parent_injected.nil?
       injected.attributes['properties'] = "context.properties_#{call_node.attributes['id']}" 
     else
@@ -176,7 +179,7 @@ class InjectionService < Riddl::Implementation
     end
     wf.find("//flow:execute/descendant::flow:output[string(@message-parameter)]").each do |output|
       call = output.parent
-      res_object = call_node.find("ancestor::cpee:injected[string(@result)]").last
+      res_object = call_node.find("ancestor::cpee:injected[string(@result) and (@type='injection')]").last
       str = res_object.nil? ? "context.result_#{call_node.attributes['id']}" : "#{res_object.attributes['result']}"
       output.attributes['message-parameter'] = "#{str}[:#{output.attributes['message-parameter']}]"
     end # }}}
@@ -290,7 +293,7 @@ class InjectionService < Riddl::Implementation
   end# }}}  
   
   def check_constraints(wf, call_node, cpee_client)    # {{{
-      call_node.find("ancestor::cpee:injected/cpee:constraints").each do |cons|
+      call_node.find("ancestor::cpee:injected[@type='injection']/cpee:constraints").each do |cons|
         bool = true
         cons.children.each do |child|
           bool = check_group(child, cpee_client, wf) if child.name.name == "group"
