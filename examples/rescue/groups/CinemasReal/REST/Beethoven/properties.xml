@@ -68,7 +68,7 @@
                 show_hall = show.find("child::tr/td[1]/h4/span").first.text.strip
                 show.find("child::tr/td[2]/span/a[text()]").each do |s|
                   show = list.root.add("show")
-                  show.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/REST/AugeGottes")
+                  show.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/REST/Beethoven")
                   show.add("show_id", s.attributes['href'].gsub('--amp--','&amp;'))
                   show.add("title", show_title)
                   show.add("date", show_date.to_s)
