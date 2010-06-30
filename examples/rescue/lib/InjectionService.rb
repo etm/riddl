@@ -168,7 +168,7 @@ class InjectionService < Riddl::Implementation
     # Resovle message-parameter {{{
     wf.find("//flow:execute/descendant::flow:input[string(@message-parameter)]").delete_if! do |p|
       var =  call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{p.attributes['message-parameter']}").first
-      temp = p.parent.add("input", {"name"=>p.attributes['name'], "variable"=>var.text}) if var
+      p.parent.add("input", {"name"=>p.attributes['name'], "variable"=>var.text}) if var
       puts "Variable named #{p.attributes['message-parameter']} could not be resolved" unless var
       true
     end
@@ -204,7 +204,7 @@ class InjectionService < Riddl::Implementation
       remove << "#{blanks}context.delete(:\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
     end # }}}
     create << "#{blanks}# Filling the properties-object og the service\n"
-    create << "#{blanks}#{parent_injected.attributes['propertiers']}[:\"#{call_node.attributes['oid']}\"][:\"#{resource_path}\"] = RescueHash.new\n"
+    create << "#{blanks}#{parent_injected.attributes['properties']}[:\"#{call_node.attributes['oid']}\"][:\"#{resource_path}\"] = RescueHash.new\n"
     create << fill_properties(wf.find("//p:properties").first, "#{parent_injected.attributes['properties']}[:\"#{call_node.attributes['oid']}\"][:\"#{resource_path}\"]", blanks)
     create = call_node.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}_service_#{index}", "generated"=>"true"}, create)
     remove = call_node.add("manipulate", {"id"=>"delete_objects_of_#{call_node.attributes['id']}_service_#{index}", "generated"=>"true"}, remove)
@@ -227,37 +227,25 @@ class InjectionService < Riddl::Implementation
   def inject_instance_level(wf, call_node, resource_path, branch, parent_injected)# {{{
     index = resource_path.tr('/:','__')
     op = parent_injected.attributes['serviceoperation'].tr('"', '')
-    # Change id's {{{ 
-    wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value} # }}}   
-    # Change endpoints  {{{
-    wf.find("//@endpoint").each do |a|
-      a.value = call_node.attributes['id']+'__'+index+'__'+a.value
-    end # }}} 
-    wf.find("//flow:call/@wsdl").each do |a|
-      a.value = call_node.attributes['id']+'__'+index+'__'+a.value
-    end
+    wf.find("//@id").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value}
+    wf.find("//@endpoint").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }
+    wf.find("//flow:call/@wsdl").each {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }
     wf.find("//flow:#{op}/descendant::flow:*/@variable").each {|a| a.value = "context.#{call_node.attributes['id']}__#{index}__#{a.value}"}
     wf.find("//flow:#{op}/descendant::flow:*/@test").each {|a| a.value = "context.#{call_node.attributes['id']}__#{index}__#{a.value}"}
     wf.find("//flow:#{op}/descendant::flow:*/@context").each {|a| a.value = "context.#{call_node.attributes['id']}__#{index}__#{a.value}"}
     wf.find("//flow:#{op}/descendant::flow:*/@input-parameter").each do |a| 
       p = call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{a.value}").first
-      a.value = p.text if not p.nil?
-      puts "Variable for manipulate-block #{a.element.parent.attributes['id']} named #{a.value} not found" if p.nil?
+      a.value = p.nil? ? "\"not found\"" : p.text 
     end
-    wf.find("//flow:#{op}/descendant::flow:*/@output-parameter").each do |a|
-      res_object = call_node.find("ancestor::cpee:injected[string(@result)]").last
-      a.value = "#{parent_injected.attributes['result']}[:\"#{resource_path}\"][:#{a.value}]" unless res_object.nil?
-    end # }}}
+    wf.find("//flow:#{op}/descendant::flow:*/@output-parameter").each { |a| a.value = "#{parent_injected.attributes['result']}[:\"#{resource_path}\"][:#{a.value}]" }
     # Resovle message-parameter {{{
     wf.find("//flow:#{op}/descendant::flow:input[string(@message-parameter)]").delete_if! do |p|
-      var =  call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{p.attributes['message-parameter']}").first
-      temp = p.parent.add("input", {"name"=>p.attributes['name'], "variable"=>var.text}) if var
-      puts "Variable named #{p.attributes['message-parameter']} could not be resolved" if not var
+      var = call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{p.attributes['message-parameter']}").first
+      p.parent.add("input", {"name"=>p.attributes['name'], "variable"=>var.text}) if var 
       true
     end
     wf.find("//flow:#{op}/descendant::flow:output[string(@message-parameter)]").each do |p|
-      res_object = call_node.find("ancestor::cpee:injected[string(@result)]").last
-      p.attributes['message-parameter'] = "#{parent_injected.attributes['result']}[:\"#{resource_path}\"][:#{p.attributes['message-parameter']}]" if not res_object.nil?
+      p.attributes['message-parameter'] = "#{parent_injected.attributes['result']}[:\"#{resource_path}\"][:#{p.attributes['message-parameter']}]" if  parent_injected.attributes['result']
     end # }}}
     doc = wf.find("//flow:#{op}/flow:execute").first.to_doc
     # The new doc seem's to have lost all namespace-information during document creation
@@ -265,11 +253,11 @@ class InjectionService < Riddl::Implementation
     doc.find("//*").each { |node| node.namespace = ns }
     create, remove = maintain_instance_level(wf, call_node, parent_injected, resource_path)
     branch.add(create)
+    branch.add(XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root.children) 
     branch.add(remove)
-    XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root 
   end# }}}
 
-  def add_service(parallel_node, rescue_client, call_node, cpee_client, resource_path, parent_injected)  # {{{
+  def add_service(parallel_node, rescue_client, call_node, cpee_client, resource_path, parent_injected)  # {{{ 
     status, resp = rescue_client.resource(resource_path).get
     return if status != 200
     if resp[0].name == "atom-feed"
@@ -283,9 +271,7 @@ class InjectionService < Riddl::Implementation
       wf.namespaces['p'] = 'http://rescue.org/ns/properties/0.2'
       if check_constraints(wf, call_node, cpee_client)
         branch = parallel_node.add("parallel_branch", {"generated"=>"true"})
-        branch.add(inject_instance_level(wf, call_node, "#{rescue_client.instance_variable_get("@base")}/#{resource_path}", branch, parent_injected).children)
-        del_block = branch.find("child::cpee:manipulate[@id='delete_objects_of_#{call_node.attributes['id']}_service_#{"#{rescue_client.instance_variable_get("@base")}/#{resource_path}".tr('/:','_')}']").first
-        branch.add(del_block) # Move del-block to last psoition in branch
+        inject_instance_level(wf, call_node, "#{rescue_client.instance_variable_get("@base")}/#{resource_path}", branch, parent_injected)
       end
     end 
   end# }}}  
@@ -296,7 +282,7 @@ class InjectionService < Riddl::Implementation
         cons.children.each do |child|
           bool = check_group(child, cpee_client, wf) if child.name.name == "group"
           bool = check_constraint(child, cpee_client, wf) if child.name.name == "constraint"
-          return false if bool == false
+          return false unless bool
         end
       end
       true
