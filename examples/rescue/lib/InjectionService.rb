@@ -44,8 +44,9 @@ class InjectionService < Riddl::Implementation
           inject_class_level(wf, call_node)
         else
           puts "== Loop-Class-Injection =="*5
+          first_ancestor_loop.find('./@post_test').delete_if! {first_ancestor_loop.attributes['pre_test'] = first_ancestor_loop.attributes['post_test']; true}
 # Copy loop-block to new block
-          preceding_loops = call_node.find("count(preceding-sibling::cpee:injected[@type='loop' and @source='#{call_node.attributes['id']}'])").to_i
+          preceding_loops = call_node.find("count(ancestor::cpee:loop[1]/preceding-sibling::cpee:injected[@type='loop' and @source='#{call_node.attributes['id']}'])").to_i
           loop_copy =  call_node.find('/*').first.add('injected', {'type' => 'loop', 'source' => call_node.attributes['id'], 'cycle' => preceding_loops})
           loop_copy.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY)
 # Find new call-block
@@ -53,9 +54,9 @@ class InjectionService < Riddl::Implementation
 # Performe injection
           inject_class_level(wf, call_node)
 # Change ID's
-          loop_copy.find('//cpee:*[@id]').each {|node| node.attributes['id'] =  "#{node.attributes['id']}_#{preceding_loops}"}
-          puts call_node.dump 
+          loop_copy.find('descendant::cpee:*[@id]').each {|node| node.attributes['id'] =  "#{node.attributes['id']}_#{preceding_loops}"}
 # Check if an other position is within the block
+          # TODO
 # Add block before ancestor_loop
           first_ancestor_loop.add_before(loop_copy)
           puts "== Loop-Class-Injection =="*5
@@ -74,6 +75,22 @@ class InjectionService < Riddl::Implementation
           call_node.add_after(injected)
         else
           puts "== Loop-Instance-Injection =="*5
+          first_ancestor_loop.find('./@post_test').delete_if! {first_ancestor_loop.attributes['pre_test'] = first_ancestor_loop.attributes['post_test']; true}
+# Copy loop-block to new block
+          preceding_loops = call_node.find("count(ancestor::cpee:loop[1]/preceding-sibling::cpee:injected[@type='loop' and @source='#{call_node.attributes['id']}'])").to_i
+          loop_copy =  call_node.find('/*').first.add('injected', {'type' => 'loop', 'source' => call_node.attributes['id'], 'cycle' => preceding_loops})
+          loop_copy.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY)
+# Find new call-block
+          call_node = loop_copy.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']").first
+# Performe injection
+          add_service(parallel, rescue_client, call_node, cpee_client, "", parent_injected)
+          call_node.add_after(injected)
+# Change ID's
+          loop_copy.find('descendant::cpee:*[@id]').each {|node| node.attributes['id'] =  "#{node.attributes['id']}_#{preceding_loops}"}
+# Check if an other position is within the block
+          # TODO
+# Add block before ancestor_loop
+          first_ancestor_loop.add_before(loop_copy)
           puts "== Loop-Instance-Injection =="*5
         end
       end # }}}
@@ -113,7 +130,7 @@ class InjectionService < Riddl::Implementation
     end # }}} 
     wf.find("//flow:context-variables/*").each do |node|  # Create/Remoce context-variables {{{
       create << "#{blanks_create}context.#{call_node.attributes['id']+'__'+node.name.name} = "
-      create << (node.attributes.include?('class') ? node.attributes['class'] : "#{node.text.inspect}") + "\n"
+      create << (node.attributes.include?('class') ? node.attributes['class'] : "#{node.text.empty? ? "''" : node.text}") + "\n"
       remove << "#{blanks_remove}context.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
     end # }}}
     create  = injected.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}", "generated"=>"true"}, create)
@@ -216,7 +233,7 @@ class InjectionService < Riddl::Implementation
     # Create/Remove context-variables {{{ 
     wf.find("//flow:#{op}/flow:context-variables/*").each do |node|
       create << "#{blanks}context.#{call_node.attributes['id']+'__'+index+'__'+node.name.name} = "
-      create << (node.attributes.include?('class') ? node.attributes['class'] : "#{node.text.inspect}") + "\n"
+      create << (node.attributes.include?('class') ? node.attributes['class'] : "#{node.text.empty? ? "''" : node.text}") + "\n"
       remove << "#{blanks}context.delete(:\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
     end # }}}
     create << "#{blanks}# Filling the properties-object og the service\n"
