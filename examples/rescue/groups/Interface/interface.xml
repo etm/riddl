@@ -50,7 +50,7 @@
     <operation name="loop" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
       <context-variables>
-        <loop_count>2</loop_count>
+        <loop_count>1</loop_count>
       </context-variables>
       <endpoints/>
       <execute>
