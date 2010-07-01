@@ -83,6 +83,7 @@
   <message name="injection-service-request">
     <parameter name="position" type="string"/>
     <parameter name="instance" type="string"/>
+    <parameter name="handler" type="string"/>
   </message>
 
   <message name="injection-service-response">

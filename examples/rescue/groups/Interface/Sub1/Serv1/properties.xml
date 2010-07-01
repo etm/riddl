@@ -17,7 +17,7 @@
           <input name="timeout" message-parameter="pi1"/>
         </call>
         <manipulate id="set_output">
-          <variable output-parameter="mpo1" local="out"/>
+          <variable output-parameter="po1" local="out"/>
           out = 2
         </manipulate>
       </execute>
@@ -39,7 +39,7 @@
           <input name="timeout" message-parameter="pi1"/>
         </call>
         <manipulate id="set_output">
-          <variable output-parameter="mpo1" local="out"/>
+          <variable output-parameter="po1" local="out"/>
           out = 2
         </manipulate>
       </execute>

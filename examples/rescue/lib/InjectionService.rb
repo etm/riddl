@@ -3,15 +3,16 @@ require '../../lib/ruby/client'
 class InjectionService < Riddl::Implementation
   def response  #{{{
     puts "== Injection-service: injecting position #{@p.value('position')} on instance #{@p.value('instance')}"
-    pos, state =  analyze(@p.value('position'), @p.value('instance'))
-    [Riddl::Parameter::Simple.new('position', pos), Riddl::Parameter::Simple.new('state', state)]
+    positions =  analyze(@p.value('position'), @p.value('instance'), @p.value('handler'))
+    pos = XML::Smart.string('<positions/>') # Set positions {{{
+    positions.each { |p| pos.root.add(p[:old].to_s, {'new'=>p[:new].to_s}, p[:state].to_s) }
+    Riddl::Parameter::Complex.new('positions', 'text/xml', pos.root.dump) # }}}
   end# }}}  
 
-  def analyze(position, instance)# {{{ 
-    new_position = nil
-    new_state = nil
+  def analyze(position, instance, handler_uri)# {{{ 
     begin
       injected = nil
+      positions = Array.new
       cpee_client = Riddl::Client.new(instance)
       status, resp = cpee_client.resource("/properties/values/description").get # Get description {{{
       unless status == 200
@@ -21,7 +22,7 @@ class InjectionService < Riddl::Implementation
       description = XML::Smart.string(resp[0].value.read)
       description.namespaces['cpee'] = 'http://cpee.org/ns/description/1.0'  # }}}
       call_node = description.find("//cpee:call[@id = '#{position}']").first # Get call-node, rescue_client and service_operation {{{
-      service_operation = call_node.find("descendant::cpee:serviceoperation").first.text.gsub('"','')
+      service_operation = call_node.find("descendant::cpee:serviceoperation").first.text.tr('"','')
       status, resp = cpee_client.resource("properties/values/endpoints/#{call_node.attributes['endpoint']}").get 
       puts "ERROR receiving endpoint named #{call_node.attributes['endpoint']}" unless status == 200
       rescue_uri = XML::Smart.string(resp.value('value').read).root.text
@@ -29,8 +30,6 @@ class InjectionService < Riddl::Implementation
       parent_injected = call_node.find("ancestor::cpee:injected[@type='injection']").last
       class_level = parent_injected.nil? || parent_injected.attributes['serviceoperation'] != call_node.find('descendant::cpee:serviceoperation').first.text # Check if it is an class-level or instance-level injection
       first_ancestor_loop = call_node.find("ancestor::cpee:loop").first # Check if injections is within a loop
-# puts first_ancestor_loop.dump
-# puts call_node.find("ancestor::cpee:loop").last.dump
       if (class_level) # Injecting class-level {{{
         status, resp = rescue_client.resource("operations/#{service_operation}").get [] # {{{
         unless status == 200
@@ -42,27 +41,34 @@ class InjectionService < Riddl::Implementation
         wf.namespaces['p'] =  'http://rescue.org/ns/properties/0.2'
         if first_ancestor_loop.nil?
           inject_class_level(wf, call_node)
+          positions << {:old=>call_node.attributes['id'], :new=>call_node.attributes['id'], :state=>'after'}
         else
           puts "== Loop-Class-Injection =="*5
           first_ancestor_loop.find('./@post_test').delete_if! {first_ancestor_loop.attributes['pre_test'] = first_ancestor_loop.attributes['post_test']; true}
-# Copy loop-block to new block
+          # Copy loop-block to new block {{{
           preceding_loops = call_node.find("count(ancestor::cpee:loop[1]/preceding-sibling::cpee:injected[@type='loop' and @source='#{call_node.attributes['id']}'])").to_i
-          loop_copy =  call_node.find('/*').first.add('injected', {'type' => 'loop', 'source' => call_node.attributes['id'], 'cycle' => preceding_loops})
-          loop_copy.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY)
-# Find new call-block
-          call_node = loop_copy.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']").first
-# Performe injection
-          inject_class_level(wf, call_node)
-# Change ID's
-          loop_copy.find('descendant::cpee:*[@id]').each {|node| node.attributes['id'] =  "#{node.attributes['id']}_#{preceding_loops}"}
-# Check if an other position is within the block
-          # TODO
-# Add block before ancestor_loop
+          loop_copy = call_node.find('/*').first.add('injected', {'type' => 'loop', 'source' => call_node.attributes['id'], 'cycle' => preceding_loops})
+          loop_copy.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY) # }}}
+          # Set new position and check if other positions are within the block {{{
+          positions << {:old=>call_node.attributes['id'], :new=>"#{call_node.attributes['id']}_#{preceding_loops}", :state=>'after'}
+          handler = Riddl::Client.new(handler_uri)
+          status, resp = handler.get [Riddl::Parameter::Simple.new('instance', instance)]
+          puts "ERROR: Receiving queue status: #{status}" unless status == 200
+          queue = XML::Smart.string(resp[0].value.read)
+          queue.find('/injection-queue/cpee-positions/*').each do |cpee_pos|
+             p = loop_copy.find("descendant::cpee:*[@id='#{cpee_pos.name.name}']").first
+             positions << {:old=>cpee_pos.name.name, :new=>"#{cpee_pos.name.name}_#{preceding_loops}", :state=>'after'} unless p.nil? || cpee_pos.name.name == call_node.attributes['id']
+          end
+          # }}}
+          call_node = loop_copy.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']").first # Find new call-block
+          inject_class_level(wf, call_node) # Performe injection
+          loop_copy.find('descendant::cpee:*[@id]').each {|node| node.attributes['id'] =  "#{node.attributes['id']}_#{preceding_loops}"} # Change ID's
+          # Add block before ancestor_loop
           first_ancestor_loop.add_before(loop_copy)
           puts "== Loop-Class-Injection =="*5
         end
       # }}}
-      else   # Injection service-level {{{ 
+      else   # Injection instance-level {{{ 
         injected = description.root.add("injected") # Create injected-block {{{
         injected.attributes['source'] = call_node.attributes['id'] 
         injected.attributes['type'] = 'injection' 
@@ -73,34 +79,52 @@ class InjectionService < Riddl::Implementation
         if first_ancestor_loop.nil?
           add_service(parallel, rescue_client, call_node, cpee_client, "", parent_injected)
           call_node.add_after(injected)
+          positions << {:old=>call_node.attributes['id'], :new=>call_node.attributes['id'], :state=>'after'}
         else
           puts "== Loop-Instance-Injection =="*5
           first_ancestor_loop.find('./@post_test').delete_if! {first_ancestor_loop.attributes['pre_test'] = first_ancestor_loop.attributes['post_test']; true}
-# Copy loop-block to new block
+          # Copy loop-block to new block
           preceding_loops = call_node.find("count(ancestor::cpee:loop[1]/preceding-sibling::cpee:injected[@type='loop' and @source='#{call_node.attributes['id']}'])").to_i
           loop_copy =  call_node.find('/*').first.add('injected', {'type' => 'loop', 'source' => call_node.attributes['id'], 'cycle' => preceding_loops})
           loop_copy.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY)
-# Find new call-block
+          # Set new position and check if other positions are within the block {{{
+          positions << {:old=>call_node.attributes['id'], :new=>"#{call_node.attributes['id']}_#{preceding_loops}", :state=>'after'}
+          handler = Riddl::Client.new(handler_uri)
+          status, resp = handler.get [Riddl::Parameter::Simple.new('instance', instance)]
+          puts "ERROR: Receiving queue status: #{status}" unless status == 200
+          queue = XML::Smart.string(resp[0].value.read)
+          queue.find('/injection-queue/cpee-positions/*').each do |cpee_pos|
+             p = loop_copy.find("descendant::cpee:*[@id='#{cpee_pos.name.name}']").first
+             positions << {:old=>cpee_pos.name.name, :new=>"#{cpee_pos.name.name}_#{preceding_loops}", :state=>'after'} unless p.nil? || cpee_pos.name.name == call_node.attributes['id']
+          end
+          # }}}
+          # Find new call-block
           call_node = loop_copy.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']").first
-# Performe injection
+          # Move manipulate into seperate node, set result-attribute for injected and create output context-variable {{{
+          man_block = call_node.find("child::cpee:manipulate").first
+          if man_block
+            man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
+            man_block.attributes['context'] = parent_injected.attributes['result']
+            man_block.attributes['properties'] = "#{parent_injected.attributes['properties']}"
+            call_node.add_after(man_block)
+          end  # }}} 
+          # Performe injection
           add_service(parallel, rescue_client, call_node, cpee_client, "", parent_injected)
           call_node.add_after(injected)
-# Change ID's
+          # Change ID's
           loop_copy.find('descendant::cpee:*[@id]').each {|node| node.attributes['id'] =  "#{node.attributes['id']}_#{preceding_loops}"}
-# Check if an other position is within the block
+          # Check if an other position is within the block
           # TODO
-# Add block before ancestor_loop
+          # Add block before ancestor_loop
           first_ancestor_loop.add_before(loop_copy)
           puts "== Loop-Instance-Injection =="*5
         end
       end # }}}
-      new_position = call_node.attributes['id']
-      new_state = 'after'
       # Set description {{{
       status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("content", "<content>#{description.root.dump}</content>")]
       puts "ERROR setting description - status: #{status}" unless status == 200
       # }}} 
-      [new_position, new_state]
+      positions
     rescue => e
       puts $!
       puts e.backtrace
@@ -355,6 +379,6 @@ class InjectionService < Riddl::Implementation
     value2 =  wf.find("//p:properties/#{xpath}").first.text
     value2 = value2.to_f if is_a_number?(value2.strip)
     value2.send(con.attributes['comparator'], value1)
-  end#}}}
+  end#}}} 
 
 end

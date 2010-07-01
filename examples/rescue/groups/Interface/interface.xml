@@ -61,7 +61,7 @@
               <domain:caption lang="en">pi1</domain:caption>
               <rng:data type="string"/>
             </input>
-            <output name="po1" message-parameter="mpo1">
+            <output name="po1" message-parameter="po1">
               <domain:caption lang="en">po2</domain:caption>
               <rng:data type="string"/>
             </output>
