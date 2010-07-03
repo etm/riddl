@@ -4,6 +4,7 @@ class InjectionHandler < Riddl::Implementation
   $injection_queue = Hash.new
   $notification_keys = Array.new
   $registration_semaphore = Mutex.new # this semaphore prevents timing issues when a call leades to an injection which is directly followed by a sync_after event
+  $received_stop = Hash.new
   def response
     notification = YAML::load(@p.value('notification')) if @p.value('notification')
     cpee = Riddl::Client.new(notification[:instance]) if notification
@@ -71,6 +72,10 @@ class InjectionHandler < Riddl::Implementation
 # }}}
     elsif @p.value('event') == "change" && @p.value('topic') == "properties/state"# received notification for instance stopped{{{
       unless notification[:state] != :stopped
+        $registration_semaphore.synchronize { 
+          return if $received_stop.include?(notification[:instance]) 
+          $received_stop[notification[:instance]] = true 
+        }
         puts "== Injection-handler: #{notification[:instance]} informed about state stopped"
         status, resp = cpee.resource("notifications/subscriptions/#{@p.value('key')}").delete [
           Riddl::Parameter::Simple.new("message-uid","ralph"),
@@ -107,6 +112,7 @@ class InjectionHandler < Riddl::Implementation
         # Restarting the instance
         status, resp = cpee.resource("properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
         $injection_queue.delete(notification[:instance])
+        $received_stop.delete(notification[:instance])
       end
 # }}} 
     elsif @p.value('notification-key' ) # received subsription for sync_after {{{
