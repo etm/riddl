@@ -39,13 +39,6 @@ class InjectionService < Riddl::Implementation
         injected.attributes['properties'] = "#{parent_injected.attributes['properties']}[:\"#{call_node.attributes['oid']}\"]"
       end
       injected.add(call_node.find("child::cpee:constraints"), XML::Smart::Dom::Element::COPY) #}}}
-      # Move manipulate into seperate node, set result-attribute for injected and create output context-variable {{{
-      man_block = call_node.find("child::cpee:manipulate").first
-      if man_block
-        man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
-        man_block.attributes['context'] =  class_level ? "context.result_#{call_node.attributes['id']}" : parent_injected.attributes['result'] 
-        man_block.attributes['properties'] = parent_injected ? "#{parent_injected.attributes['properties']}" : injected.attributes['properties']
-      end  # }}} 
       wf = nil; parallel = nil; remove = nil;
       if class_level
         status, resp = rescue_client.resource("operations/#{service_operation}").get [] # {{{
@@ -89,6 +82,13 @@ class InjectionService < Riddl::Implementation
         loop_copy.find('descendant::cpee:*[@id]').each {|node| node.attributes['id'] =  "#{node.attributes['id']}_#{preceding_loops}"} # Change ID's
         first_ancestor_loop.add_before(loop_copy)  # Add block before ancestor_loop
       end
+      # Move manipulate into seperate node, set result-attribute for injected and create output context-variable {{{
+      man_block = call_node.find("child::cpee:manipulate").first
+      if man_block
+        man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
+        man_block.attributes['context'] =  class_level ? "context.result_#{call_node.attributes['id']}" : parent_injected.attributes['result'] 
+        man_block.attributes['properties'] = parent_injected ? "#{parent_injected.attributes['properties']}" : injected.attributes['properties']
+      end  # }}} 
       call_node.add_after(man_block)
       call_node.add_after(injected)
       man_block.nil? ? injected.add_after(remove) : man_block.add_after(remove) if class_level
