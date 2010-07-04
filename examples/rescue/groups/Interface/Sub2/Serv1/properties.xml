@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+
+<service-description xmlns="http://rescue.org/ns/service/0.2"
+                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <properties xmlns="http://rescue.org/ns/properties/0.2"/>
+  <operations xmlns="http://rescue.org/ns/controlflow/0.2">
+    <op1>
+      <endpoints>
+        <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
+      </endpoints>
+      <context-variables>
+        <wait>2</wait>
+      </context-variables>
+      <execute>
+        <call id="s1_op1" endpoint="ep" http-method="post">
+          <input name="senseless" variable="wait"/>
+          <input name="timeout" message-parameter="pi1"/>
+        </call>
+        <manipulate id="set_output">
+          <variable output-parameter="po1" local="out"/>
+          out = 2
+        </manipulate>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </op1>
+    <loop>
+      <endpoints>
+        <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
+      </endpoints>
+      <context-variables>
+        <wait>2</wait>
+      </context-variables>
+      <execute>
+        <call id="s1_op1" endpoint="ep" http-method="post">
+          <input name="timeout" message-parameter="pi1"/>
+        </call>
+        <manipulate id="set_output">
+          <variable output-parameter="po1" local="out"/>
+          out = 2
+        </manipulate>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </loop>
+    <op2>
+      <endpoints>
+        <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
+      </endpoints>
+      <context-variables>
+        <wait>5</wait>
+      </context-variables>
+      <execute>
+        <call id="s1_op2" endpoint="ep" http-method="post">
+          <input name="timeout" message-parameter="pi2"/>
+        </call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </op2>
+  </operations>
+</service-description>

@@ -30,12 +30,12 @@ class InjectionService < Riddl::Implementation
       end #}}}
       rescue_uri = XML::Smart.string(resp.value('value').read).root.text
       rescue_client = Riddl::Client.new(rescue_uri)  # }}} 
-      parent_injected = call_node.find("ancestor::cpee:injected[@type='injection']").last
+      parent_injected = call_node.find("ancestor::cpee:group[@type='injection']").last
       class_level = parent_injected.nil? || parent_injected.attributes['serviceoperation'] != call_node.find('descendant::cpee:serviceoperation').first.text # Check if it is an class-level or instance-level injection
       first_ancestor_loop = call_node.find("ancestor::cpee:loop").first # Check if injections is within a loop
-      injected = call_node.add("injected", {'type'=>'injection', 'source'=>call_node.attributes['id'], 'serviceoperation'=>call_node.find('descendant::cpee:serviceoperation').first.text}) # Create injected-block {{{
+      injected = call_node.add("group", {'type'=>'injection', 'source'=>call_node.attributes['id'], 'serviceoperation'=>call_node.find('descendant::cpee:serviceoperation').first.text}) # Create injected-block {{{
       injected.attributes['result'] = "context.result_#{call_node.attributes['id']}" if class_level
-      parent_injected = call_node.find("ancestor::cpee:injected[@type='injection']").last
+      parent_injected = call_node.find("ancestor::cpee:group[@type='injection']").last
       if parent_injected.nil?
         injected.attributes['properties'] = "context.properties_#{call_node.attributes['id']}" 
       else
@@ -65,8 +65,8 @@ class InjectionService < Riddl::Implementation
       unless first_ancestor_loop.nil? # {{{
         first_ancestor_loop.find('./@post_test').delete_if! {first_ancestor_loop.attributes['pre_test'] = first_ancestor_loop.attributes['post_test']; true}
         # Copy loop-block to new block {{{
-        preceding_loops = call_node.find("count(ancestor::cpee:loop[1]/preceding-sibling::cpee:injected[@type='loop' and @source='#{call_node.attributes['id']}'])").to_i
-        loop_copy = call_node.find('/*').first.add('injected', {'type' => 'loop', 'source' => call_node.attributes['id'], 'cycle' => preceding_loops})
+        preceding_loops = call_node.find("count(ancestor::cpee:loop[1]/preceding-sibling::cpee:group[@type='loop' and @source='#{call_node.attributes['id']}'])").to_i
+        loop_copy = call_node.find('/*').first.add('group', {'type' => 'loop', 'source' => call_node.attributes['id'], 'cycle' => preceding_loops})
         loop_copy.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY) # }}}
         # Set new position and check if other positions are within the block {{{
         status, resp = Riddl::Client.new(handler_uri).get [Riddl::Parameter::Simple.new('instance', instance)]
@@ -116,7 +116,7 @@ class InjectionService < Riddl::Implementation
     blanks = call_node.find('count(ancestor::cpee:*)').to_i
     blanks_create = ' '*(blanks+1)*2; blanks_remove = ' '*(blanks)*2
     create = ''; remove = ''
-    parent_injected = call_node.find("ancestor::cpee:injected[@type='injection']").last # Create/Remove Property-Objects {{{
+    parent_injected = call_node.find("ancestor::cpee:group[@type='injection']").last # Create/Remove Property-Objects {{{
     if parent_injected.nil?
       create << "#{blanks_create}#{injected.attributes['properties']} = RescueHash.new\n"
       remove << "#{blanks_remove}context.delete(:\"properties_#{call_node.attributes['id']}\")\n"
@@ -284,7 +284,7 @@ class InjectionService < Riddl::Implementation
   end# }}}  
   
   def check_constraints(wf, call_node, cpee_client)    # {{{
-      call_node.find("ancestor::cpee:injected[@type='injection']/cpee:constraints").each do |cons|
+      call_node.find("ancestor::cpee:group[@type='injection']/cpee:constraints").each do |cons|
         bool = true
         cons.children.each do |child|
           bool = check_group(child, cpee_client, wf) if child.name.name == "group"
