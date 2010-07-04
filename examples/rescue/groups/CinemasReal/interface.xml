@@ -131,6 +131,7 @@
         <list/>
         <res/>
         <list_merge/>
+        <number_of_shows/>
       </context-variables>
       <endpoints>
         <selected_cinema/>
@@ -202,6 +203,7 @@
 <!-- {{{ --> 
           <variable context="list" local="list"/>
           <variable context="list_merge" local="m_list"/>
+          <variable context="number_of_shows" local="nos"/>
           <variable input-parameter="title" local="title"/>
           <variable input-parameter="date" local="date"/>
           xml = XML::Smart.string("&lt;list_of_shows/&gt;")
@@ -214,69 +216,78 @@
             l = XML::Smart.string(list)
             xml.root.add(l.find("//show"))
           else
-            raise "Unecpected class of return-value - class: #{list.class}"
+            raise "Unexpected class of return-value - class: #{list.class}"
           end
-          raise "No fitting shows found for #{title} on #{date}" if xml.root.children.length == 0
           m_list = xml.root.dump
+          nos = xml.root.children.length
 <!-- }}} -->  
         </manipulate>
-        <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post" group-by="//show">
-<!-- {{{ --> 
-          <resource-id xpath="cinema_uri" endpoint="selected_cinema" name="target"/>
-          <input name="data" variable="list_merge"/>
-          <output name="show_id" variable="show_id"/>
-          <output name="movie_title" message-parameter="movie_title">
-<!-- {{{ --> 
-            <rng:element name="movie_title">
-              <domain:caption lang="en">Movie title</domain:caption>
-              <domain:caption lang="de">Filmtitel</domain:caption>
-              <rng:data type="string"/>
-            </rng:element>
-<!-- }}} -->  
-          </output>
-          <output name="date" message-parameter="selected_date">
-<!-- {{{ --> 
-            <rng:element name="selected_date">
-              <domain:caption lang="en">Selected date</domain:caption>
-              <domain:caption lang="de">Gewähltes Datum</domain:caption>
-              <rng:data type="date"/>
-            </rng:element>
-<!-- }}} -->  
-          </output>
-          <output name="starting_time" message-parameter="starting_time">
-<!-- {{{ --> 
-            <rng:element name="starting_time">
-              <domain:caption lang="en">Starting time</domain:caption>
-              <domain:caption lang="de">Beginzeit</domain:caption>
-              <rng:data type="time"/>
-            </rng:element>
-<!-- }}} -->  
-          </output>
-          <output name="hall" message-parameter="hall">
-<!-- {{{ --> 
-            <rng:element name="hall">
-              <domain:caption lang="en">Hall</domain:caption>
-              <domain:caption lang="de">Saal</domain:caption>
-              <rng:data type="positiveInteger"/>
-            </rng:element>
-<!-- }}} -->  
-          </output>
-<!-- }}} -->  
-        </call>
-        <call id="call_book" endpoint="selected_cinema" service-operation="book">
-<!-- {{{ -->  
-          <input name="show_id" variable="show_id"/>
-          <output name="reservation_id" message-parameter="reservation_id">
-<!-- {{{ -->     
-            <rng:element name="reservation_id">
-              <domain:caption lang="en">Reservation ID</domain:caption>
-              <domain:caption lang="de">Reservierungsnummer</domain:caption>
-              <rng:data type="string"/>
-            </rng:element>
-<!-- }}} --> 
-          </output>
-<!-- }}} --> 
-        </call>
+        <choose>
+          <alternative>
+            <condition test="number_of_shows" comparator="&gt;" value="0"/>
+            <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post" group-by="//show">
+              <!-- {{{ --> 
+              <resource-id xpath="cinema_uri" endpoint="selected_cinema" name="target"/>
+              <input name="data" variable="list_merge"/>
+              <output name="show_id" variable="show_id"/>
+              <output name="movie_title" message-parameter="movie_title">
+                <!-- {{{ --> 
+                <rng:element name="movie_title">
+                  <domain:caption lang="en">Movie title</domain:caption>
+                  <domain:caption lang="de">Filmtitel</domain:caption>
+                  <rng:data type="string"/>
+                </rng:element>
+                <!-- }}} -->  
+              </output>
+              <output name="date" message-parameter="selected_date">
+              <!-- {{{ --> 
+                <rng:element name="selected_date">
+                  <domain:caption lang="en">Selected date</domain:caption>
+                  <domain:caption lang="de">Gewähltes Datum</domain:caption>
+                  <rng:data type="date"/>
+                </rng:element>
+              <!-- }}} -->  
+              </output>
+              <output name="starting_time" message-parameter="starting_time">
+              <!-- {{{ --> 
+                <rng:element name="starting_time">
+                  <domain:caption lang="en">Starting time</domain:caption>
+                  <domain:caption lang="de">Beginzeit</domain:caption>
+                  <rng:data type="time"/>
+                </rng:element>
+              <!-- }}} -->  
+              </output>
+              <output name="hall" message-parameter="hall">
+              <!-- {{{ --> 
+                <rng:element name="hall">
+                  <domain:caption lang="en">Hall</domain:caption>
+                  <domain:caption lang="de">Saal</domain:caption>
+                  <rng:data type="positiveInteger"/>
+                </rng:element>
+              <!-- }}} -->  
+              </output>
+            <!-- }}} -->  
+            </call>
+            <call id="call_book" endpoint="selected_cinema" service-operation="book">
+            <!-- {{{ -->  
+              <input name="show_id" variable="show_id"/>
+              <output name="reservation_id" message-parameter="reservation_id">
+              <!-- {{{ -->     
+                <rng:element name="reservation_id">
+                  <domain:caption lang="en">Reservation ID</domain:caption>
+                  <domain:caption lang="de">Reservierungsnummer</domain:caption>
+                  <rng:data type="string"/>
+                </rng:element>
+              <!-- }}} --> 
+              </output>
+            <!-- }}} --> 
+            </call>
+            <manipulate id="set_status_success"/>
+          </alternative>
+          <otherwise>
+            <manipulate id="set_status_failed"/>
+          </otherwise>
+        </choose>
       </execute>
 <!-- }}} --> 
     </operation>
