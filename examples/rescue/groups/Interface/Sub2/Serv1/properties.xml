@@ -2,9 +2,29 @@
 
 <service-description xmlns="http://rescue.org/ns/service/0.2"
                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-  <properties xmlns="http://rescue.org/ns/properties/0.2"/>
+  <properties xmlns="http://rescue.org/ns/properties/0.2">
+    <property_A>71</property_A>
+    <property_B>74</property_B>
+    <property_C>11</property_C>
+  </properties>
   <operations xmlns="http://rescue.org/ns/controlflow/0.2">
-    <op1>
+    <no_params>
+      <endpoints>
+        <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
+      </endpoints>
+      <context-variables/>
+      <execute>
+        <call id="s1_op1" endpoint="ep" http-method="post">
+          <input name="timeout" value="2"/>
+        </call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+    </no_params>
+    <simple>
       <endpoints>
         <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
       </endpoints>
@@ -13,11 +33,10 @@
       </context-variables>
       <execute>
         <call id="s1_op1" endpoint="ep" http-method="post">
-          <input name="senseless" variable="wait"/>
-          <input name="timeout" message-parameter="pi1"/>
+          <input name="timeout" message-parameter="wait"/>
         </call>
         <manipulate id="set_output">
-          <variable output-parameter="po1" local="out"/>
+          <variable output-parameter="simple_output" local="out"/>
           out = 2
         </manipulate>
       </execute>
@@ -26,21 +45,37 @@
       <redo/>
       <suspend/>
       <abort/>
-    </op1>
+    </simple>
     <loop>
       <endpoints>
         <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
       </endpoints>
       <context-variables>
-        <wait>2</wait>
+        <loops>2</loops>
+        <internal_wait/>
+        <internal_count>0</internal_count>
       </context-variables>
       <execute>
-        <call id="s1_op1" endpoint="ep" http-method="post">
-          <input name="timeout" message-parameter="pi1"/>
-        </call>
-        <manipulate id="set_output">
-          <variable output-parameter="po1" local="out"/>
-          out = 2
+        <manipulate id="prepare">
+          <variable input-parameter="loop_wait" local="lw"/>
+          <variable context="internal_wait" local="iw"/>
+          <variable context="loops" local="l"/>
+          iw = 1
+        </manipulate>
+        <loop>
+          <condition test="loops" comparator="&gt;" value="0"/>
+          <call id="timeout" endpoint="ep" http-method="post">
+            <input name="timeout" variable="internal_wait"/>
+          </call>
+          <manipulate id="count">
+            <variable context="loops" local="loops"/>
+            loops -= 1
+          </manipulate>
+        </loop>
+        <manipulate id="set_ouput">
+          <variable output-parameter="counted_loops" local="cl"/>
+          <variable context="internal_count" local="count"/>
+          cl = count
         </manipulate>
       </execute>
       <compensate/>
@@ -49,23 +84,44 @@
       <suspend/>
       <abort/>
     </loop>
-    <op2>
+    <parallel>
       <endpoints>
         <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
       </endpoints>
       <context-variables>
-        <wait>5</wait>
+        <wait/>
       </context-variables>
       <execute>
-        <call id="s1_op2" endpoint="ep" http-method="post">
-          <input name="timeout" message-parameter="pi2"/>
-        </call>
+        <manipulate id="prepare">
+          <variable input-parameter="wait" local="lw"/>
+          <variable output-parameter="parallel_parallel_output" local="po"/>
+          <variable context="wait" local="wait"/>
+          wait = lw * 2
+          po = 0
+        </manipulate>
+        <parallel>
+          <parallel_branch>
+            <call id="wait_branch_1" endpoint="ep" http-method="post">
+              <input name="timeout" message-parameter="wait"/>
+            </call>
+            <manipulate id="set_output_branch_1">
+              <variable output-parameter="parallel_parallel_output" local="po"/>
+              <variable input-parameter="wait" local="w"/>
+              po = w 
+            </manipulate>
+          </parallel_branch>
+          <parallel_branch>
+            <call id="wait_branch_2" endpoint="ep" http-method="post">
+              <input name="timeout" message-parameter="wait"/>
+            </call>
+          </parallel_branch>
+        </parallel>
       </execute>
       <compensate/>
       <undo/>
       <redo/>
       <suspend/>
       <abort/>
-    </op2>
+    </parallel>
   </operations>
 </service-description>
