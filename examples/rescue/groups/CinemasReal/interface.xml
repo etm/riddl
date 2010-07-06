@@ -6,50 +6,50 @@
   <properties>
 <!-- {{{ -->
     <rng:element name="address">
-      <domain:caption lang="en">Address</domain:caption>
-      <domain:caption lang="de">Adresse</domain:caption>
+      <domain:caption xml:lang="en">Address</domain:caption>
+      <domain:caption xml:lang="de">Adresse</domain:caption>
       <rng:element name="street">
-        <domain:caption lang="en">Street</domain:caption>
-        <domain:caption lang="de">Straße</domain:caption>
+        <domain:caption xml:lang="en">Street</domain:caption>
+        <domain:caption xml:lang="de">Straße</domain:caption>
         <rng:data type="string"/>
       </rng:element>
       <rng:element name="zip">
-        <domain:caption lang="en">ZIP</domain:caption>
-        <domain:caption lang="de">PLZ</domain:caption>
+        <domain:caption xml:lang="en">ZIP</domain:caption>
+        <domain:caption xml:lang="de">PLZ</domain:caption>
         <rng:data type="positiveInteger"/>
       </rng:element>
       <rng:element name="city">
-        <domain:caption lang="en">City</domain:caption>
-        <domain:caption lang="de">Stadt</domain:caption>
+        <domain:caption xml:lang="en">City</domain:caption>
+        <domain:caption xml:lang="de">Stadt</domain:caption>
         <rng:data type="string"/>
       </rng:element>
       <rng:element name="state">
-        <domain:caption lang="en">State</domain:caption>
-        <domain:caption lang="de">Land</domain:caption>
+        <domain:caption xml:lang="en">State</domain:caption>
+        <domain:caption xml:lang="de">Land</domain:caption>
         <rng:data type="string"/>
       </rng:element>
     </rng:element>
     <rng:element name="vendor">
-      <domain:caption lang="en">Vendor</domain:caption>
-      <domain:caption lang="de">Anbieter</domain:caption>
+      <domain:caption xml:lang="en">Vendor</domain:caption>
+      <domain:caption xml:lang="de">Anbieter</domain:caption>
       <rng:element name="name">
-        <domain:caption lang="en">Name</domain:caption>
-        <domain:caption lang="de">Name</domain:caption>
+        <domain:caption xml:lang="en">Name</domain:caption>
+        <domain:caption xml:lang="de">Name</domain:caption>
         <rng:data type="string"/>
       </rng:element>
       <rng:element name="phone">
-        <domain:caption lang="en">Phone</domain:caption>
-        <domain:caption lang="de">Telephon</domain:caption>
+        <domain:caption xml:lang="en">Phone</domain:caption>
+        <domain:caption xml:lang="de">Telephon</domain:caption>
         <rng:data type="string"/>
       </rng:element>
       <rng:element name="url">
-        <domain:caption lang="en">URL</domain:caption>
-        <domain:caption lang="de">URL</domain:caption>
+        <domain:caption xml:lang="en">URL</domain:caption>
+        <domain:caption xml:lang="de">URL</domain:caption>
         <rng:data type="string"/>
       </rng:element>
       <rng:element name="mail">
-        <domain:caption lang="en">@mail</domain:caption>
-        <domain:caption lang="de">@mail</domain:caption>
+        <domain:caption xml:lang="en">@mail</domain:caption>
+        <domain:caption xml:lang="de">@mail</domain:caption>
         <rng:data type="string"/>
       </rng:element>
     </rng:element>
@@ -64,8 +64,8 @@
           <input name="title" message-parameter="title">
 <!-- {{{ -->     
             <rng:element name="title">
-              <domain:caption lang="en">Movietitle</domain:caption>
-              <domain:caption lang="de">Filmtitel</domain:caption>
+              <domain:caption xml:lang="en">Movietitle</domain:caption>
+              <domain:caption xml:lang="de">Filmtitel</domain:caption>
               <rng:data type="string"/>
             </rng:element>
 <!-- }}} --> 
@@ -73,8 +73,8 @@
           <input name="date" message-parameter="date">
 <!-- {{{ -->     
             <rng:element name="date">
-              <domain:caption lang="en">Date</domain:caption>
-              <domain:caption lang="de">Datum</domain:caption>
+              <domain:caption xml:lang="en">Date</domain:caption>
+              <domain:caption xml:lang="de">Datum</domain:caption>
               <rng:data type="date"/>
             </rng:element>
 <!-- }}} --> 
@@ -85,33 +85,21 @@
               <rng:zeroOrMore>
                 <rng:element name="show">
                   <rng:element name="cinema_uri">
-                    <domain:caption lang="en">CinemaURI</domain:caption>
-                    <domain:caption lang="de">CinemaURI</domain:caption>
                     <rng:data type="string"/>
                   </rng:element>
                   <rng:element name="show_id">
-                    <domain:caption lang="en">ShowID</domain:caption>
-                    <domain:caption lang="de">VorstellungsID</domain:caption>
                     <rng:data type="string"/>
                   </rng:element>
                   <rng:element name="title">
-                    <domain:caption lang="en">Movietitle</domain:caption>
-                    <domain:caption lang="de">Filmtitel</domain:caption>
                     <rng:data type="string"/>
                   </rng:element>
                   <rng:element name="date">
-                    <domain:caption lang="en">Date</domain:caption>
-                    <domain:caption lang="de">Datum</domain:caption>
                     <rng:data type="date"/>
                   </rng:element>
                   <rng:element name="time">
-                    <domain:caption lang="en">Starting time</domain:caption>
-                    <domain:caption lang="de">Beginzeit</domain:caption>
                     <rng:data type="time"/>
                   </rng:element>
                   <rng:element name="hall">
-                    <domain:caption lang="en">Hall</domain:caption>
-                    <domain:caption lang="de">Saal</domain:caption>
                     <rng:data type="string"/>
                   </rng:element>
                 </rng:element>
@@ -142,8 +130,8 @@
           <input name="title" message-parameter="title">
 <!-- {{{ --> 
             <rng:element name="title">
-              <domain:caption lang="en">Movietitle</domain:caption>
-              <domain:caption lang="de">Filmtitel</domain:caption>
+              <domain:caption xml:lang="en">Movietitle</domain:caption>
+              <domain:caption xml:lang="de">Filmtitel</domain:caption>
               <rng:data type="string"/>
             </rng:element>
 <!-- }}} -->  
@@ -151,52 +139,13 @@
           <input name="date" message-parameter="date">
 <!-- {{{ --> 
             <rng:element name="date">
-              <domain:caption lang="en">Date</domain:caption>
-              <domain:caption lang="de">Datum</domain:caption>
+              <domain:caption xml:lang="en">Date</domain:caption>
+              <domain:caption xml:lang="de">Datum</domain:caption>
               <rng:data type="date"/>
             </rng:element>
-<!-- }}} -->  
+<!-- }}} -->   
           </input>
-          <output name="list" variable="list">
-<!-- {{{ -->     
-            <rng:element name="list_of_shows">
-              <rng:zeroOrMore>
-                <rng:element name="show">
-                  <rng:element name="cinema_uri">
-                    <domain:caption lang="en">CinemaURI</domain:caption>
-                    <domain:caption lang="de">CinemaURI</domain:caption>
-                    <rng:data type="string"/>
-                  </rng:element>
-                  <rng:element name="show_id">
-                    <domain:caption lang="en">ShowID</domain:caption>
-                    <domain:caption lang="de">VorstellungsID</domain:caption>
-                    <rng:data type="string"/>
-                  </rng:element>
-                  <rng:element name="title">
-                    <domain:caption lang="en">Movietitle</domain:caption>
-                    <domain:caption lang="de">Filmtitel</domain:caption>
-                    <rng:data type="string"/>
-                  </rng:element>
-                  <rng:element name="date">
-                    <domain:caption lang="en">Date</domain:caption>
-                    <domain:caption lang="de">Datum</domain:caption>
-                    <rng:data type="date"/>
-                  </rng:element>
-                  <rng:element name="time">
-                    <domain:caption lang="en">Starting time</domain:caption>
-                    <domain:caption lang="de">Beginzeit</domain:caption>
-                    <rng:data type="time"/>
-                  </rng:element>
-                  <rng:element name="hall">
-                    <domain:caption lang="en">Hall</domain:caption>
-                    <domain:caption lang="de">Saal</domain:caption>
-                    <rng:data type="string"/>
-                  </rng:element>
-                </rng:element>
-              </rng:zeroOrMore>
-            </rng:element>
-<!-- }}} --> 
-          </output>
+          <output name="list" variable="list"/>
 <!-- }}} -->  
         </call>
         <manipulate id="merge_result">
@@ -206,6 +155,13 @@
           <variable context="number_of_shows" local="nos"/>
           <variable input-parameter="title" local="title"/>
           <variable input-parameter="date" local="date"/>
+          <variable input-parameter="time" local="time">
+            <rng:element name="time">
+              <domain:caption xml:lang="en">Time</domain:caption>
+              <domain:caption xml:lang="de">Zeit</domain:caption>
+              <rng:data type="time"/>
+            </rng:element>
+          </variable>
           xml = XML::Smart.string("&lt;list_of_shows/&gt;")
           if list.class == Array
             list.each do |v|
@@ -225,16 +181,19 @@
         <choose>
           <alternative>
             <condition test="number_of_shows" comparator="&gt;" value="0"/>
-            <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post" group-by="//show">
+            <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post">
               <!-- {{{ --> 
-              <resource-id xpath="cinema_uri" endpoint="selected_cinema" name="target"/>
+              <resource-id xpath="/cinema_uri" endpoint="selected_cinema" name="target">
+                <xslt id="iPhone" xml:lang="de">
+                </xslt>
+                <xslt id="iPhone" xml:lang="en">
+                </xslt>
+              </resource-id>
               <input name="data" variable="list_merge"/>
               <output name="show_id" variable="show_id"/>
               <output name="movie_title" message-parameter="movie_title">
                 <!-- {{{ --> 
                 <rng:element name="movie_title">
-                  <domain:caption lang="en">Movie title</domain:caption>
-                  <domain:caption lang="de">Filmtitel</domain:caption>
                   <rng:data type="string"/>
                 </rng:element>
                 <!-- }}} -->  
@@ -242,8 +201,6 @@
               <output name="date" message-parameter="selected_date">
               <!-- {{{ --> 
                 <rng:element name="selected_date">
-                  <domain:caption lang="en">Selected date</domain:caption>
-                  <domain:caption lang="de">Gewähltes Datum</domain:caption>
                   <rng:data type="date"/>
                 </rng:element>
               <!-- }}} -->  
@@ -251,8 +208,6 @@
               <output name="starting_time" message-parameter="starting_time">
               <!-- {{{ --> 
                 <rng:element name="starting_time">
-                  <domain:caption lang="en">Starting time</domain:caption>
-                  <domain:caption lang="de">Beginzeit</domain:caption>
                   <rng:data type="time"/>
                 </rng:element>
               <!-- }}} -->  
@@ -260,8 +215,6 @@
               <output name="hall" message-parameter="hall">
               <!-- {{{ --> 
                 <rng:element name="hall">
-                  <domain:caption lang="en">Hall</domain:caption>
-                  <domain:caption lang="de">Saal</domain:caption>
                   <rng:data type="positiveInteger"/>
                 </rng:element>
               <!-- }}} -->  
@@ -269,23 +222,35 @@
             <!-- }}} -->  
             </call>
             <call id="call_book" endpoint="selected_cinema" service-operation="book">
-            <!-- {{{ -->  
+            <!-- {{{ -->   
               <input name="show_id" variable="show_id"/>
               <output name="reservation_id" message-parameter="reservation_id">
-              <!-- {{{ -->     
+              <!-- {{{ -->      
                 <rng:element name="reservation_id">
-                  <domain:caption lang="en">Reservation ID</domain:caption>
-                  <domain:caption lang="de">Reservierungsnummer</domain:caption>
                   <rng:data type="string"/>
                 </rng:element>
               <!-- }}} --> 
               </output>
             <!-- }}} --> 
             </call>
-            <manipulate id="set_status_success"/>
+            <manipulate id="set_status_success">
+              <variable output-parameter="status" local="status">
+                <rng:element name="status">
+                  <rng:data type="positiveInteger"/>
+                </rng:element>
+              </variable>
+              status = 200
+            </manipulate>
           </alternative>
           <otherwise>
-            <manipulate id="set_status_failed"/>
+            <manipulate id="set_status_failed">
+              <variable output-parameter="status" local="status">
+                <rng:element name="status">
+                  <rng:data type="positiveInteger"/>
+                </rng:element>
+              </variable>
+              status = 200
+            </manipulate>
           </otherwise>
         </choose>
       </execute>
@@ -299,8 +264,8 @@
           <input name="show_id" variable="show_id">
 <!-- {{{ -->     
             <rng:element name="show_id">
-              <domain:caption lang="en">ShowID</domain:caption>
-              <domain:caption lang="de">VorstellungsID</domain:caption>
+              <domain:caption xml:lang="en">ShowID</domain:caption>
+              <domain:caption xml:lang="de">VorstellungsID</domain:caption>
               <rng:data type="string"/>
             </rng:element>
 <!-- }}} --> 
@@ -308,8 +273,6 @@
           <output name="reservation_id" message-parameter="reservation_id">
 <!-- {{{ -->     
             <rng:element name="reservation_id">
-              <domain:caption lang="en">Reservation ID</domain:caption>
-              <domain:caption lang="de">Reservierungsnummer</domain:caption>
               <rng:data type="string"/>
             </rng:element>
 <!-- }}} --> 

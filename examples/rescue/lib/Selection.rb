@@ -1,4 +1,6 @@
 require '../../lib/ruby/client'
+$selection_data = Hash.new
+
 class SelectByRandom < Riddl::Implementation
   def response
     # {{{
@@ -39,5 +41,18 @@ class SelectByRandom < Riddl::Implementation
        Riddl::Parameter::Simple.new("date", date),
        Riddl::Parameter::Simple.new("hall", hall)]
     # }}}
+  end
+end
+
+class PostSelectByUser < Riddl::Implementation
+  def response
+    # {{{
+      data = XML::Smart.string(@p.value('data'))
+    # }}}
+  end
+end
+
+class GetSelectionData < Riddl::Implementation
+  def response
   end
 end

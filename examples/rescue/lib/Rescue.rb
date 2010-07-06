@@ -144,26 +144,34 @@ class GetInterface < Riddl::Implementation
         output.delete_if{|k,v| input.key?(k)}
         params = output
       end
-      params.each do |k,v|
-        s.root.add(v)
+      unless params.nil?
+        params.each do |k,v|
+          s.root.add(v)
+        end 
+        schema.append_schemablock(s.root)
       end
-      schema.append_schemablock(s.root)
     end 
     Riddl::Parameter::Complex.new(out_name,"text/xml", schema.to_s)
   end
 
   def collect_input(operation_name, xml)
     params = Hash.new
-    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:call/flow:input", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
-      params[input.attributes['message-parameter']] = input.children.first if input.attributes.include?('message-parameter')
+    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:call/flow:input[@message-parameter]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
+      params[input.attributes['message-parameter']] = input.children.first 
+    end
+    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:variable[@input-parameter]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
+      params[input.attributes['input-parameter']] = input.children.first unless input.children.first.nil? 
     end
     params
   end
 
   def collect_output(operation_name, xml)
     params = Hash.new
-    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:call/flow:output", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
-      params[output.attributes['message-parameter']] = output.children.first if output.attributes.include?('message-parameter')
+    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:call/flow:output[@message-parameter]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
+      params[output.attributes['message-parameter']] = output.children.first
+    end
+    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:variable[@output-parameter]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
+      params[output.attributes['output-parameter']] = output.children.first unless output.children.first.nil?
     end
     params
   end

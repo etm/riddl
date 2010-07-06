@@ -436,6 +436,7 @@ Recent changes:
           <xsl:element name="group">
             <xsl:element name="group_by"><xsl:text>&quot;</xsl:text><xsl:value-of select="@group-by"/><xsl:text>&quot;</xsl:text></xsl:element>
             <xsl:element name="uri_xpath"><xsl:text>&quot;</xsl:text><xsl:value-of select="child::flow:resource-id/@xpath"/><xsl:text>&quot;</xsl:text></xsl:element>
+            <xsl:element name="out_param_name"><xsl:text>&quot;</xsl:text><xsl:value-of select="child::flow:resource-id/@name"/><xsl:text>&quot;</xsl:text></xsl:element>
           </xsl:element>
         </xsl:if>
         <xsl:if test="child::flow:constraint">
