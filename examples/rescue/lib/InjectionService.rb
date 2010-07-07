@@ -51,6 +51,7 @@ class InjectionService < Riddl::Implementation
       wf = XML::Smart.string(resp[0].value.read)
       wf.namespaces['flow'] = 'http://rescue.org/ns/controlflow/0.2'
       wf.namespaces['p'] =  'http://rescue.org/ns/properties/0.2'
+      wf.find('//flow:call[child::flow:templates]').each {|c| c.attributes['templates'] = "#{rescue_uri}/operations/#{service_operation}/templates/#{c.attributes['id']}"; p c.attributes['templates'] }
       if first_ancestor_loop.nil?
         create, remove = inject_class_level(wf, call_node, injected)
         positions[call_node.attributes['id']] = {:pos=>call_node.attributes['id'], :state=>'after'}
@@ -144,7 +145,7 @@ class InjectionService < Riddl::Implementation
       remove << "#{blanks_remove}context.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
     end # }}}
     create  = injected.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}", "generated"=>"true"}, create)
-    remove = injected.add("manipulate", {"id"=>"remove_objects_of_#{call_node.attributes['id']}", "generated"=>"true"}, remove)
+    remove =  injected.add("manipulate", {"id"=>"remove_objects_of_#{call_node.attributes['id']}", "generated"=>"true"}, remove)
     [create, remove]
   end # }}}
 
@@ -157,7 +158,7 @@ class InjectionService < Riddl::Implementation
     wf.find("//flow:call").each do |a|
       if a.attributes.include?('endpoint-type') and a.attributes['endpoint-type'] == "outside"
         ep = call_node.find("string(child::cpee:parameters/cpee:additional_endpoints/cpee:#{a.attributes['endpoint']})")
-        a.attributes['endpoint'] = ep.gsub('"', "")
+        a.attributes['endpoint'] = ep.tr('"', "")
       else
         a.attributes['endpoint'] = a.attributes['endpoint'] == "resource_path" ? call_node.attributes['endpoint'] : call_node.attributes['id']+'__'+a.attributes['endpoint']
       end
@@ -165,23 +166,17 @@ class InjectionService < Riddl::Implementation
     wf.find("//flow:call/@wsdl").each do |a|
       a.value = call_node.attributes['id']+'__'+a.value
     end
-    wf.find("//flow:call/flow:resource-id").each do |a|
-      if a.attributes.include?('endpoint-type') and a.attributes['endpoint-type'] == "outside"
-        a.attributes['endpoint'] = call_node.find("string(child::cpee:parameters/cpee:additional_endpoints/cpee:#{a.attributes['endpoint']})").tr('"', "")
-      else
-        a.attributes['endpoint'] = a.attributes['endpoint'] == "resource_path" ? call_node.attributes['endpoint'] : call_node.attributes['id']+'__'+a.attributes['endpoint']
-      end
-    end
-    wf.find("//@variable").each {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"} 
-    wf.find("//@test").each {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"}
-    wf.find("//@context").each {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"}
+    wf.find("//@variable").each           {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"} 
+    wf.find("//@test").each               {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"}
+    wf.find("//@context").each            {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"}
+    wf.find("//flow:variable/@endpoint").each  {|a| a.value = "endpoints.#{call_node.attributes['id']}__#{a.value}"}
     wf.find("//@input-parameter").each do |a| 
       p = call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{a.value}").first
       a.value = p.text if p
       puts "Variable for manipulate-block #{a.element.parent.attributes['id']} named #{a.value} not found" unless p
     end
     wf.find("//@output-parameter").each { |a| a.value = "context.result_#{call_node.attributes['id']}[:#{a.value}]" } # }}} 
-    # Resovle mesisage-parameter {{{
+    # Resovle message-parameter {{{
     wf.find("//flow:execute/descendant::flow:input[string(@message-parameter)]").delete_if! do |p|
       var =  call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{p.attributes['message-parameter']}").first
       p.parent.add("input", {"name"=>p.attributes['name'], "variable"=>var.text}) if var
@@ -190,7 +185,7 @@ class InjectionService < Riddl::Implementation
     end
     wf.find("//flow:execute/descendant::flow:output[string(@message-parameter)]").each do |output|
       output.attributes['message-parameter'] = "context.result_#{call_node.attributes['id']}[:#{output.attributes['message-parameter']}]"
-    end # }}}
+    end # }}} 
     # Add repositroy-information to new operation-calls {{{
     wf.find("//flow:execute/descendant::flow:call").each do |call|
       call.attributes['injection_handler'] = call_node.find("string(child::cpee:parameters/cpee:service/cpee:injection_handler)").first
@@ -241,6 +236,7 @@ class InjectionService < Riddl::Implementation
   def inject_instance_level(wf, call_node, resource_path, branch, parent_injected)# {{{
     index = resource_path.tr('/:','__')
     op = parent_injected.attributes['serviceoperation'].tr('"', '')
+      wf.find('//flow:call[child::flow:templates]').each      {|c| c.attributes['templates'] = "#{rescue_uri}/operations/#{service_operation}/templates/#{c.attributes['id']}" }
     wf.find("//@id").each                                     {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }
     wf.find("//@endpoint").each                               {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }
     wf.find("//flow:call/@wsdl").each                         {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }

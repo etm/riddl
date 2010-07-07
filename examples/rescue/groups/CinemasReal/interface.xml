@@ -120,6 +120,7 @@
         <res/>
         <list_merge/>
         <number_of_shows/>
+        <endpoint/>
       </context-variables>
       <endpoints>
         <selected_cinema/>
@@ -146,7 +147,7 @@
 <!-- }}} -->   
           </input>
           <output name="list" variable="list"/>
-<!-- }}} -->  
+<!-- }}} -->   
         </call>
         <manipulate id="merge_result">
 <!-- {{{ --> 
@@ -181,16 +182,54 @@
         <choose>
           <alternative>
             <condition test="number_of_shows" comparator="&gt;" value="0"/>
-            <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post">
+            <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post" info="true">
               <!-- {{{ --> 
-              <resource-id xpath="/cinema_uri" endpoint="selected_cinema" name="target">
-                <xslt id="iPhone" xml:lang="de">
+              <templates>
+                <xslt name="iPhone" xml:lang="de">
                 </xslt>
-                <xslt id="iPhone" xml:lang="en">
+                <xslt name="iPhone" xml:lang="en">
+                  <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                    <xsl:output method="html"/>
+
+                    <xsl:template match="/">
+                      <html>
+                        <head>
+                          <script type="text/javascript">
+                            function send_selection(data, callback) {
+                            }
+                          </script>                        
+                        </head>
+                        <body>
+                          <table border="1">
+                            <xsl:apply-templates select="//show"/>
+                          </table>
+                        </body>
+                      </html>
+                    </xsl:template>
+                    <xsl:template match="//show">
+                      <tr><td><table>
+                      <tr><td>Movietitle:</td><td><xsl:value-of select="title"/></td></tr>
+                      <tr><td>Starting time:</td><td><xsl:value-of select="time"/></td></tr>
+                      <tr><td>Date:</td><td><xsl:value-of select="date"/></td></tr>
+                      <tr><td>Hall:</td><td><xsl:value-of select="hall"/></td></tr>
+                      <tr><td colspan="2"><xsl:element name="button">
+                        <xsl:attribute name="value">Select</xsl:attribute>
+                        <xsl:attribute name="onClick">send_selection({
+                          <xsl:for-each select="child::*">
+                              {'<xsl:value-of select="name()"/>' : <xsl:value-of select="text()"/>}
+                              <xsl:if test="position()!=last()">, </xsl:if>
+                          </xsl:for-each>
+                        },'<xsl:value-of select="$instance-uri"/><xsl:value-of select="$callback-id"/>')
+                        </xsl:attribute>
+                      </xsl:element></td></tr>
+                      </table></td></tr>
+                    </xsl:template>
+                  </xsl:stylesheet>
                 </xslt>
-              </resource-id>
+              </templates>
               <input name="data" variable="list_merge"/>
               <output name="show_id" variable="show_id"/>
+              <output name="target" variable="endpoint"/>
               <output name="movie_title" message-parameter="movie_title">
                 <!-- {{{ --> 
                 <rng:element name="movie_title">
@@ -203,7 +242,7 @@
                 <rng:element name="selected_date">
                   <rng:data type="date"/>
                 </rng:element>
-              <!-- }}} -->  
+              <!-- }}} -->   
               </output>
               <output name="starting_time" message-parameter="starting_time">
               <!-- {{{ --> 
@@ -221,6 +260,11 @@
               </output>
             <!-- }}} -->  
             </call>
+            <manipulate id="set_selected_endpoint">
+              <variable context="endpoint" local="ep"/>
+              <variable endpoint="selected_cinema" local="selected"/>
+              selected = ep
+            </manipulate>
             <call id="call_book" endpoint="selected_cinema" service-operation="book">
             <!-- {{{ -->   
               <input name="show_id" variable="show_id"/>
