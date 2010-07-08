@@ -4,4 +4,5 @@ module Riddl
   class PathError < ::RuntimeError; end
   class BlockError < ::StandardError; end
   class SpecificationError < ::StandardError; end
+  class WebSocketError < RuntimeError; end
 end

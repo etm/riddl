@@ -48,9 +48,6 @@ module Riddl
           attr_accessor(:debug)
       end
       
-      class Error < RuntimeError
-      end
-      
       def initialize(arg, params = {})
         if params[:server] # server
           
@@ -58,12 +55,12 @@ module Riddl
           @socket = arg
           line = gets().chomp()
           if !(line =~ /\AGET (\S+) HTTP\/1.1\z/n)
-            raise(WebSocket::Error, "invalid request: #{line}")
+            raise(Riddl::WebSocketError, "invalid request: #{line}")
           end
           @path = $1
           read_header()
           if !@server.accepted_origin?(self.origin)
-            raise(WebSocket::Error,
+            raise(Riddl::WebSocketError,
               ("Unaccepted origin: %s (server.accepted_domains = %p)\n\n" +
                 "To accept this origin, write e.g. \n" +
                 "  WebSocketServer.new(..., :accepted_domains => [%p]), or\n" +
@@ -76,9 +73,9 @@ module Riddl
           
           uri = arg.is_a?(String) ? URI.parse(arg) : arg
           if uri.scheme == "wss"
-            raise(WebSocket::Error, "wss scheme is unimplemented")
+            raise(Riddl::WebSocketError, "wss scheme is unimplemented")
           elsif uri.scheme != "ws"
-            raise(WebSocket::Error, "unsupported scheme: #{uri.scheme}")
+            raise(Riddl::WebSocketError, "unsupported scheme: #{uri.scheme}")
           end
           @path = (uri.path.empty? ? "/" : uri.path) + (uri.query ? "?" + uri.query : "")
           host = uri.host + (uri.port == 80 ? "" : ":#{uri.port}")
@@ -93,10 +90,10 @@ module Riddl
             "\r\n")
           flush()
           line = gets().chomp()
-          raise(WebSocket::Error, "bad response: #{line}") if !(line =~ /\AHTTP\/1.1 101 /n)
+          raise(Riddl::WebSocketError, "bad response: #{line}") if !(line =~ /\AHTTP\/1.1 101 /n)
           read_header()
           if @header["WebSocket-Origin"] != origin
-            raise(WebSocket::Error,
+            raise(Riddl::WebSocketError,
               "origin doesn't match: '#{@header["WebSocket-Origin"]}' != '#{origin}'")
           end
           @handshaked = true
@@ -110,7 +107,7 @@ module Riddl
       
       def handshake(status = nil, header = {})
         if @handshaked
-          raise(WebSocket::Error, "handshake has already been done")
+          raise(Riddl::WebSocketError, "handshake has already been done")
         end
         status ||= "101 Web Socket Protocol Handshake"
         def_header = {
@@ -131,7 +128,7 @@ module Riddl
       
       def send(data)
         if !@handshaked
-          raise(WebSocket::Error, "call WebSocket\#handshake first")
+          raise(Riddl::WebSocketError, "call WebSocket\#handshake first")
         end
         data = force_encoding(data.dup(), "ASCII-8BIT")
         write("\x00#{data}\xff")
@@ -140,12 +137,12 @@ module Riddl
       
       def receive()
         if !@handshaked
-          raise(WebSocket::Error, "call WebSocket\#handshake first")
+          raise(Riddl::WebSocketError, "call WebSocket\#handshake first")
         end
         packet = gets("\xff")
         return nil if !packet
         if !(packet =~ /\A\x00(.*)\xff\z/nm)
-          raise(WebSocket::Error, "input must start with \\x00 and end with \\xff")
+          raise(Riddl::WebSocketError, "input must start with \\x00 and end with \\xff")
         end
         return force_encoding($1, "UTF-8")
       end
@@ -178,15 +175,15 @@ module Riddl
           line = line.chomp()
           break if line.empty?
           if !(line =~ /\A(\S+): (.*)\z/n)
-            raise(WebSocket::Error, "invalid request: #{line}")
+            raise(Riddl::WebSocketError, "invalid request: #{line}")
           end
           @header[$1] = $2
         end
         if @header["Upgrade"] != "WebSocket"
-          raise(WebSocket::Error, "invalid Upgrade: " + @header["Upgrade"])
+          raise(Riddl::WebSocketError, "invalid Upgrade: " + @header["Upgrade"])
         end
         if @header["Connection"] != "Upgrade"
-          raise(WebSocket::Error, "invalid Connection: " + @header["Connection"])
+          raise(Riddl::WebSocketError, "invalid Connection: " + @header["Connection"])
         end
       end
       
