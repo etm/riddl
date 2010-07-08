@@ -357,6 +357,7 @@ Recent changes:
   <xsl:template name="output">
     <!-- {{{ -->
       <xsl:for-each select="child::flow:output">
+        <xsl:text> p result&#xa;</xsl:text>
         <xsl:choose>
           <xsl:when test="parent::flow:call/@soap-operation">
             <xsl:if test="@message-parameter">

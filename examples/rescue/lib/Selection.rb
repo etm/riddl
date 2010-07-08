@@ -51,8 +51,12 @@ class PostSelectByUser < Riddl::Implementation # {{{
       $selection_data[instance][activity]['data'] = XML::Smart.string(@p.value('data')) unless @p.value('data').nil?
       $selection_data[instance][activity]['oid'] = @p.value('call-oid')
       $selection_data[instance][activity]['callback-id'] = @h['CPEE_CALLBACK']
-      $selection_data[instance][activity]['templates-uri'] = @p.value('templates-uri')
+      if @p.value('templates-uri') =~ 'http://'
+        $selection_data[instance][activity]['templates-uri'] = @p.value('templates-uri') 
+      else
+      end
       @headers << Riddl::Header.new("CPEE-Callback",'true')
+      @status = 200 
   end
 end # }}}
 
@@ -85,7 +89,11 @@ class GetSelectionData < Riddl::Implementation # {{{
       end
       xslt.add('variable', {'name' => 'instance-uri', 'select'=>"'#{@p.value('instance')}'"})
       xslt.add('variable', {'name' => 'activity', 'select'=>"'#{@p.value('activity')}'"})
-      resp = $selection_data[@p.value('instance')][@p.value('activity')]['data'].transform_with(xslt.to_doc)
+      if $selection_data[@p.value('instance')][@p.value('activity')]['data']
+        resp = $selection_data[@p.value('instance')][@p.value('activity')]['data'].transform_with(xslt.to_doc)
+      else 
+        resp XML::String.new('<empty/>').transform_with(xslt.to_doc)
+      end
       Riddl::Parameter::Complex.new('templates', 'text/html', resp.to_s)
     else
       @status = 404

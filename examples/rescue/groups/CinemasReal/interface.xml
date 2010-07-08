@@ -194,8 +194,18 @@
                     <xsl:template match="/">
                       <html>
                         <head>
+                          <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"/>
                           <script type="text/javascript">
                             function send_selection(data, callback) {
+                              $.ajax({
+                                url: callback,
+                                type: 'put',
+                                dataType: 'text',
+                                data: data,
+                                success: function(res){
+                                  alert("Selection done");
+                                }
+                              });
                             }
                           </script>                        
                         </head>
@@ -208,18 +218,21 @@
                     </xsl:template>
                     <xsl:template match="//show">
                       <tr><td><table>
+                      <tr><td>Cinema:</td><td><xsl:value-of select="cinema_uri"/></td></tr>
                       <tr><td>Movietitle:</td><td><xsl:value-of select="title"/></td></tr>
                       <tr><td>Starting time:</td><td><xsl:value-of select="time"/></td></tr>
                       <tr><td>Date:</td><td><xsl:value-of select="date"/></td></tr>
                       <tr><td>Hall:</td><td><xsl:value-of select="hall"/></td></tr>
                       <tr><td colspan="2"><xsl:element name="button">
                         <xsl:attribute name="value">Select</xsl:attribute>
-                        <xsl:attribute name="onClick">send_selection({
-                          <xsl:for-each select="child::*">
-                              {'<xsl:value-of select="name()"/>' : <xsl:value-of select="text()"/>}
-                              <xsl:if test="position()!=last()">, </xsl:if>
-                          </xsl:for-each>
-                        },'<xsl:value-of select="$instance-uri"/><xsl:value-of select="$callback-id"/>')
+                        <xsl:attribute name="onClick">JavaScript:send_selection({
+                          'show_id' : '<xsl:value-of select="show_id"/>',
+                          'target' : '<xsl:value-of select="cinema_uri"/>',
+                          'movie_title' : '<xsl:value-of select="title"/>',
+                          'date' : '<xsl:value-of select="date"/>',
+                          'starting_time' : '<xsl:value-of select="time"/>',
+                          'hall' : '<xsl:value-of select="hall"/>'
+                        },'<xsl:value-of select="$instance-uri"/>callbacks/<xsl:value-of select="$callback-id"/>');
                         </xsl:attribute>
                       </xsl:element></td></tr>
                       </table></td></tr>
