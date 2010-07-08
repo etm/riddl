@@ -46,11 +46,12 @@ run(
         end
       end
       on resource 'select' do
-        run Select if method :get => '*'
-        run Select if method :post => '*'
         on resource 'random' do
-          run SelectByRandom if method :get => '*'
           run SelectByRandom if method :post => '*'
+        end
+        on resource 'user' do
+          run GetSelectionData if method :get => '*'
+          run PostSelectByUser if method :post => '*'
         end
       end
       on resource 'groups' do
@@ -72,6 +73,11 @@ run(
               run GetInterface if method :get => '*'
               run GetInterface if method :get => 'input'
               run GetInterface if method :get => 'output'
+              on resource 'templates' do
+                on resource do
+                  run GetTemplates if method :get => '*'
+                end
+              end
             end
           end
           on resource do # Subgroup-level
@@ -85,6 +91,11 @@ run(
                 run GetInterface if method :get => '*'
                 run GetInterface if method :get => 'input'
                 run GetInterface if method :get => 'output'
+                on resource 'templates' do
+                  on resource do
+                    run GetTemplates if method :get => '*'
+                  end
+                end
               end
             end
             on resource 'messages' do
@@ -104,6 +115,11 @@ run(
                   run GetInterface if method :get => '*'
                   run GetInterface if method :get => 'input'
                   run GetInterface if method :get => 'output'
+                  on resource 'templates' do
+                    on resource do
+                      run GetTemplates if method :get => '*'
+                    end
+                  end
                 end
               end
               on resource 'messages' do

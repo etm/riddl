@@ -356,14 +356,8 @@ Recent changes:
 
   <xsl:template name="output">
     <!-- {{{ -->
-      <xsl:for-each select="child::flow:resource-id">
-        <xsl:text>endpoints.</xsl:text>
-        <xsl:value-of select="@endpoint"/>
-        <xsl:text> = result.value('</xsl:text>
-        <xsl:value-of select="@name"/>
-        <xsl:text>')&#xa;</xsl:text>
-      </xsl:for-each>
       <xsl:for-each select="child::flow:output">
+        <xsl:text> p result&#xa;</xsl:text>
         <xsl:choose>
           <xsl:when test="parent::flow:call/@soap-operation">
             <xsl:if test="@message-parameter">
@@ -415,6 +409,7 @@ Recent changes:
       <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
       <xsl:attribute name="endpoint"><xsl:value-of select="@endpoint"/></xsl:attribute>
       <xsl:attribute name="oid"><xsl:value-of select="@oid"/></xsl:attribute>
+      <xsl:attribute name="templates"><xsl:value-of select="@templates"/></xsl:attribute>
       <xsl:element name="parameters">
         <xsl:if test="@soap-operation">
           <xsl:element name="soap_operation"><xsl:value-of select="@soap-operation"/></xsl:element>
@@ -426,6 +421,9 @@ Recent changes:
         <xsl:if test="@http-method">
           <xsl:element name="method"><xsl:value-of select="@http-method"/></xsl:element>
         </xsl:if>
+        <xsl:if test="@info">
+          <xsl:element name="info"><xsl:value-of select="@info"/></xsl:element>
+        </xsl:if>
         <xsl:if test="@service-operation">
           <xsl:element name="service">
             <xsl:element name="serviceoperation">"<xsl:value-of select="@service-operation"/>"</xsl:element>
@@ -436,6 +434,7 @@ Recent changes:
           <xsl:element name="group">
             <xsl:element name="group_by"><xsl:text>&quot;</xsl:text><xsl:value-of select="@group-by"/><xsl:text>&quot;</xsl:text></xsl:element>
             <xsl:element name="uri_xpath"><xsl:text>&quot;</xsl:text><xsl:value-of select="child::flow:resource-id/@xpath"/><xsl:text>&quot;</xsl:text></xsl:element>
+            <xsl:element name="out_param_name"><xsl:text>&quot;</xsl:text><xsl:value-of select="child::flow:resource-id/@name"/><xsl:text>&quot;</xsl:text></xsl:element>
           </xsl:element>
         </xsl:if>
         <xsl:if test="child::flow:constraint">
@@ -466,6 +465,12 @@ Recent changes:
       <xsl:value-of select="@context"/>
       <xsl:text>&#xa;</xsl:text>
     </xsl:for-each>
+    <xsl:for-each select="child::flow:variable[string(@endpoint)]">
+      <xsl:value-of select="@local"/>
+      <xsl:text> = </xsl:text>
+      <xsl:value-of select="@endpoint"/>
+      <xsl:text>&#xa;</xsl:text>
+    </xsl:for-each>
     <xsl:for-each select="child::flow:variable[string(@input-parameter)]">
       <xsl:text>&#xa;</xsl:text>
       <xsl:value-of select="@local"/>
@@ -479,6 +484,12 @@ Recent changes:
     <!-- Assign local variable to message-output and context-->
     <xsl:for-each select="child::flow:variable[string(@context)]">
       <xsl:value-of select="@context"/>
+      <xsl:text> = </xsl:text>
+      <xsl:value-of select="@local"/>
+      <xsl:text>&#xa;</xsl:text>
+    </xsl:for-each>
+    <xsl:for-each select="child::flow:variable[string(@endpoint)]">
+      <xsl:value-of select="@endpoint"/>
       <xsl:text> = </xsl:text>
       <xsl:value-of select="@local"/>
       <xsl:text>&#xa;</xsl:text>

@@ -83,6 +83,7 @@
   <message name="injection-service-request">
     <parameter name="position" type="string"/>
     <parameter name="instance" type="string"/>
+    <parameter name="handler" type="string"/>
   </message>
 
   <message name="injection-service-response">
@@ -117,9 +118,10 @@
       </resource>
     </resource>
     <resource relative="select">
-      <get in="*"/>
-      <post in="*"/>
       <resource relative="random">
+        <post in="*"/>
+      </resource>
+      <resource relative="user">
         <get in="*"/>
         <post in="*"/>
       </resource>
@@ -143,6 +145,11 @@
             <get in="*" out="class-level-workflow"/>
             <get in="input" out="schema"/>
             <get in="output" out="schema"/>
+            <resource relative="templates">
+              <resource>
+                <get in="*"/>
+              </resource>
+            </resource>
           </resource>
         </resource>
 <!--}}}-->
@@ -158,6 +165,11 @@
               <get in="*" out="class-level-workflow"/>
               <get in="input" out="schema"/>
               <get in="output" out="schema"/>
+              <resource relative="templates">
+                <resource>
+                  <get in="*"/>
+                </resource>
+              </resource>
             </resource>
           </resource>
           <resource relative="messages">
@@ -178,6 +190,11 @@
                 <get in="*" out="class-level-workflow"/>
                 <get in="input" out="schema"/>
                 <get in="output" out="schema"/>
+                <resource relative="templates">
+                  <resource>
+                    <get in="*"/>
+                  </resource>
+                </resource>
               </resource>
             </resource>
             <resource relative="messages">

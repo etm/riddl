@@ -1,19 +1,25 @@
-class GetOperations < Riddl::Implementation
+class GetTemplates < Riddl::Implementation # {{{
   def response
-    if not File.exists?("#{@r[0..1].join("/")}/interface.xml")
-      @status = 410
-      return
-    end
     xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-    ret = XML::Smart.string("<operations xmlns=\"http://rescue.org/ns/domain/0.2\"/>")
-    xml.find("/domain:domain-description/domain:operations/*", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each do |o|
-      ret.root.add("operation", {"name" => o.attributes["name"]})
-    end
-    Riddl::Parameter::Complex.new("xml","text/xml", ret.to_s)
+    tpls = xml.find("//flow:operation[@name='#{@r[@r.index('operations')+1]}']/descendant::flow:call[@id='#{@r[-1]}']/flow:templates", {'flow'=>'http://rescue.org/ns/controlflow/0.2', 'domain'=>'http://rescue.org/ns/domain/0.2'}).first
+    tpls.nil? ?  @status = 404 : Riddl::Parameter::Complex.new('templates','text/xml', tpls.dump) 
   end
-end
+end # }}}
 
-class AddResource < Riddl::Implementation
+class GetOperations < Riddl::Implementation# {{{
+  def response
+    unless File.exists?("#{@r[0..1].join("/")}/interface.xml")
+      @status = 410
+    else 
+      xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
+      ret = XML::Smart.string("<operations xmlns=\"http://rescue.org/ns/domain/0.2\"/>")
+      xml.find("/domain:domain-description/domain:operations/*", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each {|o| ret.root.add("operation", {"name" => o.attributes["name"]})}
+      Riddl::Parameter::Complex.new("xml","text/xml", ret.to_s)
+    end
+  end
+end # }}}
+
+class AddResource < Riddl::Implementation# {{{
   def response
     begin
       f = nil
@@ -45,9 +51,9 @@ class AddResource < Riddl::Implementation
       @status = 409 # http ERROR named 'Conflict'
     end
   end
-end
+end # }}}
 
-class UpdateResource < Riddl::Implementation
+class UpdateResource < Riddl::Implementation# {{{
   def response
     begin
       if @p[0].name == "new-name"
@@ -79,9 +85,9 @@ class UpdateResource < Riddl::Implementation
       puts $ERROR_INFO
     end
   end
-end
+end # }}}
 
-class GetInterface < Riddl::Implementation
+class GetInterface < Riddl::Implementation# {{{
   def response
     schema = RNGSchema.new(false)
     p = nil
@@ -144,34 +150,40 @@ class GetInterface < Riddl::Implementation
         output.delete_if{|k,v| input.key?(k)}
         params = output
       end
-      params.each do |k,v|
-        s.root.add(v)
+      unless params.nil?
+        params.each do |k,v|
+          s.root.add(v)
+        end 
+        schema.append_schemablock(s.root)
       end
-      schema.append_schemablock(s.root)
     end 
     Riddl::Parameter::Complex.new(out_name,"text/xml", schema.to_s)
   end
 
   def collect_input(operation_name, xml)
     params = Hash.new
-    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:call/flow:input", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
-      params[input.attributes['message-parameter']] = input.children.first if input.attributes.include?('message-parameter')
+    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:call/flow:input[@message-parameter]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
+      params[input.attributes['message-parameter']] = input.children.first 
+    end
+    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:variable[@input-parameter]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |input|
+      params[input.attributes['input-parameter']] = input.children.first unless input.children.first.nil? 
     end
     params
   end
 
   def collect_output(operation_name, xml)
     params = Hash.new
-    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:call/flow:output", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
-      params[output.attributes['message-parameter']] = output.children.first if output.attributes.include?('message-parameter')
+    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:call/flow:output[@message-parameter]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
+      params[output.attributes['message-parameter']] = output.children.first
+    end
+    xml.find("//flow:operation[@name='#{operation_name}']/descendant::flow:variable[@output-parameter]", {"flow"=>"http://rescue.org/ns/controlflow/0.2"}).each do |output|
+      params[output.attributes['output-parameter']] = output.children.first unless output.children.first.nil?
     end
     params
   end
-end
+end # }}}
 
-
-class GetServiceInterface < Riddl::Implementation
-
+class GetServiceInterface < Riddl::Implementation# {{{
   def response
     begin
       xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
@@ -182,9 +194,9 @@ class GetServiceInterface < Riddl::Implementation
       puts $ERROR_INFO
     end
   end
-end
+end # }}}
 
-class RNGSchema
+class RNGSchema# {{{
   @__schema = nil
   @__start_node = nil
   @__remove_cpations = nil
@@ -223,9 +235,9 @@ class DeleteResource < Riddl::Implementation
       puts $ERRO_INFO
     end
   end
-end
+end # }}}
 
-class GenerateFeed < Riddl::Implementation
+class GenerateFeed < Riddl::Implementation# {{{
   include MarkUSModule
 
   def response
@@ -277,9 +289,9 @@ class GenerateFeed < Riddl::Implementation
       properties_ :href=>"#{url}/groups/#{group_name}?properties"
     end
   end
-end
+end # }}}
 
-class GetServiceDescription <  Riddl::Implementation
+class GetServiceDescription <  Riddl::Implementation# {{{
   def response
     if File.exist?("#{@r.join("/")}/properties.xml") == false
       @status = 410
@@ -287,6 +299,6 @@ class GetServiceDescription <  Riddl::Implementation
     end
     Riddl::Parameter::Complex.new("instance-level-workflow","text/xml",File.open("#{@r.join("/")}/properties.xml", "r"))
   end
-end
+end # }}}
 
 

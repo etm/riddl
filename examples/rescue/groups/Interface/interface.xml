@@ -5,38 +5,51 @@
             xmlns:rng="http://relaxng.org/ns/structure/1.0">
   <properties>
 <!-- {{{ -->
-    <rng:element name="longitude">
-      <caption lang="en">Longitude</caption>
-      <caption lang="de">Längengrad</caption>
+    <rng:element name="property_A">
+      <caption lang="en">Porperty A</caption>
+      <caption lang="de">Eigenschaft A</caption>
       <rng:data type="positiveInteger"/>
     </rng:element>
-    <rng:element name="latitude">
-      <caption lang="en">Latitude</caption>
-      <caption lang="de">Breitengrad</caption>
+    <rng:element name="property_B">
+      <caption lang="en">Porperty B</caption>
+      <caption lang="de">Eigenschaft B</caption>
       <rng:data type="positiveInteger"/>
     </rng:element>
-    <rng:element name="carpark">
-      <caption lang="en">Carpark</caption>
-      <caption lang="de">Parkplatz</caption>
-      <rng:data type="boolean"/>
+    <rng:element name="property_C">
+      <caption lang="en">Porperty C</caption>
+      <caption lang="de">Eigenschaft C</caption>
+      <rng:data type="positiveInteger"/>
     </rng:element>
 <!-- }}} -->
   </properties>
   <operations>
-    <operation name="op1" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
-<!-- {{{ --> 
-      <context-variables>
-      </context-variables>
-      <endpoints/>
+    <operation name="no_params" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
+<!-- {{{ -->  
+      <context-variables/>
       <execute>
-        <call id="perform_op1" endpoint="resource_path" service-operation="op1">
-          <input name="pi1" message-parameter="op1">
-            <domain:caption lang="en">pi1</domain:caption>
-            <rng:data type="string"/>
+        <call id="no_params" endpoint="resource_path" service-operation="no_params"/>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->   
+    </operation>
+    <operation name="simple" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
+<!-- {{{ -->  
+      <context-variables/>
+      <execute>
+        <call id="simple_operation" endpoint="resource_path" service-operation="simple">
+          <input name="wait" message-parameter="wait">
+            <domain:caption lang="en">Wait</domain:caption>
+            <domain:caption lang="de">Warte</domain:caption>
+            <rng:data type="positiveInteger"/>
           </input>
-          <output name="po1" message-parameter="mpo1">
-            <domain:caption lang="en">po2</domain:caption>
-            <rng:data type="string"/>
+          <output name="simple_output" message-parameter="simple_class_output">
+            <domain:caption lang="en">Simple class ouput</domain:caption>
+            <domain:caption lang="en">Einfache Klasse Ausgabe</domain:caption>
+            <rng:data type="positiveInteger"/>
           </output>
         </call>
       </execute>
@@ -47,6 +60,76 @@
       <abort/>
 <!-- }}} -->   
     </operation>
+    <operation name="complex" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
+<!-- {{{ --> 
+      <context-variables>
+        <wait_internal>4</wait_internal>
+      </context-variables>
+      <endpoints>
+        <timeout>http://www.pri.univie.ac.at/~mangler/services/timeout.php</timeout>
+      </endpoints>
+      <execute>
+        <call id="native_http" endpoint="timeout" http-method="post">
+          <input name="timeout" variable="wait_internal">
+            <domain:caption lang="en">Wait</domain:caption>
+            <domain:caption lang="de">Warte</domain:caption>
+            <rng:data type="positiveInteger"/>
+          </input>
+        </call>
+        <manipulate id="divide_wait">
+          <variable context="wait_internal" local="number"/>
+          number = number / 2
+        </manipulate>
+        <call id="simple_operation" endpoint="resource_path" service-operation="simple">
+          <input name="wait" variable="wait_internal">
+            <domain:caption lang="en">Wait</domain:caption>
+            <domain:caption lang="de">Warte</domain:caption>
+            <rng:data type="positiveInteger"/>
+          </input>
+          <output name="simple_class_output" message-parameter="complex_class_output">
+            <domain:caption lang="en">Complex class ouput</domain:caption>
+            <domain:caption lang="en">Komplexe Klasse Ausgabe</domain:caption>
+            <rng:data type="positiveInteger"/>
+          </output>
+        </call>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->   
+    </operation>
+    <operation name="abstract" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
+<!-- {{{ -->  
+      <context-variables>
+        <complex_out/>
+      </context-variables>
+      <endpoints/>
+      <execute>
+        <call id="call_complex" endpoint="resource_path" service-operation="complex">
+          <output name="complex_class_output" variable="complex_out"/>
+        </call>
+        <call id="call_simple" endpoint="resource_path"  service-operation="simple">
+          <input name="wait" message-parameter="abstract_input">
+            <domain:caption lang="en">Wait</domain:caption>
+            <domain:caption lang="de">Warte</domain:caption>
+            <rng:data type="positiveInteger"/>
+          </input>
+        </call>
+        <manipulate id="double_class_out">
+          <variable output-parameter="abstract_output" local="a_out"/>
+          <variable context="complex_out" local="co"/>
+          a_out = co *2
+        </manipulate>
+      </execute>
+      <compensate/>
+      <undo/>
+      <redo/>
+      <suspend/>
+      <abort/>
+<!-- }}} -->  
+    </operation>
     <operation name="loop" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
       <context-variables>
@@ -56,14 +139,16 @@
       <execute>
         <loop>
           <condition test="loop_count" comparator="&gt;" value="0"/>
-          <call id="loop_op1" endpoint="resource_path" service-operation="loop">
-            <input name="pi1" message-parameter="op1">
-              <domain:caption lang="en">pi1</domain:caption>
-              <rng:data type="string"/>
+          <call id="class_loop" endpoint="resource_path" service-operation="simple">
+            <input name="wait" message-parameter="loop_wait">
+              <domain:caption lang="en">Wait</domain:caption>
+              <domain:caption lang="de">Warte</domain:caption>
+              <rng:data type="positiveInteger"/>
             </input>
-            <output name="po1" message-parameter="mpo1">
-              <domain:caption lang="en">po2</domain:caption>
-              <rng:data type="string"/>
+            <output name="simple_output" message-parameter="loop_output">
+              <domain:caption lang="en">Loop class ouput</domain:caption>
+              <domain:caption lang="en">Loop Klasse Ausgabe</domain:caption>
+              <rng:data type="positiveInteger"/>
             </output>
           </call>
           <manipulate id="reduce_counter">
@@ -71,6 +156,29 @@
             count -= 1
           </manipulate>
         </loop>
+        <call id="instance_loop" endpoint="resource_path" service-operation="loop">
+          <input name="wait" message-parameter="loop_wait">
+            <domain:caption lang="en">Wait</domain:caption>
+            <domain:caption lang="de">Warte</domain:caption>
+            <rng:data type="positiveInteger"/>
+          </input>
+          <input name="cycles" message-parameter="loop_cycles">
+            <domain:caption lang="en">Cycles</domain:caption>
+            <domain:caption lang="de">Umläufe</domain:caption>
+            <rng:data type="positiveInteger"/>
+          </input>
+          <output name="loop_count" message-parameter="counted_loops">
+            <domain:caption lang="en">Number of loops</domain:caption>
+            <domain:caption lang="en">Anzhal der Durchläufe</domain:caption>
+            <rng:data type="positiveInteger"/>
+          </output>
+        </call>
+        <manipulate id="only_once">
+          <variable input-parameter="wait" local="wait"/>
+          <variable output-parameter="wait_seconds" local="ws"/>
+          <variable context="loop_count" local="lc"/>
+          ws = (wait *  lc)
+        </manipulate>
       </execute>
       <compensate/>
       <undo/>
@@ -81,36 +189,40 @@
     </operation>
     <operation name="parallel" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
-      <context-variables>
-        <loop_count>2</loop_count>
-      </context-variables>
-      <endpoints/>
+      <context-variables/>
+      <endpoints>
+        <timeout>http://www.pri.univie.ac.at/~mangler/services/timeout.php</timeout>
+      </endpoints>
       <execute>
         <parallel>
-        <parallel_branch>
-          <call id="prallel_op1" endpoint="resource_path" service-operation="op1">
-            <input name="pi1" message-parameter="op1">
-              <domain:caption lang="en">pi1</domain:caption>
-              <rng:data type="string"/>
-            </input>
-            <output name="po1" message-parameter="mpo1">
-              <domain:caption lang="en">po2</domain:caption>
-              <rng:data type="string"/>
-            </output>
-          </call>
-        </parallel_branch>
-        <parallel_branch>
-          <call id="prallel_op2" endpoint="resource_path" service-operation="op1">
-            <input name="pi1" message-parameter="op1">
-              <domain:caption lang="en">pi1</domain:caption>
-              <rng:data type="string"/>
-            </input>
-            <output name="po1" message-parameter="mpo1">
-              <domain:caption lang="en">po2</domain:caption>
-              <rng:data type="string"/>
-            </output>
-          </call>
-        </parallel_branch>
+          <parallel_branch>
+            <call id="native" endpoint="timeout" http-method="post">
+              <input name="wait" value="3"/>
+            </call>
+          </parallel_branch>
+          <parallel_branch>
+            <call id="complex" endpoint="resource_path" service-operation="complex">
+              <output name="complex_class_output" message-parameter="parallel_complex_output">
+                <domain:caption lang="en">Complex class ouput</domain:caption>
+                <domain:caption lang="en">Komplexe Klasse Ausgabe</domain:caption>
+                <rng:data type="positiveInteger"/>
+              </output>
+            </call>
+          </parallel_branch>
+          <parallel_branch>
+            <call id="parallel" endpoint="resource_path" service-operation="parallel">
+              <input name="wait" message-parameter="wait">
+                <domain:caption lang="en">Wait</domain:caption>
+                <domain:caption lang="de">Warte</domain:caption>
+                <rng:data type="positiveInteger"/>
+              </input>
+              <output name="parallel_class_output" message-parameter="parallel_parallel_output">
+                <domain:caption lang="en">Parallel class ouput</domain:caption>
+                <domain:caption lang="en">Parallele Instanz Ausgabe</domain:caption>
+                <rng:data type="positiveInteger"/>
+              </output>
+            </call>
+          </parallel_branch>
         </parallel>
       </execute>
       <compensate/>
@@ -119,38 +231,6 @@
       <suspend/>
       <abort/>
 <!-- }}} -->  
-    </operation>
-    <operation name="op2" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
-<!-- {{{ -->  
-      <context-variables>
-        <class_input>3</class_input>
-        <class_out/>
-      </context-variables>
-      <endpoints/>
-      <execute>
-        <call id="perform_op1" endpoint="resource_path" service-operation="op1">
-          <input name="mpi1" message-parameter="op2">
-            <domain:caption lang="en">op2</domain:caption>
-            <rng:data type="string"/>
-          </input>
-          <output name="mpo2" variable="class_out">
-            <domain:caption lang="en">class_op2</domain:caption>
-            <rng:data type="string"/>
-          </output>
-        </call>
-        <call id="op2" endpoint="resource_path"  service-operation="op2">
-          <input name="pi2" variable="class_out">
-            <domain:caption lang="en">op2</domain:caption>
-            <rng:data type="string"/>
-          </input>
-        </call>
-      </execute>
-      <compensate/>
-      <undo/>
-      <redo/>
-      <suspend/>
-      <abort/>
-<!-- }}} --> 
     </operation>
   </operations>
 </domain-description>

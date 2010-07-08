@@ -3,8 +3,8 @@
 <service-description xmlns="http://rescue.org/ns/service/0.2"
                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <properties xmlns="http://rescue.org/ns/properties/0.2">
-    <property_A>17</property_A>
-    <property_B>47</property_B>
+    <property_A>71</property_A>
+    <property_B>74</property_B>
     <property_C>11</property_C>
   </properties>
   <operations xmlns="http://rescue.org/ns/controlflow/0.2">
@@ -104,16 +104,16 @@
             <call id="wait_branch_1" endpoint="ep" http-method="post">
               <input name="timeout" message-parameter="wait"/>
             </call>
+            <manipulate id="set_output_branch_1">
+              <variable output-parameter="parallel_parallel_output" local="po"/>
+              <variable input-parameter="wait" local="w"/>
+              po = w 
+            </manipulate>
           </parallel_branch>
           <parallel_branch>
             <call id="wait_branch_2" endpoint="ep" http-method="post">
               <input name="timeout" message-parameter="wait"/>
             </call>
-            <manipulate id="set_output_branch_2">
-              <variable output-parameter="parallel_parallel_output" local="po"/>
-              <variable context="wait" local="w"/>
-              po = w 
-            </manipulate>
           </parallel_branch>
         </parallel>
       </execute>
