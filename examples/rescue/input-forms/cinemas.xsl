@@ -16,7 +16,7 @@
                   dataType: 'text',
                   data:{'title': $('#title').val(), 'date': $('#date').val(), 'city': $('#city').val()},
                   success: function(res){
-                    window.location.replace('<xsl:value-of select="$worklist"/>');
+                    window.setTimeout("window.location.replace('<xsl:value-of select="$worklist"/>');", 500);
                   }
                 });
               }
@@ -28,10 +28,10 @@
         </html>
       </xsl:template>
       <xsl:template name="form">
-        <p> Movie title: <input id="title" value="Shrek"/></p> 
-        <p> Date: <input id="date" value="2010-07-12"/></p> 
+        <p> Movie title: <input id="title" value="Eclipse"/></p> 
+        <p> Date: <input id="date" value="2010-07-15"/></p> 
         <p> City: <input id="city" value="Vienna"/></p> 
-        <button value="Send" onClick="send()"/>
+        <input type="button" value="Send" onClick="send()"/>
       </xsl:template>
     </xsl:stylesheet>
   </xslt>

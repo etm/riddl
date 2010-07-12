@@ -121,7 +121,7 @@
       <resource relative="random">
         <post in="*"/>
       </resource>
-      <resource relative="user">
+      <resource relative="pgwl">
         <get in="*"/>
         <post in="*"/>
       </resource>

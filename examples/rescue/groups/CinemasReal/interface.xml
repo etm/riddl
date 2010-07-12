@@ -190,7 +190,6 @@
                 <xslt name="iPhone" xml:lang="en">
                   <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
                     <xsl:output method="html"/>
-
                     <xsl:template match="/">
                       <html>
                         <head>
@@ -203,7 +202,7 @@
                                 dataType: 'text',
                                 data: data,
                                 success: function(res){
-                                  window.location.replace('<xsl:value-of select="$worklist"/>');
+                                  window.setTimeout("window.location.replace('<xsl:value-of select="$worklist"/>');", 500);
                                 }
                               });
                             }
@@ -223,7 +222,8 @@
                       <tr><td>Starting time:</td><td><xsl:value-of select="time"/></td></tr>
                       <tr><td>Date:</td><td><xsl:value-of select="date"/></td></tr>
                       <tr><td>Hall:</td><td><xsl:value-of select="hall"/></td></tr>
-                      <tr><td colspan="2"><xsl:element name="button">
+                      <tr><td colspan="2"><xsl:element name="input">
+                        <xsl:attribute name="type">button</xsl:attribute>
                         <xsl:attribute name="value">Select</xsl:attribute>
                         <xsl:attribute name="onClick">JavaScript:send_selection({
                           'show_id' : '<xsl:value-of select="show_id"/>',
@@ -243,8 +243,8 @@
               <input name="data" variable="list_merge"/>
               <output name="show_id" variable="show_id"/>
               <output name="target" variable="endpoint"/>
-              <output name="movie_title" message-parameter="movie_title">
               <output message-parameter="status" type="status"/>
+              <output name="movie_title" message-parameter="movie_title">
                 <!-- {{{ --> 
                 <rng:element name="movie_title">
                   <rng:data type="string"/>

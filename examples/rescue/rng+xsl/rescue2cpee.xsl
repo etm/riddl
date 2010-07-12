@@ -365,7 +365,7 @@ Recent changes:
             <xsl:if test="@variable">
               <xsl:value-of select="@variable"/>
             </xsl:if>
-            <xsl:text> = result[1]</xsl:text>
+            <xsl:text> = result[1]&#xa;</xsl:text>
           </xsl:when>
           <xsl:otherwise>
             <xsl:choose>

@@ -37,7 +37,6 @@ class InjectionService < Riddl::Implementation
     injected.attributes['result'] = "context.result_#{call_node.attributes['id']}" if class_level
     parent_injected = call_node.find("ancestor::cpee:group[@type='injection']").last
     if parent_injected.nil?
-      p 'bla'
       injected.attributes['properties'] = "context.result_#{call_node.attributes['id']}[:properties]" 
     else
       injected.attributes['properties'] = "#{parent_injected.attributes['properties']}[:\"#{call_node.attributes['oid']}\"]"

@@ -49,7 +49,7 @@ run(
         on resource 'random' do
           run SelectByRandom if method :post => '*'
         end
-        on resource 'user' do
+        on resource 'pgwl' do
           run GetSelectionData if method :get => '*'
           run PostSelectByUser if method :post => '*'
         end
