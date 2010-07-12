@@ -117,36 +117,26 @@ module Riddl
           properties = @a[0]
           handler    = @a[1]
           handler.new(properties,nil).read
+          query = (@p[0].value.to_s.strip.empty? ? '*' : @p[0].value)
 
           xml = File::read(properties).gsub(/properties xmlns="[^"]+"|properties xmlns='[^']+'/,'properties')
-          e = XML::Smart::string(xml).root.find(@p[0].value)
-          prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>").to_s
+          begin
+            e = XML::Smart::string(xml).root.find(query)
+          rescue => e
+            prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>").to_s
+            return Riddl::Parameter::Complex.new("value","text/xml",prop.to_s)
+          end
           if e.class == XML::Smart::Dom::NodeSet
             if e.any?
-              if e.length == 1
-                t = e.first
-                if t.find("*").any?
-                  prop = XML::Smart::string("<content xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
-                  prop.root.add(t.children)
-                else
-                  prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
-                  prop.root.text = t.to_s
-                end
-              end  
-              if e.length > 1
-                prop = XML::Smart::string("<content xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
-                e.each do |t|
-                  prop.root.add(t)
-                end
-              end  
+              prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+              prop.root.add(e)
             else
               prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>").to_s
             end
+            return Riddl::Parameter::Complex.new("value","text/xml",prop.to_s)
           else
-            prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
-            prop.root.text = e.to_s
+            return Riddl::Parameter::Simple.new("value",e.to_s)
           end
-          return Riddl::Parameter::Complex.new("value","text/xml",prop.to_s)
         end
       end #}}}
 
