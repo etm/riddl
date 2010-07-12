@@ -26,6 +26,7 @@
       <execute>
         <call id="FilmInfo" endpoint="service" http-method="get">
           <output variable="response" name="" type="complex"/>
+          <output message-parameter="status" type="status"/>
         </call>
         <manipulate id="pares_response">
           <variable context="response" local="response"/>

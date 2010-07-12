@@ -358,43 +358,56 @@ Recent changes:
     <!-- {{{ -->
       <xsl:for-each select="child::flow:output">
         <xsl:choose>
-          <xsl:when test="parent::flow:call/@soap-operation">
+          <xsl:when test="@type = 'status'">
             <xsl:if test="@message-parameter">
               <xsl:value-of select="@message-parameter"/>
             </xsl:if>
             <xsl:if test="@variable">
               <xsl:value-of select="@variable"/>
             </xsl:if>
-            <xsl:text> = Array.new&#xa;</xsl:text>
-            <xsl:choose>
-              <xsl:when test="@namespace">
-                <xsl:text>result[0].find('</xsl:text><xsl:value-of select="@name"/><xsl:text>', {'tns'=>'</xsl:text><xsl:value-of select="@namespace"/><xsl:text>'}).each {|n| </xsl:text>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:text>result[0].find('</xsl:text><xsl:value-of select="@name"/><xsl:text>').each {|n| </xsl:text>
-              </xsl:otherwise>
-            </xsl:choose>
-            <xsl:if test="@message-parameter">
-              <xsl:value-of select="@message-parameter"/>
-            </xsl:if>
-            <xsl:if test="@variable">
-              <xsl:value-of select="@variable"/>
-            </xsl:if>
-            <xsl:text> &lt;&lt; "#{n.dump}"}</xsl:text>
+            <xsl:text> = result[1]</xsl:text>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:if test="@message-parameter">
-              <xsl:value-of select="@message-parameter"/>
-            </xsl:if>
-            <xsl:if test="@variable">
-              <xsl:value-of select="@variable"/>
-            </xsl:if>
-            <xsl:if test="@name">
-              <xsl:text> = result[0].value('</xsl:text><xsl:value-of select="@name"/><xsl:text>')</xsl:text>
-              <xsl:if test="@type = 'complex'">
-                <xsl:text>.read</xsl:text>
-              </xsl:if>
-            </xsl:if>
+            <xsl:choose>
+              <xsl:when test="parent::flow:call/@soap-operation">
+                <xsl:if test="@message-parameter">
+                  <xsl:value-of select="@message-parameter"/>
+                </xsl:if>
+                <xsl:if test="@variable">
+                  <xsl:value-of select="@variable"/>
+                </xsl:if>
+                <xsl:text> = Array.new&#xa;</xsl:text>
+                <xsl:choose>
+                  <xsl:when test="@namespace">
+                    <xsl:text>result[0].find('</xsl:text><xsl:value-of select="@name"/><xsl:text>', {'tns'=>'</xsl:text><xsl:value-of select="@namespace"/><xsl:text>'}).each {|n| </xsl:text>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:text>result[0].find('</xsl:text><xsl:value-of select="@name"/><xsl:text>').each {|n| </xsl:text>
+                  </xsl:otherwise>
+                </xsl:choose>
+                <xsl:if test="@message-parameter">
+                  <xsl:value-of select="@message-parameter"/>
+                </xsl:if>
+                <xsl:if test="@variable">
+                  <xsl:value-of select="@variable"/>
+                </xsl:if>
+                <xsl:text> &lt;&lt; "#{n.dump}"}</xsl:text>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:if test="@message-parameter">
+                  <xsl:value-of select="@message-parameter"/>
+                </xsl:if>
+                <xsl:if test="@variable">
+                  <xsl:value-of select="@variable"/>
+                </xsl:if>
+                <xsl:if test="@name">
+                  <xsl:text> = result[0].value('</xsl:text><xsl:value-of select="@name"/><xsl:text>')</xsl:text>
+                  <xsl:if test="@type = 'complex'">
+                    <xsl:text>.read</xsl:text>
+                  </xsl:if>
+                </xsl:if>
+              </xsl:otherwise>
+            </xsl:choose>
           </xsl:otherwise>
         </xsl:choose>
         <xsl:text>&#xa;</xsl:text>

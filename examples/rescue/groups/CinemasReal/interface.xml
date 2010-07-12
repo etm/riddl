@@ -244,6 +244,7 @@
               <output name="show_id" variable="show_id"/>
               <output name="target" variable="endpoint"/>
               <output name="movie_title" message-parameter="movie_title">
+              <output message-parameter="status" type="status"/>
                 <!-- {{{ --> 
                 <rng:element name="movie_title">
                   <rng:data type="string"/>

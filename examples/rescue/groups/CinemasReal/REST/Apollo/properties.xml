@@ -38,6 +38,7 @@
           <input name="uhrzeit" value="&quot;00:00:00&quot;"/>
           <input name="version" value="&quot;&quot;"/>
           <output variable="response" name="" type="complex"/>
+          <output message-parameter="status" type="status"/>
         </call>
         <manipulate id="parse_programm">
           <variable context="response" local="response"/>
