@@ -37,7 +37,8 @@ class InjectionService < Riddl::Implementation
     injected.attributes['result'] = "context.result_#{call_node.attributes['id']}" if class_level
     parent_injected = call_node.find("ancestor::cpee:group[@type='injection']").last
     if parent_injected.nil?
-      injected.attributes['properties'] = "context.properties_#{call_node.attributes['id']}" 
+      p 'bla'
+      injected.attributes['properties'] = "context.result_#{call_node.attributes['id']}[:properties]" 
     else
       injected.attributes['properties'] = "#{parent_injected.attributes['properties']}[:\"#{call_node.attributes['oid']}\"]"
     end
@@ -51,7 +52,7 @@ class InjectionService < Riddl::Implementation
       wf = XML::Smart.string(resp[0].value.read)
       wf.namespaces['flow'] = 'http://rescue.org/ns/controlflow/0.2'
       wf.namespaces['p'] =  'http://rescue.org/ns/properties/0.2'
-      wf.find('//flow:call[child::flow:templates]').each {|c| c.attributes['templates'] = "#{rescue_uri}/operations/#{service_operation}/templates/#{c.attributes['id']}"; p c.attributes['templates'] }
+      wf.find('//flow:call[child::flow:templates]').each {|c| c.attributes['templates-uri'] = "#{rescue_uri}/operations/#{service_operation}/templates/#{c.attributes['id']}"; p c.attributes['templates-uri'] }
       if first_ancestor_loop.nil?
         create, remove = inject_class_level(wf, call_node, injected)
         positions[call_node.attributes['id']] = {:pos=>call_node.attributes['id'], :state=>'after'}
@@ -89,7 +90,7 @@ class InjectionService < Riddl::Implementation
       call_node = loop_copy.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']").first # Find new call-block
       loop_copy.find('descendant::cpee:*[@id]').each {|node| node.attributes['id'] =  "#{node.attributes['id']}_#{preceding_loops}"} # Change ID's {{{
       injected.attributes['result'] = "context.result_#{call_node.attributes['id']}" if class_level
-      injected.attributes['properties'] = "context.properties_#{call_node.attributes['id']}" if parent_injected.nil? # }}}
+      injected.attributes['properties'] = "context.result_#{call_node.attributes['id']}[:properties]" if parent_injected.nil? # }}}
       unless call_node.find('ancestor::cpee:loop').first.nil?
         first_ancestor_loop.add_before(loop_copy)
         return  analyze(call_node.attributes['id'], instance, handler_uri, description, positions)
@@ -104,6 +105,8 @@ class InjectionService < Riddl::Implementation
     if man_block
       man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
       man_block.attributes['context'] =  class_level ? "context.result_#{call_node.attributes['id']}" : parent_injected.attributes['result'] 
+      p_text = "properties = #{(parent_injected ? "#{parent_injected.attributes['properties']}" : injected.attributes['properties'])}\n"
+      man_block.text = p_text + man_block.text
       man_block.attributes['properties'] = parent_injected ? "#{parent_injected.attributes['properties']}" : injected.attributes['properties']
       call_node.add_after(man_block)
     end  # }}} 
@@ -124,6 +127,8 @@ class InjectionService < Riddl::Implementation
     blanks = call_node.find('count(ancestor::cpee:*)').to_i
     blanks_create = ' '*(blanks+1)*2; blanks_remove = ' '*(blanks)*2
     create = ''; remove = ''
+    create << "#{blanks_create}context.result_#{call_node.attributes['id']} = RescueHash.new\n" # Create/Remove result-object {{{
+    remove << "#{blanks_remove}context.delete(:\"result_#{call_node.attributes['id']}\")\n" # }}}
     parent_injected = call_node.find("ancestor::cpee:group[@type='injection']").last # Create/Remove Property-Objects {{{
     if parent_injected.nil?
       create << "#{blanks_create}#{injected.attributes['properties']} = RescueHash.new\n"
@@ -133,8 +138,6 @@ class InjectionService < Riddl::Implementation
       c = "#{injected.attributes['properties']}[:\"#{call.attributes.include?('oid') ? call.attributes['oid'] : call.attributes['id'] }\"]"
       create << "#{blanks_create}#{c} = RescueHash.new\n"
     end  #}}} 
-    create << "#{blanks_create}context.result_#{call_node.attributes['id']} = RescueHash.new\n" # Create/Remove result-object {{{
-    remove << "#{blanks_remove}context.delete(:\"result_#{call_node.attributes['id']}\")\n" # }}}
     wf.find("//flow:endpoints/*").each do |node| # Create/Remove endpoints  {{{
       create << "#{blanks_create}endpoints.#{call_node.attributes['id']+'__'+node.name.name} = #{node.text.inspect}\n"
       remove << "#{blanks_remove}endpoints.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
@@ -236,7 +239,7 @@ class InjectionService < Riddl::Implementation
   def inject_instance_level(wf, call_node, resource_path, branch, parent_injected)# {{{
     index = resource_path.tr('/:','__')
     op = parent_injected.attributes['serviceoperation'].tr('"', '')
-      wf.find('//flow:call[child::flow:templates]').each      {|c| c.attributes['templates'] = "#{rescue_uri}/operations/#{service_operation}/templates/#{c.attributes['id']}" }
+    wf.find('//flow:call[child::flow:templates]').each        {|c| c.attributes['templates-uri'] = "#{rescue_uri}/operations/#{service_operation}/templates/#{c.attributes['id']}" }
     wf.find("//@id").each                                     {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }
     wf.find("//@endpoint").each                               {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }
     wf.find("//flow:call/@wsdl").each                         {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }
@@ -332,6 +335,10 @@ class InjectionService < Riddl::Implementation
     value1 = value1.to_f if is_a_number?(value1.strip)
     value2 = wf.find("string(//p:properties/#{xpath})")
     value2 = value2.to_f if is_a_number?(value2.strip)
-    value2.send(con.attributes['comparator'], value1)
+    if value1.class == String && value2.class == String
+      value2.strip.send(con.attributes['comparator'], value1.strip)
+    else
+      value2.send(con.attributes['comparator'], value1 )
+    end
   end#}}} 
 end

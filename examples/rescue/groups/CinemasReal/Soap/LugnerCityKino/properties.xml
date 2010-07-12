@@ -40,6 +40,7 @@
           <variable context="film_ids" local="ids"/>
           <variable input-parameter="date" local="from"/> 
           <variable context="date2" local="to"/>
+          p soap.class
           resp = XML::Smart.string(CGI::unescapeHTML(soap[0]))
           resp.find("//film/ID").each do |id|
             ids &lt;&lt; id.text

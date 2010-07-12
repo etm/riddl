@@ -28,7 +28,8 @@
       <execute>
         <manipulate id="preparations">
           <variable context="datum" local="datum"/>
-          <variable input-parameter="date" local="date"/>
+          <variable input-parameter="date" local="d"/>
+          date = Time.parse(d)
           datum = "#{date.mday &lt; 10 ? "0#{date.mday}" : date.mday}.#{date.mon &lt; 10 ? "0#{date.mon}" : date.mon}.#{date.year}"
         </manipulate>
         <call id="Programm" endpoint="service" http-method="get">
@@ -43,6 +44,7 @@
           <variable input-parameter="date" local="date"/> 
           <variable input-parameter="title" local="title"/> 
           <variable output-parameter="list" local="list"/>
+          date = Date.parse(date)
           str = CGI::unescapeHTML(response)
           str.gsub!('&amp;','--amp--')
           offset = str.index("selected=\"selected\"", str.index("uclKinoprogramm$DDL_Datum"))
@@ -63,7 +65,7 @@
           resp.find("//table[descendant::td/a[contains(text(),'#{title}')]]").each do |b| 
             show_title = b.find("child::tr/td[1]/a").first.text.strip
             show_date = Date.parse(d)
-            if show_date == date
+            if show_date.eql?(date)
               b.find("child::tr/td[3]/div/table").each do |show|
                 show_hall = show.find("child::tr/td[1]/h4/span").first.text.strip
                 show.find("child::tr/td[2]/span/a[text()]").each do |s|

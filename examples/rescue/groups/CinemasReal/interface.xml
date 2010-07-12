@@ -182,7 +182,7 @@
         <choose>
           <alternative>
             <condition test="number_of_shows" comparator="&gt;" value="0"/>
-            <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post" info="true">
+            <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post" info="true" default-tpl-name="iPhone" default-tpl-lang="en">
               <!-- {{{ --> 
               <templates>
                 <xslt name="iPhone" xml:lang="de">
@@ -203,7 +203,7 @@
                                 dataType: 'text',
                                 data: data,
                                 success: function(res){
-                                  alert("Selection done");
+                                  window.location.replace('<xsl:value-of select="$worklist"/>');
                                 }
                               });
                             }
@@ -281,7 +281,7 @@
             <call id="call_book" endpoint="selected_cinema" service-operation="book">
             <!-- {{{ -->   
               <input name="show_id" variable="show_id"/>
-              <output name="reservation_id" message-parameter="reservation_id">
+              <output name="reservation_number" message-parameter="reservation_id">
               <!-- {{{ -->      
                 <rng:element name="reservation_id">
                   <rng:data type="string"/>
@@ -318,7 +318,7 @@
       <execute>
         <call id="perform_book" endpoint="resource_path" service-operation="book" state-controlflow="execute">
 <!-- {{{ -->     
-          <input name="show_id" variable="show_id">
+          <input name="show_id" message-parameter="show_id">
 <!-- {{{ -->     
             <rng:element name="show_id">
               <domain:caption xml:lang="en">ShowID</domain:caption>
@@ -327,7 +327,7 @@
             </rng:element>
 <!-- }}} --> 
           </input>
-          <output name="reservation_id" message-parameter="reservation_id">
+          <output name="reservation_id" message-parameter="reservation_number">
 <!-- {{{ -->     
             <rng:element name="reservation_id">
               <rng:data type="string"/>

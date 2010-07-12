@@ -357,7 +357,6 @@ Recent changes:
   <xsl:template name="output">
     <!-- {{{ -->
       <xsl:for-each select="child::flow:output">
-        <xsl:text> p result&#xa;</xsl:text>
         <xsl:choose>
           <xsl:when test="parent::flow:call/@soap-operation">
             <xsl:if test="@message-parameter">
@@ -369,10 +368,10 @@ Recent changes:
             <xsl:text> = Array.new&#xa;</xsl:text>
             <xsl:choose>
               <xsl:when test="@namespace">
-                <xsl:text>result.find('</xsl:text><xsl:value-of select="@name"/><xsl:text>', {'tns'=>'</xsl:text><xsl:value-of select="@namespace"/><xsl:text>'}).each {|n| </xsl:text>
+                <xsl:text>result[0].find('</xsl:text><xsl:value-of select="@name"/><xsl:text>', {'tns'=>'</xsl:text><xsl:value-of select="@namespace"/><xsl:text>'}).each {|n| </xsl:text>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:text>result.find('</xsl:text><xsl:value-of select="@name"/><xsl:text>').each {|n| </xsl:text>
+                <xsl:text>result[0].find('</xsl:text><xsl:value-of select="@name"/><xsl:text>').each {|n| </xsl:text>
               </xsl:otherwise>
             </xsl:choose>
             <xsl:if test="@message-parameter">
@@ -391,7 +390,7 @@ Recent changes:
               <xsl:value-of select="@variable"/>
             </xsl:if>
             <xsl:if test="@name">
-              <xsl:text> = result.value('</xsl:text><xsl:value-of select="@name"/><xsl:text>')</xsl:text>
+              <xsl:text> = result[0].value('</xsl:text><xsl:value-of select="@name"/><xsl:text>')</xsl:text>
               <xsl:if test="@type = 'complex'">
                 <xsl:text>.read</xsl:text>
               </xsl:if>
@@ -409,8 +408,14 @@ Recent changes:
       <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
       <xsl:attribute name="endpoint"><xsl:value-of select="@endpoint"/></xsl:attribute>
       <xsl:attribute name="oid"><xsl:value-of select="@oid"/></xsl:attribute>
-      <xsl:attribute name="templates"><xsl:value-of select="@templates"/></xsl:attribute>
       <xsl:element name="parameters">
+        <xsl:if test="@templates-uri">
+          <xsl:element name="templates">
+            <xsl:element name="uri">'<xsl:value-of select="@templates-uri"/>'</xsl:element>
+            <xsl:element name="name">'<xsl:value-of select="@default-tpl-name"/>'</xsl:element>
+            <xsl:element name="lang">'<xsl:value-of select="@default-tpl-lang"/>'</xsl:element>
+          </xsl:element>
+        </xsl:if>
         <xsl:if test="@soap-operation">
           <xsl:element name="soap_operation"><xsl:value-of select="@soap-operation"/></xsl:element>
           <xsl:element name="wsdl">
