@@ -165,11 +165,6 @@
               <get in="*" out="class-level-workflow"/>
               <get in="input" out="schema"/>
               <get in="output" out="schema"/>
-              <resource relative="templates">
-                <resource>
-                  <get in="*"/>
-                </resource>
-              </resource>
             </resource>
           </resource>
           <resource relative="messages">

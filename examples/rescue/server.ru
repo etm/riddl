@@ -91,11 +91,6 @@ run(
                 run GetInterface if method :get => '*'
                 run GetInterface if method :get => 'input'
                 run GetInterface if method :get => 'output'
-                on resource 'templates' do
-                  on resource do
-                    run GetTemplates if method :get => '*'
-                  end
-                end
               end
             end
             on resource 'messages' do
