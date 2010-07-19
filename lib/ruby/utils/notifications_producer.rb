@@ -166,8 +166,43 @@ module Riddl
             data    = @a[0]
             handler = @a[1]
             key     = @r.last
+
+            muid = @p.shift.value
+            url  = @p[0].name == 'url' ? @p.shift.value : nil
+
+            # TODO check if message is valid (with producer secret)
+            if !File.exists?(data + '/' + key + '/subscription.xml')
+              raise "subscription #{data + '/' + key} no found"
+            end
+
             topics = []
+            XML::Smart::modify(data + '/' + key + '/subscription.xml') do |doc|
+              doc.namespaces = { 'n' => 'http://riddl.org/ns/common-patterns/notifications-producer/1.0' }
+              if url.nil?
+                doc.find('/n:subscription/@url').delete_all!
+              else
+                doc.root.attributes['url'] = url
+              end
+              doc.root.children.delete_all!
+              while @p.length > 1
+                topic = @p.shift.value
+                base = @p.shift
+                type = base.name
+                items = base.value.split(',')
+                t = if topics.include?(topic)
+                  doc.find("/n:subscription/n:topic[@id='#{topic}']").first
+                else
+                  topics << topic
+                  doc.root.add('topic', :id => topic)
+                end
+                items.each do |i|
+                  t.add(type[0..-2], i)
+                end
+              end
+            end  
+
             handler.new(data,key,topics).update
+            nil
           end
         end #}}}
                   

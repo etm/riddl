@@ -136,7 +136,9 @@
 
   <message name="details">
     <parameter name="message-uid" type="string"/>
-    <parameter name="url" type="string"/>
+    <optional>
+      <parameter name="url" type="string"/>
+    </optional>  
     <oneOrMore>
       <parameter name="topic" type="string"/>
       <choice>
