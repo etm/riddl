@@ -120,6 +120,9 @@
           <get in="*" out="value"/>
           <put in="updcontent"/>
           <delete in="*"/>
+          <resource recursive='true'>
+            <get in="*" out="value"/>
+          </resource>
         </resource>
       </resource>
     </resource>

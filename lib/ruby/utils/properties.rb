@@ -11,26 +11,29 @@ module Riddl
           raise "handler not a subclass of HandlerBase"
         end
         lambda {
-          run     Riddl::Utils::Properties::All,          properties,                 handler        if get
-          run     Riddl::Utils::Properties::Query,        properties,                 handler        if get    'query'
+          run     Riddl::Utils::Properties::All,            properties,                 handler        if get
+          run     Riddl::Utils::Properties::Query,          properties,                 handler        if get    'query'
           on resource 'schema' do
-            run   Riddl::Utils::Properties::Schema,       properties, schema, strans                 if get
+            run   Riddl::Utils::Properties::Schema,         properties, schema, strans                 if get
             on resource 'rng' do
-              run Riddl::Utils::Properties::RngSchema,    properties, schema, strans                 if get
+              run Riddl::Utils::Properties::RngSchema,      properties, schema, strans                 if get
             end  
           end
           on resource 'values' do
-            run   Riddl::Utils::Properties::Properties,   properties, schema,         handler        if get
-            run   Riddl::Utils::Properties::AddProperty,  properties, schema, strans, handler, level if post   'property'
+            run   Riddl::Utils::Properties::Properties,     properties, schema,         handler        if get
+            run   Riddl::Utils::Properties::AddProperty,    properties, schema, strans, handler, level if post   'property'
             on resource do
-              run Riddl::Utils::Properties::GetContent,   properties, schema,         handler, level if get
-              run Riddl::Utils::Properties::DelContent,   properties, schema, strans, handler, level if delete
-              run Riddl::Utils::Properties::AddContent,   properties, schema, strans, handler, level if post   'addcontent'
-              run Riddl::Utils::Properties::UpdContent,   properties, schema, strans, handler, level if put    'updcontent'
+              run Riddl::Utils::Properties::GetContent,     properties, schema,         handler, level if get
+              run Riddl::Utils::Properties::DelContent,     properties, schema, strans, handler, level if delete
+              run Riddl::Utils::Properties::AddContent,     properties, schema, strans, handler, level if post   'addcontent'
+              run Riddl::Utils::Properties::UpdContent,     properties, schema, strans, handler, level if put    'updcontent'
               on resource do
-                run Riddl::Utils::Properties::GetContent, properties, schema,         handler, level if get
-                run Riddl::Utils::Properties::DelContent, properties, schema, strans, handler, level if delete
-                run Riddl::Utils::Properties::UpdContent, properties, schema, strans, handler, level if put    'updcontent'
+                run Riddl::Utils::Properties::GetContent,   properties, schema,         handler, level if get
+                run Riddl::Utils::Properties::DelContent,   properties, schema, strans, handler, level if delete
+                run Riddl::Utils::Properties::UpdContent,   properties, schema, strans, handler, level if put    'updcontent'
+                on resource do
+                  run Riddl::Utils::Properties::GetContent, properties, schema,         handler, level if get
+                end
               end
             end
           end  
@@ -163,7 +166,7 @@ module Riddl
           relpath    = @r[level..-1]
           handler.new(properties,relpath[1]).read
 
-          if ret = extract_values(properties,schema,relpath[1],Riddl::HttpParser::unescape(relpath[2]))
+          if ret = extract_values(properties,schema,relpath[1],Riddl::HttpParser::unescape(relpath[2..-1].join('/')))
             ret
           else
             @status = 404
