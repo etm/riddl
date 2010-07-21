@@ -10,6 +10,7 @@ require 'xml/smart'
 require 'fileutils'
 require 'pp'
 #require 'logger'
+require 'active_support'
 
 
 require 'lib/Rescue'

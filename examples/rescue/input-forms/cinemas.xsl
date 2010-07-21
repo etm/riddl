@@ -9,7 +9,7 @@
             <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"/>
             <script type="text/javascript">
               function send() {
-                var callback = '<xsl:value-of select="$instance-uri"/>callbacks/<xsl:value-of select="$callback-id"/>'
+                var callback = '<xsl:value-of select="$instance-uri"/>/callbacks/<xsl:value-of select="$callback-id"/>'
                 $.ajax({
                   url: callback,
                   type: 'put',
@@ -29,7 +29,7 @@
       </xsl:template>
       <xsl:template name="form">
         <p> Movie title: <input id="title" value="Eclipse"/></p> 
-        <p> Date: <input id="date" value="2010-07-15"/></p> 
+        <p> Date: <input id="date" value="2010-07-22"/></p> 
         <p> City: <input id="city" value="Vienna"/></p> 
         <input type="button" value="Send" onClick="send()"/>
       </xsl:template>

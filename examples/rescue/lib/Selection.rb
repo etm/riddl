@@ -1,6 +1,6 @@
 require '../../lib/ruby/client'
 $selection_data = Hash.new
-$notification_keys = Hash.new
+$selection_notification_keys = Array.new
 class SelectByRandom < Riddl::Implementation # {{{
   def response
       puts "==SelectByRandom=="*5
@@ -45,16 +45,18 @@ end # }}}
 class PostSelectByUser < Riddl::Implementation # {{{
   def response
     if @p.value('vote') == "syncing_after" && @p.value('topic') == "running"
-      notification = YAML::load(@p.value('notification')) if @p.value('notification')
-      if $notification_keys.include?(@p.value('key'))
-        $notification_keys.delete(@p.value('key'))
-        notification[:instance] = "#{notification[:instance]}/" unless notification[:instance][-1..-1] == "/"
-        $selection_data[notification[:instance]].delete(notification[:activity].to_s)
-        status, resp = Riddl::Client.new("#{notification[:instance]}/notifications/subscriptions/#{@p.value('key')}").delete [
+      notification = ActiveSupport::JSON::decode(@p.value('notification')) if @p.value('notification')
+      if $selection_notification_keys.include?(@p.value('key'))
+p "---------------------> Select: syncing_after"        
+p notification
+p $selection_data
+        $selection_notification_keys.delete(@p.value('key'))
+        $selection_data[notification['instance']].delete(notification['activity'].to_s)
+        status, resp = Riddl::Client.new("#{notification['instance']}/notifications/subscriptions/#{@p.value('key')}").delete [
           Riddl::Parameter::Simple.new("message-uid","ralph"),
           Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
         ]
-        $selection_data.delete(notification[:instance]) if $selection_data.include?(notification[:instance]) && $selection_data[notification[:instance]].length == 0
+        $selection_data.delete(notification['instance']) if $selection_data.include?(notification['instance']) && $selection_data[notification['instance']].length == 0
       end
     else
       instance = @p.value('call-instance-uri')
@@ -66,7 +68,7 @@ class PostSelectByUser < Riddl::Implementation # {{{
         Riddl::Parameter::Simple.new("votes", "syncing_after")
       ]
       puts "ERROR while subscribing to syncing_after at #{instance}" unless status == 200
-      $notification_keys << resp.value('key')
+      $selection_notification_keys << resp.value('key')
       $selection_data[instance] = Hash.new unless $selection_data.include?(instance)
       $selection_data[instance][activity] = Hash.new unless $selection_data[instance].include?(activity)
       $selection_data[instance][activity]['data'] = XML::Smart.string(@p.value('data')) unless @p.value('data').nil?
@@ -75,6 +77,9 @@ class PostSelectByUser < Riddl::Implementation # {{{
       $selection_data[instance][activity]['templates-uri'] = @p.value('templates-uri') if @p.value('templates-uri') 
       $selection_data[instance][activity]['template-name'] = @p.value('template-name') if @p.value('template-name') 
       $selection_data[instance][activity]['template-lang'] = @p.value('template-lang') if @p.value('template-lang') 
+p "---------------------------> Select: other"      
+p $selection_notification_keys
+p $selection_data
       @headers << Riddl::Header.new("CPEE-Callback",'true')
       @status = 200 
     end

@@ -232,7 +232,7 @@
                           'date' : '<xsl:value-of select="date"/>',
                           'starting_time' : '<xsl:value-of select="time"/>',
                           'hall' : '<xsl:value-of select="hall"/>'
-                        },'<xsl:value-of select="$instance-uri"/>callbacks/<xsl:value-of select="$callback-id"/>');
+                        },'<xsl:value-of select="$instance-uri"/>/callbacks/<xsl:value-of select="$callback-id"/>');
                         </xsl:attribute>
                       </xsl:element></td></tr>
                       </table></td></tr>
