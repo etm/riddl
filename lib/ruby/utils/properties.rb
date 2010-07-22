@@ -180,7 +180,7 @@ module Riddl
 
             case decision
               when :complex
-                res = pdoc.find("/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}")
+                res = pdoc.find("/p:properties/*[name()=\"#{property}\"]#{minor == '' ? '' : "/p:#{minor}"}")
                 if res.any?
                   prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
                   if res.length == 1
