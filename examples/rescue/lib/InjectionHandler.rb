@@ -37,9 +37,7 @@ class InjectionHandler < Riddl::Implementation
 # }}}
     elsif @p.value('vote') == "syncing_after" && @p.value('topic') == "running"# received notification for sync_after {{{
       $injection_queue[notification['instance']][:mutex].synchronize do
-p "swynving_after"
-pp notification
-pp $injection_queue[notification['instance']]
+p "syncing_after: #{notification['activity']} included? #{$injection_queue[notification['instance']][:activities].include?(notification['activity'])} and key: #{$injection_queue[notification['instance']][:key]}"
         if $injection_queue[notification['instance']][:key] != :finished && $injection_queue[notification['instance']][:activities].include?(notification['activity'])
           key = $injection_queue[notification['instance']][:key]
           $injection_queue[notification['instance']][:key] = :finished
@@ -52,7 +50,6 @@ pp $injection_queue[notification['instance']]
             Riddl::Parameter::Simple.new("topic", "properties/state"),
             Riddl::Parameter::Simple.new("events", "change")
           ]
-p "subs for stop"
 pp $injection_queue[notification['instance']]
           puts "Injection-handler: ERROR subscribing state/changed (#{status})" unless status == 200 # Needs to be logged into the CPEE as well
 puts "false1"          
@@ -71,7 +68,7 @@ puts "true"
 puts "state change"
 puts notification['state']      
       unless notification['state'] != 'stopped'
-puts "---------------_> Enter stopped"
+puts "---------------> Enter stopped"
         status, resp = cpee.resource("notifications/subscriptions/#{@p.value('key')}").delete [
           Riddl::Parameter::Simple.new("message-uid","ralph"),
           Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
@@ -79,6 +76,8 @@ puts "---------------_> Enter stopped"
         puts "Injection-handler: ERROR deleting subscription (#{status})" unless status == 200 # Needs to be logged into the CPEE as well 
         changed_positions = Array.new
         $injection_queue[notification['instance']][:activities].each do |position|
+pp $injection_queue[notification['instance']]
+puts "Perform position #{position}"
           changed_positions.each { |p| position = p[:new] if position.to_s == p[:old].to_s}
           status, resp = Riddl::Client.new(injection_service_uri).post [
             Riddl::Parameter::Simple.new('position', position),
@@ -105,10 +104,9 @@ puts "---------------_> Enter stopped"
         status, resp = cpee.resource("properties/values/positions").put [Riddl::Parameter::Simple.new("content", positions.root.dump)] 
         puts "Injection-handler: ERROR setting positions (#{status})" unless status == 200 # Needs to be logged into the CPEE as well # }}}
         # Restarting the instance
-        sleep 4
         status, resp = cpee.resource("properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
         $injection_queue.delete(notification['instance'])
-puts "---------------_> leave stopped"
+puts "---------------> leave stopped"
       end
       nil
 # }}} 
@@ -117,6 +115,7 @@ puts "---------------_> leave stopped"
       $injection_queue[@p.value('instance')] ||= Hash.new
       $injection_queue[@p.value('instance')][:mutex] ||= Mutex.new
       $injection_queue[@p.value('instance')][:mutex].synchronize do
+puts "-----------------------------> Reg: #{@p.value('activity')}"        
         if !$injection_queue.has_key?(@p.value('instance')) || $injection_queue[@p.value('instance')][:key].nil?
           cpee = Riddl::Client.new(@p.value('instance'))
           status, resp = cpee.resource("notifications/subscriptions").post [ 
@@ -129,8 +128,7 @@ puts "---------------_> leave stopped"
           $injection_queue[@p.value('instance')][:activities] ||= Array.new
         end 
         $injection_queue[@p.value('instance')][:activities] << @p.value('activity')
-puts "---------------__> reigster"
-        pp $injection_queue[@p.value('instance')][:activities]
+pp $injection_queue[@p.value('instance')][:activities]
       end  
     # }}}
     else # some other request

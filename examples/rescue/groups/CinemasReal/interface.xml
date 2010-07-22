@@ -307,7 +307,7 @@
                   <rng:data type="positiveInteger"/>
                 </rng:element>
               </variable>
-              status = 200
+              status = 404
             </manipulate>
           </otherwise>
         </choose>
