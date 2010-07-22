@@ -17,7 +17,7 @@ class InjectionHandler < Riddl::Implementation
         end
       end
       callbacks = xml.root.add('outstanding-callbacks')
-      Riddl::Parameter::Complex.new("bla","text/xml", xml.to_s)
+      return Riddl::Parameter::Complex.new("bla","text/xml", xml.to_s)
 # }}}
     elsif @p.value('instance') && (@p.length == 1) # received list pending innjections for a given instance {{{
       xml = XML::Smart.string('<injection-queue/>')
@@ -33,10 +33,11 @@ class InjectionHandler < Riddl::Implementation
         queue.add(position.to_s)
       end if $injection_queue.key?(@p.value('instance')) 
       callbacks = xml.root.add('outstanding-callbacks')
-      Riddl::Parameter::Complex.new("bla","text/xml", xml.to_s)
+      return Riddl::Parameter::Complex.new("bla","text/xml", xml.to_s)
 # }}}
     elsif @p.value('vote') == "syncing_after" && @p.value('topic') == "running"# received notification for sync_after {{{
       $injection_queue[notification['instance']][:mutex].synchronize do
+      pp $injection_queue[notification['instance']][:activities]
 p "syncing_after: #{notification['activity']} included? #{$injection_queue[notification['instance']][:activities].include?(notification['activity'])} and key: #{$injection_queue[notification['instance']][:key]}"
         if $injection_queue[notification['instance']][:key] != :finished && $injection_queue[notification['instance']][:activities].include?(notification['activity'])
           key = $injection_queue[notification['instance']][:key]
@@ -50,17 +51,13 @@ p "syncing_after: #{notification['activity']} included? #{$injection_queue[notif
             Riddl::Parameter::Simple.new("topic", "properties/state"),
             Riddl::Parameter::Simple.new("events", "change")
           ]
-pp $injection_queue[notification['instance']]
           puts "Injection-handler: ERROR subscribing state/changed (#{status})" unless status == 200 # Needs to be logged into the CPEE as well
-puts "false1"          
           return Riddl::Parameter::Simple.new('continue','false')
         end  
         
         if $injection_queue[notification['instance']][:key] == :finished && $injection_queue[notification['instance']][:activities].include?(notification['activity'])  
-puts "false2"          
           return Riddl::Parameter::Simple.new('continue','false')
         end 
-puts "true"        
         return Riddl::Parameter::Simple.new('continue','true')
       end
 # }}}  
@@ -76,7 +73,6 @@ puts "---------------> Enter stopped"
         puts "Injection-handler: ERROR deleting subscription (#{status})" unless status == 200 # Needs to be logged into the CPEE as well 
         changed_positions = Array.new
         $injection_queue[notification['instance']][:activities].each do |position|
-pp $injection_queue[notification['instance']]
 puts "Perform position #{position}"
           changed_positions.each { |p| position = p[:new] if position.to_s == p[:old].to_s}
           status, resp = Riddl::Client.new(injection_service_uri).post [
@@ -102,6 +98,7 @@ puts "Perform position #{position}"
 #        positions.find('p:value/p:*').each { |node| node.text = 'after'}
         changed_positions.each { |p| positions.root.add(p[:new], p[:state])}
         status, resp = cpee.resource("properties/values/positions").put [Riddl::Parameter::Simple.new("content", positions.root.dump)] 
+        puts positions
         puts "Injection-handler: ERROR setting positions (#{status})" unless status == 200 # Needs to be logged into the CPEE as well # }}}
         # Restarting the instance
         status, resp = cpee.resource("properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]
@@ -128,7 +125,6 @@ puts "-----------------------------> Reg: #{@p.value('activity')}"
           $injection_queue[@p.value('instance')][:activities] ||= Array.new
         end 
         $injection_queue[@p.value('instance')][:activities] << @p.value('activity')
-pp $injection_queue[@p.value('instance')][:activities]
       end  
     # }}}
     else # some other request
@@ -136,5 +132,6 @@ pp $injection_queue[@p.value('instance')][:activities]
       @p.each {|param| puts param.inspect }
       @status = 404
     end
+    return
   end#}}}
 end

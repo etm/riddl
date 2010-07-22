@@ -1,4 +1,5 @@
-#!/usr/bin/ruby
+#\ -p 9290
+$0 = "RESCUE"
 
 require 'rack'
 require 'socket'
@@ -9,9 +10,7 @@ require 'lib/MarkUS_V3.0'
 require 'xml/smart'
 require 'fileutils'
 require 'pp'
-#require 'logger'
 require 'active_support'
-
 
 require 'lib/Rescue'
 require 'lib/Selection'
@@ -19,10 +18,6 @@ require 'lib/InjectionService'
 require 'lib/InjectionHandler'
 
 use Rack::ShowStatus
-
-options = {:Port => 9290, :Host => "0.0.0.0", :AccessLog => []}
-$0 = "RESCUE"
-
 
 run(
   Riddl::Server.new("description.xml") do
