@@ -2,25 +2,18 @@ require '../../lib/ruby/client'
 
 class InjectionService < Riddl::Implementation
   def response  #{{{
-    positions =  analyze(@p.value('position'), @p.value('instance'), @p.value('handler'))
+    description = XML::Smart.string(@p.value('description').read)
+    description.namespaces['cpee'] = 'http://cpee.org/ns/description/1.0'
+    positions, description =  analyze(@p.value('position'), @p.value('instance'), @p.value('handler'), description)
     pos = XML::Smart.string('<positions/>')
     positions.each { |old, new| pos.root.add(old.to_s, {'new'=>new[:pos].to_s}, new[:state].to_s) }
-    Riddl::Parameter::Complex.new('positions', 'text/xml', pos.root.dump)
+    [ Riddl::Parameter::Complex.new('positions', 'text/xml', pos.root.dump),  Riddl::Parameter::Complex.new('description', 'text/xml', description.root.dump)]
   end# }}}  
 
   def analyze(position, instance, handler_uri, description=nil, positions=nil)# {{{ 
     wf = nil; parallel = nil; create = nil; remove = nil; injected = nil; # because of variable scoping
     positions = Hash.new if positions.nil?
     cpee_client = Riddl::Client.new(instance)
-    if description.nil?# Get description {{{
-      status, resp = cpee_client.resource("/properties/values/description").get 
-      unless status == 200
-        puts "Error receiving description at #{cpee_uri}/properties/values/description: #{status}"
-        return []
-      end
-      description = XML::Smart.string(resp[0].value.read)
-      description.namespaces['cpee'] = 'http://cpee.org/ns/description/1.0'  
-    end# }}}
     call_node = description.find("//cpee:call[@id = '#{position}']").first # Get call-node, rescue_client and service_operation {{{
     service_operation = call_node.find("string(descendant::cpee:serviceoperation)").tr('"','')
     status, resp = cpee_client.resource("properties/values/endpoints/#{call_node.attributes['endpoint']}").get # Get endpoint {{{
@@ -114,12 +107,7 @@ class InjectionService < Riddl::Implementation
       injected.children[0].add_before(create)
       man_block.nil? ? injected.add_after(remove) : man_block.add_after(remove)
     end
-    status, resp = cpee_client.resource("/properties/values/description").put [Riddl::Parameter::Simple.new("content", "<content>#{description.root.dump}</content>")] # Set description {{{
-    unless status == 200 
-      puts "ERROR setting description - status: #{status}"
-      return []
-    end # }}} 
-    positions
+    [positions, description]
   end# }}}
 
   def maintain_class_level (call_node, wf, injected)  # {{{
