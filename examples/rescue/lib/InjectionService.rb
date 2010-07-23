@@ -44,7 +44,7 @@ class InjectionService < Riddl::Implementation
       wf = XML::Smart.string(resp[0].value.read)
       wf.namespaces['flow'] = 'http://rescue.org/ns/controlflow/0.2'
       wf.namespaces['p'] =  'http://rescue.org/ns/properties/0.2'
-      wf.find('//flow:call[child::flow:templates]').each {|c| c.attributes['templates-uri'] = "#{rescue_uri}/operations/#{service_operation}/templates/#{c.attributes['id']}"; p c.attributes['templates-uri'] }
+      wf.find('//flow:call[child::flow:templates]').each {|c| c.attributes['templates-uri'] = "#{rescue_uri}/operations/#{service_operation}/templates/#{c.attributes['id']}" }
       if first_ancestor_loop.nil?
         create, remove = inject_class_level(wf, call_node, injected)
         positions[call_node.attributes['id']] = {:pos=>call_node.attributes['id'], :state=>'after'}
@@ -98,7 +98,7 @@ class InjectionService < Riddl::Implementation
       man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
       man_block.attributes['context'] =  class_level ? "context.result_#{call_node.attributes['id']}" : parent_injected.attributes['result'] 
       p_text = "properties = #{(parent_injected ? "#{parent_injected.attributes['properties']}" : injected.attributes['properties'])}\n"
-      man_block.text = "\np result; p result[0].class;\n" + p_text + man_block.text
+      man_block.text = p_text + man_block.text
       man_block.attributes['properties'] = parent_injected ? "#{parent_injected.attributes['properties']}" : injected.attributes['properties']
       call_node.add_after(man_block)
     end  # }}} 
