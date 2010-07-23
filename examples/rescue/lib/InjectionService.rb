@@ -11,6 +11,7 @@ class InjectionService < Riddl::Implementation
   end# }}}  
 
   def analyze(position, instance, handler_uri, description=nil, positions=nil)# {{{ 
+puts "#### Analyzing: #{position}"
     wf = nil; parallel = nil; create = nil; remove = nil; injected = nil; # because of variable scoping
     positions = Hash.new if positions.nil?
     cpee_client = Riddl::Client.new(instance)
@@ -107,6 +108,8 @@ class InjectionService < Riddl::Implementation
       injected.children[0].add_before(create)
       man_block.nil? ? injected.add_after(remove) : man_block.add_after(remove)
     end
+puts "#### Leading to:"    
+pp positions
     [positions, description]
   end# }}}
 

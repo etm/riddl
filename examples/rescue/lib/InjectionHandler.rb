@@ -39,7 +39,7 @@ class InjectionHandler < Riddl::Implementation
       # Subscribe Injection-Handler to syncing_after 
       $injection_queue[@p.value('instance')] ||= Hash.new
       $injection_queue[@p.value('instance')][:mutex] ||= Mutex.new
-puts "@@@ Register: #{@p.value('activity')}"      
+puts "@@@@ Register: #{@p.value('activity')}"      
       @status = 500
       $injection_queue[@p.value('instance')][:mutex].synchronize do
         if !$injection_queue.has_key?(@p.value('instance')) || ($injection_queue[@p.value('instance')][:sync] != :active && $injection_queue[@p.value('instance')][:sync] != :start)
@@ -87,6 +87,13 @@ puts "**** Voted #{notification['activity']}: true"
 puts "======================== STOPPING CPEE =============================================================================================================="      
 puts "---- Pending injections:" 
 pp $injection_queue[notification['instance']]
+        status, resp = cpee.resource("properties/values/positions").get # Get positions {{{
+        puts "ERROR: Receiving positions failed #{status}" unless status == 200
+        positions = XML::Smart.string(resp[0].value.read)
+puts "==================== actual positions ============================="
+puts positions
+puts "==================== actual positions ============================="
+        positions.namespaces['p'] = 'http://riddl.org/ns/common-patterns/properties/1.0' # }}}
         status, resp = cpee.resource("notifications/subscriptions/#{$injection_queue[notification['instance']][:key]}").delete [
           Riddl::Parameter::Simple.new("message-uid","ralph"),
           Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
@@ -135,10 +142,6 @@ pp $injection_queue[notification['instance']]
           puts "ERROR setting description - status: #{status}"
         end # }}} 
         # Setting positions # {{{
-        status, resp = cpee.resource("properties/values/positions").get
-        puts "ERROR: Receiving positions failed #{status}" unless status == 200
-        positions = XML::Smart.string(resp[0].value.read)
-        positions.namespaces['p'] = 'http://riddl.org/ns/common-patterns/properties/1.0'
         changed_positions.each { |k,v| positions.find("p:value/p:#{k}").delete_if!{true}} # Update positions 
         changed_positions.each { |k,v| positions.root.add(v[:new], v[:state]) if positions.find("//p:#{v[:new]}").first.nil?}
         status, resp = cpee.resource("properties/values/positions").put [Riddl::Parameter::Simple.new("content", positions.root.dump)] 
@@ -146,7 +149,7 @@ puts "========================== NEWPOSITIONS ========================"
 puts positions.root.dump        
 puts "========================== NEWPOSITIONS ========================"
         puts "Injection-handler: ERROR setting positions (#{status})" unless status == 200 # Needs to be logged into the CPEE as well # }}}
-sleep 10
+#sleep 10
         status, resp = cpee.resource("properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]# Restarting the instance
         $injection_queue.delete(notification['instance'])
 puts "======================== RESTARTING CPEE =============================================================================================================="      
