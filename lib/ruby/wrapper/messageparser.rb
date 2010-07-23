@@ -42,7 +42,7 @@ module Riddl
         m.find("des:*[not(name()='header')]").each do |p|
           return false unless send p.name.to_s, p
         end
-        true
+        @mist.count == @mistp
         #}}}
       end
 
@@ -139,7 +139,7 @@ module Riddl
       def optional(a)
         #{{{
         tistp = @mistp
-        counter, length = traverse_simple(a)
+        counter, length = traverse_simple(a,true)
         if counter == 0 || counter == length
           true
         else  
