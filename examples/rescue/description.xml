@@ -84,6 +84,7 @@
     <parameter name="position" type="string"/>
     <parameter name="instance" type="string"/>
     <parameter name="handler" type="string"/>
+    <parameter name="description" mimetype="text/xml"/>
   </message>
 
   <message name="injection-service-response">
