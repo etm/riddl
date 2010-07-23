@@ -115,6 +115,9 @@
   <message name="subscribe">
     <optional>
       <parameter name="url" type="string"/>
+      <optional>
+        <parameter name="onbehalf" type="string"/>
+      </optional>  
     </optional>  
     <oneOrMore>
       <parameter name="topic" type="string"/>
