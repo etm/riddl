@@ -78,7 +78,7 @@
           xml.each do |e|
             res = XML::Smart.string(e)
             node = list.root.add("show")
-            node.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/Soap/LugnerCityKino")
+            node.add("cinema_uri", "http://localhost:9290/groups/Cinemas/Soap/LugnerCityKino")
             node.add("show_id", res.find("//id").first.text)
             node.add("title", res.find("//filmname").first.text)
             node.add("date", res.find("//date").first.text)

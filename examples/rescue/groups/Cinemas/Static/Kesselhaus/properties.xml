@@ -18,7 +18,7 @@
   <operations xmlns="http://rescue.org/ns/controlflow/0.2">
     <search>
       <endpoints>
-        <service>http://www.kinoimkesselhaus.at/programm/programm-kino</service>
+        <service>http://www.kinoimkesselhaus.at/programm/aktuell</service>
       </endpoints>
       <context-variables>
         <response/>
@@ -47,7 +47,7 @@
             id = id.attributes['href'] if id
             if id != "n.a." and show_title.downcase.include?(title.downcase) and show_date == "#{date.mday() &lt; 10 ? "0#{date.mday()}": date.mday()}.#{date.mon() &lt; 10 ? "0#{date.mon()}": date.mon()}"
               show = list.root.add("show")
-              show.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/Static/Kesselhaus")
+              show.add("cinema_uri", "http://localhost:9290/groups/Cinemas/Static/Kesselhaus")
               show.add("show_id", id)
               show.add("title", show_title)
               show.add("date", "#{date.year()}-#{date.mon() &lt; 10 ? "0#{date.mon()}": date.mon()}-#{date.mday() &lt; 10 ? "0#{date.mday()}": date.mday()}")

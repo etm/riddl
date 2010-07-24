@@ -4,16 +4,16 @@
                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <properties xmlns="http://rescue.org/ns/properties/0.2">
     <adress>
-      <street>Gumpendorferstraße 63</street>
-      <zip>1060</zip>
-      <city>Vienna</city>
+      <street>Beethovenstraße 2a</street>
+      <zip>2500</zip>
+      <city>Baden</city>
       <state>Austria</state>
     </adress>
     <vendor>
-      <name>Apollo - Das Kino Wien</name>
-      <phone>+43-1-5879651</phone>
+      <name>Beethoven Kino</name>
+      <phone>+43-2252-48242</phone>
       <url>http://www.cineplexx.at/content/kinos/kinodetails.aspx</url>
-      <mail>village.apollo@villagekinos.at</mail>
+      <mail>village.wienmitte@villagekinos.at</mail>
     </vendor>
   </properties>
   <operations xmlns="http://rescue.org/ns/controlflow/0.2">
@@ -29,11 +29,11 @@
         <manipulate id="preparations">
           <variable context="datum" local="datum"/>
           <variable input-parameter="date" local="d"/>
-          date = Time.parse(d)
+          date = Time-parse(d)
           datum = "#{date.mday &lt; 10 ? "0#{date.mday}" : date.mday}.#{date.mon &lt; 10 ? "0#{date.mon}" : date.mon}.#{date.year}"
         </manipulate>
         <call id="Programm" endpoint="service" http-method="get">
-          <input name="id" value="1"/>
+          <input name="id" value="11"/>
           <input name="datum" variable="datum"/>
           <input name="uhrzeit" value="&quot;00:00:00&quot;"/>
           <input name="version" value="&quot;&quot;"/>
@@ -66,12 +66,12 @@
           resp.find("//table[descendant::td/a[contains(text(),'#{title}')]]").each do |b| 
             show_title = b.find("child::tr/td[1]/a").first.text.strip
             show_date = Date.parse(d)
-            if show_date.eql?(date)
+            if show_datei.eql?(date)
               b.find("child::tr/td[3]/div/table").each do |show|
                 show_hall = show.find("child::tr/td[1]/h4/span").first.text.strip
                 show.find("child::tr/td[2]/span/a[text()]").each do |s|
                   show = list.root.add("show")
-                  show.add("cinema_uri", "http://localhost:9290/groups/CinemasReal/REST/Apollo")
+                  show.add("cinema_uri", "http://localhost:9290/groups/Cinemas/REST/Beethoven")
                   show.add("show_id", s.attributes['href'].gsub('--amp--','&amp;'))
                   show.add("title", show_title)
                   show.add("date", show_date.to_s)

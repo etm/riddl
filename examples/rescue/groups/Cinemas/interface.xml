@@ -1,216 +1,337 @@
 <?xml version="1.0"?>
 
 <domain-description  xmlns="http://rescue.org/ns/domain/0.2"
-            xmlns:rng="http://relaxng.org/ns/structure/1.0"
-            xmlns:flow="http://rescue.org/ns/controlflow/0.2">
+            xmlns:domain="http://rescue.org/ns/domain/0.2"
+            xmlns:rng="http://relaxng.org/ns/structure/1.0">
   <properties>
 <!-- {{{ -->
-    <rng:element name="longitude">
-      <caption lang="en">Longitude</caption>
-      <caption lang="de">Längengrad</caption>
-      <rng:data type="positiveInteger"/>
+    <rng:element name="address">
+      <domain:caption xml:lang="en">Address</domain:caption>
+      <domain:caption xml:lang="de">Adresse</domain:caption>
+      <rng:element name="street">
+        <domain:caption xml:lang="en">Street</domain:caption>
+        <domain:caption xml:lang="de">Straße</domain:caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="zip">
+        <domain:caption xml:lang="en">ZIP</domain:caption>
+        <domain:caption xml:lang="de">PLZ</domain:caption>
+        <rng:data type="positiveInteger"/>
+      </rng:element>
+      <rng:element name="city">
+        <domain:caption xml:lang="en">City</domain:caption>
+        <domain:caption xml:lang="de">Stadt</domain:caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="state">
+        <domain:caption xml:lang="en">State</domain:caption>
+        <domain:caption xml:lang="de">Land</domain:caption>
+        <rng:data type="string"/>
+      </rng:element>
     </rng:element>
-    <rng:element name="latitude">
-      <caption lang="en">Latitude</caption>
-      <caption lang="de">Breitengrad</caption>
-      <rng:data type="positiveInteger"/>
-    </rng:element>
-    <rng:element name="carpark">
-      <caption lang="en">Carpark</caption>
-      <caption lang="de">Parkplatz</caption>
-      <rng:data type="boolean"/>
+    <rng:element name="vendor">
+      <domain:caption xml:lang="en">Vendor</domain:caption>
+      <domain:caption xml:lang="de">Anbieter</domain:caption>
+      <rng:element name="name">
+        <domain:caption xml:lang="en">Name</domain:caption>
+        <domain:caption xml:lang="de">Name</domain:caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="phone">
+        <domain:caption xml:lang="en">Phone</domain:caption>
+        <domain:caption xml:lang="de">Telephon</domain:caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="url">
+        <domain:caption xml:lang="en">URL</domain:caption>
+        <domain:caption xml:lang="de">URL</domain:caption>
+        <rng:data type="string"/>
+      </rng:element>
+      <rng:element name="mail">
+        <domain:caption xml:lang="en">@mail</domain:caption>
+        <domain:caption xml:lang="de">@mail</domain:caption>
+        <rng:data type="string"/>
+      </rng:element>
     </rng:element>
 <!-- }}} -->
   </properties>
-  <messages>
-    <message name="search_parameters">
-<!-- {{{ -->     
-      <rng:element name="title">
-        <caption lang="en">Title</caption>
-        <caption lang="de">Titel</caption>
-        <rng:data type="string"/>
-      </rng:element>
-      <rng:element name="date">
-        <caption lang="en">Date</caption>
-        <caption lang="de">Datum</caption>
-        <rng:data type="date"/>
-      </rng:element>
-<!-- }}} -->
-    </message>
-    <message name="list_shows">
-<!-- {{{ -->     
-      <rng:element name="list">
-        <rng:zeroOrMore>
-          <rng:element name="show">
-            <rng:element name="show_id">
-              <caption lang="en">ShowID</caption>
-              <caption lang="de">VorstellungsID</caption>
-              <rng:data type="string"/>
-            </rng:element>
-            <rng:element name="title">
-              <caption lang="en">Movietitle</caption>
-              <caption lang="de">Filmtitel</caption>
-              <rng:data type="string"/>
-            </rng:element>
-            <rng:element name="time">
-              <caption lang="en">Starting time</caption>
-              <caption lang="de">Beginzeit</caption>
-              <rng:data type="time"/>
-            </rng:element>
-          </rng:element>
-        </rng:zeroOrMore>
-      </rng:element>
-<!-- }}} -->
-    </message>
-    <message name="selected_show">
-<!-- {{{ -->    
-      <rng:element name="movie_title">
-        <caption lang="en">Movietitle</caption>
-        <caption lang="de">Filmtitel</caption>
-        <rng:data type="string"/>
-      </rng:element>
-      <rng:element name="show_id">
-        <caption lang="en">ShowID</caption>
-        <caption lang="de">VorstellungsID</caption>
-        <rng:data type="string"/>
-      </rng:element>
-      <rng:element name="starting_time">
-        <caption lang="en">Starting time</caption>
-        <caption lang="de">Beginzeit</caption>
-        <rng:data type="time"/>
-      </rng:element>
-      <rng:element name="hall">
-        <caption lang="en">Hall</caption>
-        <caption lang="de">Saal</caption>
-        <rng:data type="positiveInteger"/>
-      </rng:element>
-<!-- }}} --> 
-    </message>
-    <message name="book_tickets">
-<!-- {{{ -->    
-      <rng:element name="show_id">
-        <caption lang="en">ShowID</caption>
-        <caption lang="de">VorstellungsID</caption>
-        <rng:data type="string"/>
-      </rng:element>
-<!-- }}} --> 
-    </message>
-    <message name="reservation_result">
-<!-- {{{ -->     
-      <rng:element name="reservation_id">
-        <caption lang="en">Reservation ID</caption>
-        <caption lang="de">Reservierungsnummer</caption>
-        <rng:data type="string"/>
-      </rng:element>
-<!-- }}} -->
-    </message>
-    <message name="popcorn_order">
-<!-- {{{ -->      
-      <rng:element name="reservation_id">
-        <caption lang="en">Reservation ID</caption>
-        <caption lang="de">Reservierungsnummer</caption>
-        <rng:data type="string"/>
-      </rng:element>
-      <rng:element name="quantity">
-        <caption lang="en">Quantity</caption>
-        <caption lang="de">Packungen</caption>
-        <rng:data type="positiveInteger"/>
-      </rng:element>
-<!-- }}} -->
-    </message>
-    <message name="popcorn_result">
-<!-- {{{ -->      
-      <rng:element name="price">
-        <caption lang="en">Preis</caption>
-        <caption lang="de">Price</caption>
-        <rng:data type="float"/>
-      </rng:element>
-      <rng:element name="order_number">
-        <caption lang="en">Bestellnummer</caption>
-        <caption lang="de">Order number</caption>
-        <rng:data type="float"/>
-      </rng:element>
-<!-- }}} -->
-    </message>
-    <message name="undo_popcorn">
-<!-- {{{ -->      
-      <rng:element name="order_number">
-        <caption lang="en">Bestellnummer</caption>
-        <caption lang="de">Order number</caption>
-        <rng:data type="string"/>
-      </rng:element>
-      <rng:element name="quantity">
-        <caption lang="en">Quantity</caption>
-        <caption lang="de">Packungen</caption>
-        <rng:data type="boolean"/>
-      </rng:element>
-<!-- }}} --> 
-    </message>
-  </messages>
   <operations>
     <operation name="search" short="search for avaliable shows" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ -->   
       <execute>
-        <flow:call id="perform_search" endpoint="resource_path" service-operation="search">
-          <flow:input message="search_parameters"/>
-          <flow:output message="list_shows"/>
-        </flow:call>
+        <call id="perform_search" endpoint="resource_path" service-operation="search">
+<!-- {{{ -->   
+          <input name="title" message-parameter="title">
+<!-- {{{ -->     
+            <rng:element name="title">
+              <domain:caption xml:lang="en">Movietitle</domain:caption>
+              <domain:caption xml:lang="de">Filmtitel</domain:caption>
+              <rng:data type="string"/>
+            </rng:element>
+<!-- }}} --> 
+          </input>
+          <input name="date" message-parameter="date">
+<!-- {{{ -->     
+            <rng:element name="date">
+              <domain:caption xml:lang="en">Date</domain:caption>
+              <domain:caption xml:lang="de">Datum</domain:caption>
+              <rng:data type="date"/>
+            </rng:element>
+<!-- }}} --> 
+          </input>
+          <output name="list" message-parameter="list_shows">
+<!-- {{{ -->     
+            <rng:element name="list_of_shows">
+              <rng:zeroOrMore>
+                <rng:element name="show">
+                  <rng:element name="cinema_uri">
+                    <rng:data type="string"/>
+                  </rng:element>
+                  <rng:element name="show_id">
+                    <rng:data type="string"/>
+                  </rng:element>
+                  <rng:element name="title">
+                    <rng:data type="string"/>
+                  </rng:element>
+                  <rng:element name="date">
+                    <rng:data type="date"/>
+                  </rng:element>
+                  <rng:element name="time">
+                    <rng:data type="time"/>
+                  </rng:element>
+                  <rng:element name="hall">
+                    <rng:data type="string"/>
+                  </rng:element>
+                </rng:element>
+              </rng:zeroOrMore>
+            </rng:element>
+<!-- }}} --> 
+          </output>
+<!-- }}} -->  
+        </call>
       </execute>
 <!-- }}} -->  
     </operation>
     <operation name="search_and_book" short="search for shows, select show and book tickets" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
       <context-variables>
-        <empty/>
-        <bla>BLU</bla>
+        <show_id/>
+        <list/>
+        <res/>
+        <list_merge/>
+        <number_of_shows/>
+        <endpoint/>
       </context-variables>
       <endpoints>
-        <an_other_one>http://whats-o-ever.org</an_other_one>
+        <selected_cinema/>
       </endpoints>
       <execute>
-        <flow:call id="call_find" endpoint="resource_scope" service-operation="search" state-controlflow="execute"/>
-        <flow:call id="perform_select" endpoint="selector_service" http-method="get" http-status="200" group-by="//show">
-          <flow:resource-id xpath="//show/cinema_uri" endpoint="selected_cinema"/>
-          <flow:input message="list_shows"/>
-          <flow:output message="selected_show"/>
-        </flow:call>
-        <flow:call id="call_book" endpoint="selected_cinema" service-operation="book" state-controlflow="execute"/>
+        <call id="call_find" endpoint="resource_path" service-operation="search">
+<!-- {{{ --> 
+          <input name="title" message-parameter="title">
+<!-- {{{ --> 
+            <rng:element name="title">
+              <domain:caption xml:lang="en">Movietitle</domain:caption>
+              <domain:caption xml:lang="de">Filmtitel</domain:caption>
+              <rng:data type="string"/>
+            </rng:element>
+<!-- }}} -->  
+          </input>
+          <input name="date" message-parameter="date">
+<!-- {{{ --> 
+            <rng:element name="date">
+              <domain:caption xml:lang="en">Date</domain:caption>
+              <domain:caption xml:lang="de">Datum</domain:caption>
+              <rng:data type="date"/>
+            </rng:element>
+<!-- }}} -->   
+          </input>
+          <output name="list" variable="list"/>
+<!-- }}} -->   
+        </call>
+        <manipulate id="merge_result">
+<!-- {{{ --> 
+          <variable context="list" local="list"/>
+          <variable context="list_merge" local="m_list"/>
+          <variable context="number_of_shows" local="nos"/>
+          <variable input-parameter="title" local="title"/>
+          <variable input-parameter="date" local="date"/>
+          xml = XML::Smart.string("&lt;list_of_shows/&gt;")
+          if list.class == Array
+            list.each do |v|
+              l = XML::Smart.string(v)
+              xml.root.add(l.find("//show"))
+            end
+          elsif list.class == String
+            l = XML::Smart.string(list)
+            xml.root.add(l.find("//show"))
+          else
+            raise "Unexpected class of return-value - class: #{list.class}"
+          end
+          m_list = xml.root.dump
+          nos = xml.root.children.length
+<!-- }}} -->  
+        </manipulate>
+        <choose>
+          <alternative>
+            <condition test="number_of_shows" comparator="&gt;" value="0"/>
+            <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post" info="true" default-tpl-name="iPhone" default-tpl-lang="en">
+              <!-- {{{ --> 
+              <templates>
+                <xslt name="iPhone" xml:lang="de">
+                </xslt>
+                <xslt name="iPhone" xml:lang="en">
+                  <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                    <xsl:output method="html"/>
+                    <xsl:template match="/">
+                      <html>
+                        <head>
+                          <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"/>
+                          <script type="text/javascript">
+                            function send_selection(data, callback) {
+                              $.ajax({
+                                url: callback,
+                                type: 'put',
+                                dataType: 'text',
+                                data: data,
+                                success: function(res){
+                                  window.setTimeout("window.location.replace('<xsl:value-of select="$worklist"/>');", 500);
+                                }
+                              });
+                            }
+                          </script>                        
+                        </head>
+                        <body>
+                          <table border="1">
+                            <xsl:apply-templates select="//show"/>
+                          </table>
+                        </body>
+                      </html>
+                    </xsl:template>
+                    <xsl:template match="//show">
+                      <tr><td><table>
+                      <tr><td>Cinema:</td><td><xsl:value-of select="cinema_uri"/></td></tr>
+                      <tr><td>Movietitle:</td><td><xsl:value-of select="title"/></td></tr>
+                      <tr><td>Starting time:</td><td><xsl:value-of select="time"/></td></tr>
+                      <tr><td>Date:</td><td><xsl:value-of select="date"/></td></tr>
+                      <tr><td>Hall:</td><td><xsl:value-of select="hall"/></td></tr>
+                      <tr><td colspan="2"><xsl:element name="input">
+                        <xsl:attribute name="type">button</xsl:attribute>
+                        <xsl:attribute name="value">Select</xsl:attribute>
+                        <xsl:attribute name="onClick">JavaScript:send_selection({
+                          'show_id' : '<xsl:value-of select="show_id"/>',
+                          'target' : '<xsl:value-of select="cinema_uri"/>',
+                          'movie_title' : '<xsl:value-of select="title"/>',
+                          'date' : '<xsl:value-of select="date"/>',
+                          'starting_time' : '<xsl:value-of select="time"/>',
+                          'hall' : '<xsl:value-of select="hall"/>'
+                        },'<xsl:value-of select="$instance-uri"/>/callbacks/<xsl:value-of select="$callback-id"/>');
+                        </xsl:attribute>
+                      </xsl:element></td></tr>
+                      </table></td></tr>
+                    </xsl:template>
+                  </xsl:stylesheet>
+                </xslt>
+              </templates>
+              <input name="data" variable="list_merge"/>
+              <output name="show_id" variable="show_id"/>
+              <output name="target" variable="endpoint"/>
+              <output message-parameter="status" type="status"/>
+              <output name="movie_title" message-parameter="movie_title">
+                <!-- {{{ --> 
+                <rng:element name="movie_title">
+                  <rng:data type="string"/>
+                </rng:element>
+                <!-- }}} -->  
+              </output>
+              <output name="date" message-parameter="selected_date">
+              <!-- {{{ --> 
+                <rng:element name="selected_date">
+                  <rng:data type="date"/>
+                </rng:element>
+              <!-- }}} -->   
+              </output>
+              <output name="starting_time" message-parameter="starting_time">
+              <!-- {{{ --> 
+                <rng:element name="starting_time">
+                  <rng:data type="time"/>
+                </rng:element>
+              <!-- }}} -->  
+              </output>
+              <output name="hall" message-parameter="hall">
+              <!-- {{{ --> 
+                <rng:element name="hall">
+                  <rng:data type="positiveInteger"/>
+                </rng:element>
+              <!-- }}} -->  
+              </output>
+            <!-- }}} -->  
+            </call>
+            <manipulate id="set_selected_endpoint">
+              <variable context="endpoint" local="ep"/>
+              <variable endpoint="selected_cinema" local="selected"/>
+              selected = ep
+            </manipulate>
+            <call id="call_book" endpoint="selected_cinema" service-operation="book">
+            <!-- {{{ -->   
+              <input name="show_id" variable="show_id"/>
+              <output name="reservation_number" message-parameter="reservation_id">
+              <!-- {{{ -->      
+                <rng:element name="reservation_id">
+                  <rng:data type="string"/>
+                </rng:element>
+              <!-- }}} --> 
+              </output>
+            <!-- }}} --> 
+            </call>
+            <manipulate id="set_status_success">
+              <variable output-parameter="status" local="status">
+                <rng:element name="status">
+                  <rng:data type="positiveInteger"/>
+                </rng:element>
+              </variable>
+              status = 200
+            </manipulate>
+          </alternative>
+          <otherwise>
+            <manipulate id="set_status_failed">
+              <variable output-parameter="status" local="status">
+                <rng:element name="status">
+                  <rng:data type="positiveInteger"/>
+                </rng:element>
+              </variable>
+              status = 404
+            </manipulate>
+          </otherwise>
+        </choose>
       </execute>
-      <compensate/>
-      <undo/>
-      <redo/>
-      <suspend/>
-      <abort/>
 <!-- }}} --> 
     </operation>
     <operation name="book" short="book tickets for a given show and cinema" xmlns="http://rescue.org/ns/controlflow/0.2">
-<!-- {{{ -->    
+<!-- {{{ -->     
       <execute>
-        <flow:call id="perform_book" endpoint="resource_path" service-operation="book" state-controlflow="execute">
-          <flow:input message="book_tickets"/>
-          <flow:output message="reservation_result"/>
-        </flow:call>
+        <call id="perform_book" endpoint="resource_path" service-operation="book" state-controlflow="execute">
+<!-- {{{ -->     
+          <input name="show_id" message-parameter="show_id">
+<!-- {{{ -->     
+            <rng:element name="show_id">
+              <domain:caption xml:lang="en">ShowID</domain:caption>
+              <domain:caption xml:lang="de">VorstellungsID</domain:caption>
+              <rng:data type="string"/>
+            </rng:element>
+<!-- }}} --> 
+          </input>
+          <output name="reservation_id" message-parameter="reservation_number">
+<!-- {{{ -->     
+            <rng:element name="reservation_id">
+              <rng:data type="string"/>
+            </rng:element>
+<!-- }}} --> 
+          </output>
+<!-- }}} -->       
+        </call>
       </execute>
 <!-- }}} -->       
-    </operation>
-    <operation name="order_popcorn" short="get popcorn to your seat" xmlns="http://rescue.org/ns/controlflow/0.2">
-<!-- {{{ -->    
-      <execute>
-        <flow:call id="perform_order_popcorn" endpoint="resource_scope" service-operation="order_popcorn" state-controlflow="execute">
-          <flow:input message="popcorn_order"/>
-          <flow:output message="popcorn_result"/>
-        </flow:call>
-      </execute>
-      <compensate/>
-      <undo>
-        <flow:call id="perform_order_popcorn" endpoint="resource_scope" service-operation="order_popcorn" state-controlflow="undo">
-          <flow:input message="popcorn_undo"/>
-        </flow:call>
-      </undo>
-      <redo/>
-      <suspend/>
-      <abort/>
-<!-- }}} -->      
     </operation>
   </operations>
 </domain-description>
