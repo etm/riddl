@@ -150,7 +150,7 @@ puts positions.root.dump
 puts "========================== NEWPOSITIONS ========================"
         puts "Injection-handler: ERROR setting positions (#{status})" unless status == 200 # Needs to be logged into the CPEE as well # }}}
 #sleep 10
-        status, resp = cpee.resource("properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]# Restarting the instance
+ #       status, resp = cpee.resource("properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]# Restarting the instance
         $injection_queue.delete(notification['instance'])
 puts "======================== RESTARTING CPEE =============================================================================================================="      
       end

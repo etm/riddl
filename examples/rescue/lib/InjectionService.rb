@@ -12,6 +12,8 @@ class InjectionService < Riddl::Implementation
 
   def analyze(position, instance, handler_uri, description=nil, positions=nil)# {{{ 
 puts "#### Analyzing: #{position}"
+puts "#### Positions (0):"
+pp positions
     wf = nil; parallel = nil; create = nil; remove = nil; injected = nil; # because of variable scoping
     positions = Hash.new if positions.nil?
     cpee_client = Riddl::Client.new(instance)
@@ -27,6 +29,7 @@ puts "#### Analyzing: #{position}"
     parent_injected = call_node.find("ancestor::cpee:group[@type='injection']").last
     class_level = parent_injected.nil? || parent_injected.attributes['serviceoperation'] != call_node.find('string(descendant::cpee:serviceoperation)') # Check if it is an class-level or instance-level injection
     first_ancestor_loop = call_node.find("ancestor::cpee:loop").first # Check if injections is within a loop, and not already injected via a loop
+puts "#### Is in loop? #{!first_ancestor_loop.nil?}"    
     injected = call_node.add("group", {'type'=>'injection', 'source'=>call_node.attributes['id'], 'serviceoperation'=>call_node.find('string(descendant::cpee:serviceoperation)')}) # Create injected-block {{{
     injected.attributes['result'] = "context.result_#{call_node.attributes['id']}" if class_level
     parent_injected = call_node.find("ancestor::cpee:group[@type='injection']").last
@@ -57,28 +60,32 @@ puts "#### Analyzing: #{position}"
         positions[call_node.attributes['id']] = {:pos=>call_node.attributes['id'], :state=>'after'}
       end
     end # }}}
-    unless first_ancestor_loop.nil? # {{{
+    unless first_ancestor_loop.nil? # {{{ 
       first_ancestor_loop.find('./@post_test').delete_if! {first_ancestor_loop.attributes['pre_test'] = first_ancestor_loop.attributes['post_test']; true}
       # Copy loop-block to new block {{{
-      preceding_loops = call_node.find("count(ancestor::cpee:loop[last()]/preceding-sibling::cpee:group[@type='loop' and @source='#{call_node.attributes['id']}'])").to_i
+      #preceding_loops = call_node.find("count(ancestor::cpee:loop[last()]/preceding-sibling::cpee:group[@type='loop' and @source='#{call_node.attributes['id']}'])").to_i
+      preceding_loops = call_node.find("count(ancestor::cpee:loop[last()]/preceding-sibling::cpee:group[@type='loop'])").to_i # Becaus we can not differ between two sequential loops ther would be problems with the counting of the iterations as lon ther is no UID for loops
+puts "#### Found #{preceding_loops} preceding loops"
       loop_copy = call_node.find('/*').first.add('group', {'type' => 'loop', 'source' => call_node.attributes['id'], 'cycle' => preceding_loops})
       loop_copy.add(first_ancestor_loop.children, XML::Smart::Dom::Element::COPY) # }}}
       # Set new position and check if other positions are within the block {{{
-      if positions.length < 1 # means that a position object was given -> in a loop-injection recursion
+      if positions.length < 1 # means that a position object was not given -> in a loop-injection recursion
+puts "#### Positions (1):"
         status, resp = Riddl::Client.new(handler_uri).get [Riddl::Parameter::Simple.new('instance', instance)]
         unless status == 200
           puts "ERROR: Receiving queue status: #{status}"
           return []
         end
         XML::Smart.string(resp[0].value.read).find('/injection-queue/*[(name() = "cpee-positions") or (name() = "queued")]/*').each do |cpee_pos|
-           p = loop_copy.find("descendant::cpee:*[@id='#{cpee_pos.name.name}']").first
-           positions[cpee_pos.name.name] = {:pos=>"#{cpee_pos.name.name}_#{preceding_loops}", :state=>'after'} unless p.nil?
+           positions[cpee_pos.name.name] = {:pos=>"#{cpee_pos.name.name}_#{preceding_loops}", :state=>'after'} unless loop_copy.find("descendant::cpee:*[@id='#{cpee_pos.name.name}']").first.nil? 
         end
       else
+puts "#### Positions (2):"
         positions.each do |old, new|
-          p = loop_copy.find("descendant::cpee:*[@id='#{new[:pos]}']").first
-          positions[old] = {:pos=>"#{new[:pos]}_#{preceding_loops}", :state=>'after'} unless p.nil?
+          positions[old] = {:pos=>"#{new[:pos]}_#{preceding_loops}", :state=>'after'} unless loop_copy.find("descendant::cpee:*[@id='#{new[:pos]}']").first.nil?
         end
+puts "#### Positions (3):"
+pp positions
       end # }}}
       call_node = loop_copy.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']").first # Find new call-block
       loop_copy.find('descendant::cpee:*[@id]').each {|node| node.attributes['id'] =  "#{node.attributes['id']}_#{preceding_loops}"} # Change ID's {{{
@@ -86,6 +93,7 @@ puts "#### Analyzing: #{position}"
       injected.attributes['properties'] = "context.result_#{call_node.attributes['id']}['properties']" if parent_injected.nil? # }}}
       unless call_node.find('ancestor::cpee:loop').first.nil?
         first_ancestor_loop.add_before(loop_copy)
+puts "#### Call analyze for #{call_node.attributes['id']}"
         return  analyze(call_node.attributes['id'], instance, handler_uri, description, positions)
       end
       # Performe injection # {{{
@@ -137,12 +145,13 @@ pp positions
       create << (node.attributes.include?('class') ? node.attributes['class'] : "#{node.text.empty? ? "''" : node.text}") + "\n"
       remove << "#{blanks_remove}context.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
     end # }}}
-    create  = injected.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}", "generated"=>"true"}, create)
+    create  = injected.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}", "generated"=>"true"}, create) 
     remove =  injected.add("manipulate", {"id"=>"remove_objects_of_#{call_node.attributes['id']}", "generated"=>"true"}, remove)
     [create, remove]
   end # }}}
 
   def inject_class_level(wf, call_node, injected) # {{{
+puts "### Inject-clall-level: #{call_node.attributes['id']}"    
     # Change attributes {{{
     wf.find("//@id").each do |a| 
       a.element.attributes['oid'] = a.value 
@@ -227,6 +236,7 @@ pp positions
   end #}}}
 
   def inject_instance_level(wf, call_node, resource_path, branch, parent_injected)# {{{
+puts "### Inject-instance-level: #{call_node.attributes['id']}"    
     index = resource_path.tr('/:','__')
     op = parent_injected.attributes['serviceoperation'].tr('"', '')
     wf.find('//flow:call[child::flow:templates]').each        {|c| c.attributes['templates-uri'] = "#{rescue_uri}/operations/#{service_operation}/templates/#{c.attributes['id']}" }
