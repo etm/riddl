@@ -156,13 +156,6 @@
           <variable context="number_of_shows" local="nos"/>
           <variable input-parameter="title" local="title"/>
           <variable input-parameter="date" local="date"/>
-          <variable input-parameter="time" local="time">
-            <rng:element name="time">
-              <domain:caption xml:lang="en">Time</domain:caption>
-              <domain:caption xml:lang="de">Zeit</domain:caption>
-              <rng:data type="time"/>
-            </rng:element>
-          </variable>
           xml = XML::Smart.string("&lt;list_of_shows/&gt;")
           if list.class == Array
             list.each do |v|

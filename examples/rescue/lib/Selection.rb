@@ -47,9 +47,6 @@ class PostSelectByUser < Riddl::Implementation # {{{
     if @p.value('vote') == "syncing_after" && @p.value('topic') == "running"
       notification = ActiveSupport::JSON::decode(@p.value('notification')) if @p.value('notification')
       if $selection_notification_keys.include?(@p.value('key'))
-p "---------------------> Select: syncing_after"        
-p notification
-p $selection_data
         $selection_notification_keys.delete(@p.value('key'))
         $selection_data[notification['instance']].delete(notification['activity'].to_s)
         status, resp = Riddl::Client.new("#{notification['instance']}/notifications/subscriptions/#{@p.value('key')}").delete [
@@ -77,9 +74,6 @@ p $selection_data
       $selection_data[instance][activity]['templates-uri'] = @p.value('templates-uri') if @p.value('templates-uri') 
       $selection_data[instance][activity]['template-name'] = @p.value('template-name') if @p.value('template-name') 
       $selection_data[instance][activity]['template-lang'] = @p.value('template-lang') if @p.value('template-lang') 
-p "---------------------------> Select: other"      
-p $selection_notification_keys
-p $selection_data
       @headers << Riddl::Header.new("CPEE-Callback",'true')
       @status = 200 
     end

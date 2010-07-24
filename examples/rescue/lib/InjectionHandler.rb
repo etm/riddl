@@ -39,7 +39,6 @@ class InjectionHandler < Riddl::Implementation
       # Subscribe Injection-Handler to syncing_after 
       $injection_queue[@p.value('instance')] ||= Hash.new
       $injection_queue[@p.value('instance')][:mutex] ||= Mutex.new
-puts "@@@@ Register: #{@p.value('activity')}"      
       @status = 500
       $injection_queue[@p.value('instance')][:mutex].synchronize do
         if !$injection_queue.has_key?(@p.value('instance')) || ($injection_queue[@p.value('instance')][:sync] != :active && $injection_queue[@p.value('instance')][:sync] != :start)
@@ -59,7 +58,6 @@ puts "@@@@ Register: #{@p.value('activity')}"
       end  
     # }}}
     elsif @p.value('vote') == "syncing_after" && @p.value('topic') == "running"# received notification for sync_after {{{
-puts "**** Sync-after: #{notification['activity']}"      
       $injection_queue[notification['instance']][:mutex].synchronize do
         if $injection_queue[notification['instance']][:activities].include?(notification['activity'])
           if $injection_queue[notification['instance']][:sync] == :start 
@@ -70,29 +68,20 @@ puts "**** Sync-after: #{notification['activity']}"
               Riddl::Parameter::Simple.new("events", "change")
             ]
             puts "Injection-handler: ERROR subscribing state/changed (#{status})" unless status == 200 # Needs to be logged into the CPEE as well
-puts "**** Voted #{notification['activity']}: flase (1)"            
             return Riddl::Parameter::Simple.new('continue','false')
           end  
           if $injection_queue[notification['instance']][:sync] == :active
-puts "**** Voted #{notification['activity']}: flase (2)"            
             return Riddl::Parameter::Simple.new('continue','false')
           end 
         end
-puts "**** Voted #{notification['activity']}: true"            
         return Riddl::Parameter::Simple.new('continue','true')
       end
 # }}}  
     elsif @p.value('event') == "change" && @p.value('topic') == "properties/state"# received notification for instance stopped{{{
       unless notification['state'] != 'stopped'
-puts "======================== STOPPING CPEE =============================================================================================================="      
-puts "---- Pending injections:" 
-pp $injection_queue[notification['instance']]
         status, resp = cpee.resource("properties/values/positions").get # Get positions {{{
         puts "ERROR: Receiving positions failed #{status}" unless status == 200
         positions = XML::Smart.string(resp[0].value.read)
-puts "==================== actual positions ============================="
-puts positions
-puts "==================== actual positions ============================="
         positions.namespaces['p'] = 'http://riddl.org/ns/common-patterns/properties/1.0' # }}}
         status, resp = cpee.resource("notifications/subscriptions/#{$injection_queue[notification['instance']][:key]}").delete [
           Riddl::Parameter::Simple.new("message-uid","ralph"),
@@ -145,14 +134,10 @@ puts "==================== actual positions ============================="
         changed_positions.each { |k,v| positions.find("p:value/p:#{k}").delete_if!{true}} # Update positions 
         changed_positions.each { |k,v| positions.root.add(v[:new], v[:state]) if positions.find("//p:#{v[:new]}").first.nil?}
         status, resp = cpee.resource("properties/values/positions").put [Riddl::Parameter::Simple.new("content", positions.root.dump)] 
-puts "========================== NEWPOSITIONS ========================"
-puts positions.root.dump        
-puts "========================== NEWPOSITIONS ========================"
+        puts "ERRO: injecting positions failed (#{status})" unless status == 200
         puts "Injection-handler: ERROR setting positions (#{status})" unless status == 200 # Needs to be logged into the CPEE as well # }}}
-#sleep 10
- #       status, resp = cpee.resource("properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]# Restarting the instance
+        status, resp = cpee.resource("properties/values/state").put [Riddl::Parameter::Simple.new("value", "running")]# Restarting the instance
         $injection_queue.delete(notification['instance'])
-puts "======================== RESTARTING CPEE =============================================================================================================="      
       end
       nil
 # }}} 
