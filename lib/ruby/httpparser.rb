@@ -7,8 +7,8 @@ module Riddl
       def value(index)
         tmp = find_all{|e| e.name == index}
         case tmp.length
-          when 0: nil
-          when 1: tmp[0].value
+          when 0; nil
+          when 1; tmp[0].value
           else tmp
         end if tmp
       end
