@@ -83,7 +83,13 @@ module Riddl
               END
               Dir[data + "/*"].each do |d|
                 if File.directory?(d)
-                  ret.root.add('subscription', :id => File.basename(d))
+                  XML::Smart::open(d + "/subscription.xml") do |doc|
+                    if doc.root.attributes['url']
+                      ret.root.add('subscription', :id => File.basename(d), :url => doc.root.attributes['url'])
+                    else  
+                      ret.root.add('subscription', :id => File.basename(d))
+                    end  
+                  end  
                 end  
               end
               ret.to_s

@@ -56,6 +56,11 @@
             <attribute name="id">
               <data type="string"/>
             </attribute>
+            <optional>
+              <attribute name="url">
+                <data type="string"/>
+              </attribute>
+            </optional>  
           </element>
         </define>
 
