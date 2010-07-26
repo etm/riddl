@@ -8,7 +8,7 @@ module Riddl
         @headp = {}
         headers.each do |k,v|
           if v.nil?
-            @headp[k.name.upcase.gsub(/\-/,'_')] = v
+            @headp[k.name.upcase.gsub(/\-/,'_')] = k.value
           else  
             @headp[k.upcase.gsub(/\-/,'_')] = v
           end  

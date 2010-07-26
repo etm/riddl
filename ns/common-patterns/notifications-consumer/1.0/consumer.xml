@@ -85,6 +85,9 @@
   </message>
 
   <message name="acknowledgment">
+    <parameter name="continue" type="string">
+      <param name="pattern">true|false|wait</param>
+    </parameter>  
     <parameter name="message-uid" type="string"/>
     <parameter name="fingerprint-with-consumer-secret" type="string"/>
   </message>
