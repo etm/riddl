@@ -85,9 +85,10 @@
   </message>
 
   <message name="acknowledgment">
-    <parameter name="continue" type="string">
-      <param name="pattern">true|false|wait</param>
-    </parameter>  
+    <header name="CPEE-Callback" type="boolean"/>
+    <optional>
+      <parameter name="continue" type="boolean"/>
+    </optional>
     <parameter name="message-uid" type="string"/>
     <parameter name="fingerprint-with-consumer-secret" type="string"/>
   </message>
