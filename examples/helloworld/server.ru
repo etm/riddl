@@ -5,8 +5,8 @@ require 'pp'
 use Rack::ShowStatus
 
 class Bar < Riddl::Implementation
-  def content  
-    "hello world"
+  def response 
+    Riddl::Parameter::Simple.new("hellotest","hello world")
   end  
 end
 
