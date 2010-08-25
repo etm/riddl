@@ -482,7 +482,8 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           res = response = nil
 
           Net::HTTP.start(url.host, url.port) do |http|
-            http.request(req) do |res|
+            http.request(req) do |resp|
+              res = resp
               bs = Parameter::Tempfile.new("RiddlBody")
               res.read_body(bs)
               bs.rewind
