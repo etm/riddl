@@ -93,6 +93,7 @@ class InjectionHandler < Riddl::Implementation
           Riddl::Parameter::Simple.new("fingerprint-with-producer-secret",Digest::MD5.hexdigest("ralph42"))
         ]
         puts "Injection-handler: ERROR deleting subscription (#{status})" unless status == 200 # Needs to be logged into the CPEE as well 
+# This shoud be an own thread to avoid long pending of the npotificatin request
         changed_positions = Hash.new
         status, resp = cpee.resource('/properties/values/description').get # {{{ Get description
         raise "ERROR: receiving description faild" unless status == 200
@@ -100,7 +101,7 @@ class InjectionHandler < Riddl::Implementation
         queue = []
         $injection_queue[notification['instance']][:activities].each {|v| queue << v.dup}
         queue.each do |o_position|
-        cp = (changed_positions.include?(o_position) ? changed_positions[o_position][:new] : o_position)
+          cp = (changed_positions.include?(o_position) ? changed_positions[o_position][:new] : o_position)
           status, resp = Riddl::Client.new(injection_service_uri).post [
             Riddl::Parameter::Simple.new('position', cp),
             Riddl::Parameter::Simple.new('instance', notification['instance']),
