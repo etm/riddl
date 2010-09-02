@@ -89,11 +89,6 @@ run(
                 run GetInterface if method :get => 'output'
               end
             end
-            on resource 'messages' do
-              on resource do
-                run GetMessage if method :get => '*'
-              end
-            end
   
             on resource do # Service-level
               run GetServiceDescription if method :get => '*'
@@ -111,11 +106,6 @@ run(
                       run GetTemplates if method :get => '*'
                     end
                   end
-                end
-              end
-              on resource 'messages' do
-                on resource do
-                  run GetMessage if method :get => '*'
                 end
               end
             end      

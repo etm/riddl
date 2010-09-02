@@ -251,7 +251,6 @@ class GenerateFeed < Riddl::Implementation# {{{
       groups << File::basename(f) if File::directory? f
     end
     Riddl::Parameter::Complex.new("atom-feed","text/xml") do
-      text_! "<?xml-stylesheet href=\"http://localhost:9290/xsl/instances.xsl\" type=\"text/xsl\"?>"
       feed_ :xmlns => 'http://www.w3.org/2005/Atom' do
         title_ "Resourcelist at #{url}#{@r.join("/")}"
         updated_ File.mtime("#{@r.join("/")}").xmlschema
