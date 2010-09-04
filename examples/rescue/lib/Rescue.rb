@@ -13,7 +13,7 @@ class GetOperations < Riddl::Implementation# {{{
     else 
       xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
       ret = XML::Smart.string("<operations xmlns=\"http://rescue.org/ns/domain/0.2\"/>")
-      xml.find("/domain:domain-description/domain:operations/*", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each {|o| ret.root.add("operation", {"name" => o.attributes["name"]})}
+      xml.find("/domain:domain-description/domain:operations/*", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each {|o| ret.root.add("operation", {"name" => o.attributes["name"], "short" => o.attributes["short"]})}
       Riddl::Parameter::Complex.new("xml","text/xml", ret.to_s)
     end
   end
