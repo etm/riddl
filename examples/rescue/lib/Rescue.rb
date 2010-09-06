@@ -278,14 +278,17 @@ class GenerateFeed < Riddl::Implementation# {{{
     end
     xml = XML::Smart.open("groups/#{group_name}/interface.xml")
     schema_ do
-      operations = xml.find("/interface/operations/*")
+      operations = xml.find("//domain:operations/*", "domain"=>"http://rescue.org/ns/domain/0.2")
+      puts operations.length
       operations.each do |o|
+      puts o.dump
         operation_ :name=>"#{o.name.name}" do
           message_ :type=>"input", :href=>"#{url}/groups/#{group_name}/operations/#{o.name.name}?input"
           message_ :type=>"output", :href=>"#{url}/groups/#{group_name}/operations/#{o.name.name}?output"
         end
       end
       properties_ :href=>"#{url}/groups/#{group_name}?properties"
+      service_ :href=>"#{url}/groups/#{group_name}?service-schema"
     end
   end
 end # }}}
