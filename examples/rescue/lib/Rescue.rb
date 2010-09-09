@@ -225,8 +225,9 @@ class RNGSchema# {{{
     @__schema.root.dump
   end
 end
+# }}}
 
-class DeleteResource < Riddl::Implementation
+class DeleteResource < Riddl::Implementation # {{{
   def response
     begin
       FileUtils.rm_r @r.join("/")
