@@ -56,7 +56,7 @@
 <!-- }}} -->
   </properties>
   <operations>
-    <operation name="search" short="search for avaliable shows" xmlns="http://rescue.org/ns/controlflow/0.2">
+    <operation name="search" short="search for available shows" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ -->   
       <execute>
         <call id="perform_search" endpoint="resource_path" service-operation="search">
@@ -82,24 +82,40 @@
           <output name="list" message-parameter="list_shows">
 <!-- {{{ -->     
             <rng:element name="list_of_shows">
+              <domain:caption xml:lang="en">List of Shows</domain:caption>
+              <domain:caption xml:lang="de">Liste der Vorstellungen</domain:caption>
               <rng:zeroOrMore>
                 <rng:element name="show">
+                  <domain:caption xml:lang="en">Show</domain:caption>
+                  <domain:caption xml:lang="de">Vorstellung</domain:caption>
                   <rng:element name="cinema_uri">
+                    <domain:caption xml:lang="en">Cinema URI</domain:caption>
+                    <domain:caption xml:lang="de">Kino URI</domain:caption>
                     <rng:data type="string"/>
                   </rng:element>
                   <rng:element name="show_id">
+                    <domain:caption xml:lang="en">Show ID</domain:caption>
+                    <domain:caption xml:lang="de">VorstellungsID</domain:caption>
                     <rng:data type="string"/>
                   </rng:element>
                   <rng:element name="title">
+                    <domain:caption xml:lang="en">Title</domain:caption>
+                    <domain:caption xml:lang="de">Titel</domain:caption>
                     <rng:data type="string"/>
                   </rng:element>
                   <rng:element name="date">
+                    <domain:caption xml:lang="en">Date</domain:caption>
+                    <domain:caption xml:lang="de">Datum</domain:caption>
                     <rng:data type="date"/>
                   </rng:element>
                   <rng:element name="time">
+                    <domain:caption xml:lang="en">Starting Time</domain:caption>
+                    <domain:caption xml:lang="de">Startzeit</domain:caption>
                     <rng:data type="time"/>
                   </rng:element>
                   <rng:element name="hall">
+                    <domain:caption xml:lang="en">Hall</domain:caption>
+                    <domain:caption xml:lang="de">Saal</domain:caption>
                     <rng:data type="string"/>
                   </rng:element>
                 </rng:element>
@@ -127,9 +143,9 @@
       </endpoints>
       <execute>
         <call id="call_find" endpoint="resource_path" service-operation="search">
-<!-- {{{ --> 
+<!-- {{{ -->  
           <input name="title" message-parameter="title">
-<!-- {{{ --> 
+<!-- {{{ -->  
             <rng:element name="title">
               <domain:caption xml:lang="en">Movietitle</domain:caption>
               <domain:caption xml:lang="de">Filmtitel</domain:caption>
@@ -138,7 +154,7 @@
 <!-- }}} -->  
           </input>
           <input name="date" message-parameter="date">
-<!-- {{{ --> 
+<!-- {{{ -->  
             <rng:element name="date">
               <domain:caption xml:lang="en">Date</domain:caption>
               <domain:caption xml:lang="de">Datum</domain:caption>
@@ -240,6 +256,8 @@
               <output name="movie_title" message-parameter="movie_title">
                 <!-- {{{ --> 
                 <rng:element name="movie_title">
+                  <domain:caption xml:lang="en">Title</domain:caption>
+                  <domain:caption xml:lang="de">Titel</domain:caption>
                   <rng:data type="string"/>
                 </rng:element>
                 <!-- }}} -->  
@@ -247,6 +265,8 @@
               <output name="date" message-parameter="selected_date">
               <!-- {{{ --> 
                 <rng:element name="selected_date">
+                  <domain:caption xml:lang="en">Date</domain:caption>
+                  <domain:caption xml:lang="de">Datum</domain:caption>
                   <rng:data type="date"/>
                 </rng:element>
               <!-- }}} -->   
@@ -254,6 +274,8 @@
               <output name="starting_time" message-parameter="starting_time">
               <!-- {{{ --> 
                 <rng:element name="starting_time">
+                  <domain:caption xml:lang="en">Starting Time</domain:caption>
+                  <domain:caption xml:lang="de">Startzeit</domain:caption>
                   <rng:data type="time"/>
                 </rng:element>
               <!-- }}} -->  
@@ -261,6 +283,8 @@
               <output name="hall" message-parameter="hall">
               <!-- {{{ --> 
                 <rng:element name="hall">
+                  <domain:caption xml:lang="en">Hall</domain:caption>
+                  <domain:caption xml:lang="de">Saal</domain:caption>
                   <rng:data type="positiveInteger"/>
                 </rng:element>
               <!-- }}} -->  
@@ -278,9 +302,11 @@
               <output name="reservation_number" message-parameter="reservation_id">
               <!-- {{{ -->      
                 <rng:element name="reservation_id">
+                  <domain:caption xml:lang="en">Reservation number</domain:caption>
+                  <domain:caption xml:lang="de">Reservierungsnummer</domain:caption>
                   <rng:data type="string"/>
                 </rng:element>
-              <!-- }}} --> 
+               <!-- }}} --> 
               </output>
             <!-- }}} --> 
             </call>
@@ -324,6 +350,8 @@
           <output name="reservation_id" message-parameter="reservation_number">
 <!-- {{{ -->     
             <rng:element name="reservation_id">
+              <domain:caption xml:lang="en">Reservation number</domain:caption>
+              <domain:caption xml:lang="de">Reservierungsnummer</domain:caption>
               <rng:data type="string"/>
             </rng:element>
 <!-- }}} --> 
