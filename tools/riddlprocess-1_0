@@ -40,12 +40,12 @@ end
 
 d = riddl.declaration
 case dowhat
-  when 'layers':
+  when 'layers'
     d.visualize_tiles_and_layers
-  when 'compositions':
+  when 'compositions'
     d.visualize_tiles_and_compositions
-  when 'facade':
+  when 'facade'
     d.visualize_facade
-  when 'description':
+  when 'description'
     puts d.description_xml(true)
 end 
