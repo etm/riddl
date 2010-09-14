@@ -1,8 +1,12 @@
 class GetTemplates < Riddl::Implementation # {{{
   def response
-    xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-    tpls = xml.find("//flow:operation[@name='#{@r[@r.index('operations')+1]}']/descendant::flow:call[@id='#{@r[-1]}']/flow:templates", {'flow'=>'http://rescue.org/ns/controlflow/0.2', 'domain'=>'http://rescue.org/ns/domain/0.2'}).first
-    tpls.nil? ?  @status = 404 : Riddl::Parameter::Complex.new('templates','text/xml', tpls.dump) 
+    unless File.exists?("#{@r[0..1].join("/")}/interface.xml")
+      @status = 410
+    else 
+      xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
+      tpls = xml.find("//flow:operation[@name='#{@r[@r.index('operations')+1]}']/descendant::flow:call[@id='#{@r[-1]}']/flow:templates", {'flow'=>'http://rescue.org/ns/controlflow/0.2', 'domain'=>'http://rescue.org/ns/domain/0.2'}).first
+      tpls.nil? ?  @status = 404 : Riddl::Parameter::Complex.new('templates','text/xml', tpls.dump) 
+    end
   end
 end # }}}
 
