@@ -45,7 +45,7 @@ class AddResource < Riddl::Implementation# {{{
         end
         f = File.new("#{@r.join("/")}/#{@p[0].value}/properties.xml", "w")
       end
-      if @p[0].name != "subgroup-name"
+      if @p[0].name != "subclass-name"
         f.write(c)
         f.close()
       end
