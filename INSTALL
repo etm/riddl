@@ -5,7 +5,10 @@ sudo gem install ruby-xml-smart (>= 0.2.1.1 needed)
 sudo gem install rack mongrel mime-types
 sudo gem install activesupport
 
-For websocket support you need a custom rack gem. Please write email to juergen.mangler@univie.ac.at to obtain one.
+For websocket support you need a custom rack gem. 
+  * http://www.pri.univie.ac.at/~mangler/rack-1.1.0+rack.io.gem
+  * deinstall all other rack stuff, for less problems
+  * todo make the io patch a rack monkey patch addon
 
 == Others
 
