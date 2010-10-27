@@ -61,7 +61,7 @@ run(
           run GetServiceInterface if method :get => 'service-schema'
           run UpdateResource if method :put => 'rename'
           run DeleteResource if method :delete => '*'
-          run AddResource if method :post => 'subgroup'
+          run AddResource if method :post => 'subclass'
 
           on resource 'operations' do
             run GetOperations if method :get => "*"
@@ -76,7 +76,7 @@ run(
               end
             end
           end
-          on resource do # Subgroup-level
+          on resource do # subclass-level
             run GenerateFeed if method :get => '*'
             run DeleteResource if method :delete => '*'
             run UpdateResource if method :put => 'rename'
