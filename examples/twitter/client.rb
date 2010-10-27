@@ -4,7 +4,7 @@ require 'pp'
 
 tweet = 4997095028 # eTM
 user = 10154142 # eTM
-cred = "ZXRtOnR3aXR0ZXJ0d2l0dGVy"
+cred = "xxxxxx"
 twitter = Riddl::Client.interface("http://twitter.com/","twitter.xml")
 
 ### Show single tweet

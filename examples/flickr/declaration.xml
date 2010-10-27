@@ -1,8 +1,8 @@
 <declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <interface name="main" path="http://api.flickr.com/services">
+  <interface name="main" location="http://api.flickr.com/services">
     <xi:include href="Flickr/flickr.xml"/>
   </interface>
-  <interface name="exif" path="http://localhost:9292">
+  <interface name="exif" location="http://localhost:9292">
     <xi:include href="Exif/exif.xml"/>
   </interface>
 

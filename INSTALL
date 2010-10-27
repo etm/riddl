@@ -3,6 +3,9 @@
 sudo apt-get install libxml2-dev libxslt1-dev zlib1g-dev ruby1.8-dev build-essential ruby ruby1.8 rubygems
 sudo gem install ruby-xml-smart (>= 0.2.1.1 needed)
 sudo gem install rack mongrel mime-types
+sudo gem install activesupport
+
+For websocket support you need a custom rack gem. Please write email to juergen.mangler@univie.ac.at to obtain one.
 
 == Others
 
