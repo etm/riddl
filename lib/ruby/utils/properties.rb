@@ -22,6 +22,7 @@ module Riddl
           on resource 'values' do
             run   Riddl::Utils::Properties::Properties,     properties, schema,         handler        if get
             run   Riddl::Utils::Properties::AddProperty,    properties, schema, strans, handler, level if post   'property'
+            run   Riddl::Utils::Properties::AddProperties,  properties, schema, strans, handler, level if put    'properties'
             on resource do
               run Riddl::Utils::Properties::GetContent,     properties, schema,         handler, level if get
               run Riddl::Utils::Properties::DelContent,     properties, schema, strans, handler, level if delete
@@ -255,6 +256,74 @@ module Riddl
           end
 
           handler.new(properties,property).create
+        end
+      end #}}}
+
+      class AddProperties < Riddl::Implementation #{{{
+        def response
+          properties = @a[0]
+          schema     = @a[1]
+          strans     = @a[2]
+          handler    = @a[3]
+          level      = @a[4]
+          relpath    = @r[level..-1]
+
+          0.upto(@p.length/2-1) do |i|
+            property = @p[i*2].value
+            ct       = @p[i*2+1]
+            value    = ct.name == 'value' ? ct.value : nil
+            content  = ct.name == 'content' ? ct.value : nil
+
+            unless Riddl::Utils::Properties::modifiable?(schema,property)
+              @status = 500
+              return # change properties.schema
+            end
+
+            newstuff = value.nil? ? XML::Smart.string(content).root.children : value
+            path = "/p:properties/*[name()=\"#{property}\"]"
+            XML::Smart::open(properties) do |doc|
+              doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+              nodes = doc.find(path)
+              if nodes.empty?
+                @status = 404
+                return # this property does not exist
+              end
+              if Riddl::Utils::Properties::is_state?(schema,property)
+                unless Riddl::Utils::Properties::valid_state?(schema,property,nodes.first.to_s,value)
+                  @status = 404
+                  return # not a valid state from here on
+                end
+              end  
+              nods = nodes.map{|ele| ele.children.delete_all!; ele}
+              nods.each do |ele| 
+                if value.nil?
+                  ele.add newstuff
+                else
+                  ele.text = newstuff
+                end  
+              end  
+              if !doc.validate_against(XML::Smart::string(strans))
+                @status = 400
+                return # bad request
+              end
+            end
+
+            XML::Smart::modify(properties) do |doc|
+              doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+              nodes = doc.root.find(path)
+              nods = nodes.map{|ele| ele.children.delete_all!; ele}
+              nods.each do |ele| 
+                if value.nil?
+                  ele.add newstuff
+                else
+                  ele.text = newstuff
+                end  
+              end  
+            end
+            
+            handler.new(properties,property).update
+          end
+          return
         end
       end #}}}
 
