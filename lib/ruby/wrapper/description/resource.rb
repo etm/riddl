@@ -89,8 +89,8 @@ module Riddl
             ### remove all emtpy layers  
             v.compact!
             case v.size
-              when 0:
-              when 1:
+              when 0
+              when 1
                 @composition[k] = compose_plain(v[0])
               else
                 @composition[k] = compose_layers(k,v)

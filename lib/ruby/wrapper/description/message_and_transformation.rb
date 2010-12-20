@@ -59,13 +59,13 @@ module Riddl
           unless trans.name.nil?
             trans.content.root.children.each do |e|
               case e.name.name
-                when 'add_header':
+                when 'add_header'
                   raise "TODO"
-                when 'add_before':
+                when 'add_before'
                   raise "TODO"
-                when 'add_after':
+                when 'add_after'
                   raise "TODO"
-                when 'add_as_first':
+                when 'add_as_first'
                   t = ret.content.root 
                   n = t.find("header[last()]").first
                   if n.nil?
@@ -78,44 +78,44 @@ module Riddl
                   else  
                     n.add_after(e.children)
                   end  
-                when 'add_as_last':
+                when 'add_as_last'
                   ret.content.root.add(e.children)
                   ret.update_hash!
-                when 'remove_each':
+                when 'remove_each'
                   ret.content.find("parameter[@name=\"#{e.attributes['name']}\"]").delete_all!
-                when 'remove_first':
+                when 'remove_first'
                   if e.attributes['name']
                     case e.attributes['type']
-                      when 'parameter', nil:
+                      when 'parameter', nil
                         node = ret.content.find("//parameter[@name=\"#{e.attributes['name']}\"]").first
                         opt = node.add_before("optional")
                         opt.add(node)
-                      when 'header':
+                      when 'header'
                         ret.content.find("header[@name=\"#{e.attributes['name']}\"]").delete_all!
                     end    
                   else
                     case e.attributes['type']
-                      when 'parameter', nil:
+                      when 'parameter', nil
                         ret.content.find("//parameter[first()]").delete_all!
-                      when 'header':
+                      when 'header'
                         ret.content.find("//header[first()]").delete_all!
                     end    
                   end
-                when 'remove_last':
+                when 'remove_last'
                   if e.attributes['name']
                     case e.attributes['type']
-                      when 'parameter', nil:
+                      when 'parameter', nil
                         node = ret.content.find("//parameter[@name=\"#{e.attributes['name']}\"]").last
                         opt = node.add_before("optional")
                         opt.add(node)
-                      when 'header':
+                      when 'header'
                         ret.content.find("header[@name=\"#{e.attributes['name']}\"]").delete_all!
                     end    
                   else
                     case e.attributes['type']
-                      when 'parameter', nil:
+                      when 'parameter', nil
                         ret.content.find("//parameter[last()]").delete_all!
-                      when 'header':
+                      when 'header'
                         ret.content.find("//header[last()]").delete_all!
                     end    
                   end

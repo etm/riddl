@@ -54,8 +54,8 @@
     <parameter name="new-name" type="string"/>
   </message>
 
-  <message name="subgroup">
-    <parameter name="subgroup-name" type="string"/>
+  <message name="subclass">
+    <parameter name="subclass-name" type="string"/>
   </message>
 
   <message name="riddl-description">
@@ -138,7 +138,7 @@
         <get in="properties" out="schema"/>
         <get in="service-schema" out="schema"/>
         <put in="rename"/>
-        <post in="subgroup"/>
+        <post in="subclass"/>
         <delete in="*"/>
         <resource relative="operations">
           <get in="*" out="xml"/>
@@ -154,7 +154,7 @@
           </resource>
         </resource>
 <!--}}}-->
-        <resource> <!-- Subgroup-level -->
+        <resource> <!-- subclass-level -->
 <!-- {{{ -->
           <get in="*" out="atom-feed"/>
           <delete in="*"/>
@@ -166,11 +166,6 @@
               <get in="*" out="class-level-workflow"/>
               <get in="input" out="schema"/>
               <get in="output" out="schema"/>
-            </resource>
-          </resource>
-          <resource relative="messages">
-            <resource>
-              <get in="*" out="xml"/>
             </resource>
           </resource>
 <!--}}}-->
@@ -191,11 +186,6 @@
                     <get in="*"/>
                   </resource>
                 </resource>
-              </resource>
-            </resource>
-            <resource relative="messages">
-              <resource>
-                <get in="*" out="xml"/>
               </resource>
             </resource>
 <!--}}}--> 

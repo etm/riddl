@@ -1,8 +1,12 @@
 class GetTemplates < Riddl::Implementation # {{{
   def response
-    xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
-    tpls = xml.find("//flow:operation[@name='#{@r[@r.index('operations')+1]}']/descendant::flow:call[@id='#{@r[-1]}']/flow:templates", {'flow'=>'http://rescue.org/ns/controlflow/0.2', 'domain'=>'http://rescue.org/ns/domain/0.2'}).first
-    tpls.nil? ?  @status = 404 : Riddl::Parameter::Complex.new('templates','text/xml', tpls.dump) 
+    unless File.exists?("#{@r[0..1].join("/")}/interface.xml")
+      @status = 410
+    else 
+      xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
+      tpls = xml.find("//flow:operation[@name='#{@r[@r.index('operations')+1]}']/descendant::flow:call[@id='#{@r[-1]}']/flow:templates", {'flow'=>'http://rescue.org/ns/controlflow/0.2', 'domain'=>'http://rescue.org/ns/domain/0.2'}).first
+      tpls.nil? ?  @status = 404 : Riddl::Parameter::Complex.new('templates','text/xml', tpls.dump) 
+    end
   end
 end # }}}
 
@@ -13,7 +17,7 @@ class GetOperations < Riddl::Implementation# {{{
     else 
       xml = XML::Smart.open("#{@r[0..1].join("/")}/interface.xml")
       ret = XML::Smart.string("<operations xmlns=\"http://rescue.org/ns/domain/0.2\"/>")
-      xml.find("/domain:domain-description/domain:operations/*", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each {|o| ret.root.add("operation", {"name" => o.attributes["name"]})}
+      xml.find("/domain:domain-description/domain:operations/*", {"domain"=>"http://rescue.org/ns/domain/0.2", "rng" => "http://relaxng.org/ns/structure/1.0"}).each {|o| ret.root.add("operation", {"name" => o.attributes["name"], "short" => o.attributes["short"]})}
       Riddl::Parameter::Complex.new("xml","text/xml", ret.to_s)
     end
   end
@@ -41,7 +45,7 @@ class AddResource < Riddl::Implementation# {{{
         end
         f = File.new("#{@r.join("/")}/#{@p[0].value}/properties.xml", "w")
       end
-      if @p[0].name != "subgroup-name"
+      if @p[0].name != "subclass-name"
         f.write(c)
         f.close()
       end
@@ -225,8 +229,9 @@ class RNGSchema# {{{
     @__schema.root.dump
   end
 end
+# }}}
 
-class DeleteResource < Riddl::Implementation
+class DeleteResource < Riddl::Implementation # {{{
   def response
     begin
       FileUtils.rm_r @r.join("/")
@@ -251,7 +256,6 @@ class GenerateFeed < Riddl::Implementation# {{{
       groups << File::basename(f) if File::directory? f
     end
     Riddl::Parameter::Complex.new("atom-feed","text/xml") do
-      text_! "<?xml-stylesheet href=\"http://localhost:9290/xsl/instances.xsl\" type=\"text/xsl\"?>"
       feed_ :xmlns => 'http://www.w3.org/2005/Atom' do
         title_ "Resourcelist at #{url}#{@r.join("/")}"
         updated_ File.mtime("#{@r.join("/")}").xmlschema
@@ -279,14 +283,16 @@ class GenerateFeed < Riddl::Implementation# {{{
     end
     xml = XML::Smart.open("groups/#{group_name}/interface.xml")
     schema_ do
-      operations = xml.find("/interface/operations/*")
+      operations = xml.find("//domain:operations/flow:operation", {"domain"=>"http://rescue.org/ns/domain/0.2", "flow"=>"http://rescue.org/ns/controlflow/0.2"})
       operations.each do |o|
-        operation_ :name=>"#{o.name.name}" do
-          message_ :type=>"input", :href=>"#{url}/groups/#{group_name}/operations/#{o.name.name}?input"
-          message_ :type=>"output", :href=>"#{url}/groups/#{group_name}/operations/#{o.name.name}?output"
+        name = o.attributes['name']
+        operation_ :name=>name, :href=>"#{url}/groups/#{group_name}/operations/#{name}" do
+          message_ :type=>"input", :href=>"#{url}/groups/#{group_name}/operations/#{name}?input"
+          message_ :type=>"output", :href=>"#{url}/groups/#{group_name}/operations/#{name}?output"
         end
       end
       properties_ :href=>"#{url}/groups/#{group_name}?properties"
+      service_ :href=>"#{url}/groups/#{group_name}?service-schema"
     end
   end
 end # }}}

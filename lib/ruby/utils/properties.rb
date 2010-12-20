@@ -10,30 +10,32 @@ module Riddl
         unless handler.class == Class && handler.superclass == Riddl::Utils::Properties::HandlerBase
           raise "handler not a subclass of HandlerBase"
         end
-        lambda {
-          run     Riddl::Utils::Properties::All,            properties,                 handler        if get
-          run     Riddl::Utils::Properties::Query,          properties,                 handler        if get    'query'
+        Proc.new {
+          if get("*")
+            run     Riddl::Utils::Properties::All,            properties,                 handler       
+          end
+          run(     Riddl::Utils::Properties::Query,          properties,                 handler       ) if get    'query'
           on resource 'schema' do
-            run   Riddl::Utils::Properties::Schema,         properties, schema, strans                 if get
+            run(   Riddl::Utils::Properties::Schema,         properties, schema, strans                ) if get
             on resource 'rng' do
-              run Riddl::Utils::Properties::RngSchema,      properties, schema, strans                 if get
+              run( Riddl::Utils::Properties::RngSchema,      properties, schema, strans                ) if get
             end  
           end
           on resource 'values' do
-            run   Riddl::Utils::Properties::Properties,     properties, schema,         handler        if get
-            run   Riddl::Utils::Properties::AddProperty,    properties, schema, strans, handler, level if post   'property'
-            run   Riddl::Utils::Properties::AddProperties,  properties, schema, strans, handler, level if put    'properties'
+            run(   Riddl::Utils::Properties::Properties,     properties, schema,         handler       ) if get
+            run(   Riddl::Utils::Properties::AddProperty,    properties, schema, strans, handler, level) if post   'property'
+            run(   Riddl::Utils::Properties::AddProperties,  properties, schema, strans, handler, level) if put    'properties'
             on resource do
-              run Riddl::Utils::Properties::GetContent,     properties, schema,         handler, level if get
-              run Riddl::Utils::Properties::DelContent,     properties, schema, strans, handler, level if delete
-              run Riddl::Utils::Properties::AddContent,     properties, schema, strans, handler, level if post   'addcontent'
-              run Riddl::Utils::Properties::UpdContent,     properties, schema, strans, handler, level if put    'updcontent'
+              run( Riddl::Utils::Properties::GetContent,     properties, schema,         handler, level) if get
+              run( Riddl::Utils::Properties::DelContent,     properties, schema, strans, handler, level) if delete
+              run( Riddl::Utils::Properties::AddContent,     properties, schema, strans, handler, level) if post   'addcontent'
+              run( Riddl::Utils::Properties::UpdContent,     properties, schema, strans, handler, level) if put    'updcontent'
               on resource do
-                run Riddl::Utils::Properties::GetContent,   properties, schema,         handler, level if get
-                run Riddl::Utils::Properties::DelContent,   properties, schema, strans, handler, level if delete
-                run Riddl::Utils::Properties::UpdContent,   properties, schema, strans, handler, level if put    'updcontent'
+                run( Riddl::Utils::Properties::GetContent,   properties, schema,         handler, level) if get
+                run( Riddl::Utils::Properties::DelContent,   properties, schema, strans, handler, level) if delete
+                run( Riddl::Utils::Properties::UpdContent,   properties, schema, strans, handler, level) if put    'updcontent'
                 on resource do
-                  run Riddl::Utils::Properties::GetContent, properties, schema,         handler, level if get
+                  run( Riddl::Utils::Properties::GetContent, properties, schema,         handler, level) if get
                 end
               end
             end

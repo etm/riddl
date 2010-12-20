@@ -11,7 +11,7 @@ module Riddl
           if !File.exists?(data) || !File.directory?(data)
             raise "data directory #{data} no found"
           end
-          lambda {
+          Proc.new {
             run Riddl::Utils::Notifications::Producer::Overview, xsls[:overview] if get
             on resource "topics" do
               run Riddl::Utils::Notifications::Producer::Topics, data, xsls[:topics] if get
@@ -117,11 +117,11 @@ module Riddl
             key  = nil
             begin
               continue = true
-              key      = Digest::MD5.hexdigest(rand(Time.now).to_s)
+              key      = Digest::MD5.hexdigest(Kernel::rand().to_s)
               Dir.mkdir(data + '/' + key) rescue continue = false
             end until continue
-            producer_secret = Digest::MD5.hexdigest(rand(Time.now).to_s)
-            consumer_secret = Digest::MD5.hexdigest(rand(Time.now).to_s)
+            producer_secret = Digest::MD5.hexdigest(Kernel::rand().to_s)
+            consumer_secret = Digest::MD5.hexdigest(Kernel::rand().to_s)
 
             File.open(data + '/' + key + '/producer-secret','w') { |f| f.write producer_secret }
             File.open(data + '/' + key + '/consumer-secret','w') { |f| f.write consumer_secret }

@@ -69,8 +69,15 @@
     <xsl:text>&#10;&#9;</xsl:text>
     <xsl:element name="element"><xsl:attribute name="name"><xsl:text>service:</xsl:text><xsl:value-of select="@name"/></xsl:attribute>
       <xsl:copy-of select="./rng:data"/>
+      <xsl:apply-templates select="child::rng:element"/>
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="rng:element">
+    <xsl:text>&#10;&#9;</xsl:text>
+    <xsl:element name="element"><xsl:attribute name="name"><xsl:text>service:</xsl:text><xsl:value-of select="@name"/></xsl:attribute>
+      <xsl:copy-of select="./rng:data"/>
+    </xsl:element>
+  </xsl:template>
 </xsl:stylesheet>
 
