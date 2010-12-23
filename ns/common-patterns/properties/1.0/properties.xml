@@ -53,6 +53,18 @@
   </message>
 
   <message name="properties">
+    <oneOrMore>
+      <parameter name="name" type="string"/>
+      <choice>
+        <parameter name="value" type="string"/>
+        <parameter name="value" mimetype="text/plain"/>
+        <parameter name="content" mimetype="text/xml"/> <!-- add everything inside the root tag -->
+        <parameter name="content" type="string"/> <!-- add everything inside the root tag -->
+      </choice>
+    </oneOrMore>
+  </message>
+
+  <message name="propertylist">
     <parameter name="properties" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
         <start>
@@ -109,8 +121,9 @@
       </resource>
     </resource>
     <resource relative="values">
-      <get in="*" out="properties"/>
+      <get in="*" out="propertylist"/>
       <post in="property"/>
+      <put in="properties"/>
       <resource>
         <get in="*" out="value"/>
         <delete in="*"/>
