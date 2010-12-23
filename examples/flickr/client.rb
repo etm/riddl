@@ -18,6 +18,8 @@ params = [
 ]
 params <<  Riddl::Parameter::Simple.new("api_sig", fh.sign(params,["api_key","auth_token","title","description","tags","is_public"]))
 
+#puts params.pretty_inspect
+
 dflick = Riddl::Client.facade("declaration.xml")
 upload = dflick.resource("/upload")
 status, res = upload.post params

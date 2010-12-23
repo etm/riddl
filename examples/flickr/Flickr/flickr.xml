@@ -136,6 +136,23 @@
     <!--}}}-->
   </message>
 
+  <message name="flickr.people.getPublicPhotos">
+    <!--{{{-->
+    <parameter name="method" type="string">
+      <choice>
+        <value>flickr.people.getPublicPhotos</value>
+      </choice>
+    </parameter>
+    <parameter name="api_key" type="string">
+      <param name="pattern">[a-f0-9-]+</param>
+    </parameter>
+    <parameter name="user_id" type="string">
+      <param name="pattern">[a-f0-9-]+</param>
+    </parameter>
+    <!--}}}-->
+  </message>
+
+
   <resource>
     <resource relative="upload">
       <post in="photodata" out="rsp"/>
@@ -144,6 +161,7 @@
       <get in="flickr.auth.getFrob" out="rsp"/>
       <get in="flickr.auth.getToken" out="rsp"/>
       <get in="flickr.auth.checkToken" out="rsp"/>
+      <get in="flickr.people.getPublicPhotos" out="rsp"/>
     </resource>
   </resource>  
 
