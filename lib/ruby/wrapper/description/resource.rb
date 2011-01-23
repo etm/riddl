@@ -31,6 +31,10 @@ module Riddl
             method = m.attributes['method'] || m.name.name
             add_request_star_out(index,interface,des,method,m.attributes['out'])
           end
+          desres.find("des:*[not(@in)]").each do |m|
+            method = m.attributes['method'] || m.name.name
+            add_request_star_out(index,interface,des,method,m.attributes['out'])
+          end
           desres.find("des:*[@pass and @pass='*']").each do |m|
             method = m.attributes['method'] || m.name.name
             add_request_pass(index,interface,method)

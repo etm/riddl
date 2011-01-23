@@ -62,9 +62,11 @@
         <ref name="riddl-datatype-name"/>
       </attribute>
       <group>
-        <attribute name="in">
-          <ref name="riddl-datatype-name-star"/>
-        </attribute>
+        <optional>
+          <attribute name="in">
+            <ref name="riddl-datatype-name-star"/>
+          </attribute>
+        </optional>  
         <optional>
           <attribute name="out">
             <ref name="riddl-datatype-name"/>
