@@ -1,11 +1,11 @@
 #!/usr/bin/ruby
 require 'digest/md5'
-require '../../lib/ruby/client'
+require '../../../lib/ruby/client'
 require 'pp'
 
 ### init Riddl client and get resource
 flickr = Riddl::Client.interface("http://api.flickr.com/services","flickr.xml")
-rest = flickr.resource("/services/rest")
+rest = flickr.resource("/rest")
 
 ### read application key/secret
 key = File.read('flickr.key').strip
