@@ -31,6 +31,10 @@ module Riddl
         #}}}
       end
 
+      def xml
+        @riddl.to_s
+      end
+
       def add_description(des,res,desres,path=nil,rec=nil)
         #{{{
         unless path.nil?
@@ -53,6 +57,7 @@ module Riddl
       def initialize(riddl)
         #{{{
         @resource = Riddl::Wrapper::Description::Resource.new("/")
+        @riddl = riddl
         des = riddl.root
         desres = des.find("des:resource").first
         add_description(des,@resource,desres)

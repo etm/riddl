@@ -57,7 +57,7 @@ module Riddl
     CHECK = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"><data/></element>"
     #}}}
 
-    def initialize(name)
+    def initialize(name,get_description=false)
       #{{{
       @doc = nil
       begin
@@ -86,6 +86,27 @@ module Riddl
       qname = @doc.root.name
       @is_description = qname.namespace == DESCRIPTION && qname.name ==  'description'
       @is_declaration = qname.namespace == DECLARATION && qname.name ==  'declaration'
+  
+      if @is_description && get_description
+        n = @doc.root.children
+        if n.empty?
+          @doc.root.add("message",:name=>"riddl-description-request").add("parameter",:name=>"riddl-description",:type=>"string")
+          @doc.root.add("message",:name=>"riddl-description-response").add("parameter",:name=>"riddl-description",:mimetype=>"text/xml")
+        else
+          n.first.add_before("message",:name=>"riddl-description-response").add("parameter",:name=>"riddl-description",:mimetype=>"text/xml")
+          n.first.add_before("message",:name=>"riddl-description-request").add("parameter",:name=>"riddl-description",:type=>"string")
+        end  
+
+        r = @doc.find("/des:description/des:resource")
+        unless r.empty?
+          n = r.first.children
+          if n.empty?
+            r.add("get",:in=>'riddl-description-request',:out=>'riddl-description-response')
+          else  
+            n.first.add_before("get",:in=>'riddl-description-request',:out=>'riddl-description-response')
+          end  
+        end
+      end
       @declaration = @description = nil
       #}}}
     end

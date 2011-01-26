@@ -4,12 +4,6 @@ module Riddl
   module Utils
     module Declaration
 
-      class Description < Riddl::Implementation
-        def response
-          return Riddl::Parameter::Complex.new("riddl-description","text/xml",@a[0])
-        end
-      end
-
       class Orchestrate < Riddl::Implementation
         def response
           facade = Riddl::Client.facade(@a[0])

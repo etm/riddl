@@ -14,8 +14,8 @@ module Riddl
         rpaths(@facade.resource,'')
       end
       
-      def description_xml(get_description=false)
-        @facade.description_xml(get_description)
+      def description_xml
+        @facade.description_xml
       end  
 
       def visualize_tiles_and_layers

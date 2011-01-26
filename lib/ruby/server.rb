@@ -27,15 +27,16 @@ module Riddl
       instance_eval(&blk)
       @riddl_norun = false
 
-      riddl = Riddl::Wrapper.new(riddl)
+      riddl = Riddl::Wrapper.new(riddl,@accessible_description)
       if riddl.description?
         @riddl_description = riddl
+        @riddl_description_string = riddl.description.xml
         raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl_description.validate!
       elsif riddl.declaration?
         @riddl_declaration = riddl
         raise SpecificationError, 'RIDDL declaration does not conform to specification' unless @riddl_declaration.validate!
-        @riddl_description_string = riddl.declaration.description_xml(@accessible_description)
-        @riddl_description = Riddl::Wrapper.new(@riddl_description_string)
+        @riddl_description_string = riddl.declaration.description_xml
+        @riddl_description = Riddl::Wrapper.new(@riddl_description_string,@accessible_description)
       else
         raise SpecificationError, 'Not a RIDDL file'
       end
