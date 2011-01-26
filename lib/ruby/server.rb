@@ -7,6 +7,19 @@ require File.expand_path(File.dirname(__FILE__) + '/error')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper')
 
 module Riddl
+
+  module Utils
+    module Description
+
+      class XML < Riddl::Implementation
+        def response
+          return Riddl::Parameter::Complex.new("riddl-description","text/xml",@a[0])
+        end
+      end
+      
+    end
+  end
+
   class Server
     BOUNDARY = "Time_is_an_illusion._Lunchtime_doubly_so.0xriddldata"
     EOL = "\r\n"
@@ -101,6 +114,7 @@ module Riddl
           else
             @riddl_path = '/'
             @riddl_res.status = 404
+            run Riddl::Utils::Description::XML, @riddl_description_string if get 'riddl-description-request'
             instance_exec(info, &@riddl_blk)  
             if @riddl_cross_site_xhr
               @riddl_res['Access-Control-Allow-Origin'] = '*'
@@ -125,7 +139,6 @@ module Riddl
         ### only descend when there is a possibility that it holds the right path
         rp = @riddl_path.split('/')
         block.call(info) if @riddl_matching_path_pieces[rp.length-1] == rp.last
-
         @riddl_path = File.dirname(@riddl_path).gsub(/\/+/,'/')
       end  
     end# }}}
@@ -203,7 +216,7 @@ module Riddl
     def put(min='*');    return if @riddl_norun; check(min) && @riddl_method == 'put' end
     def websocket;       return if @riddl_norun; return false unless @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] end
 
-    def check(min)# {{{
+    def check(min)#  {{{
       return false if @riddl_message.nil? # for websockets no @riddl_message is set
       @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name
     end# }}}
