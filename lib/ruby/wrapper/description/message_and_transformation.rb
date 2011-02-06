@@ -9,8 +9,9 @@ module Riddl
           @hash = nil
           if layer.nil?
             @content = content
-          else  
+          else
             tempA = layer.find("des:#{type}[@name='#{name}']").first
+            puts layer.find("/*").first.dump if name == 'userid'
             tempB = tempA.to_doc
             if layer.namespaces[nil] && tempA.namespaces.to_a.empty?
               tempB.root.namespaces[nil] = layer.namespaces[nil]
