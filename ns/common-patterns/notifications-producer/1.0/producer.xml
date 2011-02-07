@@ -16,7 +16,7 @@
             <attribute name="id">
               <data type="string"/>
             </attribute>  
-            <oneOrMore>
+            <zeroOrMore>
               <element>
                 <choice>
                   <name>event</name>
@@ -26,7 +26,7 @@
                   <param name="pattern">[\w-_]+</param>
                 </data>
               </element>  
-            </oneOrMore>
+            </zeroOrMore>
           </element>
         </define>  
 
