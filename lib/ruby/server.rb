@@ -197,6 +197,7 @@ module Riddl
             if @riddl_env.has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
               @riddl_res['Access-Control-Allow-Origin'] = '*'
               @riddl_res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+              @riddl_res['Access-Control-Allow-Headers'] = @riddl_env['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']
               @riddl_res['Access-Control-Max-Age'] = '0'
               @riddl_res['Content-Length'] = '0'
               @riddl_res.status = 200
