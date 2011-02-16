@@ -361,6 +361,7 @@ module Riddl
 
     def ws_read
       if packet = @riddl_env['rack.io'].gets("\xff")
+        return "" if (packet =~ /\A\xff\z/nm)
         if !(packet =~ /\A\x00(.*)\xff\z/nm)
           raise(Riddl::WebSocketError, "input must start with \\x00 and end with \\xff")
         end
