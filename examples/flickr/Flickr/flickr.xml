@@ -152,6 +152,22 @@
     <!--}}}-->
   </message>
 
+  <message name="flickr.people.findByEmail">
+    <!--{{{-->
+    <parameter name="method" type="string">
+      <choice>
+        <value>flickr.people.findByEmail</value>
+      </choice>
+    </parameter>
+    <parameter name="api_key" type="string">
+      <param name="pattern">[a-f0-9-]+</param>
+    </parameter>
+    <parameter name="find_email" type="string">
+      <param name="pattern">[a-f0-9-]+</param>
+    </parameter>
+    <!--}}}-->
+  </message>
+
 
   <resource>
     <resource relative="upload">
@@ -162,6 +178,7 @@
       <get in="flickr.auth.getToken" out="rsp"/>
       <get in="flickr.auth.checkToken" out="rsp"/>
       <get in="flickr.people.getPublicPhotos" out="rsp"/>
+      <get in="flickr.people.findByEmail" out="rsp"/>
     </resource>
   </resource>  
 
