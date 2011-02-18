@@ -320,7 +320,7 @@ module Riddl
     def info(other={})# {{{
       { :h => @riddl_headers, 
         :p => @riddl_parameters, 
-        :r => @riddl_pinfo.sub(/\//,'').split('/'), 
+        :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|HttpParser::unescape(e)}, 
         :m => @riddl_method, 
         :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
         :match => @riddl_path.sub(/\//,'').split('/') 
