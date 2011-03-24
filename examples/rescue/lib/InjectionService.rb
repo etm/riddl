@@ -27,10 +27,10 @@ class InjectionService < Riddl::Implementation
     class_level = parent_injected.nil? || parent_injected.attributes['serviceoperation'] != call_node.find('string(descendant::cpee:serviceoperation)') # Check if it is an class-level or instance-level injection
     first_ancestor_loop = call_node.find("ancestor::cpee:loop").first # Check if injections is within a loop, and not already injected via a loop
     injected = call_node.add("group", {'type'=>'injection', 'source'=>call_node.attributes['id'], 'serviceoperation'=>call_node.find('string(descendant::cpee:serviceoperation)')}) # Create injected-block {{{
-    injected.attributes['result'] = "context.result_#{call_node.attributes['id']}" if class_level
+    injected.attributes['result'] = "data.result_#{call_node.attributes['id']}" if class_level
     parent_injected = call_node.find("ancestor::cpee:group[@type='injection']").last
     if parent_injected.nil?
-      injected.attributes['properties'] = "context.result_#{call_node.attributes['id']}['properties']" 
+      injected.attributes['properties'] = "data.result_#{call_node.attributes['id']}['properties']" 
     else
       injected.attributes['properties'] = "#{parent_injected.attributes['properties']}[\"#{call_node.attributes['oid']}\"]"
     end
@@ -80,8 +80,8 @@ class InjectionService < Riddl::Implementation
       end # }}}
       call_node = loop_copy.find("descendant::cpee:call[@id = '#{call_node.attributes['id']}']").first # Find new call-block
       loop_copy.find('descendant::cpee:*[@id]').each {|node| node.attributes['id'] =  "#{node.attributes['id']}_#{preceding_loops}"} # Change ID's {{{
-      injected.attributes['result'] = "context.result_#{call_node.attributes['id']}" if class_level
-      injected.attributes['properties'] = "context.result_#{call_node.attributes['id']}['properties']" if parent_injected.nil? # }}}
+      injected.attributes['result'] = "data.result_#{call_node.attributes['id']}" if class_level
+      injected.attributes['properties'] = "data.result_#{call_node.attributes['id']}['properties']" if parent_injected.nil? # }}}
       unless call_node.find('ancestor::cpee:loop').first.nil?
         first_ancestor_loop.add_before(loop_copy)
         return  analyze(call_node.attributes['id'], instance, handler_uri, description, positions)
@@ -95,7 +95,7 @@ class InjectionService < Riddl::Implementation
     man_block = call_node.find("child::cpee:manipulate").first
     if man_block
       man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
-      man_block.attributes['context'] =  class_level ? "context.result_#{call_node.attributes['id']}" : parent_injected.attributes['result'] 
+      man_block.attributes['context'] =  class_level ? "data.result_#{call_node.attributes['id']}" : parent_injected.attributes['result'] 
       p_text = "properties = #{(parent_injected ? "#{parent_injected.attributes['properties']}" : injected.attributes['properties'])}\n"
       man_block.text = p_text + man_block.text
       man_block.attributes['properties'] = parent_injected ? "#{parent_injected.attributes['properties']}" : injected.attributes['properties']
@@ -113,12 +113,12 @@ class InjectionService < Riddl::Implementation
     blanks = call_node.find('count(ancestor::cpee:*)').to_i
     blanks_create = ' '*(blanks+1)*2; blanks_remove = ' '*(blanks)*2
     create = ''; remove = ''
-    create << "#{blanks_create}context.result_#{call_node.attributes['id']} = RescueHash.new\n" # Create/Remove result-object {{{
-    remove << "#{blanks_remove}context.delete(:\"result_#{call_node.attributes['id']}\")\n" # }}}
+    create << "#{blanks_create}data.result_#{call_node.attributes['id']} = RescueHash.new\n" # Create/Remove result-object {{{
+    remove << "#{blanks_remove}data.delete(:\"result_#{call_node.attributes['id']}\")\n" # }}}
     parent_injected = call_node.find("ancestor::cpee:group[@type='injection']").last # Create/Remove Property-Objects {{{
     if parent_injected.nil?
       create << "#{blanks_create}#{injected.attributes['properties']} = RescueHash.new\n"
-      remove << "#{blanks_remove}context.delete(:\"properties_#{call_node.attributes['id']}\")\n"
+      remove << "#{blanks_remove}data.delete(:\"properties_#{call_node.attributes['id']}\")\n"
     end
     wf.find("//flow:execute/descendant::flow:call[@service-operation]").each do |call|
       c = "#{injected.attributes['properties']}[\"#{call.attributes.include?('oid') ? call.attributes['oid'] : call.attributes['id'] }\"]"
@@ -128,10 +128,10 @@ class InjectionService < Riddl::Implementation
       create << "#{blanks_create}endpoints.#{call_node.attributes['id']+'__'+node.name.name} = #{node.text.inspect}\n"
       remove << "#{blanks_remove}endpoints.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
     end # }}} 
-    wf.find("//flow:context-variables/*").each do |node|  # Create/Remoce context-variables {{{
-      create << "#{blanks_create}context.#{call_node.attributes['id']+'__'+node.name.name} = "
+    wf.find("//flow:data-elements/*").each do |node|  # Create/Remoce context-variables {{{
+      create << "#{blanks_create}data.#{call_node.attributes['id']+'__'+node.name.name} = "
       create << (node.attributes.include?('class') ? node.attributes['class'] : "#{node.text.empty? ? "''" : node.text}") + "\n"
-      remove << "#{blanks_remove}context.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
+      remove << "#{blanks_remove}data.delete(:\"#{call_node.attributes['id']+'__'+node.name.name}\")\n"
     end # }}}
     create  = injected.add("manipulate", {"id"=>"create_objects_for_#{call_node.attributes['id']}", "generated"=>"true"}, create) 
     remove =  injected.add("manipulate", {"id"=>"remove_objects_of_#{call_node.attributes['id']}", "generated"=>"true"}, remove)
@@ -155,16 +155,16 @@ class InjectionService < Riddl::Implementation
     wf.find("//flow:call/@wsdl").each do |a|
       a.value = call_node.attributes['id']+'__'+a.value
     end
-    wf.find("//@variable").each           {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"} 
-    wf.find("//@test").each               {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"}
-    wf.find("//@context").each            {|a| a.value = "context.#{call_node.attributes['id']}__#{a.value}"}
+    wf.find("//@variable").each           {|a| a.value = "data.#{call_node.attributes['id']}__#{a.value}"} 
+    wf.find("//@test").each               {|a| a.value = "data.#{call_node.attributes['id']}__#{a.value}"}
+    wf.find("//@context").each            {|a| a.value = "data.#{call_node.attributes['id']}__#{a.value}"}
     wf.find("//flow:variable/@endpoint").each  {|a| a.value = "endpoints.#{call_node.attributes['id']}__#{a.value}"}
     wf.find("//@input-parameter").each do |a| 
       p = call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{a.value}").first
       a.value = p.text if p
       puts "Variable for manipulate-block #{a.element.parent.attributes['id']} named #{a.value} not found" unless p
     end
-    wf.find("//@output-parameter").each { |a| a.value = "context.result_#{call_node.attributes['id']}['#{a.value}']" } # }}} 
+    wf.find("//@output-parameter").each { |a| a.value = "data.result_#{call_node.attributes['id']}['#{a.value}']" } # }}} 
     # Resovle message-parameter {{{
     wf.find("//flow:execute/descendant::flow:input[string(@message-parameter)]").delete_if! do |p|
       var =  call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{p.attributes['message-parameter']}").first
@@ -173,7 +173,7 @@ class InjectionService < Riddl::Implementation
       true
     end
     wf.find("//flow:execute/descendant::flow:output[string(@message-parameter)]").each do |output|
-      output.attributes['message-parameter'] = "context.result_#{call_node.attributes['id']}['#{output.attributes['message-parameter']}']"
+      output.attributes['message-parameter'] = "data.result_#{call_node.attributes['id']}['#{output.attributes['message-parameter']}']"
     end # }}} 
     # Add repositroy-information to new operation-calls {{{
     wf.find("//flow:execute/descendant::flow:call").each do |call|
@@ -196,10 +196,10 @@ class InjectionService < Riddl::Implementation
       remove << "#{blanks}endpoints.delete(:\"#{ call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
     end # }}}
     # Create/Remove context-variables {{{ 
-    wf.find("//flow:#{op}/flow:context-variables/*").each do |node|
-      create << "#{blanks}context.#{call_node.attributes['id']+'__'+index+'__'+node.name.name} = "
+    wf.find("//flow:#{op}/flow:data-elements/*").each do |node|
+      create << "#{blanks}data.#{call_node.attributes['id']+'__'+index+'__'+node.name.name} = "
       create << (node.attributes.include?('class') ? node.attributes['class'] : "#{node.text.empty? ? "''" : node.text}") + "\n"
-      remove << "#{blanks}context.delete(:\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
+      remove << "#{blanks}data.delete(:\"#{call_node.attributes['id']+'__'+index+'__'+node.name.name}\")\n"
     end # }}}
     create << "#{blanks}# Filling the properties-object of the service\n"
     create << "#{blanks}#{parent_injected.attributes['properties']}[\"#{call_node.attributes['oid']}\"][\"#{resource_path}\"] = RescueHash.new\n"
@@ -229,9 +229,9 @@ class InjectionService < Riddl::Implementation
     wf.find("//@id").each                                     {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }
     wf.find("//@endpoint").each                               {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }
     wf.find("//flow:call/@wsdl").each                         {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }
-    wf.find("//flow:#{op}/descendant::flow:*/@variable").each {|a| a.value = "context.#{call_node.attributes['id']}__#{index}__#{a.value}"}
-    wf.find("//flow:#{op}/descendant::flow:*/@test").each     {|a| a.value = "context.#{call_node.attributes['id']}__#{index}__#{a.value}"}
-    wf.find("//flow:#{op}/descendant::flow:*/@context").each  {|a| a.value = "context.#{call_node.attributes['id']}__#{index}__#{a.value}"}
+    wf.find("//flow:#{op}/descendant::flow:*/@variable").each {|a| a.value = "data.#{call_node.attributes['id']}__#{index}__#{a.value}"}
+    wf.find("//flow:#{op}/descendant::flow:*/@test").each     {|a| a.value = "data.#{call_node.attributes['id']}__#{index}__#{a.value}"}
+    wf.find("//flow:#{op}/descendant::flow:*/@context").each  {|a| a.value = "data.#{call_node.attributes['id']}__#{index}__#{a.value}"}
     wf.find("//flow:#{op}/descendant::flow:*/@input-parameter").each do |a| 
       p = call_node.find("child::cpee:parameters/cpee:parameters/cpee:#{a.value}").first
       a.value = p.nil? ? "\"not found\"" : p.text 
@@ -308,7 +308,7 @@ class InjectionService < Riddl::Implementation
     xpath = ""
     value1 = con.attributes.include?('value') ? con.attributes['value'] : ""
     if con.attributes.include?('variable')
-      status, resp = cpee_client.resource("properties/values/context-variables/#{con.attributes['variable']}").get
+      status, resp = cpee_client.resource("properties/values/data-elements/#{con.attributes['variable']}").get
       unless status == 200
         puts "Could not find variable named #{con.attributes['variable']}"
         return false
