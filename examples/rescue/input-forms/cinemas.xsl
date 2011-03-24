@@ -28,9 +28,9 @@
         </html>
       </xsl:template>
       <xsl:template name="form">
-        <p> Movie title: <input id="title" value="Eclipse"/></p> 
-        <p> Date: <input id="date" value="2010-07-22"/></p> 
-        <p> City: <input id="city" value="Vienna"/></p> 
+        <p> Movie title: <input id="title"/></p> 
+        <p> Date: <input id="date"/></p> 
+        <p> City: <input id="city"/></p> 
         <input type="button" value="Send" onClick="send()"/>
       </xsl:template>
     </xsl:stylesheet>

@@ -12,7 +12,7 @@
       <endpoints>
         <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
       </endpoints>
-      <context-variables/>
+      <data-elements/>
       <execute>
         <call id="s1_op1" endpoint="ep" http-method="post">
           <input name="timeout" value="2"/>
@@ -28,9 +28,9 @@
       <endpoints>
         <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
       </endpoints>
-      <context-variables>
+      <data-elements>
         <wait>2</wait>
-      </context-variables>
+      </data-elements>
       <execute>
         <call id="s1_op1" endpoint="ep" http-method="post">
           <input name="timeout" message-parameter="wait"/>
@@ -50,11 +50,11 @@
       <endpoints>
         <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
       </endpoints>
-      <context-variables>
+      <data-elements>
         <loops>2</loops>
         <internal_wait/>
         <internal_count>0</internal_count>
-      </context-variables>
+      </data-elements>
       <execute>
         <manipulate id="prepare">
           <variable input-parameter="loop_wait" local="lw"/>
@@ -88,9 +88,9 @@
       <endpoints>
         <ep>http://www.pri.univie.ac.at/~mangler/services/timeout.php</ep>
       </endpoints>
-      <context-variables>
+      <data-elements>
         <wait/>
-      </context-variables>
+      </data-elements>
       <execute>
         <manipulate id="prepare">
           <variable input-parameter="wait" local="lw"/>

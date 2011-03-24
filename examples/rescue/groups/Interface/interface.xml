@@ -25,7 +25,7 @@
   <operations>
     <operation name="no_params" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ -->  
-      <context-variables/>
+      <data-elements/>
       <execute>
         <call id="no_params" endpoint="resource_path" service-operation="no_params"/>
       </execute>
@@ -38,7 +38,7 @@
     </operation>
     <operation name="simple" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ -->  
-      <context-variables/>
+      <data-elements/>
       <execute>
         <call id="simple_operation" endpoint="resource_path" service-operation="simple">
           <input name="wait" message-parameter="wait">
@@ -62,9 +62,9 @@
     </operation>
     <operation name="complex" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
-      <context-variables>
+      <data-elements>
         <wait_internal>4</wait_internal>
-      </context-variables>
+      </data-elements>
       <endpoints>
         <timeout>http://www.pri.univie.ac.at/~mangler/services/timeout.php</timeout>
       </endpoints>
@@ -102,9 +102,9 @@
     </operation>
     <operation name="abstract" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ -->  
-      <context-variables>
+      <data-elements>
         <complex_out/>
-      </context-variables>
+      </data-elements>
       <endpoints/>
       <execute>
         <call id="call_complex" endpoint="resource_path" service-operation="complex">
@@ -132,9 +132,9 @@
     </operation>
     <operation name="loop" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
-      <context-variables>
+      <data-elements>
         <loop_count>1</loop_count>
-      </context-variables>
+      </data-elements>
       <endpoints/>
       <execute>
         <loop>
@@ -189,7 +189,7 @@
     </operation>
     <operation name="parallel" short="" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
-      <context-variables/>
+      <data-elements/>
       <endpoints>
         <timeout>http://www.pri.univie.ac.at/~mangler/services/timeout.php</timeout>
       </endpoints>

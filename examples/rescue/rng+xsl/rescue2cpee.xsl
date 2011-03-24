@@ -340,8 +340,8 @@ Recent changes:
             <xsl:value-of select="@variable"/>
           </xsl:if>
           <xsl:if test="@message-parameter">
-            <xsl:if test="starts-with(@message-parameter, 'context.') = false">
-              <xsl:text>context.</xsl:text>
+            <xsl:if test="starts-with(@message-parameter, 'data.') = false">
+              <xsl:text>data.</xsl:text>
             </xsl:if>
             <xsl:value-of select="@message-parameter"/>
           </xsl:if>
