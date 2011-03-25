@@ -15,13 +15,6 @@ class InjectionService < Riddl::Implementation
     positions = Hash.new if positions.nil?
     cpee_client = Riddl::Client.new(instance)
     call_node = description.find("//cpee:call[@id = '#{position}']").first # Get call-node, rescue_client and service_operation {{{
-puts description.to_s
-puts "pos: #{position}"
-puts "call node"
-puts call_node.attributes['id']
-puts call_node.attributes['endpoint']
-
-puts call_node.nil?
     service_operation = call_node.find("string(descendant::cpee:serviceoperation)").tr('"','')
     status, resp = cpee_client.resource("properties/values/endpoints/#{call_node.attributes['endpoint']}").get # Get endpoint {{{
     unless status == 200
@@ -102,7 +95,7 @@ puts call_node.nil?
     man_block = call_node.find("child::cpee:manipulate").first
     if man_block
       man_block.attributes['id'] = "manipulate_from_#{call_node.attributes['id']}"
-      man_block.attributes['context'] =  class_level ? "data.result_#{call_node.attributes['id']}" : parent_injected.attributes['result'] 
+      man_block.attributes['data'] =  class_level ? "data.result_#{call_node.attributes['id']}" : parent_injected.attributes['result'] 
       p_text = "properties = #{(parent_injected ? "#{parent_injected.attributes['properties']}" : injected.attributes['properties'])}\n"
       man_block.text = p_text + man_block.text
       man_block.attributes['properties'] = parent_injected ? "#{parent_injected.attributes['properties']}" : injected.attributes['properties']
@@ -187,7 +180,8 @@ puts call_node.nil?
       call.attributes['injection_handler'] = call_node.find("string(child::cpee:parameters/cpee:service/cpee:injection_handler)")
     end # }}}
     doc = wf.find("//flow:execute").first.to_doc
-puts doc.to_s
+    ns = doc.root.namespaces.add("flow","http://rescue.org/ns/controlflow/0.2")
+    doc.find("//*").each { |node| node.namespace = ns }
     injected.add(XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root.children)
     maintain_class_level(call_node, wf, injected)
   end# }}}
