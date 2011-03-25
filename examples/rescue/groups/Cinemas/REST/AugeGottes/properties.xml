@@ -21,10 +21,10 @@
       <endpoints>
         <service>http://www.cineplexx.at/content/kinos/kinoprogramm.aspx</service>
       </endpoints>
-      <context-variables>
+      <data-elements>
         <response/>
         <datum/>
-      </context-variables>
+      </data-elements>
       <execute>
         <manipulate id="preparations">
           <variable context="datum" local="datum"/>
@@ -94,8 +94,8 @@
       <endpoints>
         <ep>http://www.pri.univie.ac.at/~ralph/Testservices/Cinema.php</ep>
       </endpoints>
-      <context-variables>
-      </context-variables>
+      <data-elements>
+      </data-elements>
       <execute>
         <call id="book" endpoint="ep" http-method="post">
           <input name="showID" message-parameter="show_id"/>

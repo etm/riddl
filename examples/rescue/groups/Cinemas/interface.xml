@@ -130,14 +130,14 @@
     </operation>
     <operation name="search_and_book" short="search for shows, select show and book tickets" xmlns="http://rescue.org/ns/controlflow/0.2">
 <!-- {{{ --> 
-      <context-variables>
+      <data-elements>
         <show_id/>
         <list/>
         <res/>
         <list_merge/>
         <number_of_shows/>
         <endpoint/>
-      </context-variables>
+      </data-elements>
       <endpoints>
         <selected_cinema/>
       </endpoints>

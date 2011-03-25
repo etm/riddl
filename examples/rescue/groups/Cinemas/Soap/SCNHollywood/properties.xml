@@ -22,13 +22,13 @@
         <wsdl>http://scn.hollywood-megaplex.at/sinemaweb/service.asmx?WSDL</wsdl>
         <soap_service>http://scn.hollywood-megaplex.at/sinemaweb/service.asmx</soap_service>
       </endpoints>
-      <context-variables>
+      <data-elements>
         <soap_response/>
         <xml class="Array.new"/>
         <film_ids class="Array.new"/>
         <film_id/>
         <date2/>
-      </context-variables>
+      </data-elements>
       <execute>
         <call id="FilmInfo" endpoint="soap_service" soap-operation="FilmInfo" wsdl="wsdl">
           <input name="SearchItem" message-parameter="title"/>
@@ -98,8 +98,8 @@
       <endpoints>
         <ep>http://www.pri.univie.ac.at/~ralph/Testservices/Cinema.php</ep>
       </endpoints>
-      <context-variables>
-      </context-variables>
+      <data-elements>
+      </data-elements>
       <execute>
         <call id="book" endpoint="ep" http-method="post">
           <input name="showID" message-parameter="show_id"/>
