@@ -368,6 +368,12 @@ Recent changes:
             <xsl:text> = result[1]&#xa;</xsl:text>
           </xsl:when>
           <xsl:otherwise>
+            <xsl:text># Dirty, Dirty, Dirty Monkey-Hacking, but I coudln't figure out the JSON Problem with this Object&#xa;</xsl:text>
+            <!-- xsl:text>puts "Call: </xsl:text><xsl:value-of select="parent::flow:call/@id"/><xsl:text>"&#xa;</xsl:text>
+            <xsl:text>puts "Class: #{result[0].class}"&#xa;</xsl:text -->
+            <xsl:text>if result[0].class.to_s == "Hash"&#xa;</xsl:text>
+            <xsl:text>  result[0] = RescueHash.new_from_obj(result[0])&#xa;</xsl:text>
+            <xsl:text>end&#xa;</xsl:text>
             <xsl:choose>
               <xsl:when test="parent::flow:call/@soap-operation">
                 <xsl:if test="@message-parameter">
