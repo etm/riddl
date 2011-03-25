@@ -74,7 +74,8 @@ class InjectionHandler < Riddl::Implementation
             return Riddl::Parameter::Simple.new('continue','false')
           end 
         end
-        return Riddl::Parameter::Simple.new('continue','true')
+        # return Riddl::Parameter::Simple.new('continue','true')
+        return Riddl::Parameter::Simple.new('continue','false')
       end
 # }}}  
     elsif @p.value('event') == "change" && @p.value('topic') == "properties/state"# received notification for instance stopped{{{

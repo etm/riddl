@@ -15,6 +15,13 @@ class InjectionService < Riddl::Implementation
     positions = Hash.new if positions.nil?
     cpee_client = Riddl::Client.new(instance)
     call_node = description.find("//cpee:call[@id = '#{position}']").first # Get call-node, rescue_client and service_operation {{{
+puts description.to_s
+puts "pos: #{position}"
+puts "call node"
+puts call_node.attributes['id']
+puts call_node.attributes['endpoint']
+
+puts call_node.nil?
     service_operation = call_node.find("string(descendant::cpee:serviceoperation)").tr('"','')
     status, resp = cpee_client.resource("properties/values/endpoints/#{call_node.attributes['endpoint']}").get # Get endpoint {{{
     unless status == 200
@@ -180,6 +187,7 @@ class InjectionService < Riddl::Implementation
       call.attributes['injection_handler'] = call_node.find("string(child::cpee:parameters/cpee:service/cpee:injection_handler)")
     end # }}}
     doc = wf.find("//flow:execute").first.to_doc
+puts doc.to_s
     injected.add(XML::Smart.string(doc.transform_with(XML::Smart.open("rng+xsl/rescue2cpee.xsl"))).root.children)
     maintain_class_level(call_node, wf, injected)
   end# }}}
