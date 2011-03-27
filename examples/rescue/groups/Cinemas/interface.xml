@@ -194,9 +194,9 @@
             <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post" info="true" default-tpl-name="iPhone" default-tpl-lang="en">
               <!-- {{{ --> 
               <templates>
-                <xslt name="iPhone" xml:lang="de">
+                <xslt name="Select-Show" xml:lang="de" platform="iPhone">
                 </xslt>
-                <xslt name="iPhone" xml:lang="en">
+                <xslt name="Select-Show" xml:lang="en" platform="iPhone">
                   <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
                     <xsl:output method="html"/>
                     <xsl:template match="/">
