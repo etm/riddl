@@ -10,7 +10,7 @@
           <a onClick="send()" class="button">Send</a>
         <ul>
           <li><b>Movie title: </b><input id="title" caption="Movie Title" style="border:none"/></li> 
-          <li><b>Date: </b><input id="date" caption="Date" value="2011/03/28" style="border:none"/></li> 
+          <li><b>Date: </b><input id="date" caption="Date" value="2011-03-28" style="border:none"/></li> 
           <li><b>City: </b><input id="city" caption="City" value="Vienna" style="border:none"/></li> 
         </ul>
         <script type="text/javascript">
@@ -42,7 +42,7 @@
           <a onClick="send()" class="button">Absenden</a>
         <ul>
           <li><b>Filmtitle: </b><input id="title" caption="Movie Title" style="border:none"/></li> 
-          <li><b>Datum: </b><input id="date" caption="Date" value="2011/03/28" style="border:none"/></li> 
+          <li><b>Datum: </b><input id="date" caption="Date" value="2011-03-28" style="border:none"/></li> 
           <li><b>Stadt: </b><input id="city" caption="City" value="Vienna" style="border:none"/></li> 
         </ul>
         <script type="text/javascript">
@@ -93,7 +93,7 @@
       </xsl:template>
       <xsl:template name="form">
         <p> Movie title: <input id="title" value="Gnomeo" caption='Movie Title'/></p> 
-        <p> Date: <input id="date" value="2011/03/28" caption="Date"/></p> 
+        <p> Date: <input id="date" value="2011-03-30" caption="Date"/></p> 
         <p> City: <input id="city" value="Vienna" caption="City/Town"/></p> 
         <input type="button" value="Send" onClick="send()"/>
       </xsl:template>
@@ -129,7 +129,7 @@
       </xsl:template>
       <xsl:template name="form">
         <p> Filmtitel: <input id="title" value="Julia" caption='Filmtitle'/></p> 
-        <p> Datum: <input id="date" value="2011/03/26" caption="Datum"/></p> 
+        <p> Datum: <input id="date" value="2011-03-26" caption="Datum"/></p> 
         <p> Stadt: <input id="city" value="Vienna" caption="Stadt"/></p> 
         <input type="button" value="Send" onClick="send()"/>
       </xsl:template>

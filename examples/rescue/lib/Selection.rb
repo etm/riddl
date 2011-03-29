@@ -73,7 +73,7 @@ class PostSelectByUser < Riddl::Implementation # {{{
       $selection_data[instance][activity]['callback-id'] = @h['CPEE_CALLBACK']
       $selection_data[instance][activity]['templates-uri'] = @p.value('templates-uri') if @p.value('templates-uri') 
       $selection_data[instance][activity]['template-name'] = @p.value('template-name') if @p.value('template-name') 
-      $selection_data[instance][activity]['template-lang'] = @p.value('template-lang') if @p.value('template-lang') 
+      $selection_data[instance][activity]['template-lang'] = @p.value('template-lang') if @p.value('template-lang') .upcase
       @headers << Riddl::Header.new("CPEE-Callback",'true')
       @status = 200 
     end
