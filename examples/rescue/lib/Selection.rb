@@ -96,14 +96,14 @@ class GetSelectionData < Riddl::Implementation # {{{
         end
       end
       Riddl::Parameter::Complex.new('data', 'text/xml', inputs.to_s)
-    elsif @p.value('instance') && @p.value('activity') && @p.value('name') && @p.value('lang')
+    elsif @p.value('instance') && @p.value('activity') && @p.value('name') && @p.value('lang') && @p.value('platform')
       unless $selection_data.include?(@p.value('instance')) && $selection_data[@p.value('instance')].include?(@p.value('activity'))
         @status = 404
         return
       end
       status, resp = Riddl::Client.new($selection_data[@p.value('instance')][@p.value('activity')]['templates-uri']).get
       tpls = XML::Smart.string(resp[0].value.read)
-      xslt = tpls.find("//xslt[@name='#{@p.value('name')}' and @xml:lang='#{@p.value('lang')}']/*").first
+      xslt = tpls.find("//xslt[@name='#{@p.value('name')}' and @xml:lang='#{@p.value('lang')}' and @platform='#{@p.value('platform')}']/*").first
       if xslt.nil?
         @status = 400
         return

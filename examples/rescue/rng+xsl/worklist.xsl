@@ -25,7 +25,7 @@
                   <tr>
                   <td> </td>
                   <td><xsl:element name="a">
-                      <xsl:attribute name="href">?instance=<xsl:value-of select="parent::instance/@uri"/>&amp;activity=<xsl:value-of select="name()"/>&amp;name=<xsl:value-of select="child::template-name"/>&amp;lang=<xsl:value-of select="child::template-lang"/>
+                      <xsl:attribute name="href">?instance=<xsl:value-of select="parent::instance/@uri"/>&amp;activity=<xsl:value-of select="name()"/>&amp;name=<xsl:value-of select="child::template-name"/>&amp;lang=<xsl:value-of select="child::template-lang"/>&amp;platform=Browser
                       </xsl:attribute>
                       Go to task
                     </xsl:element>

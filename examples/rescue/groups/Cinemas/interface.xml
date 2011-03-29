@@ -191,63 +191,194 @@
         <choose>
           <alternative>
             <condition test="number_of_shows" comparator="&gt;" value="0"/>
-            <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post" info="true" default-tpl-name="iPhone" default-tpl-lang="en">
+            <call id="perform_select" endpoint="selector_service" endpoint-type="outside" http-method="post" info="true" default-tpl-name="Select_Show" default-tpl-lang="EN">
               <!-- {{{ --> 
               <templates>
-                <xslt name="Select-Show" xml:lang="de" platform="iPhone">
-                </xslt>
-                <xslt name="Select-Show" xml:lang="en" platform="iPhone">
+                <xslt name="Select_Show" xml:lang="DE" platform="iPhone"><!-- {{{ -->
                   <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
                     <xsl:output method="html"/>
                     <xsl:template match="/">
-                      <html>
-                        <head>
-                          <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"/>
-                          <script type="text/javascript">
-                            function send_selection(data, callback) {
-                              $.ajax({
-                                url: callback,
-                                type: 'put',
-                                dataType: 'text',
-                                data: data,
-                                success: function(res){
-                                  window.setTimeout("window.location.replace('<xsl:value-of select="$worklist"/>');", 500);
-                                }
-                              });
-                            }
-                          </script>                        
-                        </head>
-                        <body>
-                          <table border="1">
-                            <xsl:apply-templates select="//show"/>
-                          </table>
-                        </body>
-                      </html>
+                      <xsl:apply-templates select="//show"/>
+                      <script type="text/javascript">
+                        function send_selection(data, callback) {
+                          $.ajax({
+                            url: callback,
+                            type: 'put',
+                            dataType: 'text',
+                            data: data,
+                            success: function(res){
+                              jQT.goBack();
+                            },
+                            error: function() {alert('Unable to send data to instance ' + callback);}
+                          });
+                        }
+                      </script>                        
                     </xsl:template>
                     <xsl:template match="//show">
-                      <tr><td><table>
-                      <tr><td>Cinema:</td><td><xsl:value-of select="cinema_uri"/></td></tr>
-                      <tr><td>Movietitle:</td><td><xsl:value-of select="title"/></td></tr>
-                      <tr><td>Starting time:</td><td><xsl:value-of select="time"/></td></tr>
-                      <tr><td>Date:</td><td><xsl:value-of select="date"/></td></tr>
-                      <tr><td>Hall:</td><td><xsl:value-of select="hall"/></td></tr>
-                      <tr><td colspan="2"><xsl:element name="input">
-                        <xsl:attribute name="type">button</xsl:attribute>
-                        <xsl:attribute name="value">Select</xsl:attribute>
-                        <xsl:attribute name="onClick">JavaScript:send_selection({
-                          'show_id' : '<xsl:value-of select="show_id"/>',
-                          'target' : '<xsl:value-of select="cinema_uri"/>',
-                          'movie_title' : '<xsl:value-of select="title"/>',
-                          'date' : '<xsl:value-of select="date"/>',
-                          'starting_time' : '<xsl:value-of select="time"/>',
-                          'hall' : '<xsl:value-of select="hall"/>'
-                        },'<xsl:value-of select="$instance-uri"/>/callbacks/<xsl:value-of select="$callback-id"/>');
-                        </xsl:attribute>
-                      </xsl:element></td></tr>
-                      </table></td></tr>
+                      <ul>
+                        <li style="font-weight:normal"><b>Kino:</b><xsl:value-of select="cinema_uri"/></li>
+                        <li style="font-weight:normal"><b>Filmtitel:</b><xsl:value-of select="title"/></li>
+                        <li style="font-weight:normal"><b>Beginzeit:</b><xsl:value-of select="time"/></li>
+                        <li style="font-weight:normal"><b>Datum:</b><xsl:value-of select="date"/></li>
+                        <li style="font-weight:normal"><b>Saal:</b><xsl:value-of select="hall"/></li>
+                          <xsl:element name="li">
+                            <xsl:attribute name="class">blueButton</xsl:attribute>
+                            <xsl:attribute name="style">text-align:center;color:</xsl:attribute>
+                            <xsl:attribute name="onClick">JavaScript:send_selection({
+                              'show_id' : '<xsl:value-of select="show_id"/>',
+                              'target' : '<xsl:value-of select="cinema_uri"/>',
+                              'movie_title' : '<xsl:value-of select="title"/>',
+                              'date' : '<xsl:value-of select="date"/>',
+                              'starting_time' : '<xsl:value-of select="time"/>',
+                              'hall' : '<xsl:value-of select="hall"/>'
+                            },'<xsl:value-of select="$instance-uri"/>/callbacks/<xsl:value-of select="$callback-id"/>');
+                            </xsl:attribute>
+                            Select Show
+                          </xsl:element>
+                      </ul>
                     </xsl:template>
                   </xsl:stylesheet>
-                </xslt>
+                </xslt><!-- }}} -->
+                <xslt name="Select_Show" xml:lang="EN" platform="iPhone"><!-- {{{ -->
+                  <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                    <xsl:output method="html"/>
+                    <xsl:template match="/">
+                      <xsl:apply-templates select="//show"/>
+                      <script type="text/javascript">
+                        function send_selection(data, callback) {
+                          $.ajax({
+                            url: callback,
+                            type: 'put',
+                            dataType: 'text',
+                            data: data,
+                            success: function(res){
+                              jQT.goBack();
+                            },
+                            error: function() {alert('Unable to send data to instance ' + callback);}
+                          });
+                        }
+                      </script>                        
+                    </xsl:template>
+                    <xsl:template match="//show">
+                      <ul>
+                        <li style="font-weight:normal"><b>Cinema:</b><xsl:value-of select="cinema_uri"/></li>
+                        <li style="font-weight:normal"><b>Movietitle:</b><xsl:value-of select="title"/></li>
+                        <li style="font-weight:normal"><b>Starting time:</b><xsl:value-of select="time"/></li>
+                        <li style="font-weight:normal"><b>Date:</b><xsl:value-of select="date"/></li>
+                        <li style="font-weight:normal"><b>Hall:</b><xsl:value-of select="hall"/></li>
+                          <xsl:element name="li">
+                            <xsl:attribute name="class">blueButton</xsl:attribute>
+                            <xsl:attribute name="style">text-align:center;color:</xsl:attribute>
+                            <xsl:attribute name="onClick">JavaScript:send_selection({
+                              'show_id' : '<xsl:value-of select="show_id"/>',
+                              'target' : '<xsl:value-of select="cinema_uri"/>',
+                              'movie_title' : '<xsl:value-of select="title"/>',
+                              'date' : '<xsl:value-of select="date"/>',
+                              'starting_time' : '<xsl:value-of select="time"/>',
+                              'hall' : '<xsl:value-of select="hall"/>'
+                            },'<xsl:value-of select="$instance-uri"/>/callbacks/<xsl:value-of select="$callback-id"/>');
+                            </xsl:attribute>
+                            Select Show
+                          </xsl:element>
+                      </ul>
+                    </xsl:template>
+                  </xsl:stylesheet>
+                </xslt><!-- }}} -->
+                <xslt name="Select_Show" xml:lang="DE" platform="Browser"><!-- {{{ -->
+                  <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                    <xsl:output method="html"/>
+                    <xsl:template match="/">
+                      <xsl:apply-templates select="//show"/>
+                      <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"/>
+                      <script type="text/javascript">
+                        function send_selection(data, callback) {
+                          $.ajax({
+                            url: callback,
+                            type: 'put',
+                            dataType: 'text',
+                            data: data,
+                            success: function(res){
+                              window.setTimeout("window.location.replace('<xsl:value-of select="$worklist"/>');", 500);
+                            },
+                            error: function() {alert('Unable to send data to instance ' + callback);}
+                          });
+                        }
+                      </script>                        
+                    </xsl:template>
+                    <xsl:template match="//show">
+                      <ul>
+                        <li style="font-weight:normal"><b>Kino:</b><xsl:value-of select="cinema_uri"/></li>
+                        <li style="font-weight:normal"><b>Filmtitel:</b><xsl:value-of select="title"/></li>
+                        <li style="font-weight:normal"><b>Beginzeit:</b><xsl:value-of select="time"/></li>
+                        <li style="font-weight:normal"><b>Datum:</b><xsl:value-of select="date"/></li>
+                        <li style="font-weight:normal"><b>Saal:</b><xsl:value-of select="hall"/></li>
+                          <xsl:element name="input">
+                            <xsl:attribute name="type">button</xsl:attribute>
+                            <xsl:attribute name="Value">Vorstellung auswaehlen</xsl:attribute>
+                            <xsl:attribute name="style">text-align:center;color:</xsl:attribute>
+                            <xsl:attribute name="onClick">JavaScript:send_selection({
+                              'show_id' : '<xsl:value-of select="show_id"/>',
+                              'target' : '<xsl:value-of select="cinema_uri"/>',
+                              'movie_title' : '<xsl:value-of select="title"/>',
+                              'date' : '<xsl:value-of select="date"/>',
+                              'starting_time' : '<xsl:value-of select="time"/>',
+                              'hall' : '<xsl:value-of select="hall"/>'
+                            },'<xsl:value-of select="$instance-uri"/>/callbacks/<xsl:value-of select="$callback-id"/>');
+                            </xsl:attribute>
+                            Select Show
+                          </xsl:element>
+                      </ul>
+                      <hr/>
+                    </xsl:template>
+                  </xsl:stylesheet>
+                </xslt><!-- }}} -->
+                <xslt name="Select_Show" xml:lang="EN" platform="Browser"><!-- {{{ -->
+                  <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                    <xsl:output method="html"/>
+                    <xsl:template match="/">
+                      <xsl:apply-templates select="//show"/>
+                      <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"/>
+                      <script type="text/javascript">
+                        function send_selection(data, callback) {
+                          $.ajax({
+                            url: callback,
+                            type: 'put',
+                            dataType: 'text',
+                            data: data,
+                            success: function(res){
+                              window.setTimeout("window.location.replace('<xsl:value-of select="$worklist"/>');", 500);
+                            },
+                            error: function() {alert('Unable to send data to instance ' + callback);}
+                          });
+                        }
+                      </script>                        
+                    </xsl:template>
+                    <xsl:template match="//show">
+                      <ul>
+                        <li style="font-weight:normal"><b>Cinema:</b><xsl:value-of select="cinema_uri"/></li>
+                        <li style="font-weight:normal"><b>Movietitle:</b><xsl:value-of select="title"/></li>
+                        <li style="font-weight:normal"><b>Starting time:</b><xsl:value-of select="time"/></li>
+                        <li style="font-weight:normal"><b>Date:</b><xsl:value-of select="date"/></li>
+                        <li style="font-weight:normal"><b>Hall:</b><xsl:value-of select="hall"/></li>
+                          <xsl:element name="input">
+                            <xsl:attribute name="type">button</xsl:attribute>
+                            <xsl:attribute name="Value">Select Show</xsl:attribute>
+                            <xsl:attribute name="style">text-align:center;color:</xsl:attribute>
+                            <xsl:attribute name="onClick">JavaScript:send_selection({
+                              'show_id' : '<xsl:value-of select="show_id"/>',
+                              'target' : '<xsl:value-of select="cinema_uri"/>',
+                              'movie_title' : '<xsl:value-of select="title"/>',
+                              'date' : '<xsl:value-of select="date"/>',
+                              'starting_time' : '<xsl:value-of select="time"/>',
+                              'hall' : '<xsl:value-of select="hall"/>'
+                            },'<xsl:value-of select="$instance-uri"/>/callbacks/<xsl:value-of select="$callback-id"/>');
+                            </xsl:attribute>
+                          </xsl:element>
+                      </ul>
+                      <hr/>
+                    </xsl:template>
+                  </xsl:stylesheet>
+                </xslt><!-- }}} -->
               </templates>
               <input name="data" variable="list_merge"/>
               <output name="show_id" variable="show_id"/>
