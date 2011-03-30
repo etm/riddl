@@ -182,6 +182,7 @@ module Riddl
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
 
         if @riddl_env["HTTP_CONNECTION"] =~ /\AUpgrade\z/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/ && @riddl_env["HTTP_ORIGIN"] && @riddl_env["HTTP_HOST"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY1"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY2"]
+
           sec1 = @riddl_env["HTTP_SEC_WEBSOCKET_KEY1"]
           sec2 = @riddl_env["HTTP_SEC_WEBSOCKET_KEY2"]
           key  = @riddl_env["rack.input"].read(8)
