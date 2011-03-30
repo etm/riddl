@@ -328,7 +328,6 @@
                             Select Show
                           </xsl:element>
                       </ul>
-                      <hr/>
                     </xsl:template>
                   </xsl:stylesheet>
                 </xslt><!-- }}} -->
@@ -375,7 +374,6 @@
                             </xsl:attribute>
                           </xsl:element>
                       </ul>
-                      <hr/>
                     </xsl:template>
                   </xsl:stylesheet>
                 </xslt><!-- }}} -->

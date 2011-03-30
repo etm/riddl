@@ -190,7 +190,7 @@ class InjectionService < Riddl::Implementation
     blanks = call_node.find('count(ancestor::cpee:*)').to_i
     blanks = ' '*(blanks+3)*2
     op = parent_injected.attributes['serviceoperation'].tr('"', '')
-    index = resource_path.tr('/:','__')
+    index = resource_path.gsub(/[^a-zA-Z0-9]/,'_')
     create = "#{blanks}#{parent_injected.attributes['result']}[\"#{resource_path}\"] = RescueHash.new\n"
     remove = ''
     wf.find("//flow:#{op}/flow:endpoints/*").each do |node| # Create/Remove endpints {{{
@@ -225,7 +225,7 @@ class InjectionService < Riddl::Implementation
   end #}}}
 
   def inject_instance_level(wf, call_node, resource_path, branch, parent_injected)# {{{
-    index = resource_path.tr('/:','__')
+    index = resource_path.gsub(/[^a-zA-Z0-9]/,'_')
     op = parent_injected.attributes['serviceoperation'].tr('"', '')
     wf.find('//flow:call[child::flow:templates]').each        {|c| c.attributes['templates-uri'] = "#{rescue_uri}/operations/#{service_operation}/templates/#{c.attributes['id']}" }
     wf.find("//@id").each                                     {|a| a.value = call_node.attributes['id']+'__'+index+'__'+a.value }
