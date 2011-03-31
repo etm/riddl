@@ -68,12 +68,16 @@ class PostSelectByUser < Riddl::Implementation # {{{
       $selection_notification_keys << resp.value('key')
       $selection_data[instance] = Hash.new unless $selection_data.include?(instance)
       $selection_data[instance][activity] = Hash.new unless $selection_data[instance].include?(activity)
+      #Copy all params into xsl-variables except data because it has to be an XML-String and call-oid needs a different name
+      @p.each.each do |param|
+        $selection_data[instance][activity][param.name] = param.value unless (param.name == 'data') || (param.name == 'call-oid')
+      end
+      #Add special data to parameters
       $selection_data[instance][activity]['data'] = XML::Smart.string(@p.value('data')) unless @p.value('data').nil?
       $selection_data[instance][activity]['oid'] = @p.value('call-oid')
       $selection_data[instance][activity]['callback-id'] = @h['CPEE_CALLBACK']
-      $selection_data[instance][activity]['templates-uri'] = @p.value('templates-uri') if @p.value('templates-uri') 
-      $selection_data[instance][activity]['template-name'] = @p.value('template-name') if @p.value('template-name') 
-      $selection_data[instance][activity]['template-lang'] = @p.value('template-lang') if @p.value('template-lang') .upcase
+      # Convert the xml:lang to upper case
+      $selection_data[instance][activity]['template-lang'] = @p.value('template-lang') if @p.value('template-lang').upcase
       @headers << Riddl::Header.new("CPEE-Callback",'true')
       @status = 200 
     end
