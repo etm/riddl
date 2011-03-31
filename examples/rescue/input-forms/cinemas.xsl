@@ -143,7 +143,7 @@
             <xsl:call-template name="form"/>
       </xsl:template>
       <xsl:template name="form">
-          <a onClick="send()" class="button">Send</a>
+          <a onClick="send()" class="button">Confirm</a>
         <ul>
           <li><center><b>Booking Confirmation</b></center></li>
           <li><b>Movie title: </b><xsl:value-of select="$title"/></li> 
@@ -179,7 +179,7 @@
             <xsl:call-template name="form"/>
       </xsl:template>
       <xsl:template name="form">
-          <a onClick="send()" class="button">Send</a>
+          <a onClick="send()" class="button">Confirm</a>
         <ul>
           <li><center><b>Buchungsbestaetigung</b></center></li>
           <li><b>Filmtitel: </b><xsl:value-of select="$title"/></li> 
@@ -215,7 +215,7 @@
             <xsl:call-template name="form"/>
       </xsl:template>
       <xsl:template name="form">
-          <a onClick="send()" class="button">Send</a>
+          <a onClick="send()" class="button">Confirm</a>
         <ul>
           <li><center><b>Booking Confirmation</b></center></li>
           <li><b>Movie title: </b><xsl:value-of select="$title"/></li> 
@@ -251,7 +251,7 @@
             <xsl:call-template name="form"/>
       </xsl:template>
       <xsl:template name="form">
-          <a onClick="send()" class="button">Send</a>
+          <a onClick="send()" class="button">Confirm</a>
         <ul>
           <li><center><b>Buchungsbestaetigung</b></center></li>
           <li><b>Filmtitel: </b><xsl:value-of select="$title"/></li> 
