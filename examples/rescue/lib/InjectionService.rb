@@ -1,5 +1,3 @@
-require '../../lib/ruby/client'
-
 class InjectionService < Riddl::Implementation
   def response  #{{{
     description = XML::Smart.string(@p.value('description').read)

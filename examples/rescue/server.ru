@@ -2,15 +2,16 @@
 $0 = "RESCUE"
 
 require 'rack'
-require 'socket'
-require '../../lib/ruby/server'
-require '../../lib/ruby/utils/fileserve'
-require '../../lib/ruby/utils/erbserve'
+require 'rubygems'
+require 'riddl/server'
+require 'riddl/client'
+require 'riddl/utils/fileserve'
+require 'riddl/utils/erbserve'
 require 'lib/MarkUS_V3.0'
 require 'xml/smart'
 require 'fileutils'
-require 'pp'
 require 'active_support'
+require 'pp'
 
 require 'lib/Rescue'
 require 'lib/Selection'

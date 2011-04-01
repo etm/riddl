@@ -1,4 +1,3 @@
-require '../../lib/ruby/client'
 $selection_data = Hash.new
 $selection_notification_keys = Array.new
 class SelectByRandom < Riddl::Implementation # {{{

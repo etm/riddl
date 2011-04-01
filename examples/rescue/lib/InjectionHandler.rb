@@ -1,5 +1,3 @@
-require '../../lib/ruby/client'
-
 $injection_queue = Hash.new
 $subscribed_stop = Hash.new
 
