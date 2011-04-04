@@ -1,0 +1,21 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="test">
+    <optional>
+      <parameter name="url" type="string"/>
+      <optional>
+        <parameter name="onbehalf" type="string"/>
+      </optional>  
+    </optional>  
+    <parameter name="bla" type="string"/>
+  </message>
+  
+  <message name="ret">
+    <parameter name="ret" mimetype="text/html"/>
+  </message>
+
+  <resource>
+    <get in="test" out="ret"/>
+  </resource>  
+
+</description>
