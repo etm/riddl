@@ -22,7 +22,7 @@ EOF
   s.email            = 'juergen.mangler@gmail.com'
   s.homepage         = 'http://www.pri.univie.ac.at/communities/riddl/'
 
-  s.add_development_dependency 'riddl-xml-smart'
+  s.add_development_dependency 'ruby-xml-smart'
   s.add_development_dependency 'rack'
   s.add_development_dependency 'mongrel'
   s.add_development_dependency 'mime-types'
