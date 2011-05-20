@@ -1,0 +1,27 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <start>
+    <ref name="ListAllMyBucketsResponse"/>
+  </start>
+
+  <define name="any">
+    <element>
+      <anyName/>
+      <zeroOrMore>
+        <choice>
+          <attribute>
+            <anyName/>
+          </attribute>
+          <text/>
+          <ref name="any"/>
+        </choice>
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="ListAllMyBucketsResponse" ns="http://s3.amazonaws.com/doc/2006-03-01/">
+    <element name="ListAllMyBucketsResponse">
+      <ref name="any"/>
+    </element>
+  </define>
+
+</grammar>
