@@ -50,11 +50,10 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
       class WebSocket# {{{
         class << self
-            attr_accessor(:debug)
+          attr_accessor(:debug)
         end
 
         class Error < RuntimeError
-
         end
 
         def initialize(arg, params = {})
