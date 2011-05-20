@@ -16,8 +16,9 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
     class Client
       #{{{
-      def initialize(base, riddl=nil)
+      def initialize(base, riddl=nil, options={})
         @base = base.nil? ? '' : base.gsub(/\/+$/,'')
+        @options = options
         @wrapper = nil
         unless riddl.nil?
           @wrapper = (riddl.class == Riddl::Wrapper ? riddl : Riddl::Wrapper::new(riddl))
@@ -28,18 +29,18 @@ unless Module.constants.include?('CLIENT_INCLUDED')
       end
       attr_reader :base
 
-      def self::location(base)
-        new(base)
+      def self::location(base,options={})
+        new(base,nil,options)
       end
-      def self::interface(base,riddl)
-        new(base,riddl)
+      def self::interface(base,riddl,options={})
+        new(base,riddl,options)
       end
-      def self::facade(riddl)
-        new(nil,riddl)
+      def self::facade(riddl,options={})
+        new(nil,riddl,options)
       end
 
       def resource(path="")
-        Resource.new(@base,@wrapper,path)
+        Resource.new(@base,@wrapper,path,@options)
       end
       def get(parameters = []);    resource('/').get(parameters);    end
       def post(parameters = []);   resource('/').post(parameters);   end
@@ -323,11 +324,12 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
       class Resource
         #{{
-        def initialize(base,wrapper,path)
+        def initialize(base,wrapper,path,options)
           #{{{
           @base = base
           @wrapper = wrapper
           @rpath = "/#{path}".gsub(/\/+/,'/')
+          @options = options
           @path = if @wrapper.nil?
             @rpath
           else
@@ -480,7 +482,13 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           req = Riddl::Client::Request.new(riddl_method,url.path,parameters,headers,qs)
           res = response = nil
 
-          Net::HTTP.start(url.host, url.port) do |http|
+          http = Net::HTTP.new(url.host, url.port)
+          deb = nil
+          if @options[:debug]
+            deb = File.open(@options[:debug],'w')
+            http.set_debug_output deb
+          end  
+          http.start do
             http.request(req) do |resp|
               res = resp
               bs = Parameter::Tempfile.new("RiddlBody")
@@ -497,6 +505,9 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               ).params
             end
           end
+          if @options[:debug]
+            deb.close
+          end  
           return res, response
           #}}}
         end
@@ -510,11 +521,12 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           path = (path.strip == '' ? '/' : path)
           path += "?#{qs}" unless qs == ''
           super method, true, true, path, headers
+          self.content_type = '' if self.content_type.nil?
           tmp = HttpGenerator.new(parameters,self).generate(:input)
           self.content_length = tmp.size
           self.body_stream = tmp
         end
-        #}}}
+        #} }}
       end
     end
 
