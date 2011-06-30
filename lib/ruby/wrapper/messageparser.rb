@@ -188,7 +188,11 @@ module Riddl
           type = XML::Smart::string(CHECK)
           data = type.root.children[0]
           data.attributes['type'] = a.attributes['type']
-          a.children.each{ |e| data.add(e) }
+          a.children.each do |e| 
+            node = data.add(e.to_doc.root)
+            # set default namespace for copied nodes
+            node.namespaces[nil] = type.root.namespaces[nil]
+          end
           value.validate_against type
         end  
         #}}}

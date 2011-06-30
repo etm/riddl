@@ -1,4 +1,4 @@
-require 'net/http'
+require 'net/https'
 require 'socket'
 require 'uri'
 require 'openssl'
@@ -342,31 +342,52 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end
         attr_reader :rpath
 
-        def get(parameters = [])
-          exec_request('GET',parameters)
-        end
-        def post(parameters = [])
-          exec_request('POST',parameters)
-        end
-        def put(parameters = [])
-          exec_request('PUT',parameters)
-        end
-        def delete(parameters = [])
-          exec_request('DELETE',parameters)
-        end
-        def request(what)
-          #{{{
+        def get(parameters = []) #{{{
+          exec_request('GET',parameters,false)
+        end #}}}
+        def simulate_get(parameters = []) #{{{
+          exec_request('GET',parameters,true)
+        end #}}}
+        
+        def post(parameters = []) #{{{
+          exec_request('POST',parameters,false)
+        end #}}}
+        def simulate_post(parameters = []) #{{{
+          exec_request('POST',parameters,true)
+        end #}}}
+
+        def put(parameters = []) #{{{
+          exec_request('PUT',parameters,false)
+        end #}}}
+        def simulate_put(parameters = []) #{{{
+          exec_request('PUT',parameters,true)
+        end #}}}
+
+        def delete(parameters = []) #{{{
+          exec_request('DELETE',parameters,false)
+        end #}}}
+        def simulate_delete(parameters = []) #{{{
+          exec_request('DELETE',parameters,true)
+        end #}}}
+
+        def request(what) #{{{
+          priv_request(what,false)
+        end #}}}
+        def simulate_request(what) #{{{
+          priv_request(what,true)
+        end #}}}
+
+        def priv_request(what,simulate) #{{{
           if what.class == Hash && what.length == 1
             what.each do |method,parameters|
-              return exec_request(method.to_s.upcase,parameters)
+              return exec_request(method.to_s.upcase,parameters,simulate)
             end
           end
           raise ArgumentError, "Hash with ONE method => parameters pair required"
-          #}}}
-        end
+        end #}}}
+        private :priv_request
 
-        def extract_headers(parameters)
-          #{{{
+        def extract_headers(parameters) #{{{
           headers = {}
           parameters.delete_if do |p|
             if p.class == Riddl::Header
@@ -377,11 +398,9 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end
           end
           headers
-          #}}}
-        end
+        end #}}}
         private :extract_headers
-        def extract_response_headers(headers)
-          #{{{
+        def extract_response_headers(headers) #{{{
           ret = {}
           headers.each do |k,v|
             if v.nil?
@@ -391,12 +410,10 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end  
           end
           ret
-          #}}}
-        end
+        end #}}}
         private :extract_headers
         
-        def extract_qparams(parameters)
-          #{{{
+        def extract_qparams(parameters) #{{{
           qparams = []
           parameters.delete_if do |p|
             if p.class == Riddl::Parameter::Simple && p.type == :query
@@ -407,20 +424,19 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end
           end
           qparams
-          #}}}
-        end
+        end #}}}
         private :extract_qparams
 
-        def merge_paths(int,real)
+        def merge_paths(int,real) #{{{
           t = int.top.sub(/^\/*/,'').split('/')
           real = real.sub(/^\/*/,'').split('/')
           real = real[t.length..-1]
           base = int.base == '' ? @base : int.base
           base + '/' + real.join('/')
-        end
+        end #}}}
         private :merge_paths
 
-        def exec_request(riddl_method,parameters)
+        def exec_request(riddl_method,parameters,simulate)
           headers = extract_headers(parameters)
 
           unless @wrapper.nil?
@@ -433,7 +449,8 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           qparams = extract_qparams(parameters)
 
           if @wrapper.nil? || @wrapper.description?
-            res, response = make_request(@base + @rpath,riddl_method,parameters,headers,qparams)
+            res, response = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate)
+            return response if simulate
             if !@wrapper.nil? && res.code.to_i == 200
               unless @wrapper.check_message(response,res,riddl_message.out)
                 raise OutputError, "Not a valid output from service."
@@ -446,7 +463,8 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             headers['Riddl-Declaration-Path'] = @rpath
             if riddl_message.route.nil?
               reqp = merge_paths(riddl_message.interface,@rpath)
-              res, response = make_request(reqp,riddl_method,parameters,headers,qparams)
+              res, response = make_request(reqp,riddl_method,parameters,headers,qparams,simulate)
+              return response if simulate
               if res.code.to_i == 200
                 unless @wrapper.check_message(response,res,riddl_message.out)
                   raise OutputError, "Not a valid output from service."
@@ -459,7 +477,8 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               tq = qparams
               riddl_message.route.each do |m|
                 reqp = merge_paths(m.interface,@rpath)
-                res, response = make_request(reqp,riddl_method,tp,th,tq)
+                res, response = make_request(reqp,riddl_method,tp,th,tq,simulate)
+                return response if simulate
                 if res.code.to_i != 200 || !@wrapper.check_message(response,res,m.out)
                   raise OutputError, "Not a valid output from service."
                 end
@@ -475,14 +494,20 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end
         private :exec_request
 
-        def make_request(url,riddl_method,parameters,headers,qparams)
+        def make_request(url,riddl_method,parameters,headers,qparams,simulate) #{{{
           #{{{
           url = URI.parse(url)
           qs = qparams.join('&')
           req = Riddl::Client::Request.new(riddl_method,url.path,parameters,headers,qs)
+          return req.simulate if simulate
+
           res = response = nil
 
           http = Net::HTTP.new(url.host, url.port)
+          if url.class == URI::HTTPS
+            http.use_ssl = true
+            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          end  
           deb = nil
           if @options[:debug]
             deb = File.open(@options[:debug],'w')
@@ -513,10 +538,9 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end
         private :make_request
         #}}}
-      end
+      end #}}}
 
-      class Request < Net::HTTPGenericRequest
-        #{{{
+      class Request < Net::HTTPGenericRequest #{{{
         def initialize(method, path, parameters, headers, qs)
           path = (path.strip == '' ? '/' : path)
           path += "?#{qs}" unless qs == ''
@@ -526,8 +550,14 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           self.content_length = tmp.size
           self.body_stream = tmp
         end
-        #} }}
-      end
+
+        def simulate
+          sock = StringIO.new('')
+          self.exec(sock,"1.1",self.path)
+          sock.rewind
+          [nil, sock]
+        end
+      end #}}}
     end
 
   end
