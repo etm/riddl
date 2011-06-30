@@ -24,7 +24,37 @@
     <parameter name="return" mimetype="application/xml"/>
   </message>
 
+  <message name="request">
+    <header name="Authorization" type="string"/>
+    <parameter name="status" type="string">
+      <param name="pattern">a+b+</param>
+    </parameter>
+  </message>  
+  <message name="request_response">
+    <parameter name="oauth_token" type="string"/>
+    <parameter name="oauth_token_secret" type="string"/>
+    <parameter name="oauth_callback_confirmed" type="boolean"/>
+  </message>  
+  <message name="access">
+    <header name="Authorization" type="string"/>
+  </message>  
+  <message name="authorize">
+    <header name="Authorization" type="string"/>
+  </message>  
+
   <resource>
+    <resource relative="oauth">
+      <resource relative="request_token">
+        <post in="request" out="request_response"/>
+      </resource>
+      <resource relative="access_token">
+        <post in="access" out="xml"/>
+      </resource>
+      <resource relative="authorize">
+        <post in="authorize" out="xml"/>
+      </resource>
+    </resource>
+
     <resource relative="statuses">
       <resource relative="show">
         <resource relative="\d+\.xml">
