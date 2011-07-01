@@ -24,32 +24,20 @@
     <parameter name="return" mimetype="application/xml"/>
   </message>
 
-  <message name="request">
+  <message name="oauth">
     <header name="Authorization" type="string"/>
   </message>  
-  <message name="request_response">
-    <parameter name="return" mimetype="*" handler="http://riddl.org/ns/handlers/oauth_request_token"/>
-  </message>  
-  <message name="access">
-    <header name="Authorization" type="string"/>
-  </message>  
-  <message name="access_response">
-    <parameter name="return" mimetype="*"/>
-  </message>  
-  <message name="authorize">
-    <header name="Authorization" type="string"/>
+  <message name="oauth_response">
+    <parameter name="return" mimetype="*" handler="http://riddl.org/ns/handlers/oauth"/>
   </message>  
 
   <resource>
     <resource relative="oauth">
       <resource relative="request_token" role="http://oauth.net/1.0/request_token">
-        <post in="request" out="request_response"/>
+        <post in="oauth" out="oauth_response"/>
       </resource>
       <resource relative="access_token" role="http://oauth.net/1.0/access_token">
-        <post in="access" out="access_response"/>
-      </resource>
-      <resource relative="authorize" role="http://oauth.net/1.0/authorize">
-        <post in="authorize" out="xml"/>
+        <post in="oauth" out="oauth_response"/>
       </resource>
     </resource>
 

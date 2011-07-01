@@ -4,8 +4,8 @@ module Riddl
   module Roles
     module OAuth
 
-      module RequestToken
-        WANTED = [:consumer_key, :consumer_secret, :realm]
+      module AccessToken
+        WANTED = [:consumer_key, :consumer_secret, :realm, :token, :token_secret, :verifier]
 
         def self::after(fullpath,method,code,response,headers,options)
           if code == 200
@@ -27,4 +27,4 @@ module Riddl
   end
 end
 
-Riddl::Roles::add("http://oauth.net/1.0/request_token",Riddl::Roles::OAuth::RequestToken)
+Riddl::Roles::add("http://oauth.net/1.0/access_token",Riddl::Roles::OAuth::AccessToken)
