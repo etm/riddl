@@ -26,9 +26,6 @@
 
   <message name="request">
     <header name="Authorization" type="string"/>
-    <parameter name="status" type="string">
-      <param name="pattern">a+b+</param>
-    </parameter>
   </message>  
   <message name="request_response">
     <parameter name="oauth_token" type="string"/>

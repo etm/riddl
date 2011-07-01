@@ -323,9 +323,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
       end# }}}
 
       class Resource
-        #{{
-        def initialize(base,wrapper,path,options)
-          #{{{
+        def initialize(base,wrapper,path,options) #{{{
           @base = base
           @wrapper = wrapper
           @rpath = "/#{path}".gsub(/\/+/,'/')
@@ -338,9 +336,13 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             @path[0]
           end
           @rpath = @rpath == '/' ? '' : @rpath 
-          #}}}
-        end
+        end #}}}
         attr_reader :rpath
+
+        ### get all request paths for a certain operation and parameter set (can be multiple when declaration)
+        def fullpath #{{{
+          @base + @rpath
+        end #}}}
 
         def get(parameters = []) #{{{
           exec_request('GET',parameters,false)
@@ -376,7 +378,6 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         def simulate_request(what) #{{{
           priv_request(what,true)
         end #}}}
-
         def priv_request(what,simulate) #{{{
           if what.class == Hash && what.length == 1
             what.each do |method,parameters|
@@ -384,7 +385,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end
           end
           raise ArgumentError, "Hash with ONE method => parameters pair required"
-        end #}}}
+        end #}}} 
         private :priv_request
 
         def extract_headers(parameters) #{{{
@@ -436,7 +437,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end #}}}
         private :merge_paths
 
-        def exec_request(riddl_method,parameters,simulate)
+        def prepare_request(riddl_method,parameters) #{{{
           headers = extract_headers(parameters)
 
           unless @wrapper.nil?
@@ -447,7 +448,12 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           end
 
           qparams = extract_qparams(parameters)
-
+          [headers,riddl_message,qparams]
+        end #}}}
+        private :prepare_request
+        def exec_request(riddl_method,parameters,simulate) #{{{
+          headers, riddl_message, qparams = prepare_request(riddl_method,parameters)
+          res = response = nil
           if @wrapper.nil? || @wrapper.description?
             res, response = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate)
             return response if simulate
@@ -456,10 +462,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                 raise OutputError, "Not a valid output from service."
               end
             end
-            return res.code.to_i, response, extract_response_headers(res)
-          end
-
-          if !@wrapper.nil? && @wrapper.declaration?
+          elsif !@wrapper.nil? && @wrapper.declaration?
             headers['Riddl-Declaration-Path'] = @rpath
             if riddl_message.route.nil?
               reqp = merge_paths(riddl_message.interface,@rpath)
@@ -470,7 +473,6 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                   raise OutputError, "Not a valid output from service."
                 end
               end  
-              return res.code.to_i, response, extract_response_headers(res)
             else
               tp = parameters
               th = headers
@@ -488,14 +490,14 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                   tq = extract_qparams(response)
                 end
               end
-              return res.code.to_i, response, extract_response_headers(res)
             end
+          else
+            raise OutputError, "Impossible Error :-)"
           end
-        end
+          return res.code.to_i, response, extract_response_headers(res)
+        end #}}}
         private :exec_request
-
         def make_request(url,riddl_method,parameters,headers,qparams,simulate) #{{{
-          #{{{
           url = URI.parse(url)
           qs = qparams.join('&')
           req = Riddl::Client::Request.new(riddl_method,url.path,parameters,headers,qs)
@@ -534,10 +536,9 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             deb.close
           end  
           return res, response
-          #}}}
-        end
+        end #}}}
         private :make_request
-        #}}}
+        
       end #}}}
 
       class Request < Net::HTTPGenericRequest #{{{

@@ -1,0 +1,36 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <message name="xml">
+    <parameter name="return" mimetype="application/xml"/>
+  </message>
+
+  <message name="request">
+    <header name="Authorization" type="string"/>
+  </message>  
+  <message name="request_response">
+    <parameter name="oauth_token" type="string"/>
+    <parameter name="oauth_token_secret" type="string"/>
+    <parameter name="oauth_callback_confirmed" type="boolean"/>
+  </message>  
+  <message name="access">
+    <header name="Authorization" type="string"/>
+  </message>  
+  <message name="authorize">
+    <header name="Authorization" type="string"/>
+  </message>  
+
+  <resource>
+    <resource relative="oauth">
+      <resource relative="example">
+        <resource relative="request_token.php">
+          <post in="request" out="request_response"/>
+        </resource>
+        <resource relative="access_token.php">
+          <post in="access" out="xml"/>
+        </resource>
+        <resource relative="authorize.php">
+          <post in="authorize" out="xml"/>
+        </resource>
+      </resource>
+    </resource>
+  </resource>
+</description>
