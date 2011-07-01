@@ -8,6 +8,7 @@ require File.expand_path(File.dirname(__FILE__) + '/error')
 require File.expand_path(File.dirname(__FILE__) + '/httpgenerator')
 require File.expand_path(File.dirname(__FILE__) + '/httpparser')
 require File.expand_path(File.dirname(__FILE__) + '/header')
+require File.expand_path(File.dirname(__FILE__) + '/option')
 
 unless Module.constants.include?('CLIENT_INCLUDED')
   CLIENT_INCLUDED = true
@@ -25,6 +26,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           raise SpecificationError, 'No RIDDL description or declaration found.' if !@wrapper.description? && !@wrapper.declaration?
           raise SpecificationError, 'RIDDL does not conform to specification' unless @wrapper.validate!
           @wrapper.load_necessary_handlers!
+          @wrapper.load_necessary_roles!
         end
       end
       attr_reader :base
@@ -339,11 +341,6 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end #}}}
         attr_reader :rpath
 
-        ### get all request paths for a certain operation and parameter set (can be multiple when declaration)
-        def fullpath #{{{
-          @base + @rpath
-        end #}}}
-
         def get(parameters = []) #{{{
           exec_request('GET',parameters,false)
         end #}}}
@@ -388,6 +385,19 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end #}}} 
         private :priv_request
 
+        def extract_options(parameters) #{{{
+          options = {}
+          parameters.delete_if do |p|
+            if p.class == Riddl::Option
+              options[p.name] = "#{p.value}"
+              true
+            else
+              false
+            end
+          end
+          options
+        end #}}}
+        private :extract_options
         def extract_headers(parameters) #{{{
           headers = {}
           parameters.delete_if do |p|
@@ -412,7 +422,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           end
           ret
         end #}}}
-        private :extract_headers
+        private :extract_response_headers
         
         def extract_qparams(parameters) #{{{
           qparams = []
@@ -437,10 +447,17 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end #}}}
         private :merge_paths
 
-        def prepare_request(riddl_method,parameters) #{{{
+        def exec_request(riddl_method,parameters,simulate) #{{{
+          parameters = parameters.dup
           headers = extract_headers(parameters)
+          options = extract_options(parameters)
+          role = nil
 
           unless @wrapper.nil?
+            role = @wrapper.role(@path)
+            if Riddl::Roles::roles[role]
+              Riddl::Roles::roles[role]::before(@base + @rpath,riddl_method.downcase,parameters,headers,options)
+            end  
             riddl_message = @wrapper.io_messages(@path,riddl_method.downcase,parameters,headers)
             if riddl_message.nil?
               raise InputError, "Not a valid input to service."
@@ -448,11 +465,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           end
 
           qparams = extract_qparams(parameters)
-          [headers,riddl_message,qparams]
-        end #}}}
-        private :prepare_request
-        def exec_request(riddl_method,parameters,simulate) #{{{
-          headers, riddl_message, qparams = prepare_request(riddl_method,parameters)
+
           res = response = nil
           if @wrapper.nil? || @wrapper.description?
             res, response = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate)
@@ -494,7 +507,14 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           else
             raise OutputError, "Impossible Error :-)"
           end
-          return res.code.to_i, response, extract_response_headers(res)
+          resc = res.code.to_i
+          resh = extract_response_headers(res)
+          unless role.nil?
+            if Riddl::Roles::roles[role]
+              response = Riddl::Roles::roles[role]::after(@base + @rpath,riddl_method.downcase,resc,response,resh,options)
+            end  
+          end  
+          return resc, response, resh
         end #}}}
         private :exec_request
         def make_request(url,riddl_method,parameters,headers,qparams,simulate) #{{{
@@ -546,10 +566,13 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           path = (path.strip == '' ? '/' : path)
           path += "?#{qs}" unless qs == ''
           super method, true, true, path, headers
-          self.content_type = '' if self.content_type.nil?
           tmp = HttpGenerator.new(parameters,self).generate(:input)
           self.content_length = tmp.size
           self.body_stream = tmp
+        end
+
+        def supply_default_content_type
+          ### none, HttpGenerator handles this
         end
 
         def simulate

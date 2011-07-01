@@ -6,6 +6,7 @@ module Riddl
         def initialize(path=nil,recursive=false)
           #{{{
           @path = path
+          @role = nil
           @resources = {}
           @access_methods = {}
           @composition = {}
@@ -42,6 +43,8 @@ module Riddl
           desres.find("des:*[not(name()='resource') and name()='websocket']").each do |m|
             add_websocket(index,interface)
           end
+          @role = desres.find("string(@role)")
+          @role = nil if @role.strip == ''
           #}}}
         end
 
@@ -259,7 +262,7 @@ module Riddl
         private :add_request_pass
         #}}}
 
-        attr_reader :resources,:path,:access_methods,:composition,:recursive
+        attr_reader :resources,:path,:access_methods,:composition,:recursive,:role
       end
 
       Composition = Struct.new(:route,:result)

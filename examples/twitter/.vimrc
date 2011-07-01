@@ -1,1 +1,1 @@
-map <F10> :!./oauth.rb<CR>
+map <F10> :!./client.rb<CR>

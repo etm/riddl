@@ -63,7 +63,9 @@ module Riddl
           if b.name == a.attributes['name'] && (a.attributes['mimetype'] == '*' || b.mimetype == a.attributes['mimetype'])
             if a.attributes['handler']
               if Riddl::Handlers::handlers[a.attributes['handler']]
-                if Riddl::Handlers::handlers[a.attributes['handler']].handle(b.value,a.children.map{|e|e.dump}.join)
+                success = Riddl::Handlers::handlers[a.attributes['handler']].handle(b.value,a.children.map{|e|e.dump}.join)
+                b.value.rewind if b.value.respond_to?(:rewind)
+                if success
                   @mistp += 1
                   return true
                 end  

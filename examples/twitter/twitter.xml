@@ -28,12 +28,13 @@
     <header name="Authorization" type="string"/>
   </message>  
   <message name="request_response">
-    <parameter name="oauth_token" type="string"/>
-    <parameter name="oauth_token_secret" type="string"/>
-    <parameter name="oauth_callback_confirmed" type="boolean"/>
+    <parameter name="return" mimetype="*" handler="http://riddl.org/ns/handlers/oauth_request_token"/>
   </message>  
   <message name="access">
     <header name="Authorization" type="string"/>
+  </message>  
+  <message name="access_response">
+    <parameter name="return" mimetype="*"/>
   </message>  
   <message name="authorize">
     <header name="Authorization" type="string"/>
@@ -41,13 +42,13 @@
 
   <resource>
     <resource relative="oauth">
-      <resource relative="request_token">
+      <resource relative="request_token" role="http://oauth.net/1.0/request_token">
         <post in="request" out="request_response"/>
       </resource>
-      <resource relative="access_token">
-        <post in="access" out="xml"/>
+      <resource relative="access_token" role="http://oauth.net/1.0/access_token">
+        <post in="access" out="access_response"/>
       </resource>
-      <resource relative="authorize">
+      <resource relative="authorize" role="http://oauth.net/1.0/authorize">
         <post in="authorize" out="xml"/>
       </resource>
     </resource>
@@ -62,6 +63,6 @@
         <post in="update" out="xml"/>
       </resource>
     </resource>
-  </resource>  
+  </resource>
 
 </description>
