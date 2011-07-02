@@ -5,11 +5,10 @@ require 'pp'
 twitter = Riddl::Client.interface("https://twitter.com/","twitter.xml")
 
 ### Base
-consumer_key = 'JUGRfvAcSIjxpJ13g96Fw'
-consumer_secret = 'fTV93ULm4PtKGTZL2YGE22vvwuwidDl9RdBkZC15Y'
-realm = 'Riddl Client'
-file_user_id = File.expand_path(File.dirname(__FILE__) + '/twitter.user_id')
-file_token = File.expand_path(File.dirname(__FILE__) + '/twitter.token')
+consumer_key      = 'JUGRfvAcSIjxpJ13g96Fw'
+consumer_secret   = 'fTV93ULm4PtKGTZL2YGE22vvwuwidDl9RdBkZC15Y'
+file_user_id      = File.expand_path(File.dirname(__FILE__) + '/twitter.user_id')
+file_token        = File.expand_path(File.dirname(__FILE__) + '/twitter.token')
 file_token_secret = File.expand_path(File.dirname(__FILE__) + '/twitter.token_secret')
 
 ### When token and secret already saved, skip this part
@@ -18,8 +17,7 @@ if !File.exists?(file_token) && !File.exists?(file_token_secret)
   resource = twitter.resource("/oauth/request_token")
   params = [ 
     Riddl::Option.new(:consumer_key,consumer_key),
-    Riddl::Option.new(:consumer_secret,consumer_secret),
-    Riddl::Option.new(:realm,realm)
+    Riddl::Option.new(:consumer_secret,consumer_secret)
   ]
   
   ### simulate request token
@@ -42,8 +40,7 @@ if !File.exists?(file_token) && !File.exists?(file_token_secret)
     Riddl::Option.new(:consumer_secret,consumer_secret),
     Riddl::Option.new(:token,token),
     Riddl::Option.new(:verifier,verifier),
-    Riddl::Option.new(:token_secret,token_secret),
-    Riddl::Option.new(:realm,realm)
+    Riddl::Option.new(:token_secret,token_secret)
   ]
   user_id = response.user_id
   token = response.oauth_token
@@ -70,8 +67,7 @@ if ARGV.length == 1
     Riddl::Option.new(:consumer_key,consumer_key),
     Riddl::Option.new(:consumer_secret,consumer_secret),
     Riddl::Option.new(:token,token),
-    Riddl::Option.new(:token_secret,token_secret),
-    Riddl::Option.new(:realm,realm)
+    Riddl::Option.new(:token_secret,token_secret)
   ]
 else  
   puts "Usage: #{__FILE__} [TWEET]"
