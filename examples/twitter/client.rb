@@ -63,12 +63,16 @@ end
 # status, res = twitter.resource("/statuses/show/#{tweet}.xml").get
 # puts res[0].value.read
 
-### Update status
-status, res = twitter.resource("/#{}/statuses/update.xml").post [
-  Riddl::Parameter::Simple.new("status","It's an OAuth Riddler."),
-  Riddl::Option.new(:consumer_key,consumer_key),
-  Riddl::Option.new(:consumer_secret,consumer_secret),
-  Riddl::Option.new(:token,token),
-  Riddl::Option.new(:token_secret,token_secret),
-  Riddl::Option.new(:realm,realm)
-]
+if ARGV.length == 1
+  ### Update status
+  status, res = twitter.resource("/#{}/statuses/update.xml").post [
+    Riddl::Parameter::Simple.new("status",ARGV[0]),
+    Riddl::Option.new(:consumer_key,consumer_key),
+    Riddl::Option.new(:consumer_secret,consumer_secret),
+    Riddl::Option.new(:token,token),
+    Riddl::Option.new(:token_secret,token_secret),
+    Riddl::Option.new(:realm,realm)
+  ]
+else  
+  puts "Usage: #{__FILE__} [TWEET]"
+end
