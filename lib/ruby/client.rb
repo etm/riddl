@@ -456,7 +456,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           unless @wrapper.nil?
             role = @wrapper.role(@path)
             if Riddl::Roles::roles[role]
-              Riddl::Roles::roles[role]::before(@base + @rpath,riddl_method.downcase,parameters,headers,options)
+              Riddl::Roles::roles[role]::before(@base + @rpath,riddl_method.downcase,parameters,headers,options) if Riddl::Roles::roles[role].respond_to?(:before)
             end  
             riddl_message = @wrapper.io_messages(@path,riddl_method.downcase,parameters,headers)
             if riddl_message.nil?
@@ -511,7 +511,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           resh = extract_response_headers(res)
           unless role.nil?
             if Riddl::Roles::roles[role]
-              response = Riddl::Roles::roles[role]::after(@base + @rpath,riddl_method.downcase,resc,response,resh,options)
+              response = Riddl::Roles::roles[role]::after(@base + @rpath,riddl_method.downcase,resc,response,resh,options) if Riddl::Roles::roles[role].respond_to?(:after)
             end  
           end  
           return resc, response, resh

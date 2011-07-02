@@ -44,13 +44,11 @@ module Riddl
         oparams << ["oauth_signature_method","HMAC-SHA1"]
         oparams << ["oauth_timestamp",Time.new.to_i.to_s]
         oparams << ["oauth_version","1.0"]
-        oparams << ["oauth_nonce",(1..5).map{OpenSSL::Digest::SHA1.hexdigest(rand(10000).to_s)[0,8]}.join]
+        oparams << ["oauth_nonce",HttpGenerator::escape((1..5).map{OpenSSL::Digest::SHA1.hexdigest(rand(10000).to_s)[0,8]}.join)]
         oparams << ["oauth_token",HttpGenerator::escape(options[:token])] if options[:token]
         oparams << ["oauth_verifier",HttpGenerator::escape(options[:verifier])] if options[:verifier]
 
-        params = (sparams + oparams).sort{|a,b|a[0]<=>b[0]}.map{ |e| 
-          HttpGenerator::escape(e[0]) + '=' + HttpGenerator::escape(e[1])
-        }.join('&')
+        params = (sparams + oparams).sort{|a,b|a[0]<=>b[0]}.map{ |e| e[0] + '=' + e[1] }.join('&')
         signature_string += HttpGenerator::escape(params)
 
         signature = OpenSSL::HMAC.digest(DIGEST,"#{HttpGenerator::escape(options[:consumer_secret])}&#{HttpGenerator::escape(options[:token_secret])}",signature_string)

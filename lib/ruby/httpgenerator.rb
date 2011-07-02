@@ -12,11 +12,11 @@ module Riddl
 
     # Performs URI escaping so that you can construct proper
     # query strings faster.  Use this rather than the cgi.rb
-    # version since it's faster. (Stolen from Camping).
+    # version since it's faster. (%20 instead of + for improved standards conformance).
     def self.escape(s)
-      s.to_s.gsub(/([^ a-zA-Z0-9_.-]+)/n) {
+      s.to_s.gsub(/([^a-zA-Z0-9_.-]+)/n) {
         '%'+$1.unpack('H2'*$1.size).join('%').upcase
-      }.tr(' ', '+')
+      }
     end
 
     def generate(mode=:output)

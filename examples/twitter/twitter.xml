@@ -1,7 +1,6 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="update">
-    <header name="Authorization" type="string"/>
     <parameter name="status" type="string"/>
     <optional>
       <parameter name="in_reply_to_status_id" type="string"/>
@@ -47,7 +46,7 @@
           <get in="*" out="xml"/>
         </resource>
       </resource>
-      <resource relative="update.xml">
+      <resource relative="update.xml" role="http://oauth.net/1.0/on_behalf">
         <post in="update" out="xml"/>
       </resource>
     </resource>
