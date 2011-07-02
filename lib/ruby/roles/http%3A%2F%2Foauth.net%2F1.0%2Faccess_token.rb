@@ -5,7 +5,7 @@ module Riddl
     module OAuth
 
       module AccessToken
-        WANTED = [:consumer_key, :consumer_secret, :realm, :token, :token_secret, :verifier]
+        WANTED = [:consumer_key, :consumer_secret, :token, :token_secret, :verifier]
 
         def self::after(fullpath,method,code,response,headers,options)
           if code == 200

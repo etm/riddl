@@ -5,7 +5,7 @@ module Riddl
     module OAuth
 
       module OnBehalf
-        WANTED = [:consumer_key, :consumer_secret, :realm, :token, :token_secret]
+        WANTED = [:consumer_key, :consumer_secret, :token, :token_secret]
 
         def self::before(fullpath,method,parameters,headers,options)
           unless WANTED.all?{ |e| options.has_key?(e) }

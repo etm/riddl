@@ -9,9 +9,9 @@ oauth = Riddl::Client.interface("http://term.ie/","oauth.xml")
 ### http://term.ie/oauth/example/request_token.php
 resource = oauth.resource("/oauth/example/request_token.php")
 params = [ 
-  Riddl::Option.new(:key,'key'),
-  Riddl::Option.new(:secret,'secret'),
-  Riddl::Option.new(:realm,'')
+  Riddl::Option.new(:consumer_key,'key'),
+  Riddl::Option.new(:consumer_secret,'secret'),
+  Riddl::Option.new(:realm,'Example')
 ]
 puts resource.simulate_post(params).read
 

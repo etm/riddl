@@ -56,7 +56,9 @@ module Riddl
 
         oparams << ["oauth_signature", HttpGenerator::escape(signature)]
 
-        headers['Authorization'] = "OAuth realm=\"#{options[:realm]}\"," + oparams.map{|e|e[0]+'='+"\"#{e[1]}\""}.join(',')
+        oparams.unshift(["realm", HttpGenerator::escape(options[:realm])]) if options[:realm]
+
+        headers['Authorization'] = 'OAuth ' + oparams.map{|e|e[0]+'='+"\"#{e[1]}\""}.join(', ')
       end
 
     end  
