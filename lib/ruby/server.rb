@@ -62,14 +62,13 @@ module Rack #{{{
         rack_input.set_encoding(Encoding::BINARY) if rack_input.respond_to?(:set_encoding)
 
         env.update({"rack.version" => Rack::VERSION,
-                     "rack.input" => rack_input,
-                     "rack.errors" => $stderr,
-                     "rack.io" => response.socket,
-                     "rack.multithread" => true,
-                     "rack.multiprocess" => false, # ???
-                     "rack.run_once" => false,
-
-                     "rack.url_scheme" => "http",
+                    "rack.input" => rack_input,
+                    "rack.errors" => $stderr,
+                    "rack.io" => response.socket,
+                    "rack.multithread" => true,
+                    "rack.multiprocess" => false, # ???
+                    "rack.run_once" => false,
+                    "rack.url_scheme" => "http"
                    })
         env["QUERY_STRING"] ||= ""
 

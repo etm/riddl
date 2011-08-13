@@ -346,8 +346,6 @@ module Riddl
             return # change properties.schema
           end
 
-          pp @p
-
           newstuff = XML::Smart.string(value)
           XML::Smart::open(properties) do |doc|
             doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
