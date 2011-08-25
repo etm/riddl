@@ -48,5 +48,32 @@ module Riddl
       @ws[:io].write("\x00#{data}\xff")
       @ws[:io].flush
     end
+
+    # def encode_hybi(buf, opcode, base64=False):
+    #   """ Encode a HyBi style WebSocket frame.
+    #   Optional opcode:
+    #   0x0 - continuation
+    #   0x1 - text frame (base64 encode buf)
+    #   0x2 - binary frame (use raw buf)
+    #   0x8 - connection close
+    #   0x9 - ping
+    #   0xA - pong
+    #   """
+    #   if base64:
+    #       buf = b64encode(buf)
+
+    #   b1 = 0x80 | (opcode & 0x0f) # FIN + opcode
+    #   payload_len = len(buf)
+    #   if payload_len <= 125:
+    #       header = struct.pack('>BB', b1, payload_len)
+    #   elif payload_len > 125 and payload_len <= 65536:
+    #       header = struct.pack('>BBH', b1, 126, payload_len)
+    #   elif payload_len >= 65536:
+    #       header = struct.pack('>BBQ', b1, 127, payload_len)
+
+    #   #print("Encoded: %s" % repr(header + buf))
+
+    #   return header + buf, len(header), 0
+
   end
 end

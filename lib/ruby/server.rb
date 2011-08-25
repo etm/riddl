@@ -7,6 +7,8 @@ require File.expand_path(File.dirname(__FILE__) + '/error')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper')
 
 require 'rack'
+require 'base64'
+require 'digest/sha1'
 require 'mongrel'
 require 'stringio'
 require 'rack/content_length'
@@ -114,12 +116,16 @@ module Riddl
   class Server
     BOUNDARY = "Time_is_an_illusion._Lunchtime_doubly_so.0xriddldata"
     EOL = "\r\n"
-    WS_HANDSHAKE = "HTTP/1.1 101 Web Socket Protocol Handshake" + EOL +
-                   "Upgrade: WebSocket" + EOL +
-                   "Connection: Upgrade" + EOL +
-                   "Sec-WebSocket-Origin: %s" + EOL +
-                   "Sec-WebSocket-Location: %s" + EOL + EOL +
-                   "%s"
+    WS_HANDSHAKE_00 = "HTTP/1.1 101 Web Socket Protocol Handshake" + EOL +
+                      "Upgrade: WebSocket" + EOL +
+                      "Connection: Upgrade" + EOL +
+                      "Sec-WebSocket-Origin: %s" + EOL +
+                      "Sec-WebSocket-Location: %s" + EOL + EOL +
+                      "%s"
+    WS_HANDSHAKE_08 = "HTTP/1.1 101 Switching Protocols" + EOL +
+                      "Upgrade: websocket" + EOL +
+                      "Connection: Upgrade" + EOL +
+                      "Sec-WebSocket-Accept: %s" + EOL + EOL
 
     def initialize(riddl,&blk)# {{{
       @riddl_norun = true
@@ -180,14 +186,22 @@ module Riddl
         ).params
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
 
-        if @riddl_env["HTTP_CONNECTION"] =~ /\AUpgrade\z/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/ && @riddl_env["HTTP_ORIGIN"] && @riddl_env["HTTP_HOST"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY1"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY2"]
+        if @riddl_env["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/i && @riddl_env["HTTP_SEC_WEBSOCKET_ORIGIN"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY"]
+          sec = @riddl_env["HTTP_SEC_WEBSOCKET_KEY"].strip
+          key = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+          @riddl_env["rack.io"].write(WS_HANDSHAKE_08 % [ws_security_digest_08(sec,key)])
 
+          @riddl_env["rack.io"].flush
+          @riddl_path = '/'
+          @riddl_res.status = 404
+          instance_exec(info, &@riddl_blk)  
+        elsif @riddl_env["HTTP_CONNECTION"] =~ /\AUpgrade\z/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/ && @riddl_env["HTTP_ORIGIN"] && @riddl_env["HTTP_HOST"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY1"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY2"]
           sec1 = @riddl_env["HTTP_SEC_WEBSOCKET_KEY1"]
           sec2 = @riddl_env["HTTP_SEC_WEBSOCKET_KEY2"]
           key  = @riddl_env["rack.input"].read(8)
           @riddl_env["rack.io"].write(WS_HANDSHAKE % [@riddl_env["HTTP_ORIGIN"], ws_location, ws_security_digest(sec1,sec2,key)])
-          @riddl_env["rack.io"].flush
 
+          @riddl_env["rack.io"].flush
           @riddl_path = '/'
           @riddl_res.status = 404
           instance_exec(info, &@riddl_blk)  
@@ -336,7 +350,7 @@ module Riddl
     end# }}}
 
   private
-    def ws_security_digest(key1, key2, key3)
+    def ws_security_digest_00(key1, key2, key3)
       bytes1 = ws_key_to_bytes(key1)
       bytes2 = ws_key_to_bytes(key2)
       return Digest::MD5.digest(bytes1 + bytes2 + key3)
@@ -344,6 +358,10 @@ module Riddl
     def ws_key_to_bytes(key)
       num = key.gsub(/\D/n, '').to_i() / key.scan(/ /).size
       return [num].pack("N")
+    end
+
+    def ws_security_digest_08(key1, key2)
+      return Base64::encode64(Digest::SHA1.digest(key1+key2))
     end
 
     def ws_location
@@ -370,5 +388,104 @@ module Riddl
         nil
       end
     end
+
+    # def decode_hybi(buf, base64=False):
+    #   """ Decode HyBi style WebSocket packets.
+    #   Returns:
+    #   {'fin' : 0_or_1,
+    #   'opcode' : number,
+    #   'mask' : 32_bit_number,
+    #   'hlen' : header_bytes_number,
+    #   'length' : payload_bytes_number,
+    #   'payload' : decoded_buffer,
+    #   'left' : bytes_left_number,
+    #   'close_code' : number,
+    #   'close_reason' : string}
+    #   """
+
+    #   f = {'fin' : 0,
+    #        'opcode' : 0,
+    #        'mask' : 0,
+    #        'hlen' : 2,
+    #        'length' : 0,
+    #        'payload' : None,
+    #        'left' : 0,
+    #        'close_code' : None,
+    #        'close_reason' : None}
+
+    #   blen = len(buf)
+    #   f['left'] = blen
+
+    #   if blen < f['hlen']:
+    #       return f # Incomplete frame header
+
+    #   b1, b2 = struct.unpack_from(">BB", buf)
+    #   f['opcode'] = b1 & 0x0f
+    #   f['fin'] = (b1 & 0x80) >> 7
+    #   has_mask = (b2 & 0x80) >> 7
+
+    #   f['length'] = b2 & 0x7f
+
+    #   if f['length'] == 126:
+    #       f['hlen'] = 4
+    #       if blen < f['hlen']:
+    #           return f # Incomplete frame header
+    #       (f['length'],) = struct.unpack_from('>xxH', buf)
+    #   elif f['length'] == 127:
+    #       f['hlen'] = 10
+    #       if blen < f['hlen']:
+    #           return f # Incomplete frame header
+    #       (f['length'],) = struct.unpack_from('>xxQ', buf)
+
+    #   full_len = f['hlen'] + has_mask * 4 + f['length']
+
+    #   if blen < full_len: # Incomplete frame
+    #       return f # Incomplete frame header
+
+    #   # Number of bytes that are part of the next frame(s)
+    #   f['left'] = blen - full_len
+
+    #   # Process 1 frame
+    #   if has_mask:
+    #       # unmask payload
+    #       f['mask'] = buf[f['hlen']:f['hlen']+4]
+    #       b = c = ''
+    #       if f['length'] >= 4:
+    #           mask = numpy.frombuffer(buf, dtype=numpy.dtype('<u4'),
+    #                   offset=f['hlen'], count=1)
+    #           data = numpy.frombuffer(buf, dtype=numpy.dtype('<u4'),
+    #                   offset=f['hlen'] + 4, count=int(f['length'] / 4))
+    #           #b = numpy.bitwise_xor(data, mask).data
+    #           b = numpy.bitwise_xor(data, mask).tostring()
+
+    #       if f['length'] % 4:
+    #           print("Partial unmask")
+    #           mask = numpy.frombuffer(buf, dtype=numpy.dtype('B'),
+    #                   offset=f['hlen'], count=(f['length'] % 4))
+    #           data = numpy.frombuffer(buf, dtype=numpy.dtype('B'),
+    #                   offset=full_len - (f['length'] % 4),
+    #                   count=(f['length'] % 4))
+    #           c = numpy.bitwise_xor(data, mask).tostring()
+    #       f['payload'] = b + c
+    #   else:
+    #       print("Unmasked frame: %s" % repr(buf))
+    #       f['payload'] = buf[(f['hlen'] + has_mask * 4):full_len]
+
+    #   if base64 and f['opcode'] in [1, 2]:
+    #       try:
+    #           f['payload'] = b64decode(f['payload'])
+    #       except:
+    #           print("Exception while b64decoding buffer: %s" %
+    #                   repr(buf))
+    #           raise
+
+    #   if f['opcode'] == 0x08:
+    #       if f['length'] >= 2:
+    #           f['close_code'] = struct.unpack_from(">H", f['payload'])
+    #       if f['length'] > 3:
+    #           f['close_reason'] = f['payload'][2:]
+
+    #   return f
+
   end
 end
