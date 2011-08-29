@@ -1,3 +1,5 @@
+require File.expand_path(File.dirname(__FILE__) + '/constants')
+require File.expand_path(File.dirname(__FILE__) + '/websocket')
 require File.expand_path(File.dirname(__FILE__) + '/implementation')
 require File.expand_path(File.dirname(__FILE__) + '/httpparser')
 require File.expand_path(File.dirname(__FILE__) + '/httpgenerator')
@@ -7,8 +9,6 @@ require File.expand_path(File.dirname(__FILE__) + '/error')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper')
 
 require 'rack'
-require 'base64'
-require 'digest/sha1'
 require 'mongrel'
 require 'stringio'
 require 'rack/content_length'
@@ -17,42 +17,6 @@ require 'rack/chunked'
 module Rack #{{{
   module Handler
     class Mongrel < ::Mongrel::HttpHandler
-      def self.run(app, options={})
-        server = ::Mongrel::HttpServer.new(
-          options[:Host]           || '0.0.0.0',
-          options[:Port]           || 8080,
-          options[:num_processors] || 950,
-          options[:throttle]       || 0,
-          options[:timeout]        || 60)
-        # Acts like Rack::URLMap, utilizing Mongrel's own path finding methods.
-        # Use is similar to #run, replacing the app argument with a hash of
-        # { path=>app, ... } or an instance of Rack::URLMap.
-        if options[:map]
-          if app.is_a? Hash
-            app.each do |path, appl|
-              path = '/'+path unless path[0] == ?/
-              server.register(path, Rack::Handler::Mongrel.new(appl))
-            end
-          elsif app.is_a? URLMap
-            app.instance_variable_get(:@mapping).each do |(host, path, appl)|
-             next if !host.nil? && !options[:Host].nil? && options[:Host] != host
-             path = '/'+path unless path[0] == ?/
-             server.register(path, Rack::Handler::Mongrel.new(appl))
-            end
-          else
-            raise ArgumentError, "first argument should be a Hash or URLMap"
-          end
-        else
-          server.register('/', Rack::Handler::Mongrel.new(app))
-        end
-        yield server  if block_given?
-        server.run.join
-      end
-
-      def initialize(app)
-        @app = Rack::Chunked.new(Rack::ContentLength.new(app))
-      end
-
       def process(request, response)
         env = {}.replace(request.params)
         env.delete "HTTP_CONTENT_TYPE"
@@ -67,10 +31,12 @@ module Rack #{{{
                     "rack.input" => rack_input,
                     "rack.errors" => $stderr,
                     "rack.io" => response.socket,
+
                     "rack.multithread" => true,
                     "rack.multiprocess" => false, # ???
                     "rack.run_once" => false,
-                    "rack.url_scheme" => "http"
+
+                    "rack.url_scheme" => ["yes", "on", "1"].include?(env["HTTPS"]) ? "https" : "http"
                    })
         env["QUERY_STRING"] ||= ""
 
@@ -114,19 +80,6 @@ module Riddl
   end
 
   class Server
-    BOUNDARY = "Time_is_an_illusion._Lunchtime_doubly_so.0xriddldata"
-    EOL = "\r\n"
-    WS_HANDSHAKE_00 = "HTTP/1.1 101 Web Socket Protocol Handshake" + EOL +
-                      "Upgrade: WebSocket" + EOL +
-                      "Connection: Upgrade" + EOL +
-                      "Sec-WebSocket-Origin: %s" + EOL +
-                      "Sec-WebSocket-Location: %s" + EOL + EOL +
-                      "%s"
-    WS_HANDSHAKE_08 = "HTTP/1.1 101 Switching Protocols" + EOL +
-                      "Upgrade: websocket" + EOL +
-                      "Connection: Upgrade" + EOL +
-                      "Sec-WebSocket-Accept: %s" + EOL + EOL
-
     def initialize(riddl,&blk)# {{{
       @riddl_norun = true
       @riddl_logger = nil
@@ -186,22 +139,8 @@ module Riddl
         ).params
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
 
-        if @riddl_env["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/i && @riddl_env["HTTP_SEC_WEBSOCKET_ORIGIN"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY"]
-          sec = @riddl_env["HTTP_SEC_WEBSOCKET_KEY"].strip
-          key = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
-          @riddl_env["rack.io"].write(WS_HANDSHAKE_08 % [ws_security_digest_08(sec,key)])
-
-          @riddl_env["rack.io"].flush
-          @riddl_path = '/'
-          @riddl_res.status = 404
-          instance_exec(info, &@riddl_blk)  
-        elsif @riddl_env["HTTP_CONNECTION"] =~ /\AUpgrade\z/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/ && @riddl_env["HTTP_ORIGIN"] && @riddl_env["HTTP_HOST"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY1"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY2"]
-          sec1 = @riddl_env["HTTP_SEC_WEBSOCKET_KEY1"]
-          sec2 = @riddl_env["HTTP_SEC_WEBSOCKET_KEY2"]
-          key  = @riddl_env["rack.input"].read(8)
-          @riddl_env["rack.io"].write(WS_HANDSHAKE % [@riddl_env["HTTP_ORIGIN"], ws_location, ws_security_digest(sec1,sec2,key)])
-
-          @riddl_env["rack.io"].flush
+        if @riddl_env["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/i
+          @riddl_env["HTTP_SEC_WEBSOCKET_VERSION"] = Riddl::WebSocket.handshake @riddl_env
           @riddl_path = '/'
           @riddl_res.status = 404
           instance_exec(info, &@riddl_blk)  
@@ -272,9 +211,9 @@ module Riddl
       return if @riddl_norun
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
-        w = what.new(info(:a => args, :io => @riddl_env['rack.io']))
+        w = what.new(info(:a => args, :io => @riddl_env['rack.io'], :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION']))
         w.onopen
-        while data = ws_read
+        while data = Riddl::WebSocket::read(@riddl_env['rack.io'], @riddl_env['HTTP_SEC_WEBSOCKET_VERSION'])
           w.onmessage(data)
         end  
         w.onclose
@@ -348,144 +287,5 @@ module Riddl
     def facade# {{{
       @riddl_declaration
     end# }}}
-
-  private
-    def ws_security_digest_00(key1, key2, key3)
-      bytes1 = ws_key_to_bytes(key1)
-      bytes2 = ws_key_to_bytes(key2)
-      return Digest::MD5.digest(bytes1 + bytes2 + key3)
-    end
-    def ws_key_to_bytes(key)
-      num = key.gsub(/\D/n, '').to_i() / key.scan(/ /).size
-      return [num].pack("N")
-    end
-
-    def ws_security_digest_08(key1, key2)
-      return Base64::encode64(Digest::SHA1.digest(key1+key2))
-    end
-
-    def ws_location
-      host   = @riddl_env['SERVER_NAME']
-      scheme = @riddl_env['rack.url_scheme'] == "https" ? "wss" : "ws"
-      path   = @riddl_env['REQUEST_URI']
-      port   = @riddl_env['SERVER_PORT']
-      
-      rv = "#{scheme}://#{host}"
-      if (scheme == "wss" && port != 443) || (scheme == "ws" && port != 80)
-        rv << ":#{port}"
-      end
-      rv << path
-    end
-
-    def ws_read
-      if packet = @riddl_env['rack.io'].gets("\xff")
-        return nil if (packet == "\xff")
-        if !(packet =~ /\A\x00(.*)\xff\z/nm)
-          raise(Riddl::WebSocketError, "input must start with \\x00 and end with \\xff")
-        end
-        $1.respond_to?(:force_encoding) ? $1.force_encoding('UTF-8') : $1
-      else
-        nil
-      end
-    end
-
-    # def decode_hybi(buf, base64=False):
-    #   """ Decode HyBi style WebSocket packets.
-    #   Returns:
-    #   {'fin' : 0_or_1,
-    #   'opcode' : number,
-    #   'mask' : 32_bit_number,
-    #   'hlen' : header_bytes_number,
-    #   'length' : payload_bytes_number,
-    #   'payload' : decoded_buffer,
-    #   'left' : bytes_left_number,
-    #   'close_code' : number,
-    #   'close_reason' : string}
-    #   """
-
-    #   f = {'fin' : 0,
-    #        'opcode' : 0,
-    #        'mask' : 0,
-    #        'hlen' : 2,
-    #        'length' : 0,
-    #        'payload' : None,
-    #        'left' : 0,
-    #        'close_code' : None,
-    #        'close_reason' : None}
-
-    #   blen = len(buf)
-    #   f['left'] = blen
-
-    #   if blen < f['hlen']:
-    #       return f # Incomplete frame header
-
-    #   b1, b2 = struct.unpack_from(">BB", buf)
-    #   f['opcode'] = b1 & 0x0f
-    #   f['fin'] = (b1 & 0x80) >> 7
-    #   has_mask = (b2 & 0x80) >> 7
-
-    #   f['length'] = b2 & 0x7f
-
-    #   if f['length'] == 126:
-    #       f['hlen'] = 4
-    #       if blen < f['hlen']:
-    #           return f # Incomplete frame header
-    #       (f['length'],) = struct.unpack_from('>xxH', buf)
-    #   elif f['length'] == 127:
-    #       f['hlen'] = 10
-    #       if blen < f['hlen']:
-    #           return f # Incomplete frame header
-    #       (f['length'],) = struct.unpack_from('>xxQ', buf)
-
-    #   full_len = f['hlen'] + has_mask * 4 + f['length']
-
-    #   if blen < full_len: # Incomplete frame
-    #       return f # Incomplete frame header
-
-    #   # Number of bytes that are part of the next frame(s)
-    #   f['left'] = blen - full_len
-
-    #   # Process 1 frame
-    #   if has_mask:
-    #       # unmask payload
-    #       f['mask'] = buf[f['hlen']:f['hlen']+4]
-    #       b = c = ''
-    #       if f['length'] >= 4:
-    #           mask = numpy.frombuffer(buf, dtype=numpy.dtype('<u4'),
-    #                   offset=f['hlen'], count=1)
-    #           data = numpy.frombuffer(buf, dtype=numpy.dtype('<u4'),
-    #                   offset=f['hlen'] + 4, count=int(f['length'] / 4))
-    #           #b = numpy.bitwise_xor(data, mask).data
-    #           b = numpy.bitwise_xor(data, mask).tostring()
-
-    #       if f['length'] % 4:
-    #           print("Partial unmask")
-    #           mask = numpy.frombuffer(buf, dtype=numpy.dtype('B'),
-    #                   offset=f['hlen'], count=(f['length'] % 4))
-    #           data = numpy.frombuffer(buf, dtype=numpy.dtype('B'),
-    #                   offset=full_len - (f['length'] % 4),
-    #                   count=(f['length'] % 4))
-    #           c = numpy.bitwise_xor(data, mask).tostring()
-    #       f['payload'] = b + c
-    #   else:
-    #       print("Unmasked frame: %s" % repr(buf))
-    #       f['payload'] = buf[(f['hlen'] + has_mask * 4):full_len]
-
-    #   if base64 and f['opcode'] in [1, 2]:
-    #       try:
-    #           f['payload'] = b64decode(f['payload'])
-    #       except:
-    #           print("Exception while b64decoding buffer: %s" %
-    #                   repr(buf))
-    #           raise
-
-    #   if f['opcode'] == 0x08:
-    #       if f['length'] >= 2:
-    #           f['close_code'] = struct.unpack_from(">H", f['payload'])
-    #       if f['length'] > 3:
-    #           f['close_reason'] = f['payload'][2:]
-
-    #   return f
-
   end
 end

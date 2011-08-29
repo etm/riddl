@@ -1,10 +1,8 @@
+require File.expand_path(File.dirname(__FILE__) + '/constants')
 require 'stringio'
 
 module Riddl
   class HttpGenerator
-    BOUNDARY = "Time_is_an_illusion._Lunchtime_doubly_so.0xriddldata"
-    EOL = "\r\n"
-
     def initialize(params,headers)
       @params = params
       @headers = headers
