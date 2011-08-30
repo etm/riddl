@@ -21,11 +21,11 @@ EOF
   s.email            = 'juergen.mangler@gmail.com'
   s.homepage         = 'http://www.pri.univie.ac.at/communities/riddl/'
 
-  s.add_development_dependency 'ruby-xml-smart'
-  s.add_development_dependency 'rack'
-  s.add_development_dependency 'mongrel'
-  s.add_development_dependency 'mime-types'
-  s.add_development_dependency 'activesupport'
-  s.add_development_dependency 'i18n'
-  s.add_development_dependency 'bindata'
+  s.add_runtime_dependency 'ruby-xml-smart'
+  s.add_runtime_dependency 'rack'
+  s.add_runtime_dependency 'mongrel'
+  s.add_runtime_dependency 'mime-types'
+  s.add_runtime_dependency 'activesupport'
+  s.add_runtime_dependency 'i18n'
+  s.add_runtime_dependency 'bindata'
 end
