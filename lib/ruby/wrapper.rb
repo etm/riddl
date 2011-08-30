@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'open-uri'
-gem 'ruby-xml-smart', '>= 0.2.2.1'
+gem 'ruby-xml-smart', '>= 0.2.4'
 require 'xml/smart'
 
 module Riddl
@@ -41,6 +41,7 @@ require File.expand_path(File.dirname(__FILE__) + '/wrapper/messageparser')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/resourcechecker')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/layerchecker')
 require File.expand_path(File.dirname(__FILE__) + '/handlers')
+require File.expand_path(File.dirname(__FILE__) + '/roles')
 
 module Riddl
   class Wrapper
@@ -127,15 +128,23 @@ module Riddl
       end
       @description
       #}}}
-    end  
+    end
+
+    def role(path) #{{{
+      description
+      declaration
+      return @description.get_resource(path).role if @is_description
+      return @declaration.get_resource(path).role if @is_declaration
+      nil
+    end #}}}
 
     def io_messages(path,operation,params,headers)
       #{{{
       description
       declaration
-      
+     
       req = @description.get_resource(path).access_methods if @is_description
-      req = @declaration.get_resource(path).composition if @is_declaration
+      req = @declaration.get_resource(path).composition    if @is_declaration
 
       mp = MessageParser.new(params,headers)
       if req.has_key?(operation)
@@ -210,6 +219,16 @@ module Riddl
       @doc.find("//des:parameter/@handler").map{|h|h.to_s}.uniq.each do |h|
         if File.exists?(File.dirname(__FILE__) + '/handlers/' + File.basename(h) + ".rb")
           require File.expand_path(File.dirname(__FILE__) + '/handlers/' + File.basename(h))
+        end
+      end
+      #}}}
+    end
+    def load_necessary_roles!
+      #{{{
+      @doc.find("//des:resource/@role").map{|h|h.to_s}.uniq.each do |h|
+        h = HttpGenerator::escape(h)
+        if File.exists?(File.dirname(__FILE__) + '/roles/' + h + '.rb')
+          require File.expand_path(File.dirname(__FILE__) + '/roles/' + h)
         end
       end
       #}}}

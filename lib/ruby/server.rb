@@ -1,3 +1,5 @@
+require File.expand_path(File.dirname(__FILE__) + '/constants')
+require File.expand_path(File.dirname(__FILE__) + '/websocket')
 require File.expand_path(File.dirname(__FILE__) + '/implementation')
 require File.expand_path(File.dirname(__FILE__) + '/httpparser')
 require File.expand_path(File.dirname(__FILE__) + '/httpgenerator')
@@ -15,42 +17,6 @@ require 'rack/chunked'
 module Rack #{{{
   module Handler
     class Mongrel < ::Mongrel::HttpHandler
-      def self.run(app, options={})
-        server = ::Mongrel::HttpServer.new(
-          options[:Host]           || '0.0.0.0',
-          options[:Port]           || 8080,
-          options[:num_processors] || 950,
-          options[:throttle]       || 0,
-          options[:timeout]        || 60)
-        # Acts like Rack::URLMap, utilizing Mongrel's own path finding methods.
-        # Use is similar to #run, replacing the app argument with a hash of
-        # { path=>app, ... } or an instance of Rack::URLMap.
-        if options[:map]
-          if app.is_a? Hash
-            app.each do |path, appl|
-              path = '/'+path unless path[0] == ?/
-              server.register(path, Rack::Handler::Mongrel.new(appl))
-            end
-          elsif app.is_a? URLMap
-            app.instance_variable_get(:@mapping).each do |(host, path, appl)|
-             next if !host.nil? && !options[:Host].nil? && options[:Host] != host
-             path = '/'+path unless path[0] == ?/
-             server.register(path, Rack::Handler::Mongrel.new(appl))
-            end
-          else
-            raise ArgumentError, "first argument should be a Hash or URLMap"
-          end
-        else
-          server.register('/', Rack::Handler::Mongrel.new(app))
-        end
-        yield server  if block_given?
-        server.run.join
-      end
-
-      def initialize(app)
-        @app = Rack::Chunked.new(Rack::ContentLength.new(app))
-      end
-
       def process(request, response)
         env = {}.replace(request.params)
         env.delete "HTTP_CONTENT_TYPE"
@@ -62,14 +28,15 @@ module Rack #{{{
         rack_input.set_encoding(Encoding::BINARY) if rack_input.respond_to?(:set_encoding)
 
         env.update({"rack.version" => Rack::VERSION,
-                     "rack.input" => rack_input,
-                     "rack.errors" => $stderr,
-                     "rack.io" => response.socket,
-                     "rack.multithread" => true,
-                     "rack.multiprocess" => false, # ???
-                     "rack.run_once" => false,
+                    "rack.input" => rack_input,
+                    "rack.errors" => $stderr,
+                    "rack.io" => response.socket,
 
-                     "rack.url_scheme" => "http",
+                    "rack.multithread" => true,
+                    "rack.multiprocess" => false, # ???
+                    "rack.run_once" => false,
+
+                    "rack.url_scheme" => ["yes", "on", "1"].include?(env["HTTPS"]) ? "https" : "http"
                    })
         env["QUERY_STRING"] ||= ""
 
@@ -113,15 +80,6 @@ module Riddl
   end
 
   class Server
-    BOUNDARY = "Time_is_an_illusion._Lunchtime_doubly_so.0xriddldata"
-    EOL = "\r\n"
-    WS_HANDSHAKE = "HTTP/1.1 101 Web Socket Protocol Handshake" + EOL +
-                   "Upgrade: WebSocket" + EOL +
-                   "Connection: Upgrade" + EOL +
-                   "Sec-WebSocket-Origin: %s" + EOL +
-                   "Sec-WebSocket-Location: %s" + EOL + EOL +
-                   "%s"
-
     def initialize(riddl,&blk)# {{{
       @riddl_norun = true
       @riddl_logger = nil
@@ -181,14 +139,8 @@ module Riddl
         ).params
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
 
-        if @riddl_env["HTTP_CONNECTION"] =~ /\AUpgrade\z/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/ && @riddl_env["HTTP_ORIGIN"] && @riddl_env["HTTP_HOST"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY1"] && @riddl_env["HTTP_SEC_WEBSOCKET_KEY2"]
-
-          sec1 = @riddl_env["HTTP_SEC_WEBSOCKET_KEY1"]
-          sec2 = @riddl_env["HTTP_SEC_WEBSOCKET_KEY2"]
-          key  = @riddl_env["rack.input"].read(8)
-          @riddl_env["rack.io"].write(WS_HANDSHAKE % [@riddl_env["HTTP_ORIGIN"], ws_location, ws_security_digest(sec1,sec2,key)])
-          @riddl_env["rack.io"].flush
-
+        if @riddl_env["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/i
+          @riddl_env["HTTP_SEC_WEBSOCKET_VERSION"] = Riddl::WebSocket.handshake @riddl_env
           @riddl_path = '/'
           @riddl_res.status = 404
           instance_exec(info, &@riddl_blk)  
@@ -259,9 +211,9 @@ module Riddl
       return if @riddl_norun
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
-        w = what.new(info(:a => args, :io => @riddl_env['rack.io']))
+        w = what.new(info(:a => args, :io => @riddl_env['rack.io'], :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION']))
         w.onopen
-        while data = ws_read
+        while data = Riddl::WebSocket::read(@riddl_env['rack.io'], @riddl_env['HTTP_SEC_WEBSOCKET_VERSION'])
           w.onmessage(data)
         end  
         w.onclose
@@ -335,41 +287,5 @@ module Riddl
     def facade# {{{
       @riddl_declaration
     end# }}}
-
-  private
-    def ws_security_digest(key1, key2, key3)
-      bytes1 = ws_key_to_bytes(key1)
-      bytes2 = ws_key_to_bytes(key2)
-      return Digest::MD5.digest(bytes1 + bytes2 + key3)
-    end
-    def ws_key_to_bytes(key)
-      num = key.gsub(/\D/n, '').to_i() / key.scan(/ /).size
-      return [num].pack("N")
-    end
-
-    def ws_location
-      host   = @riddl_env['SERVER_NAME']
-      scheme = @riddl_env['rack.url_scheme'] == "https" ? "wss" : "ws"
-      path   = @riddl_env['REQUEST_URI']
-      port   = @riddl_env['SERVER_PORT']
-      
-      rv = "#{scheme}://#{host}"
-      if (scheme == "wss" && port != 443) || (scheme == "ws" && port != 80)
-        rv << ":#{port}"
-      end
-      rv << path
-    end
-
-    def ws_read
-      if packet = @riddl_env['rack.io'].gets("\xff")
-        return nil if (packet == "\xff")
-        if !(packet =~ /\A\x00(.*)\xff\z/nm)
-          raise(Riddl::WebSocketError, "input must start with \\x00 and end with \\xff")
-        end
-        $1.respond_to?(:force_encoding) ? $1.force_encoding('UTF-8') : $1
-      else
-        nil
-      end
-    end
   end
 end

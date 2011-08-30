@@ -43,10 +43,8 @@ module Riddl
     def on;end
 
     def send(data)
-      str = data.dup
-      data = data.respond_to?(:force_encoding) ? data.dup.force_encoding("ASCII-8BIT") : data
-      @ws[:io].write("\x00#{data}\xff")
-      @ws[:io].flush
+      Riddl::WebSocket::send @ws[:io], @ws[:version], data
     end
+
   end
 end

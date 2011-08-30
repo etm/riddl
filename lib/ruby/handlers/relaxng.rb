@@ -5,7 +5,6 @@ module Riddl
         # TODO XML Smart should understand ruby filehandles
         if what.class == Riddl::Parameter::Tempfile
           w = what.read
-          what.rewind
         else  
           w = what
         end  

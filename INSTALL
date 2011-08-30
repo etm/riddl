@@ -4,6 +4,7 @@ sudo apt-get install libxml2-dev libxslt1-dev zlib1g-dev ruby1.8-dev build-essen
 sudo gem install ruby-xml-smart (>= 0.2.1.1 needed)
 sudo gem install rack mongrel mime-types
 sudo gem install activesupport i18n
+sudo gem install bindata
 
 For websocket support /lib/ruby/server.rb includes a custom mongrel handler.
 

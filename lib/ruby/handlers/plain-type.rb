@@ -4,7 +4,6 @@ module Riddl
       def self::handle(what,hinfo)
         if what.class == Riddl::Parameter::Tempfile
           w = what.read
-          what.rewind
         else  
           w = what
         end  

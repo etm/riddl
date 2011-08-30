@@ -186,7 +186,12 @@
   <define name="riddl-resource-attributes">
     <optional>
       <attribute name="pattern">
-        <data type="string"/>
+        <data type="anyURI"/>
+      </attribute>  
+    </optional>
+    <optional>
+      <attribute name="role">
+        <data type="anyURI"/>
       </attribute>  
     </optional>
     <ref name="riddl-description-other-atts"/>

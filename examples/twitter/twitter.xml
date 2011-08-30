@@ -1,7 +1,6 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="update">
-    <header name="Authorization" type="string"/>
     <parameter name="status" type="string"/>
     <optional>
       <parameter name="in_reply_to_status_id" type="string"/>
@@ -24,17 +23,33 @@
     <parameter name="return" mimetype="application/xml"/>
   </message>
 
+  <message name="oauth">
+    <header name="Authorization" type="string"/>
+  </message>  
+  <message name="oauth_response">
+    <parameter name="return" mimetype="*" handler="http://riddl.org/ns/handlers/oauth"/>
+  </message>  
+
   <resource>
+    <resource relative="oauth">
+      <resource relative="request_token" role="http://oauth.net/1.0/request_token">
+        <post in="oauth" out="oauth_response"/>
+      </resource>
+      <resource relative="access_token" role="http://oauth.net/1.0/access_token">
+        <post in="oauth" out="oauth_response"/>
+      </resource>
+    </resource>
+
     <resource relative="statuses">
       <resource relative="show">
         <resource relative="\d+\.xml">
           <get in="*" out="xml"/>
         </resource>
       </resource>
-      <resource relative="update.xml">
+      <resource relative="update.xml" role="http://oauth.net/1.0/on_behalf">
         <post in="update" out="xml"/>
       </resource>
     </resource>
-  </resource>  
+  </resource>
 
 </description>

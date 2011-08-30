@@ -1,3 +1,4 @@
+require File.expand_path(File.dirname(__FILE__) + '/constants')
 require File.expand_path(File.dirname(__FILE__) + "/parameter")
 
 module Riddl
@@ -27,8 +28,6 @@ module Riddl
       'application/x-www-form-urlencoded'
       #}}}
     ]  
-    EOL = "\r\n"
-    D = '&;'
 
     def self::unescape(s)
       #{{{

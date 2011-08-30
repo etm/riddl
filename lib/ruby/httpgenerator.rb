@@ -1,10 +1,8 @@
+require File.expand_path(File.dirname(__FILE__) + '/constants')
 require 'stringio'
 
 module Riddl
   class HttpGenerator
-    BOUNDARY = "Time_is_an_illusion._Lunchtime_doubly_so.0xriddldata"
-    EOL = "\r\n"
-
     def initialize(params,headers)
       @params = params
       @headers = headers
@@ -12,11 +10,11 @@ module Riddl
 
     # Performs URI escaping so that you can construct proper
     # query strings faster.  Use this rather than the cgi.rb
-    # version since it's faster. (Stolen from Camping).
+    # version since it's faster. (%20 instead of + for improved standards conformance).
     def self.escape(s)
-      s.to_s.gsub(/([^ a-zA-Z0-9_.-]+)/n) {
+      s.to_s.gsub(/([^a-zA-Z0-9_.-]+)/n) {
         '%'+$1.unpack('H2'*$1.size).join('%').upcase
-      }.tr(' ', '+')
+      }
     end
 
     def generate(mode=:output)
