@@ -3,7 +3,10 @@ require 'digest/sha1'
 require 'bindata'
 
 module Riddl
+
   module WebSocket
+    class Error < RuntimeError; end
+
     HANDSHAKE_08 = "HTTP/1.1 101 Switching Protocols" + EOL +
                    "Upgrade: websocket" + EOL +
                    "Connection: Upgrade" + EOL +
@@ -97,116 +100,47 @@ module Riddl
     ################
 
     def self::read(io,version)
-      p 'nuller'
-      if packet = io.gets("\xff")
-        return nil if (packet == "\xff")
-        if !(packet =~ /\A\x00(.*)\xff\z/nm)
-          raise(Riddl::WebSocketError, "input must start with \\x00 and end with \\xff")
+      if version < 7 
+        if packet = io.gets("\xff")
+          return nil if (packet == "\xff")
+          if !(packet =~ /\A\x00(.*)\xff\z/nm)
+            raise(Riddl::WebSocket::Error, "input must start with \\x00 and end with \\xff")
+          end
+          $1.respond_to?(:force_encoding) ? $1.force_encoding('UTF-8') : $1
+        else
+          nil
         end
-        $1.respond_to?(:force_encoding) ? $1.force_encoding('UTF-8') : $1
-      else
-        nil
-      end
+      elsif version >= 7 
+        b1 = BinData::Uint8be.read(io); raise(Riddl::WebSocket::Error, 'strange frame format b1') if b1.nil?
+        b2 = BinData::Uint8be.read(io); raise(Riddl::WebSocket::Error, 'strange frame format b2') if b2.nil?
+
+        opcode = b1 & 0x0f
+        has_mask = (b2 & 0x80) >> 7
+        len = b2 & 0x7f
+        if len == 126
+          len = BinData::Uint16be.read(io)
+        elsif len == 127  
+          len = BinData::Uint64be.read(io)
+        end
+
+        mask_key = io.read(has_mask * 4)
+
+        ret = nil
+        if has_mask == 1
+          dat = io.read(len)
+          cnt = 0
+          dat.each_byte do |b|
+            ret << (b ^ mask_key[cnt % mask_key.length])
+            cnt += 1
+          end
+        else  
+          ret = io.read(len)
+          raise Riddl::WebSocket::Error, "unmasked frame: #{ret}"
+        end  
+
+        ret
+      end  
     end
-
-    # def decode_hybi(buf, base64=False):
-    #   """ Decode HyBi style WebSocket packets.
-    #   Returns:
-    #   {'fin' : 0_or_1,
-    #   'opcode' : number,
-    #   'mask' : 32_bit_number,
-    #   'hlen' : header_bytes_number,
-    #   'length' : payload_bytes_number,
-    #   'payload' : decoded_buffer,
-    #   'left' : bytes_left_number,
-    #   'close_code' : number,
-    #   'close_reason' : string}
-    #   """
-
-    #   f = {'fin' : 0,
-    #        'opcode' : 0,
-    #        'mask' : 0,
-    #        'hlen' : 2,
-    #        'length' : 0,
-    #        'payload' : None,
-    #        'left' : 0,
-    #        'close_code' : None,
-    #        'close_reason' : None}
-
-    #   blen = len(buf)
-    #   f['left'] = blen
-
-    #   if blen < f['hlen']:
-    #       return f # Incomplete frame header
-
-    #   b1, b2 = struct.unpack_from(">BB", buf)
-    #   f['opcode'] = b1 & 0x0f
-    #   f['fin'] = (b1 & 0x80) >> 7
-    #   has_mask = (b2 & 0x80) >> 7
-
-    #   f['length'] = b2 & 0x7f
-
-    #   if f['length'] == 126:
-    #       f['hlen'] = 4
-    #       if blen < f['hlen']:
-    #           return f # Incomplete frame header
-    #       (f['length'],) = struct.unpack_from('>xxH', buf)
-    #   elif f['length'] == 127:
-    #       f['hlen'] = 10
-    #       if blen < f['hlen']:
-    #           return f # Incomplete frame header
-    #       (f['length'],) = struct.unpack_from('>xxQ', buf)
-
-    #   full_len = f['hlen'] + has_mask * 4 + f['length']
-
-    #   if blen < full_len: # Incomplete frame
-    #       return f # Incomplete frame header
-
-    #   # Number of bytes that are part of the next frame(s)
-    #   f['left'] = blen - full_len
-
-    #   # Process 1 frame
-    #   if has_mask:
-    #       # unmask payload
-    #       f['mask'] = buf[f['hlen']:f['hlen']+4]
-    #       b = c = ''
-    #       if f['length'] >= 4:
-    #           mask = numpy.frombuffer(buf, dtype=numpy.dtype('<u4'),
-    #                   offset=f['hlen'], count=1)
-    #           data = numpy.frombuffer(buf, dtype=numpy.dtype('<u4'),
-    #                   offset=f['hlen'] + 4, count=int(f['length'] / 4))
-    #           #b = numpy.bitwise_xor(data, mask).data
-    #           b = numpy.bitwise_xor(data, mask).tostring()
-
-    #       if f['length'] % 4:
-    #           print("Partial unmask")
-    #           mask = numpy.frombuffer(buf, dtype=numpy.dtype('B'),
-    #                   offset=f['hlen'], count=(f['length'] % 4))
-    #           data = numpy.frombuffer(buf, dtype=numpy.dtype('B'),
-    #                   offset=full_len - (f['length'] % 4),
-    #                   count=(f['length'] % 4))
-    #           c = numpy.bitwise_xor(data, mask).tostring()
-    #       f['payload'] = b + c
-    #   else:
-    #       print("Unmasked frame: %s" % repr(buf))
-    #       f['payload'] = buf[(f['hlen'] + has_mask * 4):full_len]
-
-    #   if base64 and f['opcode'] in [1, 2]:
-    #       try:
-    #           f['payload'] = b64decode(f['payload'])
-    #       except:
-    #           print("Exception while b64decoding buffer: %s" %
-    #                   repr(buf))
-    #           raise
-
-    #   if f['opcode'] == 0x08:
-    #       if f['length'] >= 2:
-    #           f['close_code'] = struct.unpack_from(">H", f['payload'])
-    #       if f['length'] > 3:
-    #           f['close_reason'] = f['payload'][2:]
-
-    #   return f
-
 
   end
 end
