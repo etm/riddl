@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.99.8"
+  s.version          = "0.99.9"
   s.platform         = Gem::Platform::RUBY
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
 
@@ -27,4 +27,5 @@ EOF
   s.add_development_dependency 'mime-types'
   s.add_development_dependency 'activesupport'
   s.add_development_dependency 'i18n'
+  s.add_development_dependency 'bindata'
 end
