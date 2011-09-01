@@ -125,7 +125,7 @@ module Riddl
 
         mask_key = io.read(has_mask * 4)
 
-        ret = nil
+        ret = ''
         if has_mask == 1
           dat = io.read(len)
           cnt = 0
