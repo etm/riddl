@@ -113,8 +113,12 @@ module Riddl
       elsif version >= 7 
         b1 = BinData::Uint8be.read(io); raise(Riddl::WebSocket::Error, 'strange frame format b1') if b1.nil?
         b2 = BinData::Uint8be.read(io); raise(Riddl::WebSocket::Error, 'strange frame format b2') if b2.nil?
-
         opcode = b1 & 0x0f
+
+        if opcode == 8 # close socket signal
+          return nil
+        end  
+
         has_mask = (b2 & 0x80) >> 7
         len = b2 & 0x7f
         if len == 126
