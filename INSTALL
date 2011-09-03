@@ -1,13 +1,22 @@
 == Ubuntu & Debian
 
 sudo apt-get install libxml2-dev libxslt1-dev zlib1g-dev ruby1.8-dev build-essential ruby ruby1.8 rubygems
-sudo gem install ruby-xml-smart (>= 0.2.1.1 needed)
-sudo gem install rack mongrel mime-types
-sudo gem install activesupport i18n
-sudo gem install bindata
-
-For websocket support /lib/ruby/server.rb includes a custom mongrel handler.
+sudo gem install pkg/riddl.gem
 
 == Others
 
 find out yourself
+
+== Gem Dependencies
+
+You don't need to care about them, as they will be automatically installed
+during the installation of the riddl.gem. Here is a list of them just in case
+you are interessted:
+
+* ruby-xml-smart (>= 0.2.1.1 needed)
+* rack
+* mongrel 
+* mime-types
+* activesupport 
+* i18n
+* bindata
