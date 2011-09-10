@@ -205,7 +205,7 @@ module Riddl
                   if c.length == 1 && c.first.class == XML::Smart::Dom::Element
                     return Riddl::Parameter::Complex.new("content","text/xml",c.first.dump)
                   else
-                    return Riddl::Parameter::Complex.new("content","text/plain",c.to_s)
+                    return Riddl::Parameter::Complex.new("content","text/plain",c.first.to_s)
                   end
                 else
                   prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
