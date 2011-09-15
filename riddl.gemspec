@@ -25,7 +25,5 @@ EOF
   s.add_runtime_dependency 'rack'
   s.add_runtime_dependency 'mongrel'
   s.add_runtime_dependency 'mime-types'
-  s.add_runtime_dependency 'activesupport'
-  s.add_runtime_dependency 'i18n'
   s.add_runtime_dependency 'bindata'
 end

@@ -12,7 +12,7 @@ module Riddl
         end
         Proc.new {
           if get("*")
-            run     Riddl::Utils::Properties::All,            properties,                 handler       
+            run    Riddl::Utils::Properties::All,            properties,                 handler       
           end
           run(     Riddl::Utils::Properties::Query,          properties,                 handler       ) if get    'query'
           on resource 'schema' do
