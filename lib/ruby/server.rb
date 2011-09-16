@@ -80,12 +80,13 @@ module Riddl
   end
 
   class Server
-    def initialize(riddl,&blk)# {{{
+    def initialize(riddl,srvbasepath=nil,&blk)# {{{
       @riddl_norun = true
       @riddl_logger = nil
       @riddl_process_out = true 
       @riddl_cross_site_xhr = false
       @accessible_description = false
+      @riddl_srvbasepath = srvbasepath
       @riddl_blk =  nil
       instance_eval(&blk)
       @riddl_norun = false
@@ -113,7 +114,8 @@ module Riddl
     end# }}}
 
     def _call(env)
-      time = Time.now  unless @riddl_logger.nil?
+      Dir.chdir(@riddl_srvbasepath) if @riddl_srvbasepath 
+      time = Time.now unless @riddl_logger.nil?
       @riddl_pinfo = env["PATH_INFO"].gsub(/\/+/,'/')
       @riddl_env = env
       @riddl_req = Rack::Request.new(env)
