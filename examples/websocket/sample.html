@@ -5,13 +5,8 @@
   
   <script type="text/javascript">
     function init() {
-      if ('WebSocket' in window) {
-        ws = new WebSocket("ws://localhost:9292/");
-      } else if ('MozWebSocket' in window) {
-        ws = new MozWebSocket("ws://localhost:9292/");
-      } else {
-        return;
-      }
+      var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
+      ws = new Socket("ws://localhost:9292/");
 
       ws.onopen = function() {
         output("onopen");

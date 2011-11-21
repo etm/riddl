@@ -20,7 +20,7 @@ module Riddl
                    "%s"
 
     def self::handshake(env)
-      if env["HTTP_SEC_WEBSOCKET_ORIGIN"] && env["HTTP_SEC_WEBSOCKET_KEY"]
+      if (env["HTTP_SEC_WEBSOCKET_ORIGIN"] || env["HTTP_ORIGIN"]) && env["HTTP_SEC_WEBSOCKET_KEY"]
         version = env["HTTP_SEC_WEBSOCKET_VERSION"].to_i
         sec = env["HTTP_SEC_WEBSOCKET_KEY"].strip
         key = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
