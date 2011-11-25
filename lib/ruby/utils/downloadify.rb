@@ -7,11 +7,7 @@ module Riddl
       def response
         mimetype = @p.find{|e|e.name == 'mimetype'}.value
         content = @p.find{|e|e.name == 'content'}.value
-        if filename = @p.find{|e|e.name == 'filename'}
-          Riddl::Parameter::Complex.new("content",mimetype,content,filename.value)
-        else  
-          Riddl::Parameter::Complex.new("content",mimetype,content,'change_me.ext')
-        end
+        Riddl::Parameter::Complex.new("content",mimetype,content,@r.last)
       end  
     end
   end  

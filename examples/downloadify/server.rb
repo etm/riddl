@@ -12,6 +12,8 @@ Riddl::Server.new(::File.dirname(__FILE__) + '/server.declaration.xml') do
   accessible_description true
 
   on resource do
-    run Riddl::Utils::Downloadify if get 'dfin'
+    on resource do
+      run Riddl::Utils::Downloadify if get 'dfin'
+    end
   end
 end.loop!

@@ -5,14 +5,13 @@
   </message>
   <message name="dfin">
     <parameter name="mimetype" type="string"/>
-    <optional>
-      <parameter name="filename" type="string"/>
-    </optional>
     <parameter name="content" type="string"/>
   </message>
 
   <resource pattern="http://riddl.org/ns/common-patterns/downloadify/1.0">
-    <get in="dfin" out="dfout"/>
+    <resource>
+      <get in="dfin" out="dfout"/>
+    </resource>  
   </resource>  
 
 </description>
