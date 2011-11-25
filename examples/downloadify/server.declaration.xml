@@ -1,0 +1,17 @@
+<declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <interface name="main">
+    <xi:include href="server.description.xml"/>
+  </interface>
+  <interface name="downloadify">
+    <xi:include href="http://www.riddl.org/ns/common-patterns/downloadify/1.0/downloadify.xml"/>
+  </interface>
+
+  <facade>
+    <tile>
+      <layer name="main"/>
+      <layer name="downloadify">
+        <apply-to>/</apply-to>
+      </layer>
+    </tile>
+  </facade>
+</declaration>
