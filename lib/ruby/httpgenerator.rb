@@ -48,7 +48,7 @@ module Riddl
           @headers['Content-Type'] = r.mimetype
           @headers['Riddl-Type'] = 'complex'
           if r.filename.nil?
-           @headers['Content-ID'] = r.name
+            @headers['Content-ID'] = r.name
           else
             @headers['Content-Disposition'] = "riddl-data; name=\"#{r.name}\"; filename=\"#{r.filename}\""
           end  

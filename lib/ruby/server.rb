@@ -14,6 +14,11 @@ require 'stringio'
 require 'rack/content_length'
 require 'rack/chunked'
 
+$host = 'http://localhost'
+$port = 9298
+$mode = :debug # :production
+$url  = $host + ':' + $port.to_s
+
 module Rack #{{{
   module Handler
     class Mongrel < ::Mongrel::HttpHandler
@@ -80,13 +85,112 @@ module Riddl
   end
 
   class Server
-    def initialize(riddl,srvbasepath=nil,&blk)# {{{
+    def self::config!(base)
+      $basepath = base
+      if File.exists?($basepath + '/server.config.rb')
+        require $basepath + '/server.config'
+      end  
+      $url = $host + ':' + $port.to_s
+    end  
+
+    def loop!
+      ########################################################################################################################
+      # parse arguments
+      ########################################################################################################################
+      verbose = false
+      operation = "start"
+      ARGV.options { |opt|
+        opt.summary_indent = ' ' * 4
+        opt.banner = "Usage:\n#{opt.summary_indent}ruby server.rb [options] start|startclean|stop|restart|info\n"
+        opt.on("Options:")
+        opt.on("--verbose", "-v", "Do not daemonize. Write ouput to console.") { verbose = true }
+        opt.on("--help", "-h", "This text.") { puts opt; exit }
+        opt.separator(opt.summary_indent + "start|stop|restart|info".ljust(opt.summary_width+1) + "Do operation start, stop, restart or get information.")
+        opt.separator(opt.summary_indent + "startclean".ljust(opt.summary_width+1) + "Delete all instances before starting.")
+        opt.parse!
+      }
+      unless %w{start startclean stop restart info}.include?(ARGV[0])
+        puts ARGV.options
+        exit
+      end
+      operation = ARGV[0]
+      
+      ########################################################################################################################
+      # status and info
+      ########################################################################################################################
+      pid = File.read('server.pid') rescue pid = 666
+      status = `ps -u #{Process.uid} | grep "#{pid} "`.scan(/ server\.[^\s]+/)
+      if operation == "info" && status.empty?
+        puts "Server (#{$url}) not running"
+        exit
+      end
+      if operation == "info" && !status.empty?
+        puts "Server (#{$url}) running as #{pid}"
+        stats = `ps -o "vsz,rss,lstart,time" -p #{pid}`.split("\n")[1].strip.split(/ +/)
+        puts "Virtual:  #{"%0.2f" % (stats[0].to_f/1024)} MiB"
+        puts "Resident: #{"%0.2f" % (stats[1].to_f/1024)} MiB"
+        puts "Started:  #{stats[2..-2].join(' ')}"
+        puts "CPU Time: #{stats.last}"
+        exit
+      end
+      if %w{start startclean}.include?(operation) && !status.empty?
+        puts "Server (#{$url}) already started"
+        exit
+      end
+      
+      ########################################################################################################################
+      # stop/restart server
+      ########################################################################################################################
+      if %w{stop restart}.include?(operation)
+        if status.empty?
+          puts "Server (#{$url}) maybe not started?"
+        else
+          puts "Server (#{$url}) stopped"
+          `kill #{pid}`
+          puts "Waiting for 2 seconds to accomplish ..."
+          sleep 2 if operation == "restart"
+        end
+        exit unless operation == "restart"
+      end
+      
+      ########################################################################################################################
+      # start server
+      ########################################################################################################################
+      if operation == 'startclean'
+        Dir.glob(File.expand_path($basepath + '/instances/*')).each do |d|
+          FileUtils.rm_r(d) if File.basename(d) =~ /^\d+$/
+        end
+      end
+      
+      server = if verbose
+        Rack::Server.new(
+          :app => self,
+          :Port => $port,
+          :environment => ($mode == :debug ? 'development' : 'deployment'),
+          :server => 'mongrel',
+          :pid => File.expand_path($basepath + '/server.pid')
+        )
+      else
+        server = Rack::Server.new(
+          :app => self,
+          :Port => $port,
+          :environment => 'none',
+          :server => 'mongrel',
+          :pid => File.expand_path($basepath + '/server.pid'),
+          :daemonize => true
+        )
+      end
+      
+      puts "Server (#{$url}) started"
+      server.start
+    end
+
+    def initialize(riddl,&blk)# {{{
       @riddl_norun = true
       @riddl_logger = nil
       @riddl_process_out = true 
       @riddl_cross_site_xhr = false
       @accessible_description = false
-      @riddl_srvbasepath = srvbasepath
       @riddl_blk =  nil
       instance_eval(&blk)
       @riddl_norun = false
@@ -114,7 +218,8 @@ module Riddl
     end# }}}
 
     def _call(env)
-      Dir.chdir(@riddl_srvbasepath) if @riddl_srvbasepath 
+      Dir.chdir($basepath) if $basepath
+
       time = Time.now unless @riddl_logger.nil?
       @riddl_pinfo = env["PATH_INFO"].gsub(/\/+/,'/')
       @riddl_env = env
@@ -245,7 +350,7 @@ module Riddl
         headers.each do |h|
           if h.class == Riddl::Header
             @riddl_res[h.name] = h.value
-          end  
+          end 
         end
       end
     end# }}}
