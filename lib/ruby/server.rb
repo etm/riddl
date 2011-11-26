@@ -85,15 +85,15 @@ module Riddl
   end
 
   class Server
-    def self::config!(base)
+    def self::config!(base) #{{{
       $basepath = base
-      if File.exists?($basepath + '/server.config.rb')
-        require $basepath + '/server.config'
+      if File.exists?($basepath + '/server.config')
+        eval(File.read($basepath + '/server.config'))
       end  
       $url = $host + ':' + $port.to_s
-    end  
+    end   #}}}
 
-    def loop!
+    def loop! #{{{
       ########################################################################################################################
       # parse arguments
       ########################################################################################################################
@@ -183,7 +183,7 @@ module Riddl
       
       puts "Server (#{$url}) started"
       server.start
-    end
+    end #}}}
 
     def initialize(riddl,&blk)# {{{
       @riddl_norun = true
