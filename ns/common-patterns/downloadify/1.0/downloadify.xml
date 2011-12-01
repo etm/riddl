@@ -11,6 +11,7 @@
   <resource pattern="http://riddl.org/ns/common-patterns/downloadify/1.0">
     <resource>
       <get in="dfin" out="dfout"/>
+      <post in="dfin" out="dfout"/>
     </resource>  
   </resource>  
 

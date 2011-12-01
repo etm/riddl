@@ -14,6 +14,7 @@ Riddl::Server.new(::File.dirname(__FILE__) + '/server.declaration.xml') do
   on resource do
     on resource do
       run Riddl::Utils::Downloadify if get 'dfin'
+      run Riddl::Utils::Downloadify if post 'dfin'
     end
   end
 end.loop!
