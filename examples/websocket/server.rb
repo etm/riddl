@@ -1,10 +1,11 @@
-#\ -p 9292
+#!/usr/bin/ruby
+$0 = "websocket"
+
+require 'rubygems'
 require 'pp'
 require 'fileutils'
 require '../../lib/ruby/server'
 require 'digest/md5'
-
-use Rack::ShowStatus
 
 class Bar < Riddl::Implementation
   def response  
@@ -28,9 +29,9 @@ class Echo < Riddl::WebSocketImplementation
   end
 end
 
-run Riddl::Server.new(::File.dirname(__FILE__) + '/description.xml') {
+Riddl::Server.new($basepath + '/description.xml') do
   on resource do
     run Bar if get '*'
     run Echo if websocket
   end
-}
+end.loop!

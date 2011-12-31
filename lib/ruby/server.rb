@@ -8,70 +8,16 @@ require File.expand_path(File.dirname(__FILE__) + '/parameter')
 require File.expand_path(File.dirname(__FILE__) + '/error')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper')
 
-require 'rack'
-require 'mongrel'
+require 'optparse'
 require 'stringio'
 require 'rack/content_length'
 require 'rack/chunked'
 
-$host = 'http://localhost'
-$port = 9298
-$mode = :debug # :production
-$url  = $host + ':' + $port.to_s
-
-module Rack #{{{
-  module Handler
-    class Mongrel < ::Mongrel::HttpHandler
-      def process(request, response)
-        env = {}.replace(request.params)
-        env.delete "HTTP_CONTENT_TYPE"
-        env.delete "HTTP_CONTENT_LENGTH"
-
-        env["SCRIPT_NAME"] = ""  if env["SCRIPT_NAME"] == "/"
-
-        rack_input = request.body || StringIO.new('')
-        rack_input.set_encoding(Encoding::BINARY) if rack_input.respond_to?(:set_encoding)
-
-        env.update({"rack.version" => Rack::VERSION,
-                    "rack.input" => rack_input,
-                    "rack.errors" => $stderr,
-                    "rack.io" => response.socket,
-
-                    "rack.multithread" => true,
-                    "rack.multiprocess" => false, # ???
-                    "rack.run_once" => false,
-
-                    "rack.url_scheme" => ["yes", "on", "1"].include?(env["HTTPS"]) ? "https" : "http"
-                   })
-        env["QUERY_STRING"] ||= ""
-
-        status, headers, body = @app.call(env)
-
-        begin
-          response.status = status.to_i
-          response.send_status(nil)
-
-          headers.each { |k, vs|
-            vs.split("\n").each { |v|
-              response.header[k] = v
-            }
-          }
-          response.send_header
-
-          body.each { |part|
-            response.write part
-            response.socket.flush
-          }
-        ensure
-          body.close  if body.respond_to? :close
-        end
-      end
-    end
-  end
-end #}}}
+$host = 'http://localhost' unless $host
+$port = 9292               unless $port
+$mode = :debug             unless $mode # :production
 
 module Riddl
-
   module Utils
     module Description
 
@@ -166,8 +112,8 @@ module Riddl
         Rack::Server.new(
           :app => self,
           :Port => $port,
-          :environment => ($mode == :debug ? 'development' : 'deployment'),
-          :server => 'mongrel',
+          :environment => ($mode == :debug ? 'deployment' : 'none'),
+          :server => 'thin',
           :pid => File.expand_path($basepath + '/server.pid')
         )
       else
@@ -175,7 +121,7 @@ module Riddl
           :app => self,
           :Port => $port,
           :environment => 'none',
-          :server => 'mongrel',
+          :server => 'thin',
           :pid => File.expand_path($basepath + '/server.pid'),
           :daemonize => true
         )
@@ -217,7 +163,7 @@ module Riddl
       dup._call(env)
     end# }}}
 
-    def _call(env)
+    def _call(env) #{{{
       Dir.chdir($basepath) if $basepath
 
       time = Time.now unless @riddl_logger.nil?
@@ -247,10 +193,9 @@ module Riddl
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
 
         if @riddl_env["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/i
-          @riddl_env["HTTP_SEC_WEBSOCKET_VERSION"] = Riddl::WebSocket.handshake @riddl_env
           @riddl_path = '/'
-          @riddl_res.status = 404
-          instance_exec(info, &@riddl_blk)  
+          instance_exec(info, &@riddl_blk)
+          return [-1, {}, []]
         else
           @riddl_message = @riddl_description.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
           if @riddl_message.nil?
@@ -282,7 +227,7 @@ module Riddl
       end
       @riddl_logger.info(@riddl_env,@riddl_res,time) unless @riddl_logger.nil?
       @riddl_res.finish
-    end
+    end #}}}
   
     def on(resource, &block)# {{{
       if @riddl_norun
@@ -318,12 +263,19 @@ module Riddl
       return if @riddl_norun
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
-        w = what.new(info(:a => args, :io => @riddl_env['rack.io'], :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION']))
-        w.onopen
-        while data = Riddl::WebSocket::read(@riddl_env['rack.io'], @riddl_env['HTTP_SEC_WEBSOCKET_VERSION'])
-          w.onmessage(data)
-        end  
-        w.onclose
+        request = {}
+        request['path']   = @riddl_env['REQUEST_PATH'].to_s 
+        request['method'] = @riddl_env['REQUEST_METHOD'] 
+        request['query']  = @riddl_env['QUERY_STRING'].to_s 
+        request['Body']   = @riddl_env['rack.input'].read
+        @riddl_env.each do |key, value| 
+          if key.match(/HTTP_(.+)/) 
+            request[$1.downcase.gsub('_','-')] ||= value 
+          end 
+        end
+        w = what.new(info(:a => args, :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION']))
+        w.io = Riddl::WebSocket.new(w, @riddl_env['thin.connection'])
+        w.io.dispatch(request)
       end  
       if what.class == Class && what.superclass == Riddl::Implementation
         w = what.new(info(:a => args))
@@ -370,10 +322,10 @@ module Riddl
     def put(min='*');    return if @riddl_norun; check(min) && @riddl_method == 'put' end
     def websocket;       return if @riddl_norun; return false unless @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] end
 
-    def check(min)#  {{{
+    def check(min) # {{{
       return false if @riddl_message.nil? # for websockets no @riddl_message is set
       @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name
-    end# }}}
+    end # }}}
 
     def resource(path=nil); return if @riddl_norun; path.nil? ? '{}' : path end
 
@@ -396,3 +348,5 @@ module Riddl
     end# }}}
   end
 end
+
+Riddl::Server::config! File.expand_path('.')

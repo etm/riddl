@@ -26,25 +26,27 @@ module Riddl
 
   class WebSocketImplementation
     def initialize(ws)
-      @ws = ws
-
-      @r =     ws[:r]     # the matching path
+      @ws    = ws
+      @r     = ws[:r]     # the matching path
       @match = ws[:match] # the path of the branch matching, important for recursive
-      @env =   ws[:env]   # environment (all headers)
-      @a =     ws[:a]     # args to run command
-    end
-
-    def closed?
-      @ws[:io].closed?
+      @env   = ws[:env]   # environment (all headers)
+      @a     = ws[:a]     # args to run command
     end
 
     def onopen;end
     def onclose;end
-    def on;end
+    def onmessage;end
+    def onerror(err);end
 
     def send(data)
-      Riddl::WebSocket::send @ws[:io], @ws[:version], data
+      self.io.send data
     end
 
+    def io=(connection)
+      @ws[:io] = connection
+    end
+    def io
+      @ws[:io]
+    end
   end
 end
