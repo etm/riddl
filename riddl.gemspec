@@ -24,7 +24,7 @@ EOF
   s.add_runtime_dependency 'ruby-xml-smart'
   s.add_runtime_dependency 'rack'
   s.add_runtime_dependency 'thin'
-  s.add_runtime_dependency 'eventmachine', '>= 1.0'
+  s.add_runtime_dependency 'eventmachine', '>= 1.0.0.beta.4'
   s.add_runtime_dependency 'em-websocket'
   s.add_runtime_dependency 'mime-types'
 end
