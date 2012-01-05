@@ -55,17 +55,22 @@ module Riddl
       @socket.close_connection(*args)
     end
 
-    def trigger_on_message(msg); @app.onmessage(msg);       end
-    def trigger_on_open;         @app.onopen;               end
-    def trigger_on_close;        @app.onclose;              end
-    def trigger_on_error(error); @app.onerror(error); true; end
+    def trigger_on_message(msg); @app.onmessage(msg);                        end
+    def trigger_on_open;         @closed = false; @app.onopen;               end
+    def trigger_on_close;        @closed = true;  @app.onclose;              end
+    def trigger_on_error(error); @closed = true;  @app.onerror(error); true; end
 
     def initialize(app, socket)
       @app = app
       @socket = socket
       @ssl = socket.backend.respond_to?(:ssl?) && socket.backend.ssl?
+      @closed = true
       socket.websocket = self
       socket.comm_inactivity_timeout = 0
+    end
+
+    def closed?
+      @closed
     end
 
     def dispatch(data)

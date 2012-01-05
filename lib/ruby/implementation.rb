@@ -48,5 +48,8 @@ module Riddl
     def io
       @ws[:io]
     end
+    def closed?
+      @ws[:io].closed?
+    end  
   end
 end
