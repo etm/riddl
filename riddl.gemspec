@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.99.20"
+  s.version          = "0.99.21"
   s.platform         = Gem::Platform::RUBY
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
 
@@ -24,7 +24,7 @@ EOF
   s.add_runtime_dependency 'ruby-xml-smart'
   s.add_runtime_dependency 'rack'
   s.add_runtime_dependency 'thin'
-  s.add_runtime_dependency 'eventmachine'
+  s.add_runtime_dependency 'eventmachine', '>= 1.0'
   s.add_runtime_dependency 'em-websocket'
   s.add_runtime_dependency 'mime-types'
 end
