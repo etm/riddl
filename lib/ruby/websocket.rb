@@ -48,11 +48,15 @@ module Riddl
     end
 
     def send_data(*args)
-      @socket.send_data(*args)
+      EM.next_tick do
+        @socket.send_data(*args)
+      end  
     end
 
     def close_connection(*args)
-      @socket.close_connection(*args)
+      EM.next_tick do
+        @socket.close_connection(*args)
+      end  
     end
 
     def trigger_on_message(msg); @app.onmessage(msg);                        end
