@@ -126,6 +126,11 @@ module Riddl
           :daemonize => true
         )
       end
+
+      # remove LINT in any case as it breaks websockets
+      server.middleware.each do |k,v|
+        v.delete [Rack::Lint]
+      end  
       
       puts "Server (#{$url}) started"
       server.start
