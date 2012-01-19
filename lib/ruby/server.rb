@@ -112,7 +112,7 @@ module Riddl
         Rack::Server.new(
           :app => self,
           :Port => $port,
-          :environment => ($mode == :debug ? 'deployment' : 'none'),
+          :environment => ($mode == :debug ? 'development' : 'deployment'),
           :server => 'thin',
           :pid => File.expand_path($basepath + '/server.pid')
         )
