@@ -31,10 +31,10 @@ module Riddl
   end
 
   class Server
-    def self::config!(base) #{{{
+    def self::config!(base,conffile='server.config') #{{{
       $basepath = base
-      if File.exists?($basepath + '/server.config')
-        eval(File.read($basepath + '/server.config'))
+      if File.exists?($basepath + '/' + conffile)
+        eval(File.read($basepath + '/' + conffile))
       end  
       $url = $host + ':' + $port.to_s
     end   #}}}
