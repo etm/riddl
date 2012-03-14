@@ -1,0 +1,202 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="topics">
+    <parameter name="topics" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-producer/1.0">
+        <start>
+          <element name="topics">
+            <zeroOrMore>
+              <ref name="topic"/>
+            </zeroOrMore>  
+          </element>
+        </start>
+
+        <define name="topic">
+          <element name="topic">
+            <attribute name="id">
+              <data type="string"/>
+            </attribute>  
+            <zeroOrMore>
+              <element>
+                <choice>
+                  <name>event</name>
+                  <name>vote</name>
+                </choice>
+                <data type="string">
+                  <param name="pattern">[\w-_]+</param>
+                </data>
+              </element>  
+            </zeroOrMore>
+          </element>
+        </define>  
+
+      </grammar>
+    </parameter>
+  </message>
+  
+  <message name="subscriptions">
+    <parameter name="subscriptions" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-producer/1.0">
+        <start>
+          <element name="subscriptions">
+            <attribute name="details">
+              <choice>
+                <value>debug</value>
+                <value>production</value>
+              </choice>  
+            </attribute>
+            <zeroOrMore>
+              <ref name="subscription"/>
+            </zeroOrMore>  
+          </element>
+        </start>
+
+        <define name="subscription">
+          <element name="subscription">
+            <attribute name="id">
+              <data type="string"/>
+            </attribute>
+            <optional>
+              <attribute name="url">
+                <data type="string"/>
+              </attribute>
+            </optional>  
+          </element>
+        </define>
+
+      </grammar>
+    </parameter>
+  </message>
+  
+  <message name="subscription">
+    <parameter name="subscription" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-producer/1.0">
+        <start>
+          <element name="subscription">
+            <optional>
+              <attribute name="url">
+                <data type="string"/>
+              </attribute>
+            </optional>  
+            <oneOrMore>
+              <element name="topic">
+                <attribute name="id">
+                  <data type="string"/>
+                </attribute>  
+                <oneOrMore>
+                  <element>
+                    <choice>
+                      <name>event</name>
+                      <name>vote</name>
+                    </choice>
+                    <data type="string">
+                      <param name="pattern">[\w_]+</param>
+                    </data>
+                  </element>  
+                </oneOrMore>
+              </element>
+            </oneOrMore>
+          </element>
+        </start>
+      </grammar>
+    </parameter>
+    <optional>
+      <parameter name="message-uid" type="string"/>
+      <parameter name="fingerprint-with-producer-secret" type="string"/>
+    </optional>  
+  </message>
+  
+  <message name="delete">
+    <parameter name="message-uid" type="string"/>
+    <parameter name="fingerprint-with-producer-secret" type="string"/>
+  </message>
+  <message name="request">
+    <optional>
+      <parameter name="message-uid" type="string"/>
+      <parameter name="fingerprint-with-producer-secret" type="string"/>
+    </optional>  
+  </message>
+
+  <message name="subscribe">
+    <optional>
+      <parameter name="url" type="string"/>
+      <optional>
+        <parameter name="onbehalf" type="string"/>
+      </optional>  
+    </optional>  
+    <oneOrMore>
+      <parameter name="topic" type="string"/>
+      <choice>
+        <parameter name="votes" type="string">
+          <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
+        </parameter>
+        <parameter name="events" type="string">
+          <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
+        </parameter>
+      </choice>
+    </oneOrMore>
+  </message>  
+  <message name="acknowledgment">
+    <parameter name="key" type="string"/>
+    <parameter name="producer-secret" type="string"/>
+    <parameter name="consumer-secret" type="string"/>
+  </message>
+
+  <message name="details">
+    <parameter name="message-uid" type="string"/>
+    <optional>
+      <parameter name="url" type="string"/>
+    </optional>  
+    <oneOrMore>
+      <parameter name="topic" type="string"/>
+      <choice>
+        <parameter name="votes" type="string">
+           <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
+        </parameter>
+        <parameter name="events" type="string">
+           <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
+        </parameter>
+      </choice>
+    </oneOrMore>
+    <parameter name="fingerprint-with-producer-secret" type="string"/>
+  </message>
+
+  <message name="overview">
+    <parameter name="overview" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-producer/1.0">
+        <start>
+          <element name="overview">
+            <element name="topics">
+              <empty/>
+            </element>
+            <element name="subscriptions">
+              <empty/>
+            </element>
+          </element>
+        </start>
+      </grammar>
+    </parameter>
+  </message>
+
+  <resource pattern="http://riddl.org/ns/common-patterns/notifications-producer/1.0">
+    <resource relative="notifications">
+      <get in="*" out="overview"/>
+      <resource relative="topics">
+        <get in="*" out="topics"/>
+      </resource>
+      <resource relative="subscriptions">
+        <get in="*" out="subscriptions"/>
+        <post in="subscribe" out="acknowledgment"/>
+        <resource>
+          <get    in="request" out="subscription"/>
+          <put    in="details"/>
+          <delete in="delete"/>
+          <resource relative="ws">
+            <websocket/>
+          </resource>
+        </resource>
+      </resource>
+    </resource>
+  </resource>  
+
+</description>

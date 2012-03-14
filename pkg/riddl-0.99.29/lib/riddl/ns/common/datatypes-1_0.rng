@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/datatypes/1.0">
+
+  <define name="riddl-datatype-relpath">
+    <data type="string">
+      <param name="pattern">[\c+*?.\\]+</param>
+    </data>
+  </define>
+  <define name="riddl-datatype-pathtemplate">
+    <data type="string">
+      <param name="pattern">/|(/(\c+|\{\}))*</param>
+    </data>
+  </define>
+
+  <define name="riddl-datatype-name-star">
+    <data type="string">
+      <param name="pattern">\i\c*|\*</param>
+    </data>
+  </define>
+  <define name="riddl-datatype-name">
+    <data type="string">
+      <param name="pattern">\i\c*</param>
+    </data>
+  </define>
+  
+  <define name="riddl-att-name">
+    <attribute name="name">
+      <ref name="riddl-datatype-name"/>
+    </attribute>
+  </define>  
+  <define name="riddl-att-col-remove">
+    <optional>
+      <ref name="riddl-att-name-star"/>
+    </optional>  
+    <optional>
+      <attribute name="type">
+        <choice>
+          <value>header</value>
+          <value>parameter</value>
+        </choice>  
+      </attribute>
+    </optional>
+  </define>  
+  <define name="riddl-att-name-star">
+    <attribute name="name">
+      <ref name="riddl-datatype-name-star"/>
+    </attribute>
+  </define>  
+  <define name="riddl-att-method">
+    <attribute name="method">
+      <data type="string">
+        <param name="pattern">[a-z]+</param>
+      </data>  
+    </attribute>  
+  </define>  
+  <define name="riddl-atts-request">
+    <choice>
+      <attribute name="pass">
+        <ref name="riddl-datatype-name-star"/>
+      </attribute>
+      <attribute name="transformation">
+        <ref name="riddl-datatype-name"/>
+      </attribute>
+      <group>
+        <optional>
+          <attribute name="in">
+            <ref name="riddl-datatype-name-star"/>
+          </attribute>
+        </optional>  
+        <optional>
+          <attribute name="out">
+            <ref name="riddl-datatype-name"/>
+          </attribute>
+        </optional>  
+      </group>
+    </choice>  
+  </define>
+
+</grammar>

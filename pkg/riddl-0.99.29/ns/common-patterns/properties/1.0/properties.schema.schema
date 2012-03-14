@@ -1,0 +1,140 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+  <include href="../../../common/relaxng-modular.rng"/>
+
+  <start>
+    <ref name="metastart"/>
+  </start>  
+
+  <define name="metastart">
+    <element name="properties">
+      <oneOrMore>
+        <choice>
+          <ref name="element"/>
+          <ref name="optional"/>
+        </choice>  
+      </oneOrMore>  
+    </element>  
+  </define>
+
+  <define name="element">
+    <choice>
+      <element>
+        <anyName/>
+        <ref name="modifiable"/>
+        <attribute name="type">
+          <choice>
+            <value>simple</value>
+          </choice>
+        </attribute>
+        <choice>
+          <element name="choice">
+            <ref name="common-atts"/>
+            <oneOrMore>
+              <element name="value">
+                <optional>
+                  <attribute name="type">
+                    <data type="NCName"/>
+                  </attribute>
+                </optional>
+                <ref name="common-atts"/>
+                <text/>
+              </element>
+            </oneOrMore>
+          </element>  
+          <element name="text"><empty/></element>
+          <element name="data">
+            <ref name="common-atts"/>
+            <ref name="data"/>
+          </element>
+        </choice>  
+      </element>
+      <element>
+        <anyName/>
+        <ref name="modifiable"/>
+        <attribute name="type">
+          <choice>
+            <value>arbitrary</value>
+          </choice>
+        </attribute>
+      </element>
+      <element>
+        <anyName/>
+        <ref name="modifiable"/>
+        <attribute name="type">
+          <choice>
+            <value>complex</value>
+          </choice>
+        </attribute>
+        <ref name="same-inside"/>
+      </element>
+      <element>
+        <anyName/>
+        <ref name="modifiable"/>
+        <attribute name="type">
+          <choice>
+            <value>state</value>
+          </choice>
+        </attribute>
+        <oneOrMore>
+          <element>
+            <anyName/>
+            <zeroOrMore>
+              <element>
+                <anyName/>
+                <optional>
+                  <attribute name="putable">
+                    <data type="boolean"/>
+                  </attribute>  
+                </optional>  
+              </element>
+            </zeroOrMore>
+          </element>
+        </oneOrMore>
+      </element>
+    </choice>
+  </define>
+
+  <define name="optional">
+    <element name="optional">
+      <ref name="element"/>
+    </element>
+  </define>
+
+  <define name="modifiable">
+    <choice>
+      <attribute name="modifiable">
+        <choice>
+          <value>true</value>
+        </choice>  
+      </attribute>
+      <group>
+        <attribute name="modifiable">
+          <choice>
+            <value>false</value>
+          </choice>  
+        </attribute>
+        <attribute name="mutable">
+          <data type="boolean"/>
+        </attribute>
+      </group>
+    </choice>  
+  </define>
+    
+  <define name="same-inside">
+    <zeroOrMore>
+      <element>
+        <anyName/>
+        <zeroOrMore>
+          <choice>
+            <attribute>
+              <anyName/>
+            </attribute>
+            <text/>
+            <ref name="any"/>
+          </choice>
+        </zeroOrMore>
+      </element>
+    </zeroOrMore>
+  </define>  
+
+</grammar>

@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/declaration/1.0">
+  <include href="../../description/1.0/description.rng">
+    <start>
+      <ref name="declaration"/>
+    </start>
+  </include>  
+
+  <define name="declaration">
+    <element name="declaration">
+      <ref name="riddl-declaration-other-atts"/>
+      <oneOrMore>
+        <ref name="riddl-interface"/>
+      </oneOrMore>
+      <element name="facade">
+        <ref name="riddl-facade"/>
+      </element>
+    </element>
+  </define>
+
+  <define name="riddl-interface">
+    <element name="interface">
+      <optional>
+        <attribute name="location">
+          <data type="anyURI"/>
+        </attribute>
+      </optional>  
+      <attribute name="name">
+        <ref name="riddl-datatype-name"/>
+      </attribute>
+      <ref name="riddl-description-include"/>
+    </element>
+  </define>  
+
+  <define name="riddl-facade">
+    <oneOrMore>
+      <element name="tile">
+        <optional>
+          <attribute name="path">
+            <ref name="riddl-datatype-pathtemplate"/>
+          </attribute>
+        </optional>
+        <oneOrMore>
+          <element name="layer">
+            <ref name="riddl-layer"/>
+          </element>
+        </oneOrMore>  
+      </element>
+    </oneOrMore>
+  </define>  
+
+  <define name="riddl-layer">
+    <attribute name="name">
+      <ref name="riddl-datatype-name"/>
+    </attribute>
+    <zeroOrMore>
+      <element name="apply-to">
+        <ref name="riddl-datatype-pathtemplate"/>
+      </element>
+    </zeroOrMore>  
+    <zeroOrMore>
+      <element name="block">
+        <optional>
+          <ref name="riddl-att-method"/>
+        </optional>
+        <optional>
+          <ref name="riddl-atts-request"/>
+        </optional>
+        <ref name="riddl-datatype-pathtemplate"/>
+      </element>  
+    </zeroOrMore>  
+  </define>
+
+  <define name="riddl-description-include">
+    <choice>
+      <element name="include" ns="http://www.w3.org/2001/XInclude">
+        <attribute name="href">
+          <data type="anyURI"/>
+        </attribute>
+      </element>
+      <element name="description" ns="http://riddl.org/ns/description/1.0">
+        <ref name="riddl-description"/>
+      </element>
+    </choice>   
+  </define>
+  
+  <define name="riddl-declaration-others">
+    <ref name="other"/>
+    <zeroOrMore>
+      <attribute>
+        <anyName>
+          <except>
+            <nsName/>
+            <nsName ns=""/>
+          </except>
+        </anyName>
+      </attribute>
+    </zeroOrMore>
+  </define>  
+
+  <define name="riddl-declaration-other-atts">
+    <zeroOrMore>
+      <attribute>
+        <anyName>
+          <except>
+            <nsName/>
+            <nsName ns=""/>
+          </except>
+        </anyName>
+      </attribute>
+    </zeroOrMore>
+  </define>  
+
+</grammar>

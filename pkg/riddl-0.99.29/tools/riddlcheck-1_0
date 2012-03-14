@@ -1,0 +1,36 @@
+#!/usr/bin/ruby 
+curpath = __FILE__
+while ::File::symlink?(curpath)
+  curpath = ::File::dirname(curpath) + '/' + ::File::readlink(curpath)
+end  
+require 'rubygems'
+require ::File::dirname(curpath) + "/../lib/riddl/wrapper"
+require 'optparse'
+
+ARGV.options { |opt|
+  opt.summary_indent = ' ' * 2
+  opt.banner = "Usage:\n#{opt.summary_indent}#{File.basename($0)} [options] [FILENAME]\n"
+  opt.on("Options:")
+  opt.on("--help", "-h", "This text") { puts opt; exit }
+  opt.on("Filename is either a description or a declaration.")
+  opt.parse!
+}
+if ARGV.length == 0 || !File.exists?(ARGV[0])
+  puts ARGV.options
+  exit
+end
+fname = ARGV[0]
+
+riddl = Riddl::Wrapper::new(fname)
+
+if riddl.description?
+  puts 'RIDDL description found.'
+elsif riddl.declaration?
+  puts 'RIDDL declaration found.'
+else  
+  puts 'Neither a RIDDL description, nor a RIDDL declaration.'
+  exit
+end
+
+messages = riddl.validate!
+puts messages ? "RIDDL looks valid." : "RIDDL not valid."
