@@ -92,12 +92,11 @@ module Riddl
           puts "Server (#{$url}) maybe not started?"
         else
           puts "Server (#{$url}) stopped"
-          `kill #{pid}`
           puts "Waiting while server goes down ..."
           until status.empty?
-            pid = File.read('server.pid') rescue pid = 666
+            `kill #{pid} >/dev/null 2>&1`
             status = `ps -u #{Process.uid} | grep "#{pid} "`.scan(/ server\.[^\s]+/)
-            sleep 1
+            sleep 0.3
           end  
         end
         exit unless operation == "restart"
