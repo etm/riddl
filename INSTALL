@@ -19,7 +19,4 @@ you are interessted:
 * mime-types
 * eventmachine (>= 1.0.0.beta.4')
 * em-websocket
-
-If you are interessted in writing websocket clients we recommend
-
-* em-websocket-client (there is no examples included for this)
+* em-websocket-client

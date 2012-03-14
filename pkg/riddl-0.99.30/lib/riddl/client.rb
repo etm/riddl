@@ -1,5 +1,7 @@
 require 'net/https'
 require 'socket'
+require 'eventmachine'
+require 'em-websocket-client'
 require 'uri'
 require 'openssl'
 require 'digest/md5'
@@ -44,11 +46,17 @@ unless Module.constants.include?('CLIENT_INCLUDED')
       def resource(path="")
         Resource.new(@base,@wrapper,path,@options)
       end
-      def get(parameters = []);    resource('/').get(parameters);    end
-      def post(parameters = []);   resource('/').post(parameters);   end
-      def put(parameters = []);    resource('/').put(parameters);    end
-      def delete(parameters = []); resource('/').delete(parameters); end
-      def request(what)            resource('/').request(what);      end
+      def get(parameters = []);             resource('/').get(parameters);             end
+      def simulate_get(parameters = []);    resource('/').simulate_get(parameters);    end
+      def post(parameters = []);            resource('/').post(parameters);            end
+      def simulate_post(parameters = []);   resource('/').simulate_post(parameters);   end
+      def put(parameters = []);             resource('/').put(parameters);             end
+      def simulate_put(parameters = []);    resource('/').simulate_put(parameters);    end
+      def delete(parameters = []);          resource('/').delete(parameters);          end
+      def simulate_delete(parameters = []); resource('/').simulate_delete(parameters); end
+      def request(what)                     resource('/').request(what);               end
+      def simulate_request(what)            resource('/').simulate_request(what);      end
+      def ws(blk)                           resource('/').ws(blk);                     end
       #}}}
 
       class Resource
@@ -67,6 +75,24 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           @rpath = @rpath == '/' ? '' : @rpath 
         end #}}}
         attr_reader :rpath
+
+        def ws(&blk) #{{{
+          EM.run do
+            conn = EventMachine::WebSocketClient.connect((@base + @rpath).sub(/^http/,'ws'))
+
+            conn.disconnect do
+              EM::stop_event_loop
+            end
+
+            if @options[:debug]
+              conn.errback do |e|
+                STDERR.puts "WS ERROR: #{e}"
+              end
+            end
+
+            blk.call(conn)
+          end   
+        end #}}}
 
         def get(parameters = []) #{{{
           exec_request('GET',parameters,false)
@@ -259,8 +285,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           end  
           deb = nil
           if @options[:debug]
-            deb = File.open(@options[:debug],'w')
-            http.set_debug_output deb
+            http.set_debug_output STDOUT
           end  
           http.start do
             http.request(req) do |resp|
@@ -279,9 +304,6 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               ).params
             end
           end
-          if @options[:debug]
-            deb.close
-          end  
           return res, response
         end #}}}
         private :make_request
