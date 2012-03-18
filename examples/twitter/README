@@ -1,0 +1,8 @@
+Create two files in this directory:
+
+* twitter.consumer_key
+* twitter.consumer_secret
+
+Fill these files with result of:
+
+* https://dev.twitter.com/apps
