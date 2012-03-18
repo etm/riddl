@@ -1,0 +1,9 @@
+Create two files in this directory:
+
+* zotero.consumer_key
+* zotero.consumer_secret
+
+Fill these files with result of (although there they are called client key and
+client secret):
+
+* http://www.zotero.org/oauth/apps

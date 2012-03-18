@@ -46,13 +46,15 @@ module Riddl
       filename = content_disposition[/ filename="?([^\";]*)"?/ni, 1]
       name = content_disposition[/ name="?([^\";]*)"?/ni, 1] || content_id
 
-      return if content_length == 0 && name == ''
-
       if ctype || filename
         body = Parameter::Tempfile.new("RiddlMultipart")
         body.binmode if body.respond_to?(:binmode)
       else
         body = ''
+      end
+
+      if content_length == 0 && name == ''
+        body << input.read
       end
 
       bufsize = 16384

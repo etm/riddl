@@ -5,8 +5,8 @@ require 'pp'
 twitter = Riddl::Client.interface("https://twitter.com/","twitter.xml")
 
 ### Base
-consumer_key      = 'JUGRfvAcSIjxpJ13g96Fw'
-consumer_secret   = 'fTV93ULm4PtKGTZL2YGE22vvwuwidDl9RdBkZC15Y'
+consumer_key      = File.read(File.expand_path(File.dirname(__FILE__) + '/twitter.consumer_key')).strip
+consumer_secret   = File.read(File.expand_path(File.dirname(__FILE__) + '/twitter.consumer_secret')).strip
 file_user_id      = File.expand_path(File.dirname(__FILE__) + '/twitter.user_id')
 file_token        = File.expand_path(File.dirname(__FILE__) + '/twitter.token')
 file_token_secret = File.expand_path(File.dirname(__FILE__) + '/twitter.token_secret')

@@ -1,0 +1,55 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="xml">
+    <parameter name="return" mimetype="application/xml"/>
+  </message>
+  <message name="atom">
+    <parameter name="return" mimetype="application/atom+xml"/>
+  </message>
+
+  <message name="oauth">
+    <header name="Authorization" type="string"/>
+  </message>  
+  <message name="oauth_response">
+    <parameter name="return" mimetype="*" handler="http://riddl.org/ns/handlers/oauth"/>
+  </message>  
+
+  <resource>
+    <resource relative="oauth">
+      <resource relative="request" role="http://oauth.net/1.0/request_token">
+        <post in="oauth" out="oauth_response"/>
+      </resource>
+      <resource relative="access" role="http://oauth.net/1.0/access_token">
+        <post in="oauth" out="oauth_response"/>
+      </resource>
+    </resource>
+
+    <resource relative="users">
+      <resource relative="\d+">
+        <resource relative="items">
+          <get in="*" out='atom'/>
+        </resource>  
+      </resource>
+    </resource>
+    <resource relative="groups">
+      <resource relative="\d+">
+        <resource relative="items">
+          <get in="*" out="atom"/>
+        </resource>  
+        <resource relative="collections">
+          <get in="*" out="atom"/>
+          <resource>
+            <get in="*" out="atom"/>
+            <resource relative="collections">
+              <get in="*" out="atom"/>
+            </resource>  
+            <resource relative="items">
+              <get in="*" out="atom"/>
+            </resource>  
+          </resource>  
+        </resource>  
+      </resource>
+    </resource>
+  </resource>
+
+</description>

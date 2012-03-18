@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'net/https'
 require 'socket'
 require 'eventmachine'
