@@ -13,9 +13,10 @@ require 'stringio'
 require 'rack/content_length'
 require 'rack/chunked'
 
-$host = 'http://localhost' unless $host
-$port = 9292               unless $port
-$mode = :debug             unless $mode # :production
+$host     = 'http://localhost' unless $host
+$port     = 9292               unless $port
+$mode     = :debug             unless $mode # :production
+$pidfile  = 'server.pid'
 
 module Riddl
   module Utils
@@ -31,10 +32,13 @@ module Riddl
   end
 
   class Server
-    def self::config!(base,conffile='server.config') #{{{
+    def self::config!(base,opts={}) #{{{
+      opts[:conf] ||= 'server.config'
+      opts[:pid]  ||= $pidfile
+      $pidfile = opts[:pid] 
       $basepath = base
-      if File.exists?($basepath + '/' + conffile)
-        eval(File.read($basepath + '/' + conffile))
+      if File.exists?($basepath + '/' + opts[:conf])
+        eval(File.read($basepath + '/' + opts[:conf]))
       end  
       $url = $host + ':' + $port.to_s
     end   #}}}
@@ -64,8 +68,8 @@ module Riddl
       ########################################################################################################################
       # status and info
       ########################################################################################################################
-      pid = File.read('server.pid') rescue pid = 666
-      status = `ps -u #{Process.uid} | grep "#{pid} "`.scan(/ server\.[^\s]+/)
+      pid = File.read($pidfile) rescue pid = 666
+      status = `ps -u #{Process.uid} | grep "#{pid} "`
       if operation == "info" && status.empty?
         puts "Server (#{$url}) not running"
         exit
@@ -117,7 +121,7 @@ module Riddl
           :Port => $port,
           :environment => ($mode == :debug ? 'development' : 'deployment'),
           :server => 'thin',
-          :pid => File.expand_path($basepath + '/server.pid')
+          :pid => File.expand_path($basepath + '/' + $pidfile)
         )
       else
         server = Rack::Server.new(
@@ -125,7 +129,7 @@ module Riddl
           :Port => $port,
           :environment => 'none',
           :server => 'thin',
-          :pid => File.expand_path($basepath + '/server.pid'),
+          :pid => File.expand_path($basepath + '/' + $pidfile),
           :daemonize => true
         )
       end
