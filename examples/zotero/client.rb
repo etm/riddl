@@ -56,26 +56,28 @@ else
   token_secret = File.read(file_token_secret).strip
 end #}}}
 
-zotero = Riddl::Client.interface("https://api.zotero.org/","zotero.xml")
+zotero = Riddl::Client.new("https://api.zotero.org/")
 status, res = zotero.resource("/groups/62639/collections/X69MNMZX/collections").get [
   Riddl::Parameter::Simple.new('key',token,:query)
 ]
 doc = XML::Smart.string(res.first.value.read)
 doc.namespaces = { 'a' => 'http://www.w3.org/2005/Atom', 'z' => 'http://zotero.org/ns/api' }
-keys = []
+keys = {}
 doc.find('//a:entry').each do |e|
-  keys << e.find('string(z:key)')
+  keys[e.find('string(z:key)')] = e.find('string(a:title)')
 end
 
-keys.each do |k|
+ret = ''
+keys.each do |k,v|
+  ret << "<h2>#{v}</h2>\n"
   status, res = zotero.resource("/groups/62639/collections/#{k}/items").get [
-    Riddl::Parameter::Simple.new('key',token,:query)
+    Riddl::Parameter::Simple.new('key',token,:query),
+    Riddl::Parameter::Simple.new('format','bib',:query),
+    Riddl::Parameter::Simple.new('style','ieee',:query)
   ]
-  doc = XML::Smart.string(res.first.value.read)
-  doc.namespaces = { 'a' => 'http://www.w3.org/2005/Atom', 'z' => 'http://zotero.org/ns/api' }
-  doc.find('//a:entry/a:title').each do |e|
-    puts e.to_s
-  end
-  p '-------'
-end  
+  ret << XML::Smart.string(res.first.value.read).root.dump + "\n\n"
+end
 
+File.open(File.dirname(__FILE__) + '/litlist.html','w') do |f|
+  f.write ret
+end

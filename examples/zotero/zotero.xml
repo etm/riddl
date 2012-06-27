@@ -1,10 +1,11 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <message name="xml">
-    <parameter name="return" mimetype="application/xml"/>
-  </message>
-  <message name="atom">
-    <parameter name="return" mimetype="application/atom+xml"/>
+  <message name="ret">
+    <choice>
+      <parameter name="return" mimetype="application/xml"/>
+      <parameter name="return" mimetype="text/html"/>
+      <parameter name="return" mimetype="application/atom+xml"/>
+    </choice>
   </message>
 
   <message name="oauth">
@@ -27,24 +28,27 @@
     <resource relative="users">
       <resource relative="\d+">
         <resource relative="items">
-          <get in="*" out='atom'/>
+          <get in="*" out='ret'/>
         </resource>  
       </resource>
     </resource>
     <resource relative="groups">
       <resource relative="\d+">
         <resource relative="items">
-          <get in="*" out="atom"/>
+          <get in="*" out="ret"/>
+          <resource>
+            <get in="*" out="html"/>
+          </resource>  
         </resource>  
         <resource relative="collections">
-          <get in="*" out="atom"/>
+          <get in="*" out="ret"/>
           <resource>
-            <get in="*" out="atom"/>
+            <get in="*" out="ret"/>
             <resource relative="collections">
-              <get in="*" out="atom"/>
+              <get in="*" out="ret"/>
             </resource>  
             <resource relative="items">
-              <get in="*" out="atom"/>
+              <get in="*" out="ret"/>
             </resource>  
           </resource>  
         </resource>  
