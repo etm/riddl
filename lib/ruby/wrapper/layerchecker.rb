@@ -13,6 +13,7 @@ module Riddl
         #{{{
         messages = []
         res.each do |res|
+          p res.parent.attributes['relative']
           messages += check_field(res.attributes['name'],res.parent.attributes['relative'] || '/')
         end
         messages

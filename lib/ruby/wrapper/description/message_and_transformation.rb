@@ -17,10 +17,8 @@ module Riddl
             end  
             tempB.root.find("@name").delete_all!
             @content = tempB.root.to_doc
-            @content.namespaces = {
-              'des' => Riddl::Wrapper::DESCRIPTION,
-              'dec' => Riddl::Wrapper::DECLARATION
-            }
+            @content.register_namespace 'des', Riddl::Wrapper::DESCRIPTION
+            @content.register_namespace 'dec', Riddl::Wrapper::DECLARATION
           end  
           update_hash!
         end

@@ -48,8 +48,8 @@ module Riddl
         unless File.exists?(fschema)
           raise "schema file not found"
         end
-        schema      = XML::Smart::open(fschema)
-        schema.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+        schema = XML::Smart::open(fschema)
+        schema.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
         if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
           raise "properties schema transformation file not found"
         end  
@@ -178,7 +178,7 @@ module Riddl
         
         def extract_values(file,schema,property,minor=nil)
           XML::Smart::open(file) do |pdoc|
-            pdoc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            pdoc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
             decision = Riddl::Utils::Properties::property_type(schema,property)
 
             case decision
@@ -238,7 +238,7 @@ module Riddl
 
           newstuff = XML::Smart.string("<#{property} xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
           XML::Smart::open(properties) do |doc|
-            doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
 
             if doc.root.find("p:#{property}").any?
               @status = 500
@@ -253,7 +253,7 @@ module Riddl
 
           # everything is fine, now do it
           XML::Smart::modify(properties) do |doc|
-            doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
             doc.root.add newstuff.root
           end
 
@@ -284,7 +284,7 @@ module Riddl
             newstuff = value.nil? ? XML::Smart.string(content).root.children : value
             path = "/p:properties/*[name()=\"#{property}\"]"
             XML::Smart::open(properties) do |doc|
-              doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+              doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
               nodes = doc.find(path)
               if nodes.empty?
                 @status = 404
@@ -311,7 +311,7 @@ module Riddl
             end
 
             XML::Smart::modify(properties) do |doc|
-              doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+              doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
               nodes = doc.root.find(path)
               nods = nodes.map{|ele| ele.children.delete_all!; ele}
               nods.each do |ele| 
@@ -348,7 +348,7 @@ module Riddl
 
           newstuff = XML::Smart.string(value)
           XML::Smart::open(properties) do |doc|
-            doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
 
             node = doc.root.find("p:#{property}")
             if node.empty?
@@ -364,7 +364,7 @@ module Riddl
 
           # everything is fine, now do it
           XML::Smart::modify(properties) do |doc|
-            doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
             node = doc.find("/p:properties/p:#{property}")
             node.first.add newstuff.root
           end
@@ -394,7 +394,7 @@ module Riddl
 
           path = "/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}"
           XML::Smart::open(properties) do |doc|
-            doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
             nodes = doc.find(path)
             if nodes.empty?
               @status = 404
@@ -408,7 +408,7 @@ module Riddl
           end
 
           XML::Smart::modify(properties) do |doc|
-            doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
             doc.find(path).delete_all!
           end
 
@@ -439,7 +439,7 @@ module Riddl
           newstuff = value.nil? ? XML::Smart.string(content).root.children : value
           path = "/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}"
           XML::Smart::open(properties) do |doc|
-            doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
             nodes = doc.find(path)
             if nodes.empty?
               @status = 404
@@ -466,7 +466,7 @@ module Riddl
           end
 
           XML::Smart::modify(properties) do |doc|
-            doc.namespaces = { 'p' => 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
             nodes = doc.root.find(path)
             nods = nodes.map{|ele| ele.children.delete_all!; ele}
             nods.each do |ele| 
