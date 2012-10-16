@@ -128,7 +128,7 @@ module Riddl
 
             topics = []
             XML::Smart::modify(data + '/' + key + '/subscription.xml',"<subscription #{url ? "url='#{url}' " : ''} xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>") do |doc|
-              doc.namespaces = { 'n' => 'http://riddl.org/ns/common-patterns/notifications-producer/1.0' }
+              doc.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
               while @p.length > 0
                 topic = @p.shift.value
                 base = @p.shift
@@ -183,7 +183,7 @@ module Riddl
 
             topics = []
             XML::Smart::modify(data + '/' + key + '/subscription.xml') do |doc|
-              doc.namespaces = { 'n' => 'http://riddl.org/ns/common-patterns/notifications-producer/1.0' }
+              doc.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
               if url.nil?
                 doc.find('/n:subscription/@url').delete_all!
               else
