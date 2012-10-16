@@ -19,8 +19,15 @@
     </optional>
   </message>
 
+  <message name="show">
+    <parameter name="id" type="string"/>
+  </message>
+
   <message name="xml">
     <parameter name="return" mimetype="application/xml"/>
+  </message>
+  <message name="json">
+    <parameter name="return" mimetype="application/json"/>
   </message>
 
   <message name="oauth">
@@ -40,16 +47,22 @@
       </resource>
     </resource>
 
-    <resource relative="statuses">
-      <resource relative="show">
-        <resource relative="\d+\.xml">
-          <get in="*" out="xml"/>
+    <resource relative="1.1">
+
+      <resource relative="statuses">
+        <resource relative="user_timeline.json" role="http://oauth.net/1.0/on_behalf">
+          <get in="*" out="json"/>
+        </resource>
+        <resource relative="show.json" role="http://oauth.net/1.0/on_behalf">
+          <get in="show" out="json"/>
+        </resource>
+        <resource relative="update.json" role="http://oauth.net/1.0/on_behalf">
+          <post in="update" out="json"/>
         </resource>
       </resource>
-      <resource relative="update.xml" role="http://oauth.net/1.0/on_behalf">
-        <post in="update" out="xml"/>
-      </resource>
+
     </resource>
+
   </resource>
 
 </description>

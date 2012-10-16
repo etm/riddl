@@ -2,7 +2,7 @@
 require '../../lib/ruby/client'
 require 'pp'
 
-twitter = Riddl::Client.interface("https://twitter.com/","twitter.xml")
+twitter = Riddl::Client.interface("https://api.twitter.com/","twitter.xml")
 
 ### Base
 consumer_key      = File.read(File.expand_path(File.dirname(__FILE__) + '/twitter.consumer_key')).strip
@@ -56,19 +56,36 @@ else
 end
 
 ### Show single tweet
-# tweet = 4997095028 # some stuff
-# status, res = twitter.resource("/statuses/show/#{tweet}.xml").get
-# puts res[0].value.read
+#tweet = 258251258941554688 # some stuff
+#status, res = twitter.resource("/1.1/statuses/show.json").get [
+#    Riddl::Parameter::Simple.new("id",tweet),
+#    Riddl::Option.new(:consumer_key,consumer_key),
+#    Riddl::Option.new(:consumer_secret,consumer_secret),
+#    Riddl::Option.new(:token,token),
+#    Riddl::Option.new(:token_secret,token_secret)
+#]
+#puts status
 
-if ARGV.length == 1
+### Show timeline
+#status, res = twitter.resource("/1.1/statuses/user_timeline.json").get [
+#    Riddl::Option.new(:consumer_key,consumer_key),
+#    Riddl::Option.new(:consumer_secret,consumer_secret),
+#    Riddl::Option.new(:token,token),
+#    Riddl::Option.new(:token_secret,token_secret)
+#]
+#puts status
+
+### Status update
+if ARGV.length > 1
   ### Update status
-  status, res = twitter.resource("/#{}/statuses/update.xml").post [
-    Riddl::Parameter::Simple.new("status",ARGV[0]),
+  status, res = twitter.resource("/1.1/statuses/update.json").post [
+    Riddl::Parameter::Simple.new("status",ARGV.join(' ')),
     Riddl::Option.new(:consumer_key,consumer_key),
     Riddl::Option.new(:consumer_secret,consumer_secret),
     Riddl::Option.new(:token,token),
     Riddl::Option.new(:token_secret,token_secret)
   ]
+  puts "something went wrong!" if status != 200
 else  
   puts "Usage: #{__FILE__} [TWEET]"
 end

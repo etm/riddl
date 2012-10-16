@@ -3,8 +3,7 @@ require 'tempfile'
 module Riddl
   module Parameter
     class Simple
-      attr_reader :value, :type
-      attr_accessor :name
+      attr_accessor :name, :value, :type
       def initialize(name,value,type=:body)
         @name = name
         @value = value

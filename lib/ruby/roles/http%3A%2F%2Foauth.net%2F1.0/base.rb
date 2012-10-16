@@ -28,7 +28,7 @@ module Riddl
       end
 
       def self::sign(fullpath,method,parameters,headers,options)
-        signature_string = "POST&" + HttpGenerator::escape(fullpath) + "&"
+        signature_string = method.upcase + "&" + HttpGenerator::escape(fullpath) + "&"
 
         sparams = []
         if parameters.class == Array
@@ -44,7 +44,7 @@ module Riddl
         oparams << ["oauth_signature_method","HMAC-SHA1"]
         oparams << ["oauth_timestamp",Time.new.to_i.to_s]
         oparams << ["oauth_version","1.0"]
-        oparams << ["oauth_nonce",HttpGenerator::escape((1..5).map{OpenSSL::Digest::SHA1.hexdigest(rand(10000).to_s)[0,8]}.join)]
+        oparams << ["oauth_nonce",HttpGenerator::escape(OpenSSL::Digest::SHA1.hexdigest(rand(10000).to_s)[0...32])]
         oparams << ["oauth_token",HttpGenerator::escape(options[:token])] if options[:token]
         oparams << ["oauth_verifier",HttpGenerator::escape(options[:verifier])] if options[:verifier]
 

@@ -178,13 +178,18 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end #}}}
         private :extract_response_headers
         
-        def extract_qparams(parameters) #{{{
+        def extract_qparams(parameters,method) #{{{
           qparams = []
+          starting = true
           parameters.delete_if do |p|
+            if starting && p.class == Riddl::Parameter::Simple && method == 'get'
+               p.type = :query
+            end
             if p.class == Riddl::Parameter::Simple && p.type == :query
               qparams << HttpGenerator::escape(p.name) + (p.value.nil? ? '' : '=' + HttpGenerator::escape(p.value))
               true
             else
+              starting = false
               false
             end
           end
@@ -218,7 +223,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end
           end
 
-          qparams = extract_qparams(parameters)
+          qparams = extract_qparams(parameters,riddl_method.downcase)
 
           res = response = nil
           if @wrapper.nil? || @wrapper.description?
@@ -254,7 +259,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                 unless m == riddl_message.route.last
                   tp = response
                   th = extract_headers(response) # TODO extract relvant headers from res (get from m.out)
-                  tq = extract_qparams(response)
+                  tq = extract_qparams(response,riddl_method.downcase)
                 end
               end
             end
