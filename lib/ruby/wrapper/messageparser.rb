@@ -8,7 +8,7 @@ module Riddl
         @headp = {}
         headers.each do |k,v|
           if v.nil?
-            @headp[k.qname.upcase.gsub(/\-/,'_')] = k.value
+            @headp[k.name.upcase.gsub(/\-/,'_')] = k.value
           else  
             @headp[k.upcase.gsub(/\-/,'_')] = v
           end  
@@ -52,7 +52,7 @@ module Riddl
         b = @mist[@mistp]
 
         if b.class == Riddl::Parameter::Simple && (a.attributes['fixed'] || a.attributes['type'])
-          b.qname = a.attributes['name'] if @numparams == 1
+          b.name = a.attributes['name'] if @numparams == 1
           if b.name == a.attributes['name']
             @mistp += 1
             return match_simple(a,b.value)

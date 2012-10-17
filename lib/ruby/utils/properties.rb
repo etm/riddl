@@ -112,7 +112,7 @@ module Riddl
 
           ret = XML::Smart.string("<properties xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
           schema.find("/p:properties/*[name()!='optional']|/p:properties/p:optional/*").each do |r|
-            ret.root.add("property",r.name.to_s)
+            ret.root.add("property",r.qname.to_s)
           end
           return Riddl::Parameter::Complex.new("keys","text/xml",ret.to_s)
         end
@@ -178,7 +178,7 @@ module Riddl
         
         def extract_values(file,schema,property,minor=nil)
           XML::Smart::open(file) do |pdoc|
-            pdoc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            pdoc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
             decision = Riddl::Utils::Properties::property_type(schema,property)
 
             case decision
@@ -238,14 +238,14 @@ module Riddl
 
           newstuff = XML::Smart.string("<#{property} xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
           XML::Smart::open(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
 
             if doc.root.find("p:#{property}").any?
               @status = 500
               return # don't misuse post
             end
             doc.root.add newstuff.root
-            if !doc.validate_against(XML::Smart::string(strans))
+            if !doc.validate_against(strans)
               @status = 400
               return # bad request
             end
@@ -253,7 +253,7 @@ module Riddl
 
           # everything is fine, now do it
           XML::Smart::modify(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
             doc.root.add newstuff.root
           end
 
@@ -284,7 +284,7 @@ module Riddl
             newstuff = value.nil? ? XML::Smart.string(content).root.children : value
             path = "/p:properties/*[name()=\"#{property}\"]"
             XML::Smart::open(properties) do |doc|
-              doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
+              doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
               nodes = doc.find(path)
               if nodes.empty?
                 @status = 404
@@ -304,14 +304,14 @@ module Riddl
                   ele.text = newstuff
                 end  
               end  
-              if !doc.validate_against(XML::Smart::string(strans))
+              if !doc.validate_against(strans)
                 @status = 400
                 return # bad request
               end
             end
 
             XML::Smart::modify(properties) do |doc|
-              doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
+              doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
               nodes = doc.root.find(path)
               nods = nodes.map{|ele| ele.children.delete_all!; ele}
               nods.each do |ele| 
@@ -348,7 +348,7 @@ module Riddl
 
           newstuff = XML::Smart.string(value)
           XML::Smart::open(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
 
             node = doc.root.find("p:#{property}")
             if node.empty?
@@ -356,7 +356,7 @@ module Riddl
               return # this property does not exist
             end  
             node.first.add newstuff.root
-            if !doc.validate_against(XML::Smart::string(strans))
+            if !doc.validate_against(strans)
               @status = 400
               return # bad request
             end
@@ -364,7 +364,7 @@ module Riddl
 
           # everything is fine, now do it
           XML::Smart::modify(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
             node = doc.find("/p:properties/p:#{property}")
             node.first.add newstuff.root
           end
@@ -394,21 +394,21 @@ module Riddl
 
           path = "/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}"
           XML::Smart::open(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
             nodes = doc.find(path)
             if nodes.empty?
               @status = 404
               return # this property does not exist
             end
             nodes.delete_all!
-            if !doc.validate_against(XML::Smart::string(strans))
+            if !doc.validate_against(strans)
               @status = 400
               return # bad request
             end
           end
 
           XML::Smart::modify(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
             doc.find(path).delete_all!
           end
 
@@ -439,7 +439,7 @@ module Riddl
           newstuff = value.nil? ? XML::Smart.string(content).root.children : value
           path = "/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}"
           XML::Smart::open(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
             nodes = doc.find(path)
             if nodes.empty?
               @status = 404
@@ -459,14 +459,14 @@ module Riddl
                 ele.text = newstuff
               end  
             end  
-            if !doc.validate_against(XML::Smart::string(strans))
+            if !doc.validate_against(strans)
               @status = 400
               return # bad request
             end
           end
 
           XML::Smart::modify(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0' }
+            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
             nodes = doc.root.find(path)
             nods = nodes.map{|ele| ele.children.delete_all!; ele}
             nods.each do |ele| 
@@ -474,7 +474,7 @@ module Riddl
                 ele.add newstuff
               else
                 ele.text = newstuff
-              end  
+              end
             end  
           end
           
