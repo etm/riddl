@@ -10,13 +10,8 @@ module Riddl
           if layer.nil?
             @content = content
           else
-            tempA = layer.find("des:#{type}[@name='#{name}']").first
-            tempB = tempA.to_doc
-            if layer.namespaces[nil] && tempA.namespaces.to_a.empty?
-              tempB.root.namespaces[nil] = layer.namespaces[nil]
-            end  
-            tempB.root.find("@name").delete_all!
-            @content = tempB.root.to_doc
+            @content = layer.find("des:#{type}[@name='#{name}']").first.to_doc
+            @content.root.find("@name").delete_all!
             @content.register_namespace 'des', Riddl::Wrapper::DESCRIPTION
             @content.register_namespace 'dec', Riddl::Wrapper::DECLARATION
           end  

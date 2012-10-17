@@ -59,7 +59,7 @@ module Riddl
         @resource = Riddl::Wrapper::Description::Resource.new("/")
         @riddl = riddl
         des = riddl.root
-        desres = des.find("des:resource").first
+        desres = des.find("/des:description/des:resource").first
         add_description(des,@resource,desres)
         #}}}
       end

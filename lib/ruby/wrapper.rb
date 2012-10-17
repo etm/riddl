@@ -72,9 +72,7 @@ module Riddl
           raise SpecificationError, 'No RIDDL description or declaration found (neither a file, url or string).'
         end
       end  
-      @doc.register_namespace 'des', DESCRIPTION
-      @doc.register_namespace 'dec', DECLARATION
-      @doc.register_namespace 'x',   XINCLUDE
+      @doc.register_namespace 'x', XINCLUDE
       @doc.find('//x:include/@href').each do |i|
         if i.value =~ /^http:\/\/(www\.)?riddl\.org(\/ns\/common-patterns\/.*)/
           t = File.expand_path(File.dirname(__FILE__)) + $2
@@ -82,6 +80,8 @@ module Riddl
         end
       end
       @doc.xinclude!
+      @doc.register_namespace 'des', DESCRIPTION
+      @doc.register_namespace 'dec', DECLARATION
       qname = @doc.root.qname
       @is_description = qname.href == DESCRIPTION && qname.name ==  'description'
       @is_declaration = qname.href == DECLARATION && qname.name ==  'declaration'

@@ -8,7 +8,7 @@ module Riddl
         @headp = {}
         headers.each do |k,v|
           if v.nil?
-            @headp[k.name.upcase.gsub(/\-/,'_')] = k.value
+            @headp[k.qname.upcase.gsub(/\-/,'_')] = k.value
           else  
             @headp[k.upcase.gsub(/\-/,'_')] = v
           end  
@@ -40,7 +40,7 @@ module Riddl
         end  
 
         m.find("des:*[not(name()='header')]").each do |p|
-          return false unless send p.name.to_s, p
+          return false unless send p.qname.to_s, p
         end
         @mist.count == @mistp
         #}}}
@@ -52,7 +52,7 @@ module Riddl
         b = @mist[@mistp]
 
         if b.class == Riddl::Parameter::Simple && (a.attributes['fixed'] || a.attributes['type'])
-          b.name = a.attributes['name'] if @numparams == 1
+          b.qname = a.attributes['name'] if @numparams == 1
           if b.name == a.attributes['name']
             @mistp += 1
             return match_simple(a,b.value)
@@ -113,7 +113,7 @@ module Riddl
       def choice(a)
         #{{{
         a.find("des:*").each do |p|
-          return true if send p.name.to_s, p
+          return true if send p.qname.to_s, p
         end
         false
         #}}}
@@ -124,7 +124,7 @@ module Riddl
         tistp = @mistp
         success = true
         a.find("des:*").each do |p|
-          unless send p.name.to_s, p
+          unless send p.qname.to_s, p
             success = false
             break
           end
@@ -169,7 +169,7 @@ module Riddl
         counter = 0
         lastname = ''
         nodes.each do |p|
-          lastname = p.name.to_s 
+          lastname = p.qname.to_s 
           counter += 1 if send lastname, p
         end
         if single_optional_protection && lastname == 'optional' && tistp == @mistp
@@ -190,11 +190,7 @@ module Riddl
           type = XML::Smart::string(CHECK)
           data = type.root.children[0]
           data.attributes['type'] = a.attributes['type']
-          a.children.each do |e| 
-            node = data.add(e.to_doc.root)
-            # set default namespace for copied nodes
-            node.namespaces[nil] = type.root.namespaces[nil]
-          end
+          data.add a.children
           value.validate_against type
         end  
         #}}}

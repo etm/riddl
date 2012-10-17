@@ -23,7 +23,7 @@ module Riddl
           h_ofield = {}; h_tfield = {}
           h_cfield = {}
           res.find("des:get|des:put|des:delete|des:post|des:request").each do |mt|
-            mn = (mt.attributes['type'].nil? ? mt.name.to_s : mt.attributes['type'])
+            mn = (mt.attributes['type'].nil? ? mt.qname.to_s : mt.attributes['type'])
 
             h_ifield[mn] ||= {}; h_pfield[mn] ||= {}
             h_ofield[mn] ||= []; h_tfield[mn] ||= []
