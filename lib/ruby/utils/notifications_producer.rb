@@ -65,7 +65,7 @@ module Riddl
             data = @a[0]
             xsl  = @a[1]
             Riddl::Parameter::Complex.new("overview","text/xml") do
-              ret  = XML::Smart::open(data + "/topics.xml").to_s
+              ret  = XML::Smart.open_unprotected(data + "/topics.xml").to_s
               xsl ? ret.sub(/\?>\s*\r?\n/,"?>\n<?xml-stylesheet href=\"xsl\" type=\"text/xsl\"?>\n") : ret
             end
           end
@@ -83,7 +83,7 @@ module Riddl
               END
               Dir[data + "/*"].each do |d|
                 if File.directory?(d)
-                  XML::Smart::open(d + "/subscription.xml") do |doc|
+                  XML::Smart.open_unprotected(d + "/subscription.xml") do |doc|
                     if doc.root.attributes['url']
                       ret.root.add('subscription', :id => File.basename(d), :url => doc.root.attributes['url'])
                     else  
@@ -102,7 +102,7 @@ module Riddl
             data    = @a[0]
             xsl     = @a[1]
             Riddl::Parameter::Complex.new("subscription","text/xml") do
-              ret  = XML::Smart::open(data + "/" + @r.last + "/subscription.xml").to_s
+              ret  = XML::Smart.open_unprotected(data + "/" + @r.last + "/subscription.xml").to_s
               xsl ? ret.sub(/\?>\s*\r?\n/,"?>\n<?xml-stylesheet href=\"xsl\" type=\"text/xsl\"?>\n") : ret
             end
           end

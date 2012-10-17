@@ -197,13 +197,13 @@ module Riddl
     def validate!
       #{{{
       if @is_description
-        xval = @doc.validate_against(XML::Smart.open(DESCRIPTION_FILE))
+        xval = @doc.validate_against(XML::Smart.open_unprotected(DESCRIPTION_FILE))
         xchk = ResourceChecker.new(@doc).check
         puts xchk.join("\n") unless xchk.empty?
         return xval && xchk.empty?
       end
       if @is_declaration
-        xval = @doc.validate_against(XML::Smart.open(DECLARATION_FILE))
+        xval = @doc.validate_against(XML::Smart.open_unprotected(DECLARATION_FILE))
         xchk = LayerChecker.new(@doc).check
         puts xchk.join("\n") unless xchk.empty?
         return xval && xchk.empty?
