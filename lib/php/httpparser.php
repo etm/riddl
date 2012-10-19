@@ -106,7 +106,7 @@
         # Save the rest.
         preg_match($rx,$buf,$matches);
         if ($i = strpos($buf,$matches[0])) {
-          $body = $this->write_body(&$body,substr($buf,0,$i));
+          $body = $this->write_body($body,substr($buf,0,$i));
           $buf = substr($buf, $i + $boundary_size+2);
           if ($matches[0] == "--")
             $content_length = -1;
@@ -132,7 +132,7 @@
       #}}}
     }
 
-    private function write_body($body,$what) {
+    private function write_body(&$body,$what) {
       #{{{
       if (is_resource($body))
         fwrite($body,$what);
