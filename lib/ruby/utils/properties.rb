@@ -176,8 +176,8 @@ module Riddl
           end
         end
         
-        def extract_values(file,schema,property,minor=nil)
-          XML::Smart.open_unprotected(file) do |pdoc|
+        def extract_values(properties,schema,property,minor=nil)
+          XML::Smart.open(properties) do |pdoc|
             pdoc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
             decision = Riddl::Utils::Properties::property_type(schema,property)
 
@@ -237,7 +237,7 @@ module Riddl
           end
 
           newstuff = XML::Smart.string("<#{property} xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
-          XML::Smart.open_unprotected(properties) do |doc|
+          XML::Smart.open(properties) do |doc|
             doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
 
             if doc.root.find("p:#{property}").any?
@@ -283,7 +283,7 @@ module Riddl
 
             newstuff = value.nil? ? XML::Smart.string(content).root.children : value
             path = "/p:properties/*[name()=\"#{property}\"]"
-            XML::Smart.open_unprotected(properties) do |doc|
+            XML::Smart.open(properties) do |doc|
               doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
               nodes = doc.find(path)
               if nodes.empty?
@@ -347,7 +347,7 @@ module Riddl
           end
 
           newstuff = XML::Smart.string(value)
-          XML::Smart.open_unprotected(properties) do |doc|
+          XML::Smart.open(properties) do |doc|
             doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
 
             node = doc.root.find("p:#{property}")
@@ -393,7 +393,7 @@ module Riddl
 
 
           path = "/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}"
-          XML::Smart.open_unprotected(properties) do |doc|
+          XML::Smart.open(properties) do |doc|
             doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
             nodes = doc.find(path)
             if nodes.empty?
@@ -438,7 +438,7 @@ module Riddl
 
           newstuff = value.nil? ? XML::Smart.string(content).root.children : value
           path = "/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}"
-          XML::Smart.open_unprotected(properties) do |doc|
+          XML::Smart.open(properties) do |doc|
             doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
             nodes = doc.find(path)
             if nodes.empty?
