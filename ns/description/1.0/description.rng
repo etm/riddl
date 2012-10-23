@@ -151,7 +151,7 @@
   </define>
   <define name="riddl-parameter">
     <element name="parameter">
-      <ref name="riddl-att-name"/>
+      <ref name="riddl-att-name-star"/>
       <ref name="riddl-description-other-atts"/>
       <choice>
         <ref name="riddl-fixed"/>

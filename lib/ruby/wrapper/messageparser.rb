@@ -53,14 +53,14 @@ module Riddl
 
         if b.class == Riddl::Parameter::Simple && (a.attributes['fixed'] || a.attributes['type'])
           b.name = a.attributes['name'] if @numparams == 1
-          if b.name == a.attributes['name']
+          if (b.name == a.attributes['name'] || a.attributes['name'] == '*')
             @mistp += 1
             return match_simple(a,b.value)
           end
         end
         if b.class == Riddl::Parameter::Complex && a.attributes['mimetype']
           b.name = a.attributes['name'] if @numparams == 1
-          if b.name == a.attributes['name'] && (a.attributes['mimetype'] == '*' || b.mimetype == a.attributes['mimetype'])
+          if (b.name == a.attributes['name'] || a.attributes['name'] == '*') && (a.attributes['mimetype'] == '*' || b.mimetype == a.attributes['mimetype'])
             if a.attributes['handler']
               if Riddl::Handlers::handlers[a.attributes['handler']]
                 success = Riddl::Handlers::handlers[a.attributes['handler']].handle(b.value,a.children.map{|e|e.dump}.join)
