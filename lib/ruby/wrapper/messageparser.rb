@@ -33,7 +33,7 @@ module Riddl
         m.find("des:header").each do |h|
           return false unless header h
         end
-        
+
         if ignore_name
           # if only one parameter, ignore the name
           @numparams = m.find("count(//des:parameter)").to_i
@@ -42,6 +42,7 @@ module Riddl
         m.find("des:*[not(name()='header')]").each do |p|
           return false unless send p.qname.to_s, p
         end
+
         @mist.count == @mistp
         #}}}
       end
@@ -140,8 +141,11 @@ module Riddl
 
       def optional(a)
         #{{{
+        return true if @mistp >= @mist.length
+
         tistp = @mistp
         counter, length = traverse_simple(a,true)
+
         if counter == 0 || counter == length
           true
         else  
