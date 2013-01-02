@@ -13,6 +13,10 @@ require File.expand_path(File.dirname(__FILE__) + '/httpparser')
 require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/option')
 
+class StringIO
+  def continue_timeout; nil; end
+end  
+
 unless Module.constants.include?('CLIENT_INCLUDED')
   CLIENT_INCLUDED = true
 
