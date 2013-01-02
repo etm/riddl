@@ -1,7 +1,9 @@
 == Ubuntu & Debian
 
-sudo apt-get install libxml2-dev libxslt1-dev zlib1g-dev ruby1.8-dev build-essential ruby ruby1.8 rubygems
+sudo apt-get install libxml2-dev libxslt1-dev zlib1g-dev ruby-dev build-essential ruby ruby
 sudo gem install pkg/riddl.gem
+
+If "pkg/riddl.gem" not exists, then create it with "rake gem".
 
 == Others
 

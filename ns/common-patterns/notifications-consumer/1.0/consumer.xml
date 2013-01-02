@@ -85,7 +85,7 @@
   </message>
 
   <message name="acknowledgment">
-    <header name="CPEE-Callback" type="boolean"/>
+    <header name="CPEE_CALLBACK" type="boolean"/>
     <optional>
       <parameter name="continue" type="boolean"/>
     </optional>
