@@ -55,7 +55,7 @@
         } else {
           $g = new RiddlHttpGenerator($this->headers,$this->params,fopen($this->debug,'w'),'socket');
         }
-        $g->generate();
+        $g->generate('output');
       } else {
         header("HTTP/1.1 " . $status);
       }  

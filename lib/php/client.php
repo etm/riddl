@@ -67,7 +67,7 @@
       fwrite($sock, $type . " " . trim($urlp['path']) . " HTTP/1.1" . $this->EOL);
       fwrite($sock, "Host: " . $urlp['host'] . $this->EOL);
       $g = new RiddlHttpGenerator($headers,$params,$sock,'socket');
-      $g->generate();
+      $g->generate('input');
 
       $headers = '';
       $body = tmpfile();
@@ -77,9 +77,10 @@
         preg_match("/Content-Length: (.*)/i", $headers, $matches);
         $content_length = $matches[1];
         if (!is_null($content_length)) {
-	  if (!intval($content_length) == 0)
+          if (!intval($content_length) == 0) {
             $t = fread($sock, $content_length);
-          fwrite($body,$t);
+            fwrite($body,$t);
+          }  
         } else {
           while (!feof($sock)) {
             $t = fread($sock, 4096);

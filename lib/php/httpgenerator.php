@@ -25,8 +25,8 @@
         $this->multipart($mode);
       } else {
         $this->set_header("Content-length","0");
+        $this->critical_eol();
       }
-      $this->critical_eol();
     }
 
     private function body($r,$mode) {
@@ -38,13 +38,13 @@
           $this->set_header("Content-length",$r->size());
           $this->critical_eol();
           fwrite($this->sock, $r->value());
-          $this->critical_eol();
         }  
         if ($mode == 'input') {
-          $this->set_header("Content-Type","text/plain");
+          $ret = urlencode($r->name()) . '=' . urlencode($r->value());
+          $this->set_header("Content-Type",'application/x-www-form-urlencoded');
+          $this->set_header("Content-Length",strlen($ret));
           $this->critical_eol();
-          fwrite($this->sock, urlencode($r->name()) + '=' + urlencode($r->value()));
-          $this->critical_eol();
+          fwrite($this->sock, urlencode($r->name()) . '=' . urlencode($r->value()));
         }  
       } elseif (is_a($r,'RiddlParameterComplex')) {
         $this->set_header("Content-Type",$r->mimetype());
@@ -61,44 +61,56 @@
         } elseif (is_string($r->value())) {
           fwrite($this->sock, $r->value());
         }
-        $this->critical_eol();
       }  
     }
 
     private function multipart($mode) {
-      $this->set_header("Content-type","multipart/mixed; boundary=\"" . $this->BOUNDARY . "\"");
-      $ret = tmpfile();
+      $scount = $ccount = 0;
       foreach($this->params as $r) {
-        if (is_a($r,'RiddlParameterSimple')) {
-          fwrite($ret, "--" . $this->BOUNDARY . $this->EOL);
-          fwrite($ret, "Riddl-Type: simple" . $this->EOL);
-          fwrite($ret, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"" . $this->EOL);
-          fwrite($ret, $this->EOL);
-          fwrite($ret, $r->value());
-          fwrite($ret, $this->EOL);
-        } elseif (is_a($r,'RiddlParameterComplex')) {
-          fwrite($ret, "--" . $this->BOUNDARY . $this->EOL);
-          fwrite($ret, "Riddl-Type: complex" . $this->EOL);
-          fwrite($ret, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"");
-          if (is_null($r->filename())) {
-            fwrite($ret, $this->EOL);
-          } else {
-            fwrite($ret, "; filename=\"" . $r->filename() . "\"" . $this->EOL);
-          }
-          fwrite($ret, "Content-Transfer-Encoding: binary" . $this->EOL);
-          fwrite($ret, "Content-Type: " . $r->mimetype() . $this->EOL);
-          fwrite($ret, $this->EOL);
-          if (is_resource($r->value()) && (get_resource_type($r->value()) == 'file')) {
-            $this->copy_content($r->value(),$ret);
-          } elseif (is_string($r->value())) {
-            fwrite($ret, $r->value());
-          }
-          fwrite($ret, $this->EOL);
-        }  
+        if (is_a($r,'RiddlParameterSimple')) { $scount += 1; }
+        if (is_a($r,'RiddlParameterComplex')) { $ccount += 1; }
       }
-      fwrite($ret, "--" . $this->BOUNDARY . $this->EOL);
+      $ret = tmpfile();
+      if ($scount > 0 && $ccount == 0) {
+        $this->set_header("Content-Type",'application/x-www-form-urlencoded');
+        $res = [];
+        foreach($this->params as $r) {
+          array_push($res,urlencode($r->name()) . '=' . urlencode($r->value()));
+        }
+        fwrite($ret,implode('&',$res));
+      } else {
+        $this->set_header("Content-type","multipart/mixed; boundary=\"" . $this->BOUNDARY . "\"");
+        foreach($this->params as $r) {
+          if (is_a($r,'RiddlParameterSimple')) {
+            fwrite($ret, "--" . $this->BOUNDARY . $this->EOL);
+            fwrite($ret, "Riddl-Type: simple" . $this->EOL);
+            fwrite($ret, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"" . $this->EOL);
+            fwrite($ret, $this->EOL);
+            fwrite($ret, $r->value());
+            fwrite($ret, $this->EOL);
+          } elseif (is_a($r,'RiddlParameterComplex')) {
+            fwrite($ret, "--" . $this->BOUNDARY . $this->EOL);
+            fwrite($ret, "Riddl-Type: complex" . $this->EOL);
+            fwrite($ret, "Content-Disposition: riddl-data; name=\"" . $r->name() . "\"");
+            if (is_null($r->filename())) {
+              fwrite($ret, $this->EOL);
+            } else {
+              fwrite($ret, "; filename=\"" . $r->filename() . "\"" . $this->EOL);
+            }
+            fwrite($ret, "Content-Transfer-Encoding: binary" . $this->EOL);
+            fwrite($ret, "Content-Type: " . $r->mimetype() . $this->EOL);
+            fwrite($ret, $this->EOL);
+            if (is_resource($r->value()) && (get_resource_type($r->value()) == 'file')) {
+              $this->copy_content($r->value(),$ret);
+            } elseif (is_string($r->value())) {
+              fwrite($ret, $r->value());
+            }
+            fwrite($ret, $this->EOL);
+          }  
+        }
+        fwrite($ret, "--" . $this->BOUNDARY . $this->EOL);
+      }
       $this->set_header("Content-length",ftell($ret));
-
       $this->critical_eol();
       rewind($ret);
       $this->copy_content($ret,$this->sock);
