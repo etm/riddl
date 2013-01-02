@@ -51,7 +51,7 @@ module Riddl
           ret = self.dup
           unless trans.name.nil?
             trans.content.root.children.each do |e|
-              case e.name.name
+              case e.qname.name
                 when 'add_header'
                   raise "TODO"
                 when 'add_before'
