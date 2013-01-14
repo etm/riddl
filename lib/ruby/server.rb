@@ -13,11 +13,6 @@ require 'stringio'
 require 'rack/content_length'
 require 'rack/chunked'
 
-$host     = 'http://localhost' unless $host
-$port     = 9292               unless $port
-$mode     = :debug             unless $mode # :production
-$pidfile  = 'server.pid'
-
 module Riddl
   module Utils
     module Description
@@ -32,16 +27,14 @@ module Riddl
   end
 
   class Server
-    def self::config!(base,opts={}) #{{{
-      opts[:conf] ||= 'server.config'
-      opts[:pid]  ||= $pidfile
-      $pidfile = opts[:pid] 
-      $basepath = base
-      if File.exists?($basepath + '/' + opts[:conf])
-        eval(File.read($basepath + '/' + opts[:conf]))
-      end  
-      $url = $host + ':' + $port.to_s
-    end   #}}}
+    OPTS = { 
+      :host     => 'http://localhost',
+      :port     => :9292,
+      :mode     => :debug,
+      :basepath => File.expand_path(File.dirname($0)),
+      :pidfile  => File.basename($0,'.rb') + '.pid',
+      :conffile => File.basename($0,'.rb') + '.conf'
+    }
 
     def loop! #{{{
       ########################################################################################################################
@@ -68,14 +61,14 @@ module Riddl
       ########################################################################################################################
       # status and info
       ########################################################################################################################
-      pid = File.read($pidfile) rescue pid = 666
+      pid = File.read(@riddl_opts[:pidfile]) rescue pid = 666
       status = `ps -u #{Process.uid} | grep "#{pid} "`
       if operation == "info" && status.empty?
-        puts "Server (#{$url}) not running"
+        puts "Server (#{@riddl_opts[:url]}) not running"
         exit
       end
       if operation == "info" && !status.empty?
-        puts "Server (#{$url}) running as #{pid}"
+        puts "Server (#{@riddl_opts[:url]}) running as #{pid}"
         stats = `ps -o "vsz,rss,lstart,time" -p #{pid}`.split("\n")[1].strip.split(/ +/)
         puts "Virtual:  #{"%0.2f" % (stats[0].to_f/1024)} MiB"
         puts "Resident: #{"%0.2f" % (stats[1].to_f/1024)} MiB"
@@ -84,7 +77,7 @@ module Riddl
         exit
       end
       if %w{start startclean}.include?(operation) && !status.empty?
-        puts "Server (#{$url}) already started"
+        puts "Server (#{@riddl_opts[:url]}) already started"
         exit
       end
       
@@ -93,9 +86,9 @@ module Riddl
       ########################################################################################################################
       if %w{stop restart}.include?(operation)
         if status.empty?
-          puts "Server (#{$url}) maybe not started?"
+          puts "Server (#{@riddl_opts[:url]}) maybe not started?"
         else
-          puts "Server (#{$url}) stopped"
+          puts "Server (#{@riddl_opts[:url]}) stopped"
           puts "Waiting while server goes down ..."
           until status.empty?
             `kill #{pid} >/dev/null 2>&1`
@@ -110,7 +103,7 @@ module Riddl
       # start server
       ########################################################################################################################
       if operation == 'startclean'
-        Dir.glob(File.expand_path($basepath + '/instances/*')).each do |d|
+        Dir.glob(File.expand_path(@riddl_opts[:basepath] + '/instances/*')).each do |d|
           FileUtils.rm_r(d) if File.basename(d) =~ /^\d+$/
         end
       end
@@ -118,18 +111,18 @@ module Riddl
       server = if verbose
         Rack::Server.new(
           :app => self,
-          :Port => $port,
-          :environment => ($mode == :debug ? 'development' : 'deployment'),
+          :Port => @riddl_opts[:port],
+          :environment => (@riddl_opts[:mode] == :debug ? 'development' : 'deployment'),
           :server => 'thin',
-          :pid => File.expand_path($basepath + '/' + $pidfile)
+          :pid => File.expand_path(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile])
         )
       else
         server = Rack::Server.new(
           :app => self,
-          :Port => $port,
+          :Port => @riddl_opts[:port],
           :environment => 'none',
           :server => 'thin',
-          :pid => File.expand_path($basepath + '/' + $pidfile),
+          :pid => File.expand_path(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile]),
           :daemonize => true
         )
       end
@@ -139,11 +132,17 @@ module Riddl
         v.delete [Rack::Lint]
       end  
       
-      puts "Server (#{$url}) started"
+      puts "Server (#{@riddl_opts[:url]}) started"
       server.start
     end #}}}
 
-    def initialize(riddl,&blk)# {{{
+    def initialize(riddl,opts=Riddl::Server::OPTS,&blk)# {{{
+      @riddl_opts = opts
+      if File.exists?(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile])
+        eval(File.read(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile]))
+      end
+      @riddl_opts[:url] = @riddl_opts[:host] + ':' + @riddl_opts[:port].to_s
+
       @riddl_norun = true
       @riddl_logger = nil
       @riddl_process_out = true 
@@ -176,7 +175,7 @@ module Riddl
     end# }}}
 
     def _call(env) #{{{
-      Dir.chdir($basepath) if $basepath
+      Dir.chdir(@riddl_opts[:basepath]) if @riddl_opts[:basepath]
 
       time = Time.now unless @riddl_logger.nil?
       @riddl_pinfo = env["PATH_INFO"].gsub(/\/+/,'/')
@@ -361,4 +360,4 @@ module Riddl
   end
 end
 
-Riddl::Server::config! File.expand_path('.')
+Riddl::Server::config!
