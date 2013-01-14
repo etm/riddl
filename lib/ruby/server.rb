@@ -29,7 +29,7 @@ module Riddl
   class Server
     OPTS = { 
       :host     => 'http://localhost',
-      :port     => :9292,
+      :port     => 9292,
       :mode     => :debug,
       :basepath => File.expand_path(File.dirname($0)),
       :pidfile  => File.basename($0,'.rb') + '.pid',
@@ -136,8 +136,12 @@ module Riddl
       server.start
     end #}}}
 
-    def initialize(riddl,opts=Riddl::Server::OPTS,&blk)# {{{
-      @riddl_opts = opts
+    def initialize(riddl,opts={},&blk)# {{{
+      @riddl_opts = {}
+      OPTS.each do |k,v|
+        @riddl_opts[k] = opts.has_key?(k) ? opts[k] : v
+      end
+
       if File.exists?(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile])
         eval(File.read(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile]))
       end
@@ -359,5 +363,3 @@ module Riddl
     end# }}}
   end
 end
-
-Riddl::Server::config!

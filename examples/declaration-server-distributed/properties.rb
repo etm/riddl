@@ -1,12 +1,9 @@
-#\ -p 9295
+#!/usr/bin/ruby
 require 'pp'
 require '../../lib/ruby/server'
 require '../../lib/ruby/utils/properties'
 
-use Rack::ShowStatus
-$0 = "dsd-properties"
-
-run Riddl::Server.new(File.dirname(__FILE__) + '/properties.xml') {
+Riddl::Server.new(File.dirname(__FILE__) + '/properties.xml', :port => 9295) do
   schema, strans = Riddl::Utils::Properties::schema(File.dirname(__FILE__) + '/instances/properties.schema')
 
   on resource do |r|
@@ -21,4 +18,4 @@ run Riddl::Server.new(File.dirname(__FILE__) + '/properties.xml') {
 
     use Riddl::Utils::Properties::implementation(properties, schema, strans)
   end
-}
+end.loop!

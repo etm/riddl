@@ -3,8 +3,6 @@ require 'pp'
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/fileserve')
 
-$port = 9296
-
 class Info < Riddl::Implementation
   def response
     unless File.exists?("instances/#{@r[0]}")
@@ -23,7 +21,7 @@ class Info < Riddl::Implementation
   end
 end
 
-Riddl::Server.new($basepath + '/main.xml') do
+Riddl::Server.new(File.dirname(__FILE__) + '/main.xml', :port => 9296) do
   on resource do
     run Riddl::Utils::FileServe, 'instances/instances.xml' if get '*'
     on resource do
