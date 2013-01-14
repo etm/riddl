@@ -298,8 +298,9 @@ module Riddl
         headers           = w.headers
         @riddl_res.status = w.status
 
-        response = (response.class == Array ? response : [response])
-        headers  = (headers.class == Array ? headers : [headers])
+        response = (response.is_a?(Array) ? response : [response])
+        headers  = (headers.is_a?(Array) ? headers : [headers])
+
         response.delete_if do |r|
           r.class != Riddl::Parameter::Simple && r.class != Riddl::Parameter::Complex
         end

@@ -18,11 +18,11 @@ module Riddl
     end
 
     def generate(mode=:output)
-      if @params.class == Array && @params.length == 1
+      if @params.is_a?(Array) && @params.length == 1
         body(@params[0],mode)
       elsif @params.class == Riddl::Parameter::Simple || @params.class == Riddl::Parameter::Complex
         body(@params,mode)
-      elsif @params.class == Array && @params.length > 1
+      elsif @params.is_a?(Array) && @params.length > 1
         multipart(mode)
       else
         StringIO.new('','r+b')

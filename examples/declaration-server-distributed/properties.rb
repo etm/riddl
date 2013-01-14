@@ -3,6 +3,8 @@ require 'pp'
 require '../../lib/ruby/server'
 require '../../lib/ruby/utils/properties'
 
+class PropertiesHandler < Riddl::Utils::Properties::HandlerBase; end
+
 Riddl::Server.new(File.dirname(__FILE__) + '/properties.xml', :port => 9295) do
   schema, strans = Riddl::Utils::Properties::schema(File.dirname(__FILE__) + '/instances/properties.schema')
 
@@ -16,6 +18,6 @@ Riddl::Server.new(File.dirname(__FILE__) + '/properties.xml', :port => 9295) do
     end  
     properties     = Riddl::Utils::Properties::file(instance + 'properties.xml')
 
-    use Riddl::Utils::Properties::implementation(properties, schema, strans)
+    use Riddl::Utils::Properties::implementation(properties, schema, strans, PropertiesHandler, r[:match].count)
   end
 end.loop!
