@@ -7,7 +7,11 @@ Riddl::Server.new($basepath + '/description.xml') do
   schema, strans = Riddl::Utils::Properties::schema(File.dirname(__FILE__) + '/properties.schema')
   properties = Riddl::Utils::Properties::file(File.dirname(__FILE__) + '/properties.xml')
 
-  on resource do
+  interface 'main' do
     use Riddl::Utils::Properties::implementation(properties, schema, strans)
+  end
+
+  interface 'xsls' do
+
   end
 end.loop!

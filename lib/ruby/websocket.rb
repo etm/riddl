@@ -1,3 +1,4 @@
+gem 'em-websocket', '>= 0.4.0'
 require 'em-websocket'
 require 'thin'
 
@@ -37,6 +38,28 @@ module Thin #{{{
   end
 end   #}}}
 
+class WebSocketParserData
+  attr_accessor :headers, :request_path, :query_string, :http_method, :body, :request_url
+  def match(what)
+    @body =~ what 
+  end
+  def upgrade?
+    true
+  end
+end
+
+module EventMachine
+  module WebSocket
+    class Handshake
+      def receive_data(data)
+        @parser = data
+        @headers = data.headers
+        process(@headers, data.body)
+      end
+    end
+  end  
+end  
+
 module Riddl
   class WebSocket < ::EventMachine::WebSocket::Connection
     class Error < RuntimeError; end
@@ -59,10 +82,10 @@ module Riddl
       end  
     end
 
-    def trigger_on_message(msg); @app.onmessage(msg);                        end
-    def trigger_on_open;         @closed = false; @app.onopen;               end
-    def trigger_on_close;        @closed = true;  @app.onclose;              end
-    def trigger_on_error(error); @closed = true;  @app.onerror(error); true; end
+    def trigger_on_message(msg);    @app.onmessage(msg);                        end
+    def trigger_on_open(handshake); @closed = false; @app.onopen;               end
+    def trigger_on_close;           @closed = true;  @app.onclose;              end
+    def trigger_on_error(error);    @closed = true;  @app.onerror(error); true; end
 
     def initialize(app, socket)
       @app = app
@@ -76,17 +99,5 @@ module Riddl
     def closed?
       @closed
     end
-
-    def dispatch(data)
-      return false if data.nil?
-      @handler = EventMachine::WebSocket::HandlerFactory.build_with_request(self, data, data['Body'], @ssl, false)
-      if @handler
-        @handler.run
-        true
-      else
-        false
-      end
-    end
-
   end
 end

@@ -153,6 +153,7 @@ module Riddl
       @riddl_cross_site_xhr = false
       @accessible_description = false
       @riddl_blk =  nil
+      @riddl_interfaces = {}
       instance_eval(&blk)
       @riddl_norun = false
 
@@ -256,6 +257,10 @@ module Riddl
         @riddl_path = File.dirname(@riddl_path).gsub(/\/+/,'/')
       end  
     end# }}}
+
+    def interface(name,&block)
+      @riddl_interfaces[name] = block if @riddl_norun
+    end
     
     def use(blk,*args)# {{{
       instance_eval(&blk)
@@ -278,19 +283,21 @@ module Riddl
       return if @riddl_norun
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
-        request = {}
-        request['path']   = @riddl_env['REQUEST_PATH'].to_s 
-        request['method'] = @riddl_env['REQUEST_METHOD'] 
-        request['query']  = @riddl_env['QUERY_STRING'].to_s 
-        request['Body']   = @riddl_env['rack.input'].read
+        data = WebSocketParserData.new
+        data.headers = {}
+        data.request_path = @riddl_env['REQUEST_PATH'].to_s
+        data.request_url = @riddl_env['REQUEST_URI'].to_s
+        data.query_string = @riddl_env['QUERY_STRING'].to_s
+        data.http_method = @riddl_env['REQUEST_METHOD']
+        data.body = @riddl_env['rack.input'].read
         @riddl_env.each do |key, value| 
           if key.match(/HTTP_(.+)/) 
-            request[$1.downcase.gsub('_','-')] ||= value 
+            data.headers[$1.downcase.gsub('_','-')] ||= value 
           end 
         end
         w = what.new(info(:a => args, :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION']))
         w.io = Riddl::WebSocket.new(w, @riddl_env['thin.connection'])
-        w.io.dispatch(request)
+        w.io.dispatch(data)
       end  
       if what.class == Class && what.superclass == Riddl::Implementation
         w = what.new(info(:a => args))
@@ -300,7 +307,6 @@ module Riddl
 
         response = (response.is_a?(Array) ? response : [response])
         headers  = (headers.is_a?(Array) ? headers : [headers])
-
         response.delete_if do |r|
           r.class != Riddl::Parameter::Simple && r.class != Riddl::Parameter::Complex
         end
@@ -362,5 +368,14 @@ module Riddl
     def facade# {{{
       @riddl_declaration
     end# }}}
+
+    def orchestrate# {{{
+      facade = Riddl::Client.facade(@riddl_declaration)
+
+      path = facade.resource "/" + @r.join('/')
+      status, result = path.request @m => @p
+      @status = status
+      result
+    end
   end
 end
