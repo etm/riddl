@@ -1,15 +1,1 @@
-<?xml version="1.0"?>
-<properties xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
-  <name/>
-  <context-variables>
-    <a>7</a>
-    <b>7</b>
-  </context-variables>
-  <endpoints>
-    <e1>http://www.heise.de</e1>
-    <e2 xmlns="http://riddl.org/ns/common-patterns/properties/1.0">mager</e2>
-  </endpoints>
-  <handlers/>
-  <description xmlns="http://riddl.org/ns/common-patterns/properties/1.0">lala</description>
-  <state xmlns="http://riddl.org/ns/common-patterns/properties/1.0">stopped</state>
-</properties>
+../../ns/common-patterns/properties/1.0/properties.xml

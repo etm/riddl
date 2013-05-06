@@ -76,7 +76,7 @@ end
 #puts status
 
 ### Status update
-if ARGV.length > 1
+if ARGV.length >= 1
   ### Update status
   status, res = twitter.resource("/1.1/statuses/update.json").post [
     Riddl::Parameter::Simple.new("status",ARGV.join(' ')),

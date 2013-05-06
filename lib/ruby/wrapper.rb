@@ -40,6 +40,7 @@ require File.expand_path(File.dirname(__FILE__) + '/wrapper/declaration')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/messageparser')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/resourcechecker')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/layerchecker')
+require File.expand_path(File.dirname(__FILE__) + '/error')
 require File.expand_path(File.dirname(__FILE__) + '/handlers')
 require File.expand_path(File.dirname(__FILE__) + '/roles')
 
