@@ -62,6 +62,7 @@ module Riddl
     def initialize(name,get_description=false)
       #{{{
       @doc = nil
+
       begin
         fh = name.respond_to?(:read) ? name : open(name)
         @doc = XML::Smart.string(fh.read)
@@ -70,7 +71,7 @@ module Riddl
         begin
           @doc = XML::Smart.string(name)
         rescue
-          raise SpecificationError, 'No RIDDL description or declaration found (neither a file, url or string).'
+          raise SpecificationError, "#{name.inspect} is no RIDDL description or declaration (neither a file, url or string)."
         end
       end  
       @doc.register_namespace 'x', XINCLUDE

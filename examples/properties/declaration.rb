@@ -3,7 +3,7 @@ require 'pp'
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/properties')
 
-Riddl::Server.new($basepath + '/description.xml') do
+Riddl::Server.new($basepath + '/declaration.xml') do
   schema, strans = Riddl::Utils::Properties::schema(File.dirname(__FILE__) + '/server.properties.schema')
   properties = Riddl::Utils::Properties::file(File.dirname(__FILE__) + '/server.properties.xml')
 

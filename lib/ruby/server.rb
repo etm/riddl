@@ -147,15 +147,17 @@ module Riddl
       end
       @riddl_opts[:url] = @riddl_opts[:host] + ':' + @riddl_opts[:port].to_s
 
-      @riddl_norun = true
-      @riddl_logger = nil
-      @riddl_process_out = true 
-      @riddl_cross_site_xhr = false
-      @accessible_description = false
-      @riddl_blk =  nil
+      @riddl_logger             = nil
+      @riddl_process_out        = true 
+      @riddl_cross_site_xhr     = false
+      @accessible_description   = false
+      @riddl_description        = nil
+      @riddl_description_string = ''
+      @riddl_declaration        = nil
+      @riddl_paths              = []  
+
       @riddl_interfaces = {}
       instance_eval(&blk)
-      @riddl_norun = false
 
       riddl = Riddl::Wrapper.new(riddl,@accessible_description)
       if riddl.description?
@@ -210,7 +212,7 @@ module Riddl
 
         if @riddl_env["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/i
           @riddl_path = '/'
-          instance_exec(info, &@riddl_blk)
+          instance_exec(info, &@riddl_interfaces[nil])
           return [-1, {}, []]
         else
           @riddl_message = @riddl_description.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
@@ -230,7 +232,7 @@ module Riddl
             @riddl_path = '/'
             @riddl_res.status = 404
             run Riddl::Utils::Description::XML, @riddl_description_string if get 'riddl-description-request'
-            instance_exec(info, &@riddl_blk)  
+            instance_exec(info, &@riddl_interfaces[nil])  
             if @riddl_cross_site_xhr
               @riddl_res['Access-Control-Allow-Origin'] = '*'
               @riddl_res['Access-Control-Max-Age'] = '0'
@@ -244,28 +246,7 @@ module Riddl
       @riddl_logger.info(@riddl_env,@riddl_res,time) unless @riddl_logger.nil?
       @riddl_res.finish
     end #}}}
-  
-    def on(resource, &block)# {{{
-      if @riddl_norun
-        @riddl_blk = block if @riddl_blk.nil?
-      else
-        @riddl_path << (@riddl_path == '/' ? resource : '/' + resource)
-
-        ### only descend when there is a possibility that it holds the right path
-        rp = @riddl_path.split('/')
-        block.call(info) if @riddl_matching_path_pieces[rp.length-1] == rp.last
-        @riddl_path = File.dirname(@riddl_path).gsub(/\/+/,'/')
-      end  
-    end# }}}
-
-    def interface(name,&block)
-      @riddl_interfaces[name] = block if @riddl_norun
-    end
     
-    def use(blk,*args)# {{{
-      instance_eval(&blk)
-    end# }}}
-
     def process_out(pout)# {{{
       @riddl_process_out = pout
     end# }}}
@@ -278,9 +259,29 @@ module Riddl
     def accessible_description(ad)# {{{
       @accessible_description = ad
     end# }}}
+    def interface(name,&block)
+      @riddl_interfaces[name] = block
+    end
+
+    def on(resource, &block)# {{{
+      if @riddl_paths.empty? # default interface, when a description and "on" syntax in server
+        @riddl_interfaces[nil] = block
+        return
+      end  
+
+      @riddl_path << (@riddl_path == '/' ? resource : '/' + resource)
+
+      ### only descend when there is a possibility that it holds the right path
+      rp = @riddl_path.split('/')
+      block.call(info) if @riddl_matching_path_pieces[rp.length-1] == rp.last
+      @riddl_path = File.dirname(@riddl_path).gsub(/\/+/,'/')
+    end# }}}
+
+    def use(blk,*args)# {{{
+      instance_eval(&blk)
+    end# }}}
 
     def run(what,*args)# {{{
-      return if @riddl_norun
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
         data = WebSocketParserData.new
@@ -330,26 +331,20 @@ module Riddl
     end# }}}
 
     def method(what)# {{{
-      return if @riddl_norun
-      if what.class == Hash
-        what.each do |met,min|
-          return true if check(min) && @riddl_method == met.to_s.downcase
-        end  
+      if !@riddl_message.nil? && what.class == Hash && what.length == 1
+        met, min = what.first
+        @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name && @riddl_method == met.to_s.downcase
+      else  
+        false
       end
-      false
     end  # }}}
-    def post(min='*');   return if @riddl_norun; check(min) && @riddl_method == 'post' end
-    def get(min='*');    return if @riddl_norun; check(min) && @riddl_method == 'get' end
-    def delete(min='*'); return if @riddl_norun; check(min) && @riddl_method == 'delete' end
-    def put(min='*');    return if @riddl_norun; check(min) && @riddl_method == 'put' end
-    def websocket;       return if @riddl_norun; return false unless @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] end
+    def post(min='*');   return false if     @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name && @riddl_method == 'post'   end
+    def get(min='*');    return false if     @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name && @riddl_method == 'get'    end
+    def delete(min='*'); return false if     @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name && @riddl_method == 'delete' end
+    def put(min='*');    return false if     @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name && @riddl_method == 'put'    end
+    def websocket;       return false unless @riddl_message.nil?; @riddl_path == @riddl_matching_path[0]                                                               end
 
-    def check(min) # {{{
-      return false if @riddl_message.nil? # for websockets no @riddl_message is set
-      @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name
-    end # }}}
-
-    def resource(path=nil); return if @riddl_norun; path.nil? ? '{}' : path end
+    def resource(path=nil); return path.nil? ? '{}' : path end
 
     def info(other={})# {{{
       { :h => @riddl_headers, 
@@ -369,13 +364,5 @@ module Riddl
       @riddl_declaration
     end# }}}
 
-    def orchestrate# {{{
-      facade = Riddl::Client.facade(@riddl_declaration)
-
-      path = facade.resource "/" + @r.join('/')
-      status, result = path.request @m => @p
-      @status = status
-      result
-    end
   end
 end

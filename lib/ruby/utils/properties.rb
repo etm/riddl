@@ -6,8 +6,8 @@ module Riddl
       VERSION_MINOR = 0
       PROPERTIES_SCHEMA_XSL_RNG = "#{File.dirname(__FILE__)}/../ns/common-patterns/properties/#{VERSION_MAJOR}.#{VERSION_MINOR}/properties.schema.xsl"
 
-      def self::implementation(properties,schema,strans,handler,level,details=:production)
-        unless handler.class == Class && handler.superclass == Riddl::Utils::Properties::HandlerBase
+      def self::implementation(properties,schema,strans,handler=nil,level=0,details=:production)
+        unless handler.nil? || (handler.class == Class && handler.superclass == Riddl::Utils::Properties::HandlerBase)
           raise "handler not a subclass of HandlerBase"
         end
         Proc.new {
@@ -98,7 +98,7 @@ module Riddl
         def response
           properties = @a[0]
           handler    = @a[1]
-          handler.new(properties,nil).read
+          handler.new(properties,nil).read unless handler.nil?
           return Riddl::Parameter::Complex.new("document","text/xml",File::open(properties))
         end
       end #}}}
@@ -108,7 +108,7 @@ module Riddl
           properties = @a[0]
           schema     = @a[1]
           handler    = @a[2]
-          handler.new(properties,nil).read
+          handler.new(properties,nil).read unless handler.nil?
 
           ret = XML::Smart.string("<properties xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
           schema.find("/p:properties/*[name()!='optional']|/p:properties/p:optional/*").each do |r|
@@ -122,7 +122,7 @@ module Riddl
         def response
           properties = @a[0]
           handler    = @a[1]
-          handler.new(properties,nil).read
+          handler.new(properties,nil).read unless handler.nil?
           query = (@p[0].value.to_s.strip.empty? ? '*' : @p[0].value)
 
           xml = File::read(properties).gsub(/properties xmlns="[^"]+"|properties xmlns='[^']+'/,'properties')
@@ -167,7 +167,7 @@ module Riddl
           handler    = @a[2]
           level      = @a[3]
           relpath    = @r[level..-1]
-          handler.new(properties,relpath[1]).read
+          handler.new(properties,relpath[1]).read unless handler.nil?
 
           if ret = extract_values(properties,schema,relpath[1],Riddl::HttpParser::unescape(relpath[2..-1].join('/')))
             ret
@@ -257,7 +257,7 @@ module Riddl
             doc.root.add newstuff.root
           end
 
-          handler.new(properties,property).create
+          handler.new(properties,property).create unless handler.nil?
         end
       end #}}}
 
@@ -323,7 +323,7 @@ module Riddl
               end  
             end
             
-            handler.new(properties,property).update
+            handler.new(properties,property).update unless handler.nil?
           end
           return
         end
@@ -369,7 +369,7 @@ module Riddl
             node.first.add newstuff.root
           end
 
-          handler.new(properties,property).create
+          handler.new(properties,property).create unless handler.nil?
           return
         end
       end #}}}
@@ -412,7 +412,7 @@ module Riddl
             doc.find(path).delete_all!
           end
 
-          handler.new(properties,property).delete
+          handler.new(properties,property).delete unless handler.nil?
           return
         end
       end #}}} 
@@ -478,7 +478,7 @@ module Riddl
             end  
           end
           
-          handler.new(properties,property).update
+          handler.new(properties,property).update unless handler.nil?
           return
         end
       end #}}}
