@@ -19,8 +19,12 @@ module Riddl
           t = @top.sub(/^\/*/,'').split('/')
           real = real.sub(/^\/*/,'').split('/')
           real = real[t.length..-1]
-          @base + '/' + real.join('/')
-        end #}}}
+          '/' + real.join('/')
+        end
+
+        def real_url(real,base)
+          (@base == '' ? base : @base) + real_path(real)
+        end
 
         attr_reader :top, :base, :sub, :name, :des
       end

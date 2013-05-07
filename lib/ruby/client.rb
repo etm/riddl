@@ -201,15 +201,6 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end #}}}
         private :extract_qparams
 
-        def merge_paths(int,real) #{{{
-          t = int.top.sub(/^\/*/,'').split('/')
-          real = real.sub(/^\/*/,'').split('/')
-          real = real[t.length..-1]
-          base = int.base == '' ? @base : int.base
-          base + '/' + real.join('/')
-        end #}}}
-        private :merge_paths
-
         def exec_request(riddl_method,parameters,simulate) #{{{
           parameters = parameters.dup
           headers = extract_headers(parameters)
@@ -241,8 +232,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           elsif !@wrapper.nil? && @wrapper.declaration?
             headers['Riddl-Declaration-Path'] = @rpath
             if !riddl_message.route?
-              reqp = merge_paths(riddl_message.interface,@rpath)
-              res, response = make_request(reqp,riddl_method,parameters,headers,qparams,simulate)
+              res, response = make_request(riddl_message.interface.real_url(@rpath,@base),riddl_method,parameters,headers,qparams,simulate)
               return response if simulate
               if res.code.to_i == 200
                 unless @wrapper.check_message(response,res,riddl_message.out)
@@ -254,8 +244,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               th = headers
               tq = qparams
               riddl_message.route.each do |m|
-                reqp = merge_paths(m.interface,@rpath)
-                res, response = make_request(reqp,riddl_method,tp,th,tq,simulate)
+                res, response = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate)
                 return response if simulate
                 if res.code.to_i != 200 || !@wrapper.check_message(response,res,m.out)
                   raise OutputError, "Not a valid output from service."
