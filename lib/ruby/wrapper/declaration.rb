@@ -58,6 +58,10 @@ module Riddl
         #{{{
         ### create single tiles
         @tiles = []
+        @interfaces = {}
+        riddl.find("/dec:declaration/dec:interface").each do |int|
+          @interfaces[int.attributes['name']] = [int.attributes['location'],int.find("des:description").first]
+        end
         riddl.find("/dec:declaration/dec:facade/dec:tile").each do |tile|
           @tiles << (til = Tile.new)
           res = til.base_path(tile.attributes['path'] || '/')
@@ -67,16 +71,15 @@ module Riddl
             block = layer.find("dec:block")
 
             lname = layer.attributes['name']
-            lpath = riddl.find("string(/dec:declaration/dec:interface[@name=\"#{lname}\"]/@location)")
-            des = riddl.find("/dec:declaration/dec:interface[@name=\"#{lname}\"]/des:description").first
+            lpath, des = @interfaces[lname]
             desres = des.find("des:resource").first
             if apply_to.empty?
-              int = Interface.new("/",lpath,"/")
+              int = Interface.new(lname,"/",lpath,"/",des)
               rec = desres.attributes['recursive']
               til.add_description(des,desres,"/",index,int,block,rec)
             else
               apply_to.each do |at|
-                int = Interface.new(at.to_s,lpath,"/")
+                int = Interface.new(lname,at.to_s,lpath,"/",des)
                 til.add_description(des,desres,at.to_s,index,int,block)
               end
             end

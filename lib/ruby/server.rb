@@ -7,6 +7,7 @@ require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/parameter')
 require File.expand_path(File.dirname(__FILE__) + '/error')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper')
+require File.expand_path(File.dirname(__FILE__) + '/utils/description')
 
 require 'optparse'
 require 'stringio'
@@ -14,17 +15,6 @@ require 'rack/content_length'
 require 'rack/chunked'
 
 module Riddl
-  module Utils
-    module Description
-
-      class XML < Riddl::Implementation
-        def response
-          return Riddl::Parameter::Complex.new("riddl-description","text/xml",@a[0])
-        end
-      end
-      
-    end
-  end
 
   class Server
     OPTS = { 
@@ -151,30 +141,25 @@ module Riddl
       @riddl_process_out        = true 
       @riddl_cross_site_xhr     = false
       @accessible_description   = false
-      @riddl_description        = nil
       @riddl_description_string = ''
-      @riddl_declaration        = nil
       @riddl_paths              = []  
 
       @riddl_interfaces = {}
-      instance_eval(&blk)
+      instance_eval(&blk) if block_given?
 
-      riddl = Riddl::Wrapper.new(riddl,@accessible_description)
-      if riddl.description?
-        @riddl_description = riddl
-        @riddl_description_string = riddl.description.xml
-        raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl_description.validate!
-      elsif riddl.declaration?
-        @riddl_declaration = riddl
-        raise SpecificationError, 'RIDDL declaration does not conform to specification' unless @riddl_declaration.validate!
-        @riddl_description_string = riddl.declaration.description_xml
-        @riddl_description = Riddl::Wrapper.new(@riddl_description_string,@accessible_description)
+      @riddl = Riddl::Wrapper.new(riddl,@accessible_description)
+      if @riddl.description?
+        raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl.validate!
+        @riddl_description_string = @riddl.description.xml
+      elsif @riddl.declaration?
+        raise SpecificationError, 'RIDDL declaration does not conform to specification' unless @riddl.validate!
+        @riddl_description_string = @riddl.declaration.description_xml
       else
         raise SpecificationError, 'Not a RIDDL file'
       end
 
-      @riddl_description.load_necessary_handlers!
-      @riddl_paths = @riddl_description.paths
+      @riddl.load_necessary_handlers!
+      @riddl_paths = @riddl.paths
     end# }}}
 
     def call(env)# {{{
@@ -208,14 +193,17 @@ module Riddl
           @riddl_env['HTTP_CONTENT_ID'],
           @riddl_env['HTTP_RIDDL_TYPE']
         ).params
+
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
+        @riddl_message = @riddl.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
 
         if @riddl_env["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/i
           @riddl_path = '/'
+          #if @riddl.declaration? && @riddl_message. TODO
+          #raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl.validate!
           instance_exec(info, &@riddl_interfaces[nil])
           return [-1, {}, []]
         else
-          @riddl_message = @riddl_description.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
           if @riddl_message.nil?
             if @riddl_env.has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
               @riddl_res['Access-Control-Allow-Origin'] = '*'
@@ -231,8 +219,18 @@ module Riddl
           else
             @riddl_path = '/'
             @riddl_res.status = 404
-            run Riddl::Utils::Description::XML, @riddl_description_string if get 'riddl-description-request'
-            instance_exec(info, &@riddl_interfaces[nil])  
+            if get 'riddl-description-request'
+              run Riddl::Utils::Description::XML, @riddl_description_string 
+            else
+              if @riddl.description?
+                instance_exec(info, &@riddl_interfaces[nil])  
+              elsif @riddl.declaration?
+                ifs = @riddl_message.route? ? @riddl_message.route : [@riddl_message]
+                ifs.each do |m|
+                  run Riddl::Utils::Description::Call, m.interface.base, m.interface.des.to_doc, m.interface.sub
+                end
+              end
+            end
             if @riddl_cross_site_xhr
               @riddl_res['Access-Control-Allow-Origin'] = '*'
               @riddl_res['Access-Control-Max-Age'] = '0'
@@ -313,7 +311,7 @@ module Riddl
         end
         response.compact!
         if @riddl_process_out && @riddl_res.status == 200
-          unless @riddl_description.check_message(response,headers,@riddl_message.out)
+          unless @riddl.check_message(response,headers,@riddl_message.out)
             @riddl_log.puts "500: the return for the #{@riddl_method} is not matching anything in the description."
             @riddl_res.status = 500
             return
@@ -361,7 +359,7 @@ module Riddl
     end# }}}
 
     def facade# {{{
-      @riddl_declaration
+      @riddl.declaration? ? @riddl : nil
     end# }}}
 
   end

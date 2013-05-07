@@ -63,16 +63,20 @@ module Riddl
       #{{{
       @doc = nil
 
-      begin
-        fh = name.respond_to?(:read) ? name : open(name)
-        @doc = XML::Smart.string(fh.read)
-        fh.close
-      rescue
+      if name.is_a?(XML::Smart::Dom)
+        @doc = name
+      else  
         begin
-          @doc = XML::Smart.string(name)
+          fh = name.respond_to?(:read) ? name : open(name)
+          @doc = XML::Smart.string(fh.read)
+          fh.close
         rescue
-          raise SpecificationError, "#{name.inspect} is no RIDDL description or declaration (neither a file, url or string)."
-        end
+          begin
+            @doc = XML::Smart.string(name)
+          rescue
+            raise SpecificationError, "#{name.inspect} is no RIDDL description or declaration (neither a file, url or string)."
+          end
+        end  
       end  
       @doc.register_namespace 'x', XINCLUDE
       @doc.find('//x:include/@href').each do |i|

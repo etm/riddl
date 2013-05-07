@@ -1,5 +1,5 @@
 How to start?
 
-> rackup main.ru
-> rackup properties.ru
-> rackup declaration.ru
+> ./main.rb -v start
+> ./properties.rb -v start
+> ./declaration.rb -v start

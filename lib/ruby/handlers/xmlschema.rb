@@ -2,8 +2,7 @@ module Riddl
   module Handlers
     class XMLSchema < Riddl::Handlers::Implementation
       def self::handle(what,hinfo)
-        # TODO XML Smart should understand ruby filehandles
-        w = if what.class == Riddl::Parameter::Tempfile
+        w = if what.class == Riddl::Parameter::Tempfile || what.class == File
           XML::Smart.open_unprotected(what)
         else  
           XML::Smart.string(what)

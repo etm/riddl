@@ -240,7 +240,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end
           elsif !@wrapper.nil? && @wrapper.declaration?
             headers['Riddl-Declaration-Path'] = @rpath
-            if riddl_message.route.nil?
+            if !riddl_message.route?
               reqp = merge_paths(riddl_message.interface,@rpath)
               res, response = make_request(reqp,riddl_method,parameters,headers,qparams,simulate)
               return response if simulate
