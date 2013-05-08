@@ -1,0 +1,26 @@
+<declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <interface name="main">
+    <xi:include href="properties.xml"/>
+  </interface>  
+  <interface name="xsls">
+    <xi:include href="xsls.xml"/>
+  </interface>  
+  <interface name="xsloverlay">
+    <xi:include href="xsloverlay.xml"/>
+  </interface>  
+
+  <facade>
+    <tile>
+      <layer name="main"/>
+      <layer name="xsls">
+        <apply-to>/xsls</apply-to>
+      </layer>
+    </tile>
+    <tile>
+      <layer name="xsloverlay">
+        <apply-to>/</apply-to>
+        <apply-to>/values</apply-to>
+      </layer>
+    </tile>
+  </facade>   
+</declaration>

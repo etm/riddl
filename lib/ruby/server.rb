@@ -227,9 +227,8 @@ module Riddl
               elsif @riddl.declaration?
                 ifs = @riddl_message.route? ? @riddl_message.route : [@riddl_message]
                 ifs.each do |m|
-                  p m.interface.sub
-                  p m.interface.real_path(@riddl_pinfo)
-                  run Riddl::Utils::Description::Call, m.interface.base, m.interface.des.to_doc, m.interface.real_path(@riddl_pinfo)
+                  b m.interface.base
+                  # run Riddl::Utils::Description::Call, m.interface.base, m.interface.des.to_doc, m.interface.real_path(@riddl_pinfo)
                 end
               end
             end
