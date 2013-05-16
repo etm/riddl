@@ -159,7 +159,7 @@
         <group>
           <attribute name="mimetype">
             <data type="string">
-              <param name="pattern">[\c]+/[\c\+]+|\*</param>
+              <param name="pattern">(([\c]+|\*)/[\c\+]+)|([\c]+/([\c\+]+|\*))|\*</param>
             </data>
           </attribute>  
           <optional>

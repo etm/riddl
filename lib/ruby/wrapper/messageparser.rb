@@ -61,7 +61,7 @@ module Riddl
         end
         if b.class == Riddl::Parameter::Complex && a.attributes['mimetype']
           b.name = a.attributes['name'] if @numparams == 1
-          if (b.name == a.attributes['name'] || a.attributes['name'] == '*') && (a.attributes['mimetype'] == '*' || b.mimetype == a.attributes['mimetype'])
+          if (b.name == a.attributes['name'] || a.attributes['name'] == '*') && match_mimetype(a,b)
             if a.attributes['handler']
               if Riddl::Handlers::handlers[a.attributes['handler']]
                 success = Riddl::Handlers::handlers[a.attributes['handler']].handle(b.value,a.children.map{|e|e.dump}.join)
@@ -200,6 +200,22 @@ module Riddl
         #}}}
       end
       private :match_simple
+
+      def match_mimetype(a,b)
+        if (a.attributes['mimetype'] == '*' || b.mimetype == a.attributes['mimetype'])
+          true
+        else
+          ma = a.attributes['mimetype'].split('/')
+          mb = b.mimetype.split('/')
+          if ma.length == 2 && mb.length == 2 && ((ma[0] == mb[0] && ma[1] == '*') || (ma[1] == mb[1] && ma[0] == '*'))
+            true
+          else
+            false
+          end  
+        end
+      end
+      private :match_mimetype
+
     end  
   end    
 end

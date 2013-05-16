@@ -5,21 +5,12 @@
   <interface name="properties" location="http://localhost:9295">
     <xi:include href="properties.xml"/>
   </interface>
-  <interface name="xsloverlay" location='http://localhost:9294'>
-    <xi:include href="xsloverlay.xml"/>
-  </interface>  
 
   <facade>
     <tile>
       <layer name="main"/>
       <layer name="properties">
         <apply-to>/{}/properties</apply-to>
-      </layer>
-      <layer name="xsloverlay">
-        <apply-to>/</apply-to>
-        <apply-to>/{}</apply-to>
-        <apply-to>/{}/properties</apply-to>
-        <apply-to>/{}/properties/values</apply-to>
       </layer>
     </tile>
   </facade>

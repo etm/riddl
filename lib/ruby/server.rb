@@ -17,6 +17,24 @@ require 'rack/chunked'
 module Riddl
 
   class Server
+
+    class Execution
+      attr_reader :headers, :response
+      def initialize(headers,response)
+        @response = (response.is_a?(Array) ? response : [response])
+        @headers  = (headers.is_a?(Array) ? headers : [headers])
+        @response.delete_if do |r|
+          r.class != Riddl::Parameter::Simple && r.class != Riddl::Parameter::Complex
+        end
+        @headers.delete_if do |h|
+          h.class != Riddl::Header
+        end
+        @headers.compact!
+        @response.compact!
+        @headers = Hash[ @headers.map{ |h| [h.name, h.value] } ]  
+      end
+    end
+
     OPTS = { 
       :host     => 'http://localhost',
       :port     => 9292,
@@ -174,6 +192,7 @@ module Riddl
       @riddl_env = env
       @riddl_req = Rack::Request.new(env)
       @riddl_res = Rack::Response.new
+      @riddl_res.status = 404
 
       @riddl_log = @riddl_env['rack.errors']
       @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
@@ -197,11 +216,20 @@ module Riddl
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
         @riddl_message = @riddl.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
 
+        @riddl_path = '/'
+        @riddl_info = { 
+          :h => @riddl_headers,
+          :p => @riddl_parameters,
+          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|HttpParser::unescape(e)}, 
+          :m => @riddl_method, 
+          :env => @riddl_env.reject{|k,v| k =~ /^rack\./},
+          :match => []
+        }
+
         if @riddl_env["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/i
-          @riddl_path = '/'
-          #if @riddl.declaration? && @riddl_message. TODO
-          #raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl.validate!
-          instance_exec(info, &@riddl_interfaces[nil])
+          # TODO raise error when declaration and route or (not route and non-local interface)
+          # raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl.validate!
+          instance_exec(@riddl_info, &@riddl_interfaces[nil])
           return [-1, {}, []]
         else
           if @riddl_message.nil?
@@ -217,18 +245,31 @@ module Riddl
               @riddl_res.status = 501 # not implemented?!
             end  
           else
-            @riddl_path = '/'
-            @riddl_res.status = 404
             if get 'riddl-description-request'
               run Riddl::Utils::Description::XML, @riddl_description_string 
             else
               if @riddl.description?
-                instance_exec(info, &@riddl_interfaces[nil])  
+                instance_exec(@riddl_info, &@riddl_interfaces[nil])  
               elsif @riddl.declaration?
                 ifs = @riddl_message.route? ? @riddl_message.route : [@riddl_message]
                 ifs.each do |m|
-                  b m.interface.base
-                  # run Riddl::Utils::Description::Call, m.interface.base, m.interface.des.to_doc, m.interface.real_path(@riddl_pinfo)
+                  if m.interface.base.nil?
+                    if @riddl_interfaces.key? m.interface.name
+                      @riddl_path = m.interface.top
+                      @riddl_info[:h]['RIDDL_DECLARATION_PATH'] = @riddl_pinfo
+                      @riddl_info[:h]['RIDDL_DECLARATION_RESOURCE'] = m.interface.top
+                      @riddl_info.merge!(:match => matching_path)
+                      instance_exec(@riddl_info, &@riddl_interfaces[m.interface.name])
+                    else  
+                      @riddl_log.puts "501: not implemented (for remote: add @location in declaration; for local: add to Riddl::Server)."
+                      @riddl_res.status = 501 # not implemented?!
+                      break
+                    end  
+                  else
+                    run Riddl::Utils::Description::Call, @riddl_exe, @riddl_pinfo, m.interface.top, m.interface.base, m.interface.des.to_doc, m.interface.real_path(@riddl_pinfo)
+                  end
+                  break unless @riddl_res.status == 200
+                  @riddl_info.merge!(:h => @riddl_exe.headers, :p => @riddl_exe.response)
                 end
               end
             end
@@ -241,6 +282,14 @@ module Riddl
       else
         @riddl_log.puts "404: this resource for sure does not exist."
         @riddl_res.status = 404 # client requests wrong path
+      end
+      if @riddl_exe
+        if @riddl_res.status == 200
+          @riddl_res.write HttpGenerator.new(@riddl_exe.response,@riddl_res).generate.read
+        end  
+        @riddl_exe.headers.each do |n,h|
+          @riddl_res[n] = h
+        end
       end
       @riddl_logger.info(@riddl_env,@riddl_res,time) unless @riddl_logger.nil?
       @riddl_res.finish
@@ -258,9 +307,9 @@ module Riddl
     def accessible_description(ad)# {{{
       @accessible_description = ad
     end# }}}
-    def interface(name,&block)
+    def interface(name,&block) #{{{
       @riddl_interfaces[name] = block
-    end
+    end #}}}
 
     def on(resource, &block)# {{{
       if @riddl_paths.empty? # default interface, when a description and "on" syntax in server
@@ -272,7 +321,7 @@ module Riddl
 
       ### only descend when there is a possibility that it holds the right path
       rp = @riddl_path.split('/')
-      block.call(info) if @riddl_matching_path_pieces[rp.length-1] == rp.last
+      block.call(@riddl_info.merge!(:match => matching_path)) if @riddl_matching_path_pieces[rp.length-1] == rp.last
       @riddl_path = File.dirname(@riddl_path).gsub(/\/+/,'/')
     end# }}}
 
@@ -295,36 +344,21 @@ module Riddl
             data.headers[$1.downcase.gsub('_','-')] ||= value 
           end 
         end
-        w = what.new(info(:a => args, :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION']))
+        w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION']))
         w.io = Riddl::WebSocket.new(w, @riddl_env['thin.connection'])
         w.io.dispatch(data)
+
       end  
       if what.class == Class && what.superclass == Riddl::Implementation
-        w = what.new(info(:a => args))
-        response          = w.response
-        headers           = w.headers
+        w = what.new(@riddl_info.merge!(:a => args))
         @riddl_res.status = w.status
-
-        response = (response.is_a?(Array) ? response : [response])
-        headers  = (headers.is_a?(Array) ? headers : [headers])
-        response.delete_if do |r|
-          r.class != Riddl::Parameter::Simple && r.class != Riddl::Parameter::Complex
-        end
-        response.compact!
+        @riddl_exe = Riddl::Server::Execution.new(w.headers,w.response)
         if @riddl_process_out && @riddl_res.status == 200
-          unless @riddl.check_message(response,headers,@riddl_message.out)
+          unless @riddl.check_message(@riddl_exe.response,@riddl_exe.headers,@riddl_message.out)
             @riddl_log.puts "500: the return for the #{@riddl_method} is not matching anything in the description."
             @riddl_res.status = 500
             return
           end  
-        end
-        if @riddl_res.status == 200
-          @riddl_res.write HttpGenerator.new(response,@riddl_res).generate.read
-        end  
-        headers.each do |h|
-          if h.class == Riddl::Header
-            @riddl_res[h.name] = h.value
-          end 
         end
       end
     end# }}}
@@ -343,17 +377,18 @@ module Riddl
     def put(min='*');    return false if     @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name && @riddl_method == 'put'    end
     def websocket;       return false unless @riddl_message.nil?; @riddl_path == @riddl_matching_path[0]                                                               end
 
-    def resource(path=nil); return path.nil? ? '{}' : path end
+    def resource(rname=nil); return rname.nil? ? '{}' : rname end
 
-    def info(other={})# {{{
-      { :h => @riddl_headers, 
-        :p => @riddl_parameters, 
-        :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|HttpParser::unescape(e)}, 
-        :m => @riddl_method, 
-        :env => @riddl_env.reject{|k,v| k =~ /^rack\./}, 
-        :match => @riddl_path.sub(/\//,'').split('/') 
-      }.merge(other)
-    end# }}}
+    def matching_path #{{{
+      @riddl_path.sub(/\//,'').split('/') 
+    end #}}}
+
+    def declaration_path #{{{
+      @riddl_info[:h]['RIDDL_DECLARATION_PATH']
+    end #}}}
+    def declaration_resource #{{{
+      @riddl_info[:h]['RIDDL_DECLARATION_RESOURCE']
+    end #}}}
 
     def description_string# {{{
       @riddl_description_string

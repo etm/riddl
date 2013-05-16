@@ -37,7 +37,7 @@ module Riddl
             tmp.write r.value
             @headers['Content-Type'] = 'text/plain'
             @headers['Content-ID'] = r.name
-            @headers['Riddl-Type'] = 'simple'
+            @headers['RIDDL-TYPE'] = 'simple'
           end
           if mode == :input
             @headers['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -46,7 +46,7 @@ module Riddl
         when Riddl::Parameter::Complex
           tmp.write(r.value.respond_to?(:read) ? r.value.read : r.value)
           @headers['Content-Type'] = r.mimetype
-          @headers['Riddl-Type'] = 'complex'
+          @headers['RIDDL-TYPE'] = 'complex'
           if r.filename.nil?
             @headers['Content-ID'] = r.name
           else
@@ -87,14 +87,14 @@ module Riddl
             case r
               when Riddl::Parameter::Simple
                 tmp.write "--" + BOUNDARY + EOL
-                tmp.write "Riddl-Type: simple" + EOL
+                tmp.write "RIDDL-TYPE: simple" + EOL
                 tmp.write "Content-Disposition: #{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\"" + EOL
                 tmp.write EOL
                 tmp.write r.value
                 tmp.write EOL
               when Riddl::Parameter::Complex
                 tmp.write "--" +  BOUNDARY + EOL
-                tmp.write "Riddl-Type: complex" + EOL
+                tmp.write "RIDDL-TYPE: complex" + EOL
                 tmp.write "Content-Disposition: #{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\""
                 tmp.write r.filename.nil? ? EOL : "; filename=\"#{r.filename}\"" + EOL
                 tmp.write "Content-Transfer-Encoding: binary" + EOL

@@ -11,6 +11,7 @@ class Info < Riddl::Implementation
     end
     Riddl::Parameter::Complex.new("info","text/xml") do
       i = XML::Smart::string <<-END
+        <?xml-stylesheet href="../xsls/info.xsl" type="text/xsl"?>
         <info instance='#{@r[0]}'>
           <properties/>
         </info>
