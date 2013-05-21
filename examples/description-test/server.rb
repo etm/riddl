@@ -1,8 +1,5 @@
-require 'rack'
-require '../../lib/ruby/server'
-require 'pp'
-
-use Rack::ShowStatus
+#!/usr/bin/ruby
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
 
 class Test < Riddl::Implementation
   def response  
@@ -10,8 +7,8 @@ class Test < Riddl::Implementation
   end  
 end
 
-run Riddl::Server.new("description4.xml") {
+Riddl::Server.new("description4.xml") do
   on resource do
     run Test if get 'test'
   end  
-}
+end.loop!
