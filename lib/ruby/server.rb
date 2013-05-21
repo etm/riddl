@@ -13,6 +13,7 @@ require 'optparse'
 require 'stringio'
 require 'rack/content_length'
 require 'rack/chunked'
+require 'pp'
 
 module Riddl
 
@@ -115,10 +116,15 @@ module Riddl
           FileUtils.rm_r(d) if File.basename(d) =~ /^\d+$/
         end
       end
-      
+
+      app = Rack::Builder.new self
+      unless @riddl_logger.nil?
+        app.use Rack::CommonLogger, @riddl_logger
+      end
+
       server = if verbose
         Rack::Server.new(
-          :app => self,
+          :app => app,
           :Port => @riddl_opts[:port],
           :environment => (@riddl_opts[:mode] == :debug ? 'development' : 'deployment'),
           :server => 'thin',
@@ -126,7 +132,7 @@ module Riddl
         )
       else
         server = Rack::Server.new(
-          :app => self,
+          :app => app,
           :Port => @riddl_opts[:port],
           :environment => 'none',
           :server => 'thin',
@@ -139,7 +145,7 @@ module Riddl
       server.middleware.each do |k,v|
         v.delete [Rack::Lint]
       end  
-      
+
       puts "Server (#{@riddl_opts[:url]}) started"
       server.start
     end #}}}
@@ -187,14 +193,15 @@ module Riddl
     def _call(env) #{{{
       Dir.chdir(@riddl_opts[:basepath]) if @riddl_opts[:basepath]
 
-      time = Time.now unless @riddl_logger.nil?
-      @riddl_pinfo = env["PATH_INFO"].gsub(/\/+/,'/')
       @riddl_env = env
+      @riddl_env['rack.logger'] =  @riddl_logger if @riddl_logger
+
+      @riddl_pinfo = env["PATH_INFO"].gsub(/\/+/,'/')
       @riddl_req = Rack::Request.new(env)
       @riddl_res = Rack::Response.new
       @riddl_res.status = 404
 
-      @riddl_log = @riddl_env['rack.errors']
+      @riddl_log = @riddl_logger || @riddl_env['rack.errors'] 
       @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
 
       if @riddl_matching_path
@@ -241,7 +248,7 @@ module Riddl
               @riddl_res['Content-Length'] = '0'
               @riddl_res.status = 200
             else
-              @riddl_log.puts "501: the #{@riddl_method} parameters are not matching anything in the description."
+              @riddl_log.write "501: the #{@riddl_method} parameters are not matching anything in the description.\n"
               @riddl_res.status = 501 # not implemented?!
             end  
           else
@@ -263,7 +270,7 @@ module Riddl
                       @riddl_info.merge!(:match => matching_path)
                       instance_exec(@riddl_info, &@riddl_interfaces[m.interface.name])
                     else  
-                      @riddl_log.puts "501: not implemented (for remote: add @location in declaration; for local: add to Riddl::Server)."
+                      @riddl_log.write "501: not implemented (for remote: add @location in declaration; for local: add to Riddl::Server).\n"
                       @riddl_res.status = 501 # not implemented?!
                       break
                     end  
@@ -282,7 +289,7 @@ module Riddl
           end  
         end
       else
-        @riddl_log.puts "404: this resource for sure does not exist."
+        @riddl_log.write "404: this resource for sure does not exist.\n"
         @riddl_res.status = 404 # client requests wrong path
       end
       if @riddl_exe
@@ -293,7 +300,6 @@ module Riddl
           @riddl_res[n] = h
         end
       end
-      @riddl_logger.info(@riddl_env,@riddl_res,time) unless @riddl_logger.nil?
       @riddl_res.finish
     end #}}}
     
@@ -359,7 +365,7 @@ module Riddl
         @riddl_res.status = w.status
         if @riddl_process_out && @riddl_res.status == 200
           unless @riddl.check_message(@riddl_exe.response,@riddl_exe.headers,@riddl_message.out)
-            @riddl_log.puts "500: the return for the #{@riddl_method} is not matching anything in the description."
+            @riddl_log.write "500: the return for the #{@riddl_method} is not matching anything in the description.\n"
             @riddl_res.status = 500
             return
           end  

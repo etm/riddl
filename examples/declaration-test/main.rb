@@ -1,10 +1,7 @@
-require 'rack'
-require 'socket'
-require '../../lib/ruby/server'
-require '../../lib/ruby/commonlogger'
-require '../../lib/ruby/utils/erbserve'
-
-require 'pp'
+#!/usr/bin/ruby
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/commonlogger')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/erbserve')
 
 class A < Riddl::Implementation
   def response
@@ -27,9 +24,7 @@ class S < Riddl::Implementation
   end
 end  
 
-options[:Port] = 9201
-
-run Riddl::Server.new("main.xml") {
+Riddl::Server.new("main.xml", :port => 9201) do
   process_out false
   logger Riddl::CommonLogger.new("Main","main.log")
   on resource do
@@ -38,4 +33,4 @@ run Riddl::Server.new("main.xml") {
     run C if get 'c'
     run S if get '*'
   end
-}
+end.loop!
