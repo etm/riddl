@@ -5,7 +5,9 @@
   </message>
 
   <resource>
-    <get in="*" out="xsl"/>
+    <resource recursive='true'>
+      <get in="*" out="xsl"/>
+    </resource>  
   </resource>  
 
 </description>

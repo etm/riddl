@@ -19,8 +19,8 @@ module Riddl
   class Server
 
     class Execution
-      attr_reader :headers, :response
-      def initialize(headers,response)
+      attr_reader :response,:headers
+      def initialize(response,headers)
         @response = (response.is_a?(Array) ? response : [response])
         @headers  = (headers.is_a?(Array) ? headers : [headers])
         @response.delete_if do |r|
@@ -355,8 +355,8 @@ module Riddl
       end  
       if what.class == Class && what.superclass == Riddl::Implementation
         w = what.new(@riddl_info.merge!(:a => args, :match => matching_path))
+        @riddl_exe = Riddl::Server::Execution.new(w.response,w.headers)
         @riddl_res.status = w.status
-        @riddl_exe = Riddl::Server::Execution.new(w.headers,w.response)
         if @riddl_process_out && @riddl_res.status == 200
           unless @riddl.check_message(@riddl_exe.response,@riddl_exe.headers,@riddl_message.out)
             @riddl_log.puts "500: the return for the #{@riddl_method} is not matching anything in the description."

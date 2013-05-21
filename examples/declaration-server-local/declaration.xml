@@ -13,7 +13,7 @@
     <tile>
       <layer name="main"/>
       <layer name="xsls">
-        <apply-to>/xsls/{}</apply-to>
+        <apply-to>/xsls</apply-to>
       </layer>
       <layer name="xsloverlay">
         <apply-to>/</apply-to>

@@ -9,7 +9,7 @@ status, res = library.post [
 id = res[0].value
 p id
 
-while true
+1.upto 10 do
   status, res = library.resource("/#{id}").get
   pp status
   pp res[0]

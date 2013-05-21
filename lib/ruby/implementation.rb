@@ -5,9 +5,9 @@ module Riddl
 
       @h =     request[:h]     # incoming riddl headers
       @p =     request[:p]     # incoming riddl parameters
-      @r =     request[:r]     # the matching resource path
-      @s =     request[:s]     # the matching resource path schema
-      @match = request[:match] # the path of the branch matching, important for recursive
+      @r =     request[:r]     # the matching resource path (fixed)
+      @s =     request[:s]     # the matching resource path schema (fixed)
+      @match = request[:match] # the matching resource path schema for current resource, important for recursive
       @env =   request[:env]   # environment (all headers)
       @a =     request[:a]     # args to run command
       @m =     request[:m]     # get, put, post, ...

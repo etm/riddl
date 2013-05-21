@@ -14,7 +14,9 @@ Riddl::Server.new('declaration.xml') do
   end
 
   interface 'xsls' do |r|
-    run Riddl::Utils::FileServe, "xsls" if get
+    on resource do
+      run Riddl::Utils::FileServe, "xsls" if get
+    end  
   end
 
   interface 'xsloverlay' do

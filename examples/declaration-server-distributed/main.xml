@@ -23,7 +23,7 @@
       <delete in="*"/>
     </resource>
     <resource relative='xsls'>
-      <resource>
+      <resource recursive='true'>
         <get in="*" out="xml"/>
       </resource>  
     </resource>
