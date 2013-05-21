@@ -1,3 +1,5 @@
+require File.expand_path(File.dirname(__FILE__) + '/../client')
+
 module Riddl
   module Utils
     module Description

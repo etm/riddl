@@ -1,6 +1,44 @@
 #!/usr/bin/ruby
 require 'pp'
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/declaration')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/fileserve')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/properties')
 
-Riddl::Server.new(File.dirname(__FILE__) + '/declaration.xml', :port => 9297).loop!
+class Info < Riddl::Implementation
+  def response
+    unless File.exists?("instances/#{@r[0]}")
+      @status = 400
+      return
+    end
+    Riddl::Parameter::Complex.new("info","text/xml") do
+      i = XML::Smart::string <<-END
+        <info instance='#{@r[0]}'>
+          <properties/>
+        </info>
+      END
+      i.to_s
+    end
+  end
+end
+
+Riddl::Server.new('declaration.xml', :port => 9297) do |r|
+  schema, strans = Riddl::Utils::Properties::schema(@riddl_opts[:basepath] + '/instances/properties.schema')
+
+  interface 'main' do
+    run Riddl::Utils::FileServe, 'instances/instances.xml' if get '*'
+    on resource do
+      run Info if get
+    end  
+    on resource 'xsls' do
+      on resource do
+        run Riddl::Utils::FileServe, "xsls"  if get
+      end  
+    end  
+  end
+
+  interface 'properties' do |r|
+    properties = @riddl_opts[:basepath] + '/instances/' + r[:h]['RIDDL_DECLARATION_PATH'].split('/')[1] + '/properties.xml'
+
+    use Riddl::Utils::Properties::implementation(properties, schema, strans)
+  end
+end.loop!

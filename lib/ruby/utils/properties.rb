@@ -6,7 +6,7 @@ module Riddl
       VERSION_MINOR = 0
       PROPERTIES_SCHEMA_XSL_RNG = "#{File.dirname(__FILE__)}/../ns/common-patterns/properties/#{VERSION_MAJOR}.#{VERSION_MINOR}/properties.schema.xsl"
 
-      def self::implementation(properties,schema,strans,handler=nil,level=0,details=:production)
+      def self::implementation(properties,schema,strans,level=0,handler=nil,details=:production)
         unless handler.nil? || (handler.class == Class && handler.superclass == Riddl::Utils::Properties::HandlerBase)
           raise "handler not a subclass of HandlerBase"
         end
@@ -19,7 +19,7 @@ module Riddl
               run( Riddl::Utils::Properties::RngSchema,      properties, schema, strans                ) if get
             end  
           end
-          on resource 'values' do
+          on resource 'values' do |r|
             run(   Riddl::Utils::Properties::Properties,     properties, schema,         handler       ) if get
             run(   Riddl::Utils::Properties::AddProperty,    properties, schema, strans, handler, level) if post   'property'
             run(   Riddl::Utils::Properties::AddProperties,  properties, schema, strans, handler, level) if put    'properties'
@@ -165,6 +165,7 @@ module Riddl
           handler    = @a[2]
           level      = @a[3]
           relpath    = @r[level..-1]
+
           handler.new(properties,relpath[1]).read unless handler.nil?
 
           if ret = extract_values(properties,schema,relpath[1],Riddl::HttpParser::unescape(relpath[2..-1].join('/')))

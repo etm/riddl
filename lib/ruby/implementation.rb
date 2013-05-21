@@ -5,7 +5,8 @@ module Riddl
 
       @h =     request[:h]     # incoming riddl headers
       @p =     request[:p]     # incoming riddl parameters
-      @r =     request[:r]     # the matching path
+      @r =     request[:r]     # the matching resource path
+      @s =     request[:s]     # the matching resource path schema
       @match = request[:match] # the path of the branch matching, important for recursive
       @env =   request[:env]   # environment (all headers)
       @a =     request[:a]     # args to run command
@@ -27,7 +28,8 @@ module Riddl
   class WebSocketImplementation
     def initialize(ws)
       @ws    = ws
-      @r     = ws[:r]     # the matching path
+      @r     = ws[:r]     # the matching resource path
+      @r     = ws[:s]     # the matching resource path schema
       @match = ws[:match] # the path of the branch matching, important for recursive
       @env   = ws[:env]   # environment (all headers)
       @a     = ws[:a]     # args to run command

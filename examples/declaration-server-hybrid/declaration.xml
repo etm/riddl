@@ -1,16 +1,25 @@
 <declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <interface name="main" location="http://localhost:9296">
+  <interface name="main">
     <xi:include href="main.xml"/>
   </interface>
-  <interface name="properties" location="http://localhost:9295">
+  <interface name="properties">
     <xi:include href="properties.xml"/>
   </interface>
+  <interface name="xsloverlay" location='http://localhost:9294'>
+    <xi:include href="xsloverlay.xml"/>
+  </interface>  
 
   <facade>
     <tile>
       <layer name="main"/>
       <layer name="properties">
         <apply-to>/{}/properties</apply-to>
+      </layer>
+      <layer name="xsloverlay">
+        <apply-to>/</apply-to>
+        <apply-to>/{}</apply-to>
+        <apply-to>/{}/properties</apply-to>
+        <apply-to>/{}/properties/values</apply-to>
       </layer>
     </tile>
   </facade>

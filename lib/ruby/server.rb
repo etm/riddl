@@ -198,7 +198,6 @@ module Riddl
       @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
 
       if @riddl_matching_path
-        @riddl_matching_path_pieces = @riddl_matching_path[0].split('/')
         @riddl_headers = {}
         @riddl_env.each do |h,v|
           @riddl_headers[$1] = v if h =~ /^HTTP_(.*)$/
@@ -221,6 +220,7 @@ module Riddl
           :h => @riddl_headers,
           :p => @riddl_parameters,
           :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|HttpParser::unescape(e)}, 
+          :s => @riddl_matching_path[0].sub(/\//,'').split('/').map{|e|HttpParser::unescape(e)},
           :m => @riddl_method, 
           :env => @riddl_env.reject{|k,v| k =~ /^rack\./},
           :match => []
@@ -253,11 +253,13 @@ module Riddl
               elsif @riddl.declaration?
                 ifs = @riddl_message.route? ? @riddl_message.route : [@riddl_message]
                 ifs.each do |m|
+                  @riddl_path = '/'
                   if m.interface.base.nil?
                     if @riddl_interfaces.key? m.interface.name
-                      @riddl_path = m.interface.top
+                      @riddl_info[:r] = m.interface.real_path(@riddl_pinfo).sub(/\//,'').split('/')
                       @riddl_info[:h]['RIDDL_DECLARATION_PATH'] = @riddl_pinfo
                       @riddl_info[:h]['RIDDL_DECLARATION_RESOURCE'] = m.interface.top
+                      @riddl_info[:s] = m.interface.sub.sub(/\//,'').split('/')
                       @riddl_info.merge!(:match => matching_path)
                       instance_exec(@riddl_info, &@riddl_interfaces[m.interface.name])
                     else  
@@ -319,9 +321,11 @@ module Riddl
 
       @riddl_path << (@riddl_path == '/' ? resource : '/' + resource)
 
+
       ### only descend when there is a possibility that it holds the right path
-      rp = @riddl_path.split('/')
-      block.call(@riddl_info.merge!(:match => matching_path)) if @riddl_matching_path_pieces[rp.length-1] == rp.last
+      rp = @riddl_path.sub(/\//,'').split('/')
+
+      block.call(@riddl_info.merge!(:match => matching_path)) if @riddl_info[:s][rp.length-1] == rp.last
       @riddl_path = File.dirname(@riddl_path).gsub(/\/+/,'/')
     end# }}}
 
@@ -344,13 +348,13 @@ module Riddl
             data.headers[$1.downcase.gsub('_','-')] ||= value 
           end 
         end
-        w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION']))
+        w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION']), :match => matching_path)
         w.io = Riddl::WebSocket.new(w, @riddl_env['thin.connection'])
         w.io.dispatch(data)
 
       end  
       if what.class == Class && what.superclass == Riddl::Implementation
-        w = what.new(@riddl_info.merge!(:a => args))
+        w = what.new(@riddl_info.merge!(:a => args, :match => matching_path))
         @riddl_res.status = w.status
         @riddl_exe = Riddl::Server::Execution.new(w.headers,w.response)
         if @riddl_process_out && @riddl_res.status == 200
@@ -371,11 +375,11 @@ module Riddl
         false
       end
     end  # }}}
-    def post(min='*');   return false if     @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name && @riddl_method == 'post'   end
-    def get(min='*');    return false if     @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name && @riddl_method == 'get'    end
-    def delete(min='*'); return false if     @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name && @riddl_method == 'delete' end
-    def put(min='*');    return false if     @riddl_message.nil?; @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name && @riddl_method == 'put'    end
-    def websocket;       return false unless @riddl_message.nil?; @riddl_path == @riddl_matching_path[0]                                                               end
+    def post(min='*');   return false if     @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'post'   end
+    def get(min='*');    return false if     @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'get'    end
+    def delete(min='*'); return false if     @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'delete' end
+    def put(min='*');    return false if     @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'put'    end
+    def websocket;       return false unless @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/')                                                               end
 
     def resource(rname=nil); return rname.nil? ? '{}' : rname end
 

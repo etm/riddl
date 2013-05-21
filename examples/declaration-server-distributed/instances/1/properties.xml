@@ -2,8 +2,8 @@
 <properties xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
   <name>laller</name>
   <state>ready</state>
-  <context-variables/>
+  <dataelements/>
   <endpoints/>
-  <handlers/>
+  <handlerwrapper/>
   <description/>
 </properties>

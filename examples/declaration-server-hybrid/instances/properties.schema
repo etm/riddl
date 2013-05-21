@@ -1,27 +1,40 @@
 <properties xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
-  <name type="value" modifiable="false" mutable="false">
-    <data type="string">
-      <param name="pattern">\c*</param>
-    </data>
+  <name type="simple" modifiable="false" mutable="false">
+    <text/>
   </name>
-  <description type="content" modifiable="true"/>
+  <handlerwrapper type="simple" modifiable="false" mutable="false">
+    <data type="string">
+      <param name="pattern">[A-Z][a-zA-Z]*</param>
+    </data>  
+  </handlerwrapper>
+  <description type="arbitrary" modifiable="false" mutable="false"/>
   <optional>
-    <transformation type="content" modifiable="true"/>
+    <transformation type="arbitrary" modifiable="false" mutable="false"/>
   </optional>  
   <state type="state" modifiable="true">
     <ready>
       <running putable="true"/>
     </ready>  
     <running>
-      <stopped putable="true"/>
+      <stopping putable="true"/>
       <finished putable="false"/>
     </running>
+    <stopping>
+      <stopped putable="false"/>
+    </stopping>
     <stopped>
       <running putable="true"/>
     </stopped>  
     <finished/>
   </state>  
-  <context-variables type="map" modifiable="true"/>
-  <endpoints type="map" modifiable="true"/>
-  <handlers type="map" modifiable="true"/>
+  <dataelements type="complex" modifiable="false" mutable="true">
+    <zeroOrMore>
+      <element><anyName/><text/></element>
+    </zeroOrMore>  
+  </dataelements>  
+  <endpoints type="complex" modifiable="false" mutable="true">
+    <zeroOrMore>
+      <element><anyName/><text/></element>
+    </zeroOrMore>  
+  </endpoints>
 </properties>
