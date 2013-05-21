@@ -11,9 +11,7 @@ module Riddl
           raise "handler not a subclass of HandlerBase"
         end
         Proc.new {
-          if get("*")
-            run    Riddl::Utils::Properties::All,            properties,                 handler       
-          end
+          run(     Riddl::Utils::Properties::All,            properties,                 handler       ) if get    '*'
           run(     Riddl::Utils::Properties::Query,          properties,                 handler       ) if get    'query'
           on resource 'schema' do
             run(   Riddl::Utils::Properties::Schema,         properties, schema, strans                ) if get
