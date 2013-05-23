@@ -9,25 +9,19 @@
   </handlerwrapper>
   <description type="arbitrary" modifiable="false" mutable="false"/>
   <optional>
-    <transformation type="arbitrary" modifiable="false" mutable="false"/>
+    <transformation type="arbitrary" modifiable="true" mutable="false"/>
   </optional>  
   <state type="state" modifiable="true">
-    <ready>
-      <running putable="true"/>
-    </ready>  
     <running>
-      <stopping putable="true"/>
+      <stopped putable="true"/>
       <finished putable="false"/>
     </running>
-    <stopping>
-      <stopped putable="false"/>
-    </stopping>
     <stopped>
       <running putable="true"/>
     </stopped>  
     <finished/>
   </state>  
-  <dataelements type="complex" modifiable="false" mutable="true">
+  <dataelements type="complex" modifiable="true" mutable="true">
     <zeroOrMore>
       <element><anyName/><text/></element>
     </zeroOrMore>  

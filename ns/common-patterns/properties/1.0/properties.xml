@@ -100,9 +100,15 @@
     </choice>  
   </message>
   <message name="property">
-    <parameter name="property" type="string">
+    <parameter name="name" type="string">
       <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
     </parameter>
+    <choice>
+      <parameter name="value" type="string"/>
+      <parameter name="value" mimetype="text/plain"/>
+      <parameter name="content" mimetype="text/xml"/> <!-- add everything inside the root tag -->
+      <parameter name="content" type="string"/> <!-- add everything inside the root tag -->
+    </choice>
   </message>
   <message name="query">
     <parameter name="query" type="string"/>

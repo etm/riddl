@@ -4,28 +4,26 @@ Gem::Specification.new do |s|
   s.platform         = Gem::Platform::RUBY
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
 
-  s.description = <<-EOF
-Write useful stuff.
-
-Also see http://www.wst.univie.ac.at/communities/riddl/.
-EOF
+  s.description      = "rest service interface definition, mixing, and evolution"
 
   s.files            = Dir['{lib/riddl/ns/**/*,tools/**/*,ns/**/*,contrib/**/*,lib/riddl/**/*,example/**/*}'] + %w(COPYING Rakefile riddl.gemspec README AUTHORS INSTALL)
   s.require_path     = 'lib'
-  s.extra_rdoc_files = ['README']
+  s.extra_rdoc_files = ['README.rdoc']
   s.bindir           = 'tools'
   s.executables      = ['riddlcheck','riddlprocess']
+  s.test_files       = Dir['test/tc_*.rb','test/smartrunner.rb']
 
 
   s.authors          = ['Juergen eTM Mangler']
   s.email            = 'juergen.mangler@gmail.com'
-  s.homepage         = 'http://www.pri.univie.ac.at/communities/riddl/'
+  s.homepage         = 'http://www.wst.univie.ac.at/communities/riddl/'
 
-  s.add_runtime_dependency 'xml-smart', '>=0.3.0'
+  s.add_runtime_dependency 'xml-smart', '>=0.3.4'
   s.add_runtime_dependency 'rack'
   s.add_runtime_dependency 'thin'
   s.add_runtime_dependency 'eventmachine', '>= 1.0.0'
   s.add_runtime_dependency 'em-websocket', '>= 0.4.0'
   s.add_runtime_dependency 'em-websocket-client'
   s.add_runtime_dependency 'mime-types'
+  s.add_runtime_dependency 'minitest', '=4.7.4'
 end

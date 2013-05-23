@@ -6,110 +6,128 @@ module Riddl
       VERSION_MINOR = 0
       PROPERTIES_SCHEMA_XSL_RNG = "#{File.dirname(__FILE__)}/../ns/common-patterns/properties/#{VERSION_MAJOR}.#{VERSION_MINOR}/properties.schema.xsl"
 
-      def self::implementation(properties,schema,strans,level=0,handler=nil,details=:production)
+      def self::implementation(backend,handler=nil,details=:production)
         unless handler.nil? || (handler.class == Class && handler.superclass == Riddl::Utils::Properties::HandlerBase)
           raise "handler not a subclass of HandlerBase"
         end
-        Proc.new {
-          run(     Riddl::Utils::Properties::All,            properties,                 handler       ) if get    '*'
-          run(     Riddl::Utils::Properties::Query,          properties,                 handler       ) if get    'query'
+        Proc.new do
+          run          Riddl::Utils::Properties::All,           backend, handler if get    '*'
+          run          Riddl::Utils::Properties::Query,         backend, handler if get    'query'
           on resource 'schema' do
-            run(   Riddl::Utils::Properties::Schema,         properties, schema, strans                ) if get
+            run        Riddl::Utils::Properties::Schema,        backend          if get
             on resource 'rng' do
-              run( Riddl::Utils::Properties::RngSchema,      properties, schema, strans                ) if get
+              run      Riddl::Utils::Properties::RngSchema,     backend          if get
             end  
           end
-          on resource 'values' do |r|
-            run(   Riddl::Utils::Properties::Properties,     properties, schema,         handler       ) if get
-            run(   Riddl::Utils::Properties::AddProperty,    properties, schema, strans, handler, level) if post   'property'
-            run(   Riddl::Utils::Properties::AddProperties,  properties, schema, strans, handler, level) if put    'properties'
+          on resource 'values' do
+            run        Riddl::Utils::Properties::Properties,    backend, handler if get
+            run        Riddl::Utils::Properties::AddProperty,   backend, handler if post   'property'
+            run        Riddl::Utils::Properties::AddProperties, backend, handler if put    'properties'
             on resource do
-              run( Riddl::Utils::Properties::GetContent,     properties, schema,         handler, level) if get
-              run( Riddl::Utils::Properties::DelContent,     properties, schema, strans, handler, level) if delete
-              run( Riddl::Utils::Properties::AddContent,     properties, schema, strans, handler, level) if post   'addcontent'
-              run( Riddl::Utils::Properties::UpdContent,     properties, schema, strans, handler, level) if put    'updcontent'
+              run      Riddl::Utils::Properties::GetContent,    backend, handler if get
+              run      Riddl::Utils::Properties::DelContent,    backend, handler if delete
+              run      Riddl::Utils::Properties::AddContent,    backend, handler if post   'addcontent'
+              run      Riddl::Utils::Properties::UpdContent,    backend, handler if put    'updcontent'
               on resource do
-                run( Riddl::Utils::Properties::GetContent,   properties, schema,         handler, level) if get
-                run( Riddl::Utils::Properties::DelContent,   properties, schema, strans, handler, level) if delete
-                run( Riddl::Utils::Properties::UpdContent,   properties, schema, strans, handler, level) if put    'updcontent'
+                run    Riddl::Utils::Properties::GetContent,    backend, handler if get
+                run    Riddl::Utils::Properties::DelContent,    backend, handler if delete
+                run    Riddl::Utils::Properties::UpdContent,    backend, handler if put    'updcontent'
                 on resource do
-                  run( Riddl::Utils::Properties::GetContent, properties, schema,         handler, level) if get
+                  run  Riddl::Utils::Properties::GetContent,    backend, handler if get
                 end
               end
             end
           end  
-        }
+        end
       end  
 
-      def self::schema(fschema)
-        fschema  = fschema.gsub(/^\/+/,'/')
-        unless File.exists?(fschema)
-          raise "schema file not found"
-        end
-        schema = XML::Smart.open_unprotected(fschema)
-        schema.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-        if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
-          raise "properties schema transformation file not found"
-        end  
-        strans = schema.transform_with(XML::Smart.open_unprotected(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))
-        [schema,strans]
-      end
-      
-      def self::file(fproperties)
-        properties  = fproperties.gsub(/^\/+/,'/')
-        unless File.exists?(properties)
-          raise "properties file not found"
-        end
-        properties
-      end
-
-      def self::modifiable?(schema,property)
-        schema.find("boolean(/p:properties/p:#{property}[@modifiable='true'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}[@modifiable='true'])")
-      end
-      def self::valid_state?(schema,property,current,new)
-        schema.find("boolean(/p:properties/p:#{property}/p:#{current}/p:#{new}[@putable='true'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}/p:#{current}/p:#{new}[@putable='true'])")
-      end
-      def self::is_state?(schema,property)
-        schema.find("boolean(/p:properties/p:#{property}[@type='state'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}[@type='state'])")
-      end
-      def self::property_type(schema,property)
-        exis = schema.find("/p:properties/*[name()='#{property}']|/p:properties/p:optional/*[name()='#{property}']")
-        if exis.any?
-          return exis.first.attributes['type'].to_sym
-        else
-          return nil
-        end
-      end
-
-      class HandlerBase
-        def initialize(properties,property)
-          @properties = properties 
+      # Overloadable and Backends
+      class HandlerBase #{{{
+        def initialize(backend,property)
+          @backend = backend
           @property = property
         end
         def create; end
         def read;   end
         def update; end
         def delete; end
-      end
+      end #}}}
 
+      class Backend #{{{
+        attr_reader :schema, :properties, :rng
+
+        def initialize(schema,target)
+          raise "schema file not found" unless File.exists?(schema)
+          @schema = XML::Smart.open_unprotected(schema.gsub(/^\/+/,'/'))
+          @schema.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
+          if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
+            raise "properties schema transformation file not found"
+          end  
+          @rng = @schema.transform_with(XML::Smart.open_unprotected(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))
+
+          raise "properties file not found" unless File.exists?(target)
+          @target = target.gsub(/^\/+/,'/')
+          @properties = XML::Smart.open_unprotected(target)
+          @properties.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
+          @mutex = Mutex.new
+        end  
+
+        def modifiable?(property)
+          @schema.find("boolean(/p:properties/p:#{property}[@modifiable='true'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}[@modifiable='true'])")
+        end
+        def valid_state?(property,current,new)
+          @schema.find("boolean(/p:properties/p:#{property}/p:#{current}/p:#{new}[@putable='true'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}/p:#{current}/p:#{new}[@putable='true'])")
+        end
+        def is_state?(property)
+          @schema.find("boolean(/p:properties/p:#{property}[@type='state'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}[@type='state'])")
+        end
+        def init_state?(property,new)
+          @schema.find("boolean(/p:properties/p:#{property}/p:#{new}[position()=1])") || schema.find("boolean(/p:properties/p:optional/p:#{property}/p:#{new}[position()=1])")
+        end
+        def property_type(property)
+          exis = @schema.find("/p:properties/*[name()='#{property}']|/p:properties/p:optional/*[name()='#{property}']")
+          exis.any? ? exis.first.attributes['type'].to_sym : nil
+        end
+
+        def persist
+          @properties.save_as(@target)
+        end
+        protected :persist
+
+        def modify(&block)
+          tdoc = @properties.root.to_doc
+          tdoc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
+          @mutex.synchronize do
+            block.call tdoc
+            if tdoc.validate_against(@rng)
+              block.call @properties
+              self.persist
+              true
+            else
+              false
+            end
+          end  
+        end
+       end #}}}
+
+      # Just reading
       class All < Riddl::Implementation #{{{
         def response
-          properties = @a[0]
-          handler    = @a[1]
-          handler.new(properties,nil).read unless handler.nil?
-          return Riddl::Parameter::Complex.new("document","text/xml",File::open(properties))
+          backend = @a[0]
+          handler = @a[1]
+          handler.new(backend,nil).read unless handler.nil?
+          return Riddl::Parameter::Complex.new("document","text/xml",backend.properties.to_s)
         end
       end #}}}
 
       class Properties < Riddl::Implementation #{{{
         def response
-          properties = @a[0]
-          schema     = @a[1]
-          handler    = @a[2]
-          handler.new(properties,nil).read unless handler.nil?
+          backend = @a[0]
+          handler = @a[1]
+          handler.new(backend,nil).read unless handler.nil?
 
           ret = XML::Smart.string("<properties xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
-          schema.find("/p:properties/*[name()!='optional']|/p:properties/p:optional/*").each do |r|
+          backend.schema.find("/p:properties/*[name()!='optional']|/p:properties/p:optional/*").each do |r|
             ret.root.add("property",r.qname.to_s)
           end
           return Riddl::Parameter::Complex.new("keys","text/xml",ret.to_s)
@@ -118,14 +136,13 @@ module Riddl
 
       class Query < Riddl::Implementation #{{{
         def response
-          properties = @a[0]
-          handler    = @a[1]
-          handler.new(properties,nil).read unless handler.nil?
+          backend = @a[0]
+          handler = @a[1]
+          handler.new(backend,nil).read unless handler.nil?
           query = (@p[0].value.to_s.strip.empty? ? '*' : @p[0].value)
 
-          xml = File::read(properties).gsub(/properties xmlns="[^"]+"|properties xmlns='[^']+'/,'properties')
           begin
-            e = XML::Smart::string(xml).root.find(query)
+            e = backend.properties.find(query)
           rescue => e
             prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>").to_s
             return Riddl::Parameter::Complex.new("value","text/xml",prop.to_s)
@@ -146,71 +163,63 @@ module Riddl
 
       class RngSchema < Riddl::Implementation #{{{
         def response
-          strans = @a[2]
-          Riddl::Parameter::Complex.new("document-schema","text/xml",strans)
+          backend = @a[0]
+          Riddl::Parameter::Complex.new("document-schema","text/xml",backend.rng.to_s)
         end
       end #}}}
 
       class Schema < Riddl::Implementation #{{{
         def response
-          schema = @a[1]
-          return Riddl::Parameter::Complex.new("document-schema","text/xml",schema.to_s)
+          backend = @a[0]
+          return Riddl::Parameter::Complex.new("document-schema","text/xml",backend.schema.to_s)
         end
       end #}}}
 
       class GetContent < Riddl::Implementation #{{{
         def response
-          properties = @a[0]
-          schema     = @a[1]
-          handler    = @a[2]
-          level      = @a[3]
-          relpath    = @r[level..-1]
+          backend = @a[0]
+          handler = @a[1]
 
-          handler.new(properties,relpath[1]).read unless handler.nil?
+          handler.new(backend,@r[1]).read unless handler.nil?
 
-          if ret = extract_values(properties,schema,relpath[1],Riddl::HttpParser::unescape(relpath[2..-1].join('/')))
+          if ret = extract_values(backend,@r[1],Riddl::HttpParser::unescape(@r[2..-1].join('/')))
             ret
           else
             @status = 404
           end
         end
         
-        def extract_values(properties,schema,property,minor=nil)
-          XML::Smart.open(properties) do |pdoc|
-            pdoc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-            decision = Riddl::Utils::Properties::property_type(schema,property)
-
-            case decision
-              when :complex
-                res = pdoc.find("/p:properties/*[name()=\"#{property}\"]#{minor == '' ? '' : "/p:#{minor}"}")
-                if res.any?
-                  prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
-                  if res.length == 1
-                    prop.root.add(res.first.children)
-                  else  
-                    prop.root.add(res)
-                  end  
-                  return Riddl::Parameter::Complex.new("value","text/xml",prop.to_s)
+        def extract_values(backend,property,minor=nil)
+          case backend.property_type(property)
+            when :complex
+              res = backend.properties.find("/p:properties/*[name()=\"#{property}\"]#{minor == '' ? '' : "/p:#{minor}"}")
+              if res.any?
+                prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+                if res.length == 1
+                  prop.root.add(res.first.children)
+                else  
+                  prop.root.add(res)
+                end  
+                return Riddl::Parameter::Complex.new("value","text/xml",prop.to_s)
+              else
+                prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+              end
+            when :simple, :state
+              res = backend.properties.find("string(/p:properties/*[name()=\"#{property}\"]#{minor})")
+              return Riddl::Parameter::Simple.new("value",res.to_s)
+            when :arbitrary
+              res = backend.properties.find("/p:properties/*[name()=\"#{property}\"]")
+              if res.any?
+                c = res.first.children
+                if c.length == 1 && c.first.class == XML::Smart::Dom::Element
+                  return Riddl::Parameter::Complex.new("content","text/xml",c.first.dump)
                 else
-                  prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+                  return Riddl::Parameter::Complex.new("content","text/plain",c.first.to_s)
                 end
-              when :simple, :state
-                res = pdoc.find("string(/p:properties/*[name()=\"#{property}\"]#{minor})")
-                return Riddl::Parameter::Simple.new("value",res.to_s)
-              when :arbitrary
-                res = pdoc.find("/p:properties/*[name()=\"#{property}\"]")
-                if res.any?
-                  c = res.first.children
-                  if c.length == 1 && c.first.class == XML::Smart::Dom::Element
-                    return Riddl::Parameter::Complex.new("content","text/xml",c.first.dump)
-                  else
-                    return Riddl::Parameter::Complex.new("content","text/plain",c.first.to_s)
-                  end
-                else
-                  prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
-                  return Riddl::Parameter::Complex.new("content","text/xml",prop.to_s)
-                end
-            end
+              else
+                prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
+                return Riddl::Parameter::Complex.new("content","text/xml",prop.to_s)
+              end
           end
           nil
         end
@@ -221,53 +230,55 @@ module Riddl
       # Modifiable
       class AddProperty < Riddl::Implementation #{{{
         def response
-          properties = @a[0]
-          schema     = @a[1]
-          strans     = @a[2]
-          handler    = @a[3]
-          level      = @a[4]
-          relpath    = @r[level..-1]
+          backend = @a[0]
+          handler = @a[1]
 
-          property   = @p.detect{|p| p.name == 'property'}.value
+          property = @p[0].value
+          ct       = @p[1]
+          value    = ct.name == 'value' ? ct.value : nil
+          content  = ct.name == 'content' ? ct.value : nil
 
-          unless Riddl::Utils::Properties::modifiable?(schema,property)
+          unless backend.modifiable?(property)
             @status = 500
             return # change properties.schema
           end
 
-          newstuff = XML::Smart.string("<#{property} xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
-          XML::Smart.open(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-
-            if doc.root.find("p:#{property}").any?
-              @status = 500
-              return # don't misuse post
-            end
-            doc.root.add newstuff.root
-            if !doc.validate_against(strans)
-              @status = 400
-              return # bad request
-            end
+          path = "/p:properties/*[name()=\"#{property}\"]"
+          nodes = backend.properties.find(path)
+          if nodes.any?
+            @status = 404
+            return # this property does not exist
           end
 
-          # everything is fine, now do it
-          XML::Smart::modify(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-            doc.root.add newstuff.root
-          end
+          if backend.is_state?(property)
+            unless backend.init_state?(property,value)
+              @status = 404
+              return # not a valid state from here on
+            end
+          end  
 
-          handler.new(properties,property).create unless handler.nil?
+          newstuff = value.nil? ? XML::Smart.string(content).root.children : value
+          backend.modify do |doc|
+            ele = doc.root.add property
+            if value.nil?
+              ele.add newstuff
+            else
+              ele.text = newstuff
+            end  
+          end || begin
+            @status = 400
+            return # bad request
+          end
+          
+          handler.create(backend,property).update unless handler.nil?
+          return
         end
       end #}}}
-
+      
       class AddProperties < Riddl::Implementation #{{{
         def response
-          properties = @a[0]
-          schema     = @a[1]
-          strans     = @a[2]
-          handler    = @a[3]
-          level      = @a[4]
-          relpath    = @r[level..-1]
+          backend = @a[0]
+          handler = @a[1]
 
           0.upto(@p.length/2-1) do |i|
             property = @p[i*2].value
@@ -275,43 +286,28 @@ module Riddl
             value    = ct.name == 'value' ? ct.value : nil
             content  = ct.name == 'content' ? ct.value : nil
 
-            unless Riddl::Utils::Properties::modifiable?(schema,property)
+            unless backend.modifiable?(property)
               @status = 500
               return # change properties.schema
             end
 
-            newstuff = value.nil? ? XML::Smart.string(content).root.children : value
             path = "/p:properties/*[name()=\"#{property}\"]"
-            XML::Smart.open(properties) do |doc|
-              doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-              nodes = doc.find(path)
-              if nodes.empty?
-                @status = 404
-                return # this property does not exist
-              end
-              if Riddl::Utils::Properties::is_state?(schema,property)
-                unless Riddl::Utils::Properties::valid_state?(schema,property,nodes.first.to_s,value)
-                  @status = 404
-                  return # not a valid state from here on
-                end
-              end  
-              nods = nodes.map{|ele| ele.children.delete_all!; ele}
-              nods.each do |ele| 
-                if value.nil?
-                  ele.add newstuff
-                else
-                  ele.text = newstuff
-                end  
-              end  
-              if !doc.validate_against(strans)
-                @status = 400
-                return # bad request
-              end
+            nodes = backend.properties.find(path)
+            if nodes.empty?
+              @status = 404
+              return # this property does not exist
             end
 
-            XML::Smart::modify(properties) do |doc|
-              doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-              nodes = doc.root.find(path)
+            if backend.is_state?(property)
+              unless backend.valid_state?(property,nodes.first.to_s,value)
+                @status = 404
+                return # not a valid state from here on
+              end
+            end  
+
+            newstuff = value.nil? ? XML::Smart.string(content).root.children : value
+            backend.modify do |doc|
+              nodes = doc.find(path)
               nods = nodes.map{|ele| ele.children.delete_all!; ele}
               nods.each do |ele| 
                 if value.nil?
@@ -320,9 +316,12 @@ module Riddl
                   ele.text = newstuff
                 end  
               end  
+            end || begin
+              @status = 400
+              return # bad request
             end
             
-            handler.new(properties,property).update unless handler.nil?
+            handler.new(backend,property).update unless handler.nil?
           end
           return
         end
@@ -330,142 +329,101 @@ module Riddl
 
       class AddContent < Riddl::Implementation #{{{
         def response
-          properties = @a[0]
-          schema     = @a[1]
-          strans     = @a[2]
-          handler    = @a[3]
-          level      = @a[4]
-          relpath    = @r[level..-1]
+          backend = @a[0]
+          handler = @a[1]
 
-          property = relpath[1]
+          property = @r[1]
           value = @p.detect{|p| p.name == 'value'}.value
 
-          unless Riddl::Utils::Properties::modifiable?(schema,property)
+          unless backend.modifiable?(property)
             @status = 500
             return # change properties.schema
           end
 
+          path = "/p:properties/p:#{property}"
+          node = backend.properties.find(path)
+          if node.empty?
+            @status = 404
+            return # this property does not exist
+          end  
+
           newstuff = XML::Smart.string(value)
-          XML::Smart.open(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-
-            node = doc.root.find("p:#{property}")
-            if node.empty?
-              @status = 404
-              return # this property does not exist
-            end  
+          backend.modify do |doc|
+            node = doc.find(path)
             node.first.add newstuff.root
-            if !doc.validate_against(strans)
-              @status = 400
-              return # bad request
-            end
+          end || begin
+            @status = 400
+            return # bad request
           end
 
-          # everything is fine, now do it
-          XML::Smart::modify(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-            node = doc.find("/p:properties/p:#{property}")
-            node.first.add newstuff.root
-          end
-
-          handler.new(properties,property).create unless handler.nil?
-          return
+          handler.new(backend,property).create unless handler.nil?
         end
       end #}}}
 
       class DelContent < Riddl::Implementation #{{{
         def response
-          properties = @a[0]
-          schema     = @a[1]
-          strans     = @a[2]
-          handler    = @a[3]
-          level      = @a[4]
-          relpath    = @r[level..-1]
+          backend = @a[0]
+          handler = @a[1]
 
-          property = relpath[1]
-          minor    = Riddl::HttpParser::unescape(relpath[2])
+          property = @r[1]
+          minor    = Riddl::HttpParser::unescape(@r[2])
 
-          unless Riddl::Utils::Properties::modifiable?(schema,property)
+          unless backend.modifiable?(property)
+            p 'aaaa'
             @status = 500
             return # change properties.schema
           end
 
-
           path = "/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}"
-          XML::Smart.open(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-            nodes = doc.find(path)
-            if nodes.empty?
-              @status = 404
-              return # this property does not exist
-            end
-            nodes.delete_all!
-            if !doc.validate_against(strans)
-              @status = 400
-              return # bad request
-            end
+          nodes = backend.properties.find(path)
+          if nodes.empty?
+            @status = 404
+            return # this property does not exist
           end
 
-          XML::Smart::modify(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
+          backend.modify do |doc|
             doc.find(path).delete_all!
+          end || begin
+            @status = 400
+            return # bad request
           end
 
-          handler.new(properties,property).delete unless handler.nil?
+          handler.new(backend,property).delete unless handler.nil?
           return
         end
       end #}}} 
 
       class UpdContent < Riddl::Implementation #{{{
         def response
-          properties = @a[0]
-          schema     = @a[1]
-          strans     = @a[2]
-          handler    = @a[3]
-          level      = @a[4]
-          relpath    = @r[level..-1]
+          backend = @a[0]
+          handler = @a[1]
 
-          property = relpath[1]
+          property = @r[1]
           value    = @p.detect{|p| p.name == 'value'}; value = value.nil? ? value : value.value
           content  = @p.detect{|p| p.name == 'content'}; content = content.nil? ? content : content.value
-          minor    = relpath[2]
+          minor    = @r[2]
 
-          unless Riddl::Utils::Properties::modifiable?(schema,property)
+          unless backend.modifiable?(property)
             @status = 500
             return # change properties.schema
           end
 
-          newstuff = value.nil? ? XML::Smart.string(content).root.children : value
           path = "/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}"
-          XML::Smart.open(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-            nodes = doc.find(path)
-            if nodes.empty?
-              @status = 404
-              return # this property does not exist
-            end
-            if Riddl::Utils::Properties::is_state?(schema,property)
-              unless Riddl::Utils::Properties::valid_state?(schema,property,nodes.first.to_s,value)
-                @status = 404
-                return # not a valid state from here on
-              end
-            end  
-            nods = nodes.map{|ele| ele.children.delete_all!; ele}
-            nods.each do |ele| 
-              if value.nil?
-                ele.add newstuff
-              else
-                ele.text = newstuff
-              end  
-            end  
-            if !doc.validate_against(strans)
-              @status = 400
-              return # bad request
-            end
+          nodes = backend.properties.find(path)
+          if nodes.empty?
+            @status = 404
+            return # this property does not exist
           end
 
-          XML::Smart::modify(properties) do |doc|
-            doc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
+          if backend.is_state?(property)
+            unless backend.valid_state?(property,nodes.first.to_s,value)
+              @status = 404
+              return # not a valid state from here on
+            end
+          end  
+
+          newstuff = value.nil? ? XML::Smart.string(content).root.children : value
+          backend.modify do |doc|
             nodes = doc.root.find(path)
             nods = nodes.map{|ele| ele.children.delete_all!; ele}
             nods.each do |ele| 
@@ -475,9 +433,12 @@ module Riddl
                 ele.text = newstuff
               end
             end  
+          end || begin
+            @status = 400
+            return # bad request
           end
           
-          handler.new(properties,property).update unless handler.nil?
+          handler.new(backend,property).update unless handler.nil?
           return
         end
       end #}}}

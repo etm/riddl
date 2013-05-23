@@ -1,6 +1,12 @@
 require 'rake'
-require 'pp'
 require 'rubygems/package_task'
+require 'rake/testtask'
+
+Rake::TestTask.new do |t|
+  t.libs << "test"
+  t.test_files = FileList['./test/tc_*.rb']
+  t.verbose = false
+end
 
 spec = eval(File.read('riddl.gemspec'))
 Gem::PackageTask.new(spec) do |pkg|
@@ -9,4 +15,3 @@ Gem::PackageTask.new(spec) do |pkg|
   `rm pkg/* -rf`
   `ln -sf #{pkg.name}.gem pkg/riddl.gem`
 end
-

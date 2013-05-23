@@ -13,7 +13,6 @@ require 'optparse'
 require 'stringio'
 require 'rack/content_length'
 require 'rack/chunked'
-require 'pp'
 
 module Riddl
 
@@ -70,22 +69,32 @@ module Riddl
       ########################################################################################################################
       # status and info
       ########################################################################################################################
-      pid = File.read(@riddl_opts[:pidfile]) rescue pid = 666
-      status = `ps -u #{Process.uid} | grep "#{pid} "`
-      if operation == "info" && status.empty?
+      pid = File.read(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile]).to_i rescue pid = 666
+      status = Proc.new do
+        begin
+          Process.getpgid pid
+          true
+        rescue Errno::ESRCH
+          false
+        end
+      end
+      if operation == "info" && status.call == false
         puts "Server (#{@riddl_opts[:url]}) not running"
         exit
       end
-      if operation == "info" && !status.empty?
+      if operation == "info" && status.call == true
         puts "Server (#{@riddl_opts[:url]}) running as #{pid}"
-        stats = `ps -o "vsz,rss,lstart,time" -p #{pid}`.split("\n")[1].strip.split(/ +/)
-        puts "Virtual:  #{"%0.2f" % (stats[0].to_f/1024)} MiB"
-        puts "Resident: #{"%0.2f" % (stats[1].to_f/1024)} MiB"
-        puts "Started:  #{stats[2..-2].join(' ')}"
-        puts "CPU Time: #{stats.last}"
+        begin
+          stats = `ps -o "vsz,rss,lstart,time" -p #{pid}`.split("\n")[1].strip.split(/ +/)
+          puts "Virtual:  #{"%0.2f" % (stats[0].to_f/1024)} MiB"
+          puts "Resident: #{"%0.2f" % (stats[1].to_f/1024)} MiB"
+          puts "Started:  #{stats[2..-2].join(' ')}"
+          puts "CPU Time: #{stats.last}"
+        rescue
+        end
         exit
       end
-      if %w{start startclean}.include?(operation) && !status.empty?
+      if %w{start startclean}.include?(operation) && status.call == true
         puts "Server (#{@riddl_opts[:url]}) already started"
         exit
       end
@@ -94,14 +103,13 @@ module Riddl
       # stop/restart server
       ########################################################################################################################
       if %w{stop restart}.include?(operation)
-        if status.empty?
+        if status.call == false
           puts "Server (#{@riddl_opts[:url]}) maybe not started?"
         else
           puts "Server (#{@riddl_opts[:url]}) stopped"
           puts "Waiting while server goes down ..."
-          until status.empty?
-            `kill #{pid} >/dev/null 2>&1`
-            status = `ps -u #{Process.uid} | grep "#{pid} "`.scan(/ server\.[^\s]+/)
+          while status.call
+            Process.kill "SIGTERM", pid
             sleep 0.3
           end  
         end
@@ -146,7 +154,7 @@ module Riddl
         v.delete [Rack::Lint]
       end  
 
-      puts "Server (#{@riddl_opts[:url]}) started"
+      puts "Server (#{@riddl_opts[:url]}) started as #{Process.pid}"
       server.start
     end #}}}
 
