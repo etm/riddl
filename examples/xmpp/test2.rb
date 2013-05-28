@@ -31,7 +31,7 @@ class RESTMessage < Blather::Stanza
     end
   end #}}}
 
-  class Headers < Parts #{{{
+  class Parts < Hash #{{{
     def initialize(pa,message)
       @parts = Hash[*pa]
       @message = message
@@ -144,7 +144,7 @@ module Pong
     mess.headers['r'] = 8
     mess.operation = :post
     mess.headers['bla'] = 9
-    pp mess.to_s
+    puts mess.to_s
     #write_to_stream mess
   end
 end

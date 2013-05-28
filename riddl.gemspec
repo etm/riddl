@@ -1,12 +1,12 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.99.99"
+  s.version          = "0.99.100"
   s.platform         = Gem::Platform::RUBY
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
 
   s.description      = "rest service interface definition, mixing, and evolution"
 
-  s.files            = Dir['{lib/riddl/ns/**/*,tools/**/*,ns/**/*,contrib/**/*,lib/riddl/**/*,example/**/*}'] + %w(COPYING Rakefile riddl.gemspec README AUTHORS INSTALL)
+  s.files            = Dir['{lib/riddl/ns/**/*,tools/**/*,ns/**/*,contrib/**/*,lib/riddl/**/*,example/**/*}'] + %w(COPYING Rakefile riddl.gemspec README.rdoc AUTHORS INSTALL)
   s.require_path     = 'lib'
   s.extra_rdoc_files = ['README.rdoc']
   s.bindir           = 'tools'
