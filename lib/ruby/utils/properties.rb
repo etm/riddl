@@ -54,9 +54,10 @@ module Riddl
       end #}}}
 
       class Backend #{{{
-        attr_reader :schema, :properties, :rng
+        attr_reader :schema, :properties, :rng, :id
 
-        def initialize(schema,target)
+        def initialize(id,schema,target)
+          @id = id 
           raise "schema file not found" unless File.exists?(schema)
           @schema = XML::Smart.open_unprotected(schema.gsub(/^\/+/,'/'))
           @schema.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'

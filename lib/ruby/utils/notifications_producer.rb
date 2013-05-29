@@ -4,36 +4,35 @@ module Riddl
 
       module Producer
       
-        def self::implementation(data,xsls,handler,details=:production) 
-          unless handler.class == Class && handler.superclass == Riddl::Utils::Notifications::Producer::HandlerBase
+        def self::implementation(backend,handler=nil,details=:production) 
+          unless handler.nil? || (handler.class == Class && handler.superclass == Riddl::Utils::Notifications::Producer::HandlerBase)
             raise "handler not a subclass of HandlerBase"
           end
-          if !File.exists?(data) || !File.directory?(data)
-            raise "data directory #{data} no found"
-          end
-          Proc.new {
-            run Riddl::Utils::Notifications::Producer::Overview, xsls[:overview] if get
-            on resource "topics" do
-              run Riddl::Utils::Notifications::Producer::Topics, data, xsls[:topics] if get
-            end
-            on resource "subscriptions" do
-              run Riddl::Utils::Notifications::Producer::Subscriptions, data, xsls[:subscriptions], details if get
-              run Riddl::Utils::Notifications::Producer::CreateSubscription, data, handler if post 'subscribe'
-              on resource do
-                run Riddl::Utils::Notifications::Producer::Subscription, data, xsls[:subscription], details if get 'request'
-                run Riddl::Utils::Notifications::Producer::UpdateSubscription, data, handler if put 'details'
-                run Riddl::Utils::Notifications::Producer::DeleteSubscription, data, handler if delete 'delete'
-                on resource 'ws' do
-                  run Riddl::Utils::Notifications::Producer::WS, data, handler if websocket
+          Proc.new do
+            on resource "notifications" do
+              run Riddl::Utils::Notifications::Producer::Overview if get
+              on resource "topics" do
+                run Riddl::Utils::Notifications::Producer::Topics, backend if get
+              end
+              on resource "subscriptions" do
+                run Riddl::Utils::Notifications::Producer::Subscriptions, backend, details if get
+                run Riddl::Utils::Notifications::Producer::CreateSubscription, backend, handler if post 'subscribe'
+                on resource do
+                  run Riddl::Utils::Notifications::Producer::Subscription, backend, details if get 'request'
+                  run Riddl::Utils::Notifications::Producer::UpdateSubscription, backend, handler if put 'details'
+                  run Riddl::Utils::Notifications::Producer::DeleteSubscription, backend, handler if delete 'delete'
+                  on resource 'ws' do
+                    run Riddl::Utils::Notifications::Producer::WS, backend, handler if websocket
+                  end
                 end
               end
-            end
-          }
+            end  
+          end
         end  
       
         class HandlerBase
-          def initialize(notifications,key,topics)
-            @notifications = notifications
+          def initialize(backend,key,topics)
+            @backend = backend
             @key = key
             @topics = topics
           end
@@ -45,40 +44,64 @@ module Riddl
           def update; end
         end
 
+        class Backend #{{{
+          attr_reader :topics, :id, :target
+
+          def initialize(id,topics,target)
+            @id = id 
+            @target = target.gsub(/^\/+/,'/')
+
+            raise "topics file not found" unless File.exists?(topics)
+            @topics = XML::Smart.open_unprotected(topics.gsub(/^\/+/,'/'))
+            @topics.register_namespace 'n', 'xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'
+
+            @mutex = Mutex.new
+          end  
+
+          def persist
+            @subscriptions.save_as(@target)
+          end
+          protected :persist
+
+          def modify(&block)
+            tdoc = @subscriptions.root.to_doc
+            tdoc.register_namespace 'n', 'xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'
+            @mutex.synchronize do
+              block.call @subscriptions
+              self.persist
+            end
+          end
+        end #}}}
+
         class Overview < Riddl::Implementation #{{{ 
           def response
             Riddl::Parameter::Complex.new("overview","text/xml") do
-              ret = XML::Smart::string <<-END
-                #{@a[0] ? "<?xml-stylesheet href=\"#{@a[0]}\" type=\"text/xsl\"?>" : ''}
+              <<-END
                 <overview xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'>
                   <topics/>
                   <subscriptions/>
                 </overview>
               END
-              ret.to_s
             end
+
           end
         end #}}}
         
         class Topics < Riddl::Implementation #{{{
           def response
-            data = @a[0]
-            xsl  = @a[1]
+            backend = @a[0]
             Riddl::Parameter::Complex.new("overview","text/xml") do
-              ret  = XML::Smart.open_unprotected(data + "/topics.xml").to_s
-              xsl ? ret.sub(/\?>\s*\r?\n/,"?>\n<?xml-stylesheet href=\"xsl\" type=\"text/xsl\"?>\n") : ret
+              backend.topics.to_s
             end
           end
         end #}}}
         
         class Subscriptions < Riddl::Implementation #{{{
           def response
-            data    = @a[0]
-            xsl     = @a[1]
-            details = @a[2]
+            backend = @a[0]
+            details = @a[1]
             Riddl::Parameter::Complex.new("subscriptions","text/xml") do
               ret = XML::Smart::string <<-END
-                #{xsl ? "<?xml-stylesheet href=\"#{xsl}\" type=\"text/xsl\"?>" : ''}
                 <subscriptions details='#{details}' xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>
               END
               Dir[data + "/*"].each do |d|
@@ -100,10 +123,8 @@ module Riddl
         class Subscription < Riddl::Implementation #{{{
           def response
             data    = @a[0]
-            xsl     = @a[1]
             Riddl::Parameter::Complex.new("subscription","text/xml") do
               ret  = XML::Smart.open_unprotected(data + "/" + @r.last + "/subscription.xml").to_s
-              xsl ? ret.sub(/\?>\s*\r?\n/,"?>\n<?xml-stylesheet href=\"xsl\" type=\"text/xsl\"?>\n") : ret
             end
           end
         end #}}}
@@ -146,7 +167,7 @@ module Riddl
               end
             end  
 
-            handler.new(data,key,topics).create
+            handler.new(data,key,topics).create unless handler.nil?
             [
               Riddl::Parameter::Simple.new('key',key),
               Riddl::Parameter::Simple.new('producer-secret',producer_secret),
@@ -162,7 +183,7 @@ module Riddl
             key     = @r.last
 
             FileUtils::rm_rf(data + '/' + key)
-            handler.new(data,key,nil).delete
+            handler.new(data,key,nil).delete unless handler.nil?
             return
           end
         end #}}}
@@ -207,7 +228,7 @@ module Riddl
               end
             end  
 
-            handler.new(data,key,topics).update
+            handler.new(data,key,topics).update unless handler.nil?
             nil
           end
         end #}}}
@@ -217,15 +238,15 @@ module Riddl
             @data    = @a[0]
             @handler = @a[1]
             @key     = @r[-2]
-            @handler.new(@data,@key,[]).ws_open(self)
+            @handler.new(@data,@key,[]).ws_open(self) unless handler.nil?
           end
 
           def onmessage(data)
-            @handler.new(@data,@key,[]).ws_message(self,data)
+            @handler.new(@data,@key,[]).ws_message(self,data) unless handler.nil?
           end
 
           def onclose
-            @handler.new(@data,@key,[]).ws_close()
+            @handler.new(@data,@key,[]).ws_close() unless handler.nil?
           end
         end #}}}
         
