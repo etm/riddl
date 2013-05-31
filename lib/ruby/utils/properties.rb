@@ -56,7 +56,7 @@ module Riddl
       class Backend #{{{
         attr_reader :schema, :properties, :rng, :id
 
-        def initialize(id,schema,target)
+        def initialize(schema,target,id=nil)
           @id = id 
           raise "schema file not found" unless File.exists?(schema)
           @schema = XML::Smart.open_unprotected(schema.gsub(/^\/+/,'/'))
@@ -90,11 +90,6 @@ module Riddl
           exis.any? ? exis.first.attributes['type'].to_sym : nil
         end
 
-        def persist
-          @properties.save_as(@target)
-        end
-        protected :persist
-
         def modify(&block)
           tdoc = @properties.root.to_doc
           tdoc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
@@ -102,7 +97,7 @@ module Riddl
             block.call tdoc
             if tdoc.validate_against(@rng)
               block.call @properties
-              self.persist
+              @properties.save_as(@target)
               true
             else
               false

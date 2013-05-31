@@ -30,6 +30,9 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         @wrapper = nil
         unless riddl.nil?
           @wrapper = (riddl.class == Riddl::Wrapper ? riddl : Riddl::Wrapper::new(riddl))
+          if @wrapper.declaration? && !base.nil?
+            @wrapper = @wrapper.declaration.description
+          end  
           raise SpecificationError, 'No RIDDL description or declaration found.' if !@wrapper.description? && !@wrapper.declaration?
           raise SpecificationError, 'RIDDL does not conform to specification' unless @wrapper.validate!
           @wrapper.load_necessary_handlers!
@@ -221,7 +224,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           qparams = extract_qparams(parameters,riddl_method.downcase)
 
           res = response = nil
-          if @wrapper.nil? || @wrapper.description?
+          if @wrapper.nil? || @wrapper.description? || (@wrapper.declaration? && !@base.nil?)
             res, response = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate)
             return response if simulate
             if !@wrapper.nil? && res.code.to_i == 200
@@ -229,7 +232,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                 raise OutputError, "Not a valid output from service."
               end
             end
-          elsif !@wrapper.nil? && @wrapper.declaration?
+          elsif !@wrapper.nil? && @base.nil? && @wrapper.declaration?
             headers['RIDDL-DECLARATION-PATH'] = @rpath
             if !riddl_message.route?
               res, response = make_request(riddl_message.interface.real_url(@rpath,@base),riddl_method,parameters,headers,qparams,simulate)

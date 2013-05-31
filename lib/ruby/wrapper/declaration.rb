@@ -16,7 +16,11 @@ module Riddl
       
       def description_xml
         @facade.description_xml
-      end  
+      end
+
+      def description
+        Riddl::Wrapper.new(@facade.description_xml)
+      end
 
       def visualize_tiles_and_layers
         #{{{

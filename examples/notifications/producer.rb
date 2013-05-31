@@ -1,11 +1,14 @@
 #!/usr/bin/ruby
-require '../../lib/ruby/server'
-require '../../lib/ruby/utils/fileserve'
-require '../../lib/ruby/utils/notifications_producer'
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/fileserve')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/notifications_producer')
 
 Riddl::Server.new(::File.dirname(__FILE__) + '/producer.declaration.xml', :port => 9291) do
   accessible_description true
-  ndir = ::File.dirname(__FILE__) + '/notifications/'
+  backend =  Riddl::Utils::Notifications::Producer::Backend.new(
+    ::File.dirname(__FILE__) + '/notifications/topics.xml',
+    ::File.dirname(__FILE__) + '/notifications/'
+  )
 
   interface 'fluff' do
     run Riddl::Utils::FileServe, "implementation/index.html" if get
@@ -18,6 +21,6 @@ Riddl::Server.new(::File.dirname(__FILE__) + '/producer.declaration.xml', :port 
   end
 
   interface 'main' do |r|
-    use Riddl::Utils::Notifications::Producer::implementation(ndir)
+    use Riddl::Utils::Notifications::Producer::implementation(backend,nil,@riddl_opts[:mode])
   end  
 end.loop!

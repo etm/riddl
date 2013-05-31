@@ -1,1 +1,1 @@
-map <F10> :!ruby tc_properties.rb<CR>
+map <F10> :!ruby tc_producer.rb<CR>

@@ -63,6 +63,7 @@ module Riddl
       #{{{
       @doc = nil
 
+      fpath = nil
       if name.is_a?(XML::Smart::Dom)
         @doc = name
       else  
@@ -70,6 +71,7 @@ module Riddl
           fh = name.respond_to?(:read) ? name : open(name)
           @doc = XML::Smart.string(fh.read)
           fh.close
+          fpath = File.dirname(fh.path) if fh.is_a?(File) || fh.is_a?(Tempfile)
         rescue
           begin
             @doc = XML::Smart.string(name)
@@ -85,7 +87,7 @@ module Riddl
           i.value = t if File.exists?(t)
         end
       end
-      @doc.xinclude!
+      fpath.nil? ? @doc.xinclude! : @doc.xinclude!(fpath)
       @doc.register_namespace 'des', DESCRIPTION
       @doc.register_namespace 'dec', DECLARATION
       qname = @doc.root.qname

@@ -1,0 +1,15 @@
+<declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <interface name="fluff">
+    <xi:include href="producer.fluff.xml"/>
+  </interface>
+  <interface name="main">
+    <xi:include href="producer.main.xml"/>
+  </interface>
+
+  <facade>
+    <tile>
+      <layer name="fluff"/>
+      <layer name="main"/>
+    </tile>
+  </facade>
+</declaration>

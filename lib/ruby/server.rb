@@ -36,8 +36,9 @@ module Riddl
     end
 
     OPTS = { 
-      :host     => 'http://localhost',
+      :host     => 'localhost',
       :port     => 9292,
+      :secure   => false,
       :mode     => :debug,
       :basepath => File.expand_path(File.dirname($0)),
       :pidfile  => File.basename($0,'.rb') + '.pid',
@@ -167,7 +168,7 @@ module Riddl
       if File.exists?(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile])
         eval(File.read(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile]))
       end
-      @riddl_opts[:url] = @riddl_opts[:host] + ':' + @riddl_opts[:port].to_s
+      @riddl_opts[:url] = (@riddl_opts[:secure] ? 'https://' : 'http://') + @riddl_opts[:host] + ':' + @riddl_opts[:port].to_s
 
       @riddl_logger             = nil
       @riddl_process_out        = true 
