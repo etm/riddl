@@ -60,8 +60,11 @@ zotero = Riddl::Client.new("https://api.zotero.org/")
 status, res = zotero.resource("/groups/62639/collections/X69MNMZX/collections").get [
   Riddl::Parameter::Simple.new('key',token,:query)
 ]
+
 doc = XML::Smart.string(res.first.value.read)
-doc.namespaces = { 'a' => 'http://www.w3.org/2005/Atom', 'z' => 'http://zotero.org/ns/api' }
+doc.register_namespace 'a', 'http://www.w3.org/2005/Atom'
+doc.register_namespace 'z', 'http://zotero.org/ns/api'
+
 keys = {}
 doc.find('//a:entry').each do |e|
   keys[e.find('string(z:key)')] = e.find('string(a:title)')

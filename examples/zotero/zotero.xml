@@ -7,6 +7,16 @@
       <parameter name="return" mimetype="application/atom+xml"/>
     </choice>
   </message>
+  <message name="html">
+      <parameter name="return" mimetype="text/html"/>
+  </message>
+  <message name="xml">
+      <parameter name="return" mimetype="application/xml"/>
+  </message>
+  <message name="atom">
+      <parameter name="return" mimetype="application/atom+xml"/>
+  </message>
+
 
   <message name="oauth">
     <header name="Authorization" type="string"/>
@@ -28,27 +38,36 @@
     <resource relative="users">
       <resource relative="\d+">
         <resource relative="items">
-          <get in="*" out='ret'/>
+          <get in="*" out='atom'/>
         </resource>  
       </resource>
     </resource>
+    <resource relative="items">
+      <get in="*" out="atom"/>
+      <resource>
+        <get in="*" out="html"/>
+        <resource relative="children">
+          <get in="*" out="atom"/>
+        </resource>  
+      </resource>  
+    </resource>  
     <resource relative="groups">
       <resource relative="\d+">
         <resource relative="items">
-          <get in="*" out="ret"/>
+          <get in="*" out="atom"/>
           <resource>
             <get in="*" out="html"/>
           </resource>  
         </resource>  
         <resource relative="collections">
-          <get in="*" out="ret"/>
+          <get in="*" out="atom"/>
           <resource>
-            <get in="*" out="ret"/>
+            <get in="*" out="atom"/>
             <resource relative="collections">
-              <get in="*" out="ret"/>
+              <get in="*" out="atom"/>
             </resource>  
             <resource relative="items">
-              <get in="*" out="ret"/>
+              <get in="*" out="atom"/>
             </resource>  
           </resource>  
         </resource>  
