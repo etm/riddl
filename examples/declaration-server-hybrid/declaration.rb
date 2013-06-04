@@ -22,8 +22,6 @@ class Info < Riddl::Implementation
 end
 
 Riddl::Server.new('declaration.xml', :port => 9297) do |r|
-  schema, strans = Riddl::Utils::Properties::schema(@riddl_opts[:basepath] + '/instances/properties.schema')
-
   interface 'main' do
     run Riddl::Utils::FileServe, 'instances/instances.xml' if get '*'
     on resource do
@@ -38,7 +36,11 @@ Riddl::Server.new('declaration.xml', :port => 9297) do |r|
 
   interface 'properties' do |r|
     properties = @riddl_opts[:basepath] + '/instances/' + r[:h]['RIDDL_DECLARATION_PATH'].split('/')[1] + '/properties.xml'
+    backend = Riddl::Utils::Properties::Backend.new( 
+      @riddl_opts[:basepath] + '/instances/properties.schema', 
+      properties
+    )
 
-    use Riddl::Utils::Properties::implementation(properties, schema, strans)
+    use Riddl::Utils::Properties::implementation(backend)
   end
 end.loop!

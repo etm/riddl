@@ -6,11 +6,13 @@ require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/xslove
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/fileserve')
 
 Riddl::Server.new('declaration.xml') do
-  schema, strans = Riddl::Utils::Properties::schema(@riddl_opts[:basepath] + '/server.properties.schema')
-  properties = Riddl::Utils::Properties::file(@riddl_opts[:basepath] + '/server.properties.xml')
+  backend = Riddl::Utils::Properties::Backend.new( 
+    @riddl_opts[:basepath] + '/server.properties.schema', 
+    @riddl_opts[:basepath] + '/server.properties.xml' 
+  )
 
   interface 'main' do
-    use Riddl::Utils::Properties::implementation(properties, schema, strans)
+    use Riddl::Utils::Properties::implementation(backend)
   end
 
   interface 'xsls' do |r|
