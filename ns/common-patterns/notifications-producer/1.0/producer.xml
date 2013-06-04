@@ -107,8 +107,10 @@
   </message>
   
   <message name="delete">
-    <parameter name="message-uid" type="string"/>
-    <parameter name="fingerprint-with-producer-secret" type="string"/>
+    <optional>
+      <parameter name="message-uid" type="string"/>
+      <parameter name="fingerprint-with-producer-secret" type="string"/>
+    </optional>
   </message>
   <message name="request">
     <optional>

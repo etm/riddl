@@ -6,7 +6,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/notifi
 Riddl::Server.new(::File.dirname(__FILE__) + '/producer.declaration.xml', :port => 9291) do
   accessible_description true
   backend =  Riddl::Utils::Notifications::Producer::Backend.new(
-    ::File.dirname(__FILE__) + '/notifications/topics.xml',
+    ::File.dirname(__FILE__) + '/topics.xml',
     ::File.dirname(__FILE__) + '/notifications/'
   )
 
