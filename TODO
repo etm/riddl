@@ -1,0 +1,17 @@
+Fixing:
+fix examples/declaration-test
+fix examples/description-test
+fix examples/flickr/Exif/exif.ru
+fix examples/flickr/client.rb ???
+fix examples/library
+fix examples/websocket
+
+Tests:
+examples/downloadify
+examples/oauth
+
+Features:
+examples/xmpp
+
+
+@Florian: Try out flickr, zotero && twitter examples and write doku
