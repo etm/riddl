@@ -7,6 +7,20 @@
                                 <title>Further Explore the Notifications</title>
                                       </head>
                                             <body>
+                                                  <nav>
+                                                    <a href="/.">Main</a>
+                                                    &gt;
+                                                 <xsl:element name="a">    
+                                                   <xsl:attribute name="href">../</xsl:attribute>
+                                                    Instanz
+                                                  </xsl:element>
+                                                    &gt;
+                                                <xsl:element name="a">
+                                                  <xsl:attribute name="href">./</xsl:attribute>
+                                                Properties
+                                                </xsl:element>
+                                                   </nav>
+
                                                     <h1>Navigation </h1>
                                                             <ul>
                                                                       <li><a href='schema'>Schema</a></li>  
