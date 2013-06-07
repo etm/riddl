@@ -1,1 +1,1 @@
-map <F10> :!ruby tc_producer.rb<CR>
+map <F10> :!ruby tc_declaration-hybrid.rb<CR>

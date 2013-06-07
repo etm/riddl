@@ -5,12 +5,16 @@ require 'xml/smart'
 class TestProp <  MiniTest::Unit::TestCase
   include ServerCase
 
-  SERVER = File.expand_path(File.dirname(__FILE__) + '/../examples/properties/description.rb') 
-  SCHEMA = File.expand_path(File.dirname(__FILE__) + '/../examples/properties/properties.xml') 
+  SERVER = [
+    TestServerInfo.new(
+      File.expand_path(File.dirname(__FILE__) + '/../examples/properties/description.rb'),
+      File.expand_path(File.dirname(__FILE__) + '/../examples/properties/properties.xml')
+    )
+  ]
   NORUN = false
 
   def test_properties
-    props = Riddl::Client.new(@url,SCHEMA)
+    props = Riddl::Client.new(SERVER[0].url,SERVER[0].schema)
 
     test = props.resource("/values/state")
     status, res = test.get

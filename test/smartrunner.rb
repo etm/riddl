@@ -3,32 +3,48 @@ gem 'minitest', '=4.7.4'
 require 'minitest/autorun'
 require 'socket'
 
+class TestServerInfo
+  attr_reader :server,:schema
+  attr_accessor :url, :port
+
+  def initialize(server,schema)
+    @server = server
+    @schema = schema
+  end
+end
+
 module ServerCase 
   def setup
-    if self.class::NORUN
-      out = `#{self.class::SERVER} info`
-      @port = out.match(/:(\d+)\)/)[1].to_i
-      @url = out.match(/\(([^\)]+)\)/)[1]
-    else  
-      out = `#{self.class::SERVER} start`
-      @port = out.match(/:(\d+)\)/)[1].to_i
-      @url = out.match(/\(([^\)]+)\)/)[1]
+    self.class::SERVER.each do |s|
+      if self.class::NORUN
+        out = `#{s.server} info`
+        s.port = out.match(/:(\d+)\)/)[1].to_i
+        s.url = out.match(/\(([^\)]+)\)/)[1]
+      else  
+        p s.server
 
-      up = false
-      until up
-        begin
-          TCPSocket.new('localhost', @port)
-          up = true
-        rescue => e
-          sleep 0.2
-        end  
+        out = `#{s.server} start`
+        s.port = out.match(/:(\d+)\)/)[1].to_i
+        s.url = out.match(/\(([^\)]+)\)/)[1]
+
+        up = false
+        until up
+          begin
+            TCPSocket.new('localhost', s.port)
+            up = true
+          rescue => e
+            sleep 0.2
+          end  
+        end
       end
-    end  
+    end
   end
 
   def teardown
     unless self.class::NORUN
-      `#{self.class::SERVER} stop`
+       self.class::SERVER.each do |s|
+        `#{s.server} stop`
+       end 
     end 
   end
 end

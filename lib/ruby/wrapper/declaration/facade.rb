@@ -42,24 +42,24 @@ module Riddl
               end  
               case m
                 when Riddl::Wrapper::Description::RequestInOut
-                  result << "in=\"#{m.in.name}\""
-                  messages[m.in.hash] = m.in
+                  messages[m.in.hash] ||= m.in
+                  result << "in=\"#{messages[m.in.hash].name}\""
                   unless m.out.nil?
-                    result << " out=\"#{m.out.name}\""
-                    messages[m.out.hash] = m.out
+                    messages[m.out.hash] ||= m.out
+                    result << " out=\"#{messages[m.out.hash].name}\""
                   end  
                 when Riddl::Wrapper::Description::RequestStarOut
                   result << "in=\"*\""
                   unless m.out.nil?
-                    result << " out=\"#{m.out.name}\""
-                    messages[m.out.hash] = m.out
+                    messages[m.out.hash] ||= m.out
+                    result << " out=\"#{messages[m.out.hash].name}\""
                   end  
                 when Riddl::Wrapper::Description::RequestPass
-                  result << "pass=\"#{m.pass.name}\""
-                  messages[m.pass.hash] = m.pass
+                  messages[m.pass.hash] ||= m.pass
+                  result << "pass=\"#{messages[m.pass.hash].name}\""
                 when Riddl::Wrapper::Description::RequestTransformation
-                  result << "transformation=\"#{m.trans.name}\""
-                  messages[m.trans.hash] = m.trans
+                  messages[m.trans.hash] ||= m.trans
+                  result << "transformation=\"#{messages[m.trans.hash].name}\""
               end  
               result << "/>\n"
             end  

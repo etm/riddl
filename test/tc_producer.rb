@@ -5,12 +5,16 @@ require 'xml/smart'
 class TestProd <  MiniTest::Unit::TestCase
   include ServerCase
 
-  SERVER = File.expand_path(File.dirname(__FILE__) + '/../examples/notifications/producer.rb') 
-  SCHEMA = File.expand_path(File.dirname(__FILE__) + '/../examples/notifications/producer.declaration.xml') 
+  SERVER = [
+    TestServerInfo.new(
+      File.expand_path(File.dirname(__FILE__) + '/../examples/notifications/producer.rb'),
+      File.expand_path(File.dirname(__FILE__) + '/../examples/notifications/producer.declaration.xml')
+    )
+  ]
   NORUN = false
 
   def test_producer
-    nots = Riddl::Client.interface(@url,SCHEMA)
+    nots = Riddl::Client.interface(SERVER[0].url,SERVER[0].schema)
 
     test = nots.resource("/notifications/subscriptions")
     status, res = test.post [

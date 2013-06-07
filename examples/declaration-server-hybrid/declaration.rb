@@ -21,7 +21,7 @@ class Info < Riddl::Implementation
   end
 end
 
-Riddl::Server.new('declaration.xml', :port => 9297) do |r|
+Riddl::Server.new(File.dirname(__FILE__) + '/declaration.xml', :port => 9297) do
   interface 'main' do
     run Riddl::Utils::FileServe, 'instances/instances.xml' if get '*'
     on resource do
