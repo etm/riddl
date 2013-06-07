@@ -22,7 +22,7 @@ module Riddl
             t.root.attributes['name'] = name
             messages_result << t.root.dump + "\n"
           end
-          "<description #{Riddl::Wrapper::COMMON}>\n\n" + description_result + messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>"
+          XML::Smart.string("<description #{Riddl::Wrapper::COMMON}>\n\n" + description_result + messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>").to_s
           #}}}
         end
         def description_xml_priv(result,messages,level,res=@resource)

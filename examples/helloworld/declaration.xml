@@ -1,8 +1,8 @@
 <declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <interface name="main" path="http://tango.pri.lan:4277">
+  <interface name="main" location="http://localhost:4277">
     <xi:include href="description.xml"/>
   </interface>  
-  <interface name="post" path="http://tango.pri.lan:4278">
+  <interface name="post" location="http://localhost:4278">
     <xi:include href="filter-description.xml"/>
   </interface>  
 

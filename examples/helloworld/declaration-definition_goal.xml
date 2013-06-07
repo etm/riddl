@@ -1,41 +1,44 @@
-<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-
+<?xml version="1.0"?>
+<description xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <message name="hello">
-    <part type="text/plain" handler="http://riddl.org/ns/part-plugins/plain-type">
+    <parameter name="return" mimetype="text/plain" handler="http://riddl.org/ns/handlers/plain-type">
       <plain type="string">
         <param name="pattern">hello .+</param>
       </plain>
-    </part>
+    </parameter>
   </message>
   <message name="hello-form">
-    <part type="application/x-www-form-urlencoded" handler="http://riddl.org/ns/part-plugins/x-www-form-urlencoded">
-      <parameter name="hello-xy" type="string"/>
-    </part>
-  </message>
-  <message name="filter-hello-list">
-    <part type="text/xml" handler="http://riddl.org/ns/part-plugins/relaxng">
-      <xi:include href="filter-hello-list.rng"/>
-    </part>
-  </message>
-  <message name="hello-list-html">
-    <part type="text/html" />
+    <parameter name="hellotest" type="string"/>
   </message>
   <message name="type-html">
-  	<parameter name="type" type="string">
+    <parameter name="type" type="string">
       <choice>
         <value>html</value>
-      </choice>  
-    </parameter>  
+      </choice>
+    </parameter>
   </message>
-
+  <message name="hello-list-html">
+    <parameter name="html" mimetype="text/html"/>
+  </message>
   <resource>
-    <get in="*" out="filter-hello-list"/>
-    <get in="type-html" out="hello-list-html"/> 
+    <post in="hello"/>
+    <post in="hello-form"/>
+    <get in="type-html"/>
+    <get in="type-html" out="hello-list-html"/>
+    <get in="*"/>
+    <get in="*" out="hello-form"/>
     <resource>
-      <get in="*" out="hello"/>
+      <put in="hello"/>
       <put in="hello" out="hello"/>
+      <get in="*"/>
+      <get in="*" out="hello"/>
       <delete in="*"/>
+      <resource relative="hello">
+        <post in="hello"/>
+      </resource>
     </resource>
-  </resource>  
-
+    <resource relative="hello">
+      <post in="hello"/>
+    </resource>
+  </resource>
 </description>

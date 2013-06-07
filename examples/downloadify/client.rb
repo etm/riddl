@@ -1,6 +1,5 @@
 #!/usr/bin/ruby
-require '../../lib/ruby/client'
-require 'pp'
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
 
 srv = Riddl::Client.interface("http://localhost:9299","server.declaration.xml")
 
