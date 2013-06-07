@@ -1,0 +1,70 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output method="html" doctype-public="XSLT-compat"/>
+  <xsl:template match="*">
+    <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+      <head>
+         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+         <title>CPEE - List of Instances</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>   
+ <script class="jsbin" src="http://datatables.net/download/build/jquery.dataTables.nightly.js"></script>
+		<script type="text/javascript">
+	$(document).ready(function(){
+   var idd = $("#solo").find('tbody').children();
+	  idd.each(function() { 
+          $(this).find('#id').css('color', 'red');
+          $tempi = $(this).find('#id').text();
+          $keinplan = $(this).find('#state'); 
+          var status = "./"+$tempi+"/properties/values/state";
+          $.ajax({
+              url: status,
+              type: 'get',
+              dataType: 'html',
+              async: false,
+              success: function(data) {
+                $keinplan.text(data);
+                } 
+              });
+    });
+      $('#solo').dataTable({
+	  	"aaSorting": [[ 1, "desc" ]]
+	  	} );
+	} );
+		</script>
+      </head>
+      <body>
+        <h1>List of Instances</h1>
+        <nav>
+          <a href="/.">Main</a>
+        </nav>
+	<table id="solo">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>ID</th>
+        <th>State</th>
+			</tr>
+		</thead>
+		<tbody>
+          <xsl:for-each select="instance">
+              	<tr>
+			<td>
+              <xsl:element name="a">
+                <xsl:attribute name="href"><xsl:value-of select="@id"/>/</xsl:attribute>
+                <xsl:value-of select="text()"/>
+              </xsl:element>
+			</td>
+			<td id="id">
+		 <xsl:value-of select="@id"/>
+			</td>
+      <td id="state">
+      </td>
+           	 </tr>  
+          </xsl:for-each>
+        	</tbody>
+	</table>
+
+      </body>
+    </html>
+  </xsl:template>
+</xsl:stylesheet>
+

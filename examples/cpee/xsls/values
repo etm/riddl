@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<properties xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
+  <property>name</property>
+  <property>handlerwrapper</property>
+  <property>dsl</property>
+  <property>description</property>
+  <property>transformation</property>
+  <property>state</property>
+  <property>status</property>
+  <property>positions</property>
+  <property>dataelements</property>
+  <property>endpoints</property>
+</properties>
