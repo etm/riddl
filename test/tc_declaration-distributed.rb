@@ -3,23 +3,31 @@ require File.expand_path(File.dirname(__FILE__) + '/../lib/riddl/client')
 require 'xml/smart'
 require 'pp'
 
-class TestDecHy <  MiniTest::Unit::TestCase
+class TestDecDi <  MiniTest::Unit::TestCase
   include ServerCase
 
   SERVER = [
     TestServerInfo.new(
-      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-hybrid/xsloverlay.rb'),
-      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-hybrid/xsloverlay.xml')
+      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-distributed/main.rb'),
+      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-distributed/main.xml')
     ),
     TestServerInfo.new(
-      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-hybrid/declaration.rb'),
-      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-hybrid/declaration.xml')
+      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-distributed/properties.rb'),
+      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-distributed/properties.xml')
+    ),
+    TestServerInfo.new(
+      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-distributed/xsloverlay.rb'),
+      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-distributed/xsloverlay.xml')
+    ),
+    TestServerInfo.new(
+      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-distributed/declaration.rb'),
+      File.expand_path(File.dirname(__FILE__) + '/../examples/declaration-server-distributed/declaration.xml')
     )
   ]
   NORUN = false
 
-  def test_dechy
-    ep = Riddl::Client.interface(SERVER[1].url,SERVER[1].schema)
+  def test_decdi
+    ep = Riddl::Client.interface(SERVER[3].url,SERVER[3].schema)
 
     test = ep.resource('/')
     status, res = test.get

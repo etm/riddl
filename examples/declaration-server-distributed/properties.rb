@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 require 'pp'
-require '../../lib/ruby/server'
-require '../../lib/ruby/utils/properties'
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/properties')
 
-Riddl::Server.new('properties.xml', :port => 9295) do
+Riddl::Server.new(File.dirname(__FILE__) + '/properties.xml', :port => 9295) do
   on resource do |r|
     ### header RIDDL_DECLARATION_PATH holds the full path used in the declaration
     ### from there we get the instance, which is not present in the path used for properties

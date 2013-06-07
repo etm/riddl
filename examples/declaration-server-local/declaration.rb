@@ -5,7 +5,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/proper
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/xsloverlay')
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/fileserve')
 
-Riddl::Server.new('declaration.xml') do
+Riddl::Server.new(File.dirname(__FILE__) + '/declaration.xml', :port => 9292) do
   backend = Riddl::Utils::Properties::Backend.new( 
     @riddl_opts[:basepath] + '/server.properties.schema', 
     @riddl_opts[:basepath] + '/server.properties.xml' 

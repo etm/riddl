@@ -21,8 +21,6 @@ module ServerCase
         s.port = out.match(/:(\d+)\)/)[1].to_i
         s.url = out.match(/\(([^\)]+)\)/)[1]
       else  
-        p s.server
-
         out = `#{s.server} start`
         s.port = out.match(/:(\d+)\)/)[1].to_i
         s.url = out.match(/\(([^\)]+)\)/)[1]
