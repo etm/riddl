@@ -29,3 +29,11 @@ find out if it does bad things to your account. Of course if you code to it
 that does harmful things, this is not our fault :-)
 
 After these steps you are ready to use flickr.rb.
+
+Flickr & EXIF Declaration
+=========================
+
+Combines the two cases above through a declaration.
+
+1) Exif/exif.rb start
+2) ./client.rb

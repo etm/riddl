@@ -1,3 +1,4 @@
+# encoding: utf-8
 #!/usr/bin/ruby
 require '../../lib/ruby/client'
 require 'Helpers/flickr.rb'
