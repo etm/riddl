@@ -139,7 +139,7 @@ module Pong
   extend Blather::DSL  
 
   when_ready do 
-    mess = RESTMessage.new "adventure_processexecution@fp7-adventure.eu"
+    mess = RESTMessage.new "adventure_processexecution@fp7-adventure.eu/values/?a=3"
     mess.headers['bla'] = 7
     mess.headers['r'] = 8
     mess.operation = :post

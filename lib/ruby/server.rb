@@ -167,8 +167,7 @@ module Riddl
           xmpp = XMPP.new
           xmpp.setup @riddl_xmpp_user, @riddl_xmpp_pass
           xmpp.message do |m|
-            pp m
-            pp "message\n------------"
+            __xmpp_call(m)
           end
           xmpp.run
         end  
@@ -267,7 +266,40 @@ module Riddl
       end  
     end #}}}
 
-    def __xmpp_call(env) #{{{
+    def __xmpp_call(raw) #{{{
+      Dir.chdir(@riddl_opts[:basepath]) if @riddl_opts[:basepath]
+      @riddl_log = @riddl_logger
+
+      @riddl_env = XML::Smart::Dom::Element.new(raw).parent
+      @riddl_env.register_namespace 'o', 'http://www.fp7-adventure.eu/ns/xmpp-rest/operation'
+      @riddl_env.register_namespace 'h', 'http://www.fp7-adventure.eu/ns/xmpp-rest/header'
+      @riddl_env.register_namespace 'p', 'http://www.fp7-adventure.eu/ns/xmpp-rest/part'
+      @riddl_res = {}
+      @riddl_status = 404
+
+      @riddl_pinfo = ('/' + @riddl_env.root.attributes['to'].sub(/^[^\/]+/,'')).gsub(/\/+/,'/')
+      @riddl_pinfo.gsub!(/\?(.*)/).each do
+        @riddl_query_string = $1
+        ''
+      end
+      @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
+
+      if @riddl_matching_path
+        @riddl_method = @riddl_env.find('string(/message/o:operation/@type)')
+
+        @riddl_headers = {}
+        @riddl_env.find('/message/h:header').each do |e|
+          @riddl_headers[e.attributes['name']] = e.text
+        end
+        @riddl_parameters = []
+        @riddl_env.find('/message/p:part').each do |e|
+          @riddl_parameters
+        end
+
+
+        @riddl_path = '/'
+
+      end  
     end #}}}
 
     def __http_call(env) #{{{
@@ -334,7 +366,7 @@ module Riddl
         end
       end
       @riddl_res.finish
-    end #}}}
+    end #}}} 
     
     def process_out(pout)# {{{
       @riddl_process_out = pout
