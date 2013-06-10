@@ -18,6 +18,6 @@ module Ping
   end
 end
 
-jid = Blather::JID.new('adventure_processexecution', 'fp7-adventure.eu', '*')
+jid = Blather::JID.new('adventure_processexecution', 'fp7-adventure.eu')
 Ping.setup jid, 'adventure_processexecution'
 EM.run { Ping.run }

@@ -145,7 +145,7 @@ module Pong
     mess.operation = :post
     mess.headers['bla'] = 9
     puts mess.to_s
-    #write_to_stream mess
+    write_to_stream mess
   end
 end
 

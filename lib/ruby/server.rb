@@ -13,12 +13,14 @@ require 'optparse'
 require 'stringio'
 require 'rack/content_length'
 require 'rack/chunked'
+require 'securerandom'
+require 'blather/client/dsl'
 
 module Riddl
 
   class Server
 
-    class Execution
+    class Execution #{{{
       attr_reader :response,:headers
       def initialize(response,headers)
         @response = (response.is_a?(Array) ? response : [response])
@@ -33,7 +35,9 @@ module Riddl
         @response.compact!
         @headers = Hash[ @headers.map{ |h| [h.name, h.value] } ]  
       end
-    end
+    end #}}}
+
+    class XMPP; include Blather::DSL; end
 
     OPTS = { 
       :host     => 'localhost',
@@ -155,8 +159,20 @@ module Riddl
         v.delete [Rack::Lint]
       end  
 
-      puts "Server (#{@riddl_opts[:url]}) started as #{Process.pid}"
-      server.start
+      EM.run do
+        puts "Server (#{@riddl_opts[:url]}) started as #{Process.pid}"
+        puts "XMPP support (#{@riddl_xmpp_user}) active" if @riddl_xmpp_user && @riddl_xmpp_pass
+        server.start
+        if @riddl_xmpp_user && @riddl_xmpp_pass
+          xmpp = XMPP.new
+          xmpp.setup @riddl_xmpp_user, @riddl_xmpp_pass
+          xmpp.message do |m|
+            pp m
+            pp "message\n------------"
+          end
+          xmpp.run
+        end  
+      end
     end #}}}
 
     def initialize(riddl,opts={},&blk)# {{{
@@ -196,31 +212,84 @@ module Riddl
     end# }}}
 
     def call(env)# {{{
-      dup._call(env)
+      dup._http_call(env)
     end# }}}
 
-    def _call(env) #{{{
+    def _call
+      @riddl_message = @riddl.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
+      if @riddl_message.nil?
+        if @riddl_info[:env].has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
+          @riddl_res['Access-Control-Allow-Origin'] = '*'
+          @riddl_res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+          @riddl_res['Access-Control-Allow-Headers'] = @riddl_info[:env]['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'] if @riddl_info[:env]['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']
+          @riddl_res['Access-Control-Max-Age'] = '0'
+          @riddl_res['Content-Length'] = '0'
+          @riddl_status = 200
+        else
+          @riddl_log.write "501: the #{@riddl_method} parameters are not matching anything in the description.\n"
+          @riddl_status = 501 # not implemented?!
+        end  
+      else
+        if get 'riddl-description-request'
+          run Riddl::Utils::Description::XML, @riddl_description_string 
+        else
+          if @riddl.description?
+            instance_exec(@riddl_info, &@riddl_interfaces[nil])  
+          elsif @riddl.declaration?
+            ifs = @riddl_message.route? ? @riddl_message.route : [@riddl_message]
+            ifs.each do |m|
+              @riddl_path = '/'
+              if m.interface.base.nil?
+                if @riddl_interfaces.key? m.interface.name
+                  @riddl_info[:r] = m.interface.real_path(@riddl_pinfo).sub(/\//,'').split('/')
+                  @riddl_info[:h]['RIDDL_DECLARATION_PATH'] = @riddl_pinfo
+                  @riddl_info[:h]['RIDDL_DECLARATION_RESOURCE'] = m.interface.top
+                  @riddl_info[:s] = m.interface.sub.sub(/\//,'').split('/')
+                  @riddl_info.merge!(:match => matching_path)
+                  instance_exec(@riddl_info, &@riddl_interfaces[m.interface.name])
+                else  
+                  @riddl_log.write "501: not implemented (for remote: add @location in declaration; for local: add to Riddl::Server).\n"
+                  @riddl_status = 501 # not implemented?!
+                  break
+                end  
+              else
+                run Riddl::Utils::Description::Call, @riddl_exe, @riddl_pinfo, m.interface.top, m.interface.base, m.interface.des.to_doc, m.interface.real_path(@riddl_pinfo)
+              end
+              break unless @riddl_status == 200
+              @riddl_info.merge!(:h => @riddl_exe.headers, :p => @riddl_exe.response)
+            end
+          end
+        end
+        if @riddl_info[:env].has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
+          @riddl_res['Access-Control-Allow-Origin'] = '*'
+          @riddl_res['Access-Control-Max-Age'] = '0'
+        end
+      end  
+    end
+
+    def _http_call(env) #{{{
       Dir.chdir(@riddl_opts[:basepath]) if @riddl_opts[:basepath]
 
       @riddl_env = env
       @riddl_env['rack.logger'] =  @riddl_logger if @riddl_logger
-
-      @riddl_pinfo = env["PATH_INFO"].gsub(/\/+/,'/')
-      @riddl_req = Rack::Request.new(env)
-      @riddl_res = Rack::Response.new
-      @riddl_res.status = 404
-
       @riddl_log = @riddl_logger || @riddl_env['rack.errors'] 
+      @riddl_res = Rack::Response.new
+      @riddl_status = 404
+
+      @riddl_pinfo = @riddl_env["PATH_INFO"].gsub(/\/+/,'/')
       @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
 
       if @riddl_matching_path
+        @riddl_query_string = @riddl_env['QUERY_STRING']
+        @riddl_raw = @riddl_env['rack.input']
+
         @riddl_headers = {}
         @riddl_env.each do |h,v|
           @riddl_headers[$1] = v if h =~ /^HTTP_(.*)$/
         end
-        @riddl_parameters = Riddl::HttpParser.new(
-          @riddl_env['QUERY_STRING'],
-          @riddl_env['rack.input'],
+        @riddl_parameters = HttpParser.new(
+          @riddl_query_string,
+          @riddl_raw,
           @riddl_env['CONTENT_TYPE'],
           @riddl_env['CONTENT_LENGTH'],
           @riddl_env['HTTP_CONTENT_DISPOSITION'],
@@ -229,8 +298,6 @@ module Riddl
         ).params
 
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
-        @riddl_message = @riddl.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
-
         @riddl_path = '/'
         @riddl_info = { 
           :h => @riddl_headers,
@@ -242,61 +309,15 @@ module Riddl
           :match => []
         }
 
-        if @riddl_env["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_env["HTTP_UPGRADE"] =~ /\AWebSocket\z/i
+        if @riddl_info[:env]["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_info[:env]["HTTP_UPGRADE"] =~ /\AWebSocket\z/i
           # TODO raise error when declaration and route or (not route and non-local interface)
           # raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl.validate!
           instance_exec(@riddl_info, &@riddl_interfaces[nil])
           return [-1, {}, []]
         else
-          if @riddl_message.nil?
-            if @riddl_env.has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
-              @riddl_res['Access-Control-Allow-Origin'] = '*'
-              @riddl_res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-              @riddl_res['Access-Control-Allow-Headers'] = @riddl_env['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'] if @riddl_env['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']
-              @riddl_res['Access-Control-Max-Age'] = '0'
-              @riddl_res['Content-Length'] = '0'
-              @riddl_res.status = 200
-            else
-              @riddl_log.write "501: the #{@riddl_method} parameters are not matching anything in the description.\n"
-              @riddl_res.status = 501 # not implemented?!
-            end  
-          else
-            if get 'riddl-description-request'
-              run Riddl::Utils::Description::XML, @riddl_description_string 
-            else
-              if @riddl.description?
-                instance_exec(@riddl_info, &@riddl_interfaces[nil])  
-              elsif @riddl.declaration?
-                ifs = @riddl_message.route? ? @riddl_message.route : [@riddl_message]
-                ifs.each do |m|
-                  @riddl_path = '/'
-                  if m.interface.base.nil?
-                    if @riddl_interfaces.key? m.interface.name
-                      @riddl_info[:r] = m.interface.real_path(@riddl_pinfo).sub(/\//,'').split('/')
-                      @riddl_info[:h]['RIDDL_DECLARATION_PATH'] = @riddl_pinfo
-                      @riddl_info[:h]['RIDDL_DECLARATION_RESOURCE'] = m.interface.top
-                      @riddl_info[:s] = m.interface.sub.sub(/\//,'').split('/')
-                      @riddl_info.merge!(:match => matching_path)
-                      instance_exec(@riddl_info, &@riddl_interfaces[m.interface.name])
-                    else  
-                      @riddl_log.write "501: not implemented (for remote: add @location in declaration; for local: add to Riddl::Server).\n"
-                      @riddl_res.status = 501 # not implemented?!
-                      break
-                    end  
-                  else
-                    run Riddl::Utils::Description::Call, @riddl_exe, @riddl_pinfo, m.interface.top, m.interface.base, m.interface.des.to_doc, m.interface.real_path(@riddl_pinfo)
-                  end
-                  break unless @riddl_res.status == 200
-                  @riddl_info.merge!(:h => @riddl_exe.headers, :p => @riddl_exe.response)
-                end
-              end
-            end
-            if @riddl_cross_site_xhr
-              @riddl_res['Access-Control-Allow-Origin'] = '*'
-              @riddl_res['Access-Control-Max-Age'] = '0'
-            end
-          end  
-        end
+          _call
+          @riddl_res.status = @riddl_status
+        end  
       else
         @riddl_log.write "404: this resource for sure does not exist.\n"
         @riddl_res.status = 404 # client requests wrong path
@@ -314,6 +335,10 @@ module Riddl
     
     def process_out(pout)# {{{
       @riddl_process_out = pout
+    end# }}}
+    def xmpp(user,pass)# {{{
+      @riddl_xmpp_user = user
+      @riddl_xmpp_pass = pass
     end# }}}
     def cross_site_xhr(csxhr)# {{{
       @riddl_cross_site_xhr = csxhr
@@ -352,30 +377,25 @@ module Riddl
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
         data = WebSocketParserData.new
-        data.headers = {}
-        data.request_path = @riddl_env['REQUEST_PATH'].to_s
-        data.request_url = @riddl_env['REQUEST_URI'].to_s
-        data.query_string = @riddl_env['QUERY_STRING'].to_s
-        data.http_method = @riddl_env['REQUEST_METHOD']
-        data.body = @riddl_env['rack.input'].read
-        @riddl_env.each do |key, value| 
-          if key.match(/HTTP_(.+)/) 
-            data.headers[$1.downcase.gsub('_','-')] ||= value 
-          end 
-        end
-        w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION']), :match => matching_path)
-        w.io = Riddl::WebSocket.new(w, @riddl_env['thin.connection'])
+        data.headers = @riddl_headers
+        data.request_path = @riddl_pinfo
+        data.request_url = @riddl_pinfo + '?' + @riddl_query_string
+        data.query_string = @riddl_query_string
+        data.http_method = @riddl_method
+        data.body = @riddl_raw.read
+        w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_info[:env]['HTTP_SEC_WEBSOCKET_VERSION']), :match => matching_path)
+        w.io = Riddl::WebSocket.new(w, @riddl_info[:env]['thin.connection'])
         w.io.dispatch(data)
 
       end  
       if what.class == Class && what.superclass == Riddl::Implementation
         w = what.new(@riddl_info.merge!(:a => args, :match => matching_path))
         @riddl_exe = Riddl::Server::Execution.new(w.response,w.headers)
-        @riddl_res.status = w.status
-        if @riddl_process_out && @riddl_res.status == 200
+        @riddl_status = w.status
+        if @riddl_process_out && @riddl_status == 200
           unless @riddl.check_message(@riddl_exe.response,@riddl_exe.headers,@riddl_message.out)
             @riddl_log.write "500: the return for the #{@riddl_method} is not matching anything in the description.\n"
-            @riddl_res.status = 500
+            @riddl_status = 500
             return
           end  
         end
@@ -408,14 +428,6 @@ module Riddl
     def declaration_resource #{{{
       @riddl_info[:h]['RIDDL_DECLARATION_RESOURCE']
     end #}}}
-
-    def description_string# {{{
-      @riddl_description_string
-    end# }}}
-
-    def facade# {{{
-      @riddl.declaration? ? @riddl : nil
-    end# }}}
 
   end
 end

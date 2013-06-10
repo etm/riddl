@@ -21,6 +21,7 @@ class TestDecLo <  MiniTest::Unit::TestCase
     status, res = test.get
     assert status == 200
     doc = XML::Smart.string(res[0].value.read)
+
     assert doc.find('/processing-instruction("xml-stylesheet")').length == 1
     assert doc.find('/processing-instruction("xml-stylesheet")').first.content =~ /properties\.xsl/
     assert doc.find('/xmlns:properties/xmlns:dataelements/*').length == 2
