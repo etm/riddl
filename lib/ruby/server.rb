@@ -212,10 +212,10 @@ module Riddl
     end# }}}
 
     def call(env)# {{{
-      dup._http_call(env)
+      dup.__http_call(env)
     end# }}}
 
-    def _call
+    def __call #{{{
       @riddl_message = @riddl.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
       if @riddl_message.nil?
         if @riddl_info[:env].has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
@@ -265,9 +265,12 @@ module Riddl
           @riddl_res['Access-Control-Max-Age'] = '0'
         end
       end  
-    end
+    end #}}}
 
-    def _http_call(env) #{{{
+    def __xmpp_call(env) #{{{
+    end #}}}
+
+    def __http_call(env) #{{{
       Dir.chdir(@riddl_opts[:basepath]) if @riddl_opts[:basepath]
 
       @riddl_env = env
@@ -315,7 +318,7 @@ module Riddl
           instance_exec(@riddl_info, &@riddl_interfaces[nil])
           return [-1, {}, []]
         else
-          _call
+          __call
           @riddl_res.status = @riddl_status
         end  
       else
