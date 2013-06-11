@@ -18,14 +18,14 @@ class RESTMessage < Blather::Stanza
 
     def []=(hname,value)
       if hname
-        if elem = @message.find_first("ns:header[@name='#{hname}']", :ns => @message.class::XR_HEADER_NS)
+        if elem = @message.find_first("ns:header[@name='#{hname}']", :ns => @message.class::XR_NS)
           elem[hname] = value
         else
           he = Blather::XMPPNode.new('header', @message.document)
-          he.namespace = @message.class::XR_HEADER_NS
+          he.namespace = @message.class::XR_NS
           he['name'] = hname
           he.content = value
-          @message.xpath('ns1:*|ns2:*', :ns1 => @message.class::XR_OPERATION_NS, :ns2 => @message.class::XR_HEADER_NS).after(he)
+          @message.xpath('ns1:*|ns2:*', :ns1 => @message.class::XR_NS, :ns2 => @message.class::XR_NS).after(he)
         end
       end  
     end
@@ -43,23 +43,21 @@ class RESTMessage < Blather::Stanza
 
     def []=(pname,props)
       if pname
-        if elem = @message.find_first("ns:header[@name='#{hname}']", :ns => @message.class::XR_HEADER_NS)
+        if elem = @message.find_first("ns:header[@name='#{hname}']", :ns => @message.class::XR_NS)
           elem[hname] = value
         else
           he = Blather::XMPPNode.new('header', @message.document)
-          he.namespace = @message.class::XR_HEADER_NS
+          he.namespace = @message.class::XR_NS
           he['name'] = hname
           he.content = value
-          @message.xpath('ns1:*|ns2:*', :ns1 => @message.class::XR_OPERATION_NS, :ns2 => @message.class::XR_HEADER_NS).after(he)
+          @message.xpath('ns1:*|ns2:*', :ns1 => @message.class::XR_NS, :ns2 => @message.class::XR_NS).after(he)
         end
       end  
     end
   end #}}}
 
   VALID_OPS = [:get, :post, :put, :delete].freeze
-  XR_OPERATION_NS = 'http://www.fp7-adventure.eu/ns/xmpp-rest/operation'.freeze
-  XR_HEADER_NS = 'http://www.fp7-adventure.eu/ns/xmpp-rest/header'.freeze
-  XR_PART_NS = 'http://www.fp7-adventure.eu/ns/xmpp-rest/part'.freeze
+  XR_NS = 'http://www.fp7-adventure.eu/ns/xmpp-rest/'.freeze
 
   def self.new(to = nil)
     node = super :message
@@ -71,7 +69,7 @@ class RESTMessage < Blather::Stanza
   end
 
   def operation
-    if (elem = find_first('ns:operation', :ns => XR_OPERATION_NS)) && VALID_OPS.include?(name = elem.name.to_sym)
+    if (elem = find_first('ns:operation', :ns => XR_NS)) && VALID_OPS.include?(name = elem.name.to_sym)
       name
     end
   end
@@ -81,12 +79,12 @@ class RESTMessage < Blather::Stanza
       raise ArgumentError, "Invalid Operation (#{opname}), use: #{VALID_OPS*' '}"
     end
 
-    xpath('ns:operation', :ns => XR_OPERATION_NS).remove
+    xpath('ns:operation', :ns => XR_NS).remove
 
     if opname
       op = Blather::XMPPNode.new('operation', self.document)
       op['type'] = opname.to_s
-      op.namespace = XR_OPERATION_NS
+      op.namespace = XR_NS
       if self.children.empty?
         self << op
       else  
@@ -96,11 +94,11 @@ class RESTMessage < Blather::Stanza
   end
 
   def headers
-    Headers.new xpath('ns:*', :ns => XR_HEADER_NS).map{ |ele| [ele['name'], ele.content] }.flatten, self
+    Headers.new xpath('ns:*', :ns => XR_NS).map{ |ele| [ele['name'], ele.content] }.flatten, self
   end
 
   def parts
-    Parts.new xpath('ns:*', :ns => XR_HEADER_NS).map{ |ele| [ele['id'], ele] }.flatten, self
+    Parts.new xpath('ns:*', :ns => XR_NS).map{ |ele| [ele['id'], ele] }.flatten, self
   end
 
 end

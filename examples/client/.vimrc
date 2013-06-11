@@ -1,1 +1,1 @@
-map <F10> :!./dysk.rb<CR>
+map <F10> :!./xmppclient.rb<CR>

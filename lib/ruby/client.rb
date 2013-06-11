@@ -3,19 +3,35 @@ require 'net/https'
 require 'socket'
 require 'eventmachine'
 require 'em-websocket-client'
+require 'blather/client/client'
 require 'uri'
 require 'openssl'
 require 'digest/md5'
 require File.expand_path(File.dirname(__FILE__) + '/wrapper')
 require File.expand_path(File.dirname(__FILE__) + '/error')
-require File.expand_path(File.dirname(__FILE__) + '/httpgenerator')
-require File.expand_path(File.dirname(__FILE__) + '/httpparser')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/http/generator')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/http/parser')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/generator')
 require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/option')
 
-class StringIO
+class StringIO #{{{
   def continue_timeout; nil; end
-end  
+end #}}}
+
+class SignalWait #{{{
+  def initialize 
+    @q = Queue.new
+  end
+
+  def wait
+    @q.deq
+  end
+
+  def continue
+    @q.push nil
+  end
+end #}}}
 
 unless Module.constants.include?('CLIENT_INCLUDED')
   CLIENT_INCLUDED = true
@@ -25,9 +41,25 @@ unless Module.constants.include?('CLIENT_INCLUDED')
     class Client
       #{{{
       def initialize(base, riddl=nil, options={})
+
         @base = base.nil? ? '' : base.gsub(/\/+$/,'')
         @options = options
         @wrapper = nil
+        @thread = nil
+        sig = SignalWait.new
+        if URI.parse(@base).scheme == 'xmpp' &&  @options[:jid] && @options[:pass]
+          @thread = Thread.new do
+            EM.run do
+              client = Blather::Client.setup @options[:jid], @options[:pass]
+              client.register_handler(:ready) { sig.continue; }
+              client.connect
+              @options[:xmpp] = client
+              sig.continue
+            end  
+          end
+          sig.wait
+          sig.wait
+        end
         unless riddl.nil?
           @wrapper = (riddl.class == Riddl::Wrapper ? riddl : Riddl::Wrapper::new(riddl))
           if @wrapper.declaration? && !base.nil?
@@ -172,18 +204,6 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           headers
         end #}}}
         private :extract_headers
-        def extract_response_headers(headers) #{{{
-          ret = {}
-          headers.each do |k,v|
-            if v.nil?
-              ret[k.name.upcase.gsub(/\-/,'_')] = v
-            else  
-              ret[k.upcase.gsub(/\-/,'_')] = v
-            end  
-          end
-          ret
-        end #}}}
-        private :extract_response_headers
         
         def extract_qparams(parameters,method) #{{{
           qparams = []
@@ -193,7 +213,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                p.type = :query
             end
             if p.class == Riddl::Parameter::Simple && p.type == :query
-              qparams << HttpGenerator::escape(p.name) + (p.value.nil? ? '' : '=' + HttpGenerator::escape(p.value))
+              qparams << Protocols::HTTP::Generator::escape(p.name) + (p.value.nil? ? '' : '=' + Protocols::HTTP::Generator::escape(p.value))
               true
             else
               starting = false
@@ -225,20 +245,20 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
           res = response = nil
           if @wrapper.nil? || @wrapper.description? || (@wrapper.declaration? && !@base.nil?)
-            res, response = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate)
+            status, response, response_headers = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate)
             return response if simulate
-            if !@wrapper.nil? && res.code.to_i == 200
-              unless @wrapper.check_message(response,res,riddl_message.out)
+            if !@wrapper.nil? && status == 200
+              unless @wrapper.check_message(response,response_headers,riddl_message.out)
                 raise OutputError, "Not a valid output from service."
               end
             end
           elsif !@wrapper.nil? && @base.nil? && @wrapper.declaration?
             headers['RIDDL-DECLARATION-PATH'] = @rpath
             if !riddl_message.route?
-              res, response = make_request(riddl_message.interface.real_url(@rpath,@base),riddl_method,parameters,headers,qparams,simulate)
+              status, response, response_headers = make_request(riddl_message.interface.real_url(@rpath,@base),riddl_method,parameters,headers,qparams,simulate)
               return response if simulate
-              if res.code.to_i == 200
-                unless @wrapper.check_message(response,res,riddl_message.out)
+              if status == 200
+                unless @wrapper.check_message(response,response_headers,riddl_message.out)
                   raise OutputError, "Not a valid output from service."
                 end
               end  
@@ -247,9 +267,9 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               th = headers
               tq = qparams
               riddl_message.route.each do |m|
-                res, response = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate)
+                status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate)
                 return response if simulate
-                if res.code.to_i != 200 || !@wrapper.check_message(response,res,m.out)
+                if status != 200 || !@wrapper.check_message(response,response_headers,m.out)
                   raise OutputError, "Not a valid output from service."
                 end
                 unless m == riddl_message.route.last
@@ -262,77 +282,111 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           else
             raise OutputError, "Impossible Error :-)"
           end
-          resc = res.code.to_i
-          resh = extract_response_headers(res)
           unless role.nil?
             if Riddl::Roles::roles[role]
-              response = Riddl::Roles::roles[role]::after(@base + @rpath,riddl_method.downcase,resc,response,resh,options) if Riddl::Roles::roles[role].respond_to?(:after)
+              response = Riddl::Roles::roles[role]::after(@base + @rpath,riddl_method.downcase,status,response,response_headers,options) if Riddl::Roles::roles[role].respond_to?(:after)
             end  
           end  
-          return resc, response, resh
+          return status, response, response_headers
         end #}}}
         private :exec_request
+
         def make_request(url,riddl_method,parameters,headers,qparams,simulate) #{{{
           url = URI.parse(url)
           qs = qparams.join('&')
-          req = Riddl::Client::Request.new(riddl_method,url.path,parameters,headers,qs)
-          return req.simulate if simulate
+          if url.class == URI::HTTP || url.class == URI::HTTPS
+            req = Riddl::Client::HTTPRequest.new(riddl_method,url.path,parameters,headers,qs)
+            return req.simulate if simulate
 
-          res = response = nil
+            res = response = nil
 
-          http = Net::HTTP.new(url.host, url.port)
-          if url.class == URI::HTTPS
-            http.use_ssl = true
-            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-          end  
-          deb = nil
-          if @options[:debug]
-            http.set_debug_output STDOUT
-          end  
-          http.start do
-            http.request(req) do |resp|
-              res = resp
-              bs = Parameter::Tempfile.new("RiddlBody")
-              res.read_body(bs)
-              bs.rewind
-              response = Riddl::HttpParser.new(
-                "",
-                bs,
-                res['CONTENT-TYPE'],
-                res['CONTENT-LENGTH'],
-                res['CONTENT-DISPOSITION'],
-                res['CONTENT-ID'],
-                res['RIDDL-TYPE']
-              ).params
+            http = Net::HTTP.new(url.host, url.port)
+            if url.class == URI::HTTPS
+              http.use_ssl = true
+              http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+            end  
+            deb = nil
+            if @options[:debug]
+              http.set_debug_output STDOUT
+            end  
+            http.start do
+              http.request(req) do |resp|
+                res = resp
+                bs = Parameter::Tempfile.new("RiddlBody")
+                res.read_body(bs)
+                bs.rewind
+                response = Riddl::Protocols::HTTP::Parser.new(
+                  "",
+                  bs,
+                  res['CONTENT-TYPE'],
+                  res['CONTENT-LENGTH'],
+                  res['CONTENT-DISPOSITION'],
+                  res['CONTENT-ID'],
+                  res['RIDDL-TYPE']
+                ).params
+              end
             end
+            response_headers = {}
+            res.each do |k,v|
+              if v.nil?
+                response_headers[k.name.upcase.gsub(/\-/,'_')] = v
+              else  
+                response_headers[k.upcase.gsub(/\-/,'_')] = v
+              end  
+            end
+            return res.code.to_i, response, response_headers
+          elsif url.class == URI::Generic && url.scheme.downcase == 'xmpp'
+            req = Riddl::Client::XMPPRequest.new(riddl_method,url.user + "@" + url.host,url.path,parameters,headers,qs)
+            return req.simulate if simulate
+            @options[:xmpp].write req.stanza
+            return nil, StringIO.new, []
           end
-          return res, response
+          raise URIError, "not a valid URI (http, https, xmpp are accepted)"
         end #}}}
         private :make_request
-        
+
       end #}}}
 
-      class Request < Net::HTTPGenericRequest #{{{
+      class HTTPRequest < Net::HTTPGenericRequest #{{{
         def initialize(method, path, parameters, headers, qs)
           path = (path.strip == '' ? '/' : path)
           path += "?#{qs}" unless qs == ''
           super method, true, true, path, headers
-          tmp = HttpGenerator.new(parameters,self).generate(:input)
+          tmp = Protocols::HTTP::Generator.new(parameters,self).generate(:input)
           self.content_length = tmp.size
           self.body_stream = tmp
         end
 
         def supply_default_content_type
-          ### none, HttpGenerator handles this
+          ### none, Protocols::HTTP::Generator handles this
         end
 
         def simulate
           sock = StringIO.new('')
           self.exec(sock,"1.1",self.path)
           sock.rewind
-          [nil, sock]
+          [nil, sock, []]
+        end
+      end # }}}
+
+      class XMPPRequest #{{{
+        attr_reader :stanza
+
+        def initialize(method, to, path, parameters, headers, qs)
+          path = (path.strip == '' ? '/' : path)
+          path += "?#{qs}" unless qs == ''
+          @stanza = Protocols::XMPP::Generator.new(method,headers,parameters).generate
+          @stanza.to = to + path
+        end
+
+        def simulate
+          sock = StringIO.new('')
+          sock.write @stanza.to_s
+          sock.rewind
+          [nil, sock, []]
         end
       end #}}}
+
     end
 
   end

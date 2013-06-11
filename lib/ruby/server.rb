@@ -1,8 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/constants')
-require File.expand_path(File.dirname(__FILE__) + '/websocket')
 require File.expand_path(File.dirname(__FILE__) + '/implementation')
-require File.expand_path(File.dirname(__FILE__) + '/httpparser')
-require File.expand_path(File.dirname(__FILE__) + '/httpgenerator')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/http/parser')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/http/generator')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/websocket')
 require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/parameter')
 require File.expand_path(File.dirname(__FILE__) + '/error')
@@ -270,10 +270,10 @@ module Riddl
       Dir.chdir(@riddl_opts[:basepath]) if @riddl_opts[:basepath]
       @riddl_log = @riddl_logger
 
+      p raw
+
       @riddl_env = XML::Smart::Dom::Element.new(raw).parent
-      @riddl_env.register_namespace 'o', 'http://www.fp7-adventure.eu/ns/xmpp-rest/operation'
-      @riddl_env.register_namespace 'h', 'http://www.fp7-adventure.eu/ns/xmpp-rest/header'
-      @riddl_env.register_namespace 'p', 'http://www.fp7-adventure.eu/ns/xmpp-rest/part'
+      @riddl_env.register_namespace 'xr', 'http://www.fp7-adventure.eu/ns/xmpp-rest/'
       @riddl_res = {}
       @riddl_status = 404
 
@@ -285,17 +285,16 @@ module Riddl
       @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
 
       if @riddl_matching_path
-        @riddl_method = @riddl_env.find('string(/message/o:operation/@type)')
+        @riddl_method = @riddl_env.find('string(/message/xr:operation/@type)')
 
         @riddl_headers = {}
-        @riddl_env.find('/message/h:header').each do |e|
+        @riddl_env.find('/message/xr:header').each do |e|
           @riddl_headers[e.attributes['name']] = e.text
         end
         @riddl_parameters = []
-        @riddl_env.find('/message/p:part').each do |e|
+        @riddl_env.find('/message/xr:part').each do |e|
           @riddl_parameters
         end
-
 
         @riddl_path = '/'
 
@@ -322,7 +321,7 @@ module Riddl
         @riddl_env.each do |h,v|
           @riddl_headers[$1] = v if h =~ /^HTTP_(.*)$/
         end
-        @riddl_parameters = HttpParser.new(
+        @riddl_parameters = Protocols::HTTP::Parser.new(
           @riddl_query_string,
           @riddl_raw,
           @riddl_env['CONTENT_TYPE'],
@@ -337,8 +336,8 @@ module Riddl
         @riddl_info = { 
           :h => @riddl_headers,
           :p => @riddl_parameters,
-          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|HttpParser::unescape(e)}, 
-          :s => @riddl_matching_path[0].sub(/\//,'').split('/').map{|e|HttpParser::unescape(e)},
+          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::HTTP::Parser::unescape(e)}, 
+          :s => @riddl_matching_path[0].sub(/\//,'').split('/').map{|e|Protocols::HTTP::Parser::unescape(e)},
           :m => @riddl_method, 
           :env => @riddl_env.reject{|k,v| k =~ /^rack\./},
           :match => []
@@ -359,7 +358,7 @@ module Riddl
       end
       if @riddl_exe
         if @riddl_res.status == 200
-          @riddl_res.write HttpGenerator.new(@riddl_exe.response,@riddl_res).generate.read
+          @riddl_res.write Protocols::HTTP::Generator.new(@riddl_exe.response,@riddl_res).generate.read
         end  
         @riddl_exe.headers.each do |n,h|
           @riddl_res[n] = h

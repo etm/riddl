@@ -2,7 +2,7 @@
 require '../../lib/ruby/client'
 require 'pp'
 
-library = Riddl::Client.new("http://sumatra.wst.univie.ac.at/services/delay.php")
+library = Riddl::Client.new("Http://sumatra.wst.univie.ac.at/services/delay.php")
 status, res = library.post [
   Riddl::Parameter::Simple.new("delay","10"),
 ]
