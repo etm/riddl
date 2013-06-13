@@ -2,6 +2,8 @@ require File.expand_path(File.dirname(__FILE__) + '/constants')
 require File.expand_path(File.dirname(__FILE__) + '/implementation')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/parser')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/generator')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/parser')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/generator')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/websocket')
 require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/parameter')
@@ -14,7 +16,7 @@ require 'stringio'
 require 'rack/content_length'
 require 'rack/chunked'
 require 'securerandom'
-require 'blather/client/dsl'
+require 'blather/client/client'
 
 module Riddl
 
@@ -36,8 +38,6 @@ module Riddl
         @headers = Hash[ @headers.map{ |h| [h.name, h.value] } ]  
       end
     end #}}}
-
-    class XMPP; include Blather::DSL; end
 
     OPTS = { 
       :host     => 'localhost',
@@ -161,18 +161,34 @@ module Riddl
 
       EM.run do
         puts "Server (#{@riddl_opts[:url]}) started as #{Process.pid}"
-        puts "XMPP support (#{@riddl_xmpp_user}) active" if @riddl_xmpp_user && @riddl_xmpp_pass
+        puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass
         server.start
-        if @riddl_xmpp_user && @riddl_xmpp_pass
-          xmpp = XMPP.new
-          xmpp.setup @riddl_xmpp_user, @riddl_xmpp_pass
-          xmpp.message do |m|
-            __xmpp_call(m)
+        if @riddl_xmpp_jid && @riddl_xmpp_pass
+          xmpp = Blather::Client.setup @riddl_xmpp_jid, @riddl_xmpp_pass
+          xmpp.register_handler(:message, :type => :normal) do |m|
+            began_at = Time.now
+            instance = dup
+            instance.__xmpp_call(xmpp,m)
+            now = Time.now
+            instance.riddl_log.write Rack::CommonLogger::FORMAT % [
+              @riddl_xmpp_jid || "-",
+              m.from || "-",
+              now.strftime("%d/%b/%Y %H:%M:%S"),
+              instance.riddl_method.upcase,
+              instance.riddl_pinfo,
+              '',
+              'XMPP',
+              instance.riddl_status,
+              '?',
+              now - began_at ]
+
           end
-          xmpp.run
+          xmpp.connect
         end  
       end
     end #}}}
+
+    attr_reader :riddl_log, :riddl_method, :riddl_pinfo, :riddl_status
 
     def initialize(riddl,opts={},&blk)# {{{
       @riddl_opts = {}
@@ -266,39 +282,58 @@ module Riddl
       end  
     end #}}}
 
-    def __xmpp_call(raw) #{{{
+    def __xmpp_call(env,raw) #{{{
       Dir.chdir(@riddl_opts[:basepath]) if @riddl_opts[:basepath]
-      @riddl_log = @riddl_logger
-
-      p raw
+      @riddl_log = @riddl_logger || STDOUT
 
       @riddl_env = XML::Smart::Dom::Element.new(raw).parent
-      @riddl_env.register_namespace 'xr', 'http://www.fp7-adventure.eu/ns/xmpp-rest/'
-      @riddl_res = {}
+      @riddl_env.register_namespace 'xr', Riddl::Protocols::XMPP::XR_NS
+      @riddl_res = env
       @riddl_status = 404
 
       @riddl_pinfo = ('/' + @riddl_env.root.attributes['to'].sub(/^[^\/]+/,'')).gsub(/\/+/,'/')
       @riddl_pinfo.gsub!(/\?(.*)/).each do
-        @riddl_query_string = $1
-        ''
+        @riddl_query_string = $1; ''
       end
       @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
 
       if @riddl_matching_path
-        @riddl_method = @riddl_env.find('string(/message/xr:operation/@type)')
+        @riddl_method = @riddl_env.find('string(/message/xr:operation)').downcase
 
         @riddl_headers = {}
         @riddl_env.find('/message/xr:header').each do |e|
           @riddl_headers[e.attributes['name']] = e.text
         end
-        @riddl_parameters = []
-        @riddl_env.find('/message/xr:part').each do |e|
-          @riddl_parameters
-        end
+        @riddl_parameters = Protocols::XMPP::Parser.new(
+          @riddl_query_string,
+          @riddl_env
+        ).params
 
         @riddl_path = '/'
+        @riddl_info = { 
+          :h => @riddl_headers,
+          :p => @riddl_parameters,
+          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::HTTP::Parser::unescape(e)}, 
+          :s => @riddl_matching_path[0].sub(/\//,'').split('/').map{|e|Protocols::HTTP::Parser::unescape(e)},
+          :m => @riddl_method, 
+          :env =>  Hash[@riddl_env.root.attributes.map{|a| [a.qname.name, a.value] }].merge({ 'riddl.transport' => 'xmpp' }),
+          :match => []
+        }
 
+        __call
+      else
+        @riddl_log.write "404: this resource for sure does not exist.\n"
+        @riddl_status = 404 # client requests wrong path
+      end
+      stanza = if @riddl_exe && @riddl_status == 200
+        Protocols::XMPP::Generator.new(@riddl_status,@riddl_exe.response,@riddl_exe.headers).generate
+      else
+        Protocols::XMPP::Error.new(@riddl_status).generate
       end  
+      stanza.from = raw.to
+      stanza.to = raw.from
+      stanza.id = raw.id
+      @riddl_res.write stanza
     end #}}}
 
     def __http_call(env) #{{{
@@ -339,7 +374,7 @@ module Riddl
           :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::HTTP::Parser::unescape(e)}, 
           :s => @riddl_matching_path[0].sub(/\//,'').split('/').map{|e|Protocols::HTTP::Parser::unescape(e)},
           :m => @riddl_method, 
-          :env => @riddl_env.reject{|k,v| k =~ /^rack\./},
+          :env => @riddl_env.reject{|k,v| k =~ /^rack\./}.merge({'riddl.transport' => 'xmpp'}),
           :match => []
         }
 
@@ -350,28 +385,28 @@ module Riddl
           return [-1, {}, []]
         else
           __call
-          @riddl_res.status = @riddl_status
         end  
       else
         @riddl_log.write "404: this resource for sure does not exist.\n"
-        @riddl_res.status = 404 # client requests wrong path
+        @riddl_status = 404 # client requests wrong path
       end
       if @riddl_exe
-        if @riddl_res.status == 200
+        if @riddl_status == 200
           @riddl_res.write Protocols::HTTP::Generator.new(@riddl_exe.response,@riddl_res).generate.read
         end  
         @riddl_exe.headers.each do |n,h|
           @riddl_res[n] = h
         end
       end
+      @riddl_res.status = @riddl_status
       @riddl_res.finish
     end #}}} 
     
     def process_out(pout)# {{{
       @riddl_process_out = pout
     end# }}}
-    def xmpp(user,pass)# {{{
-      @riddl_xmpp_user = user
+    def xmpp(jid,pass)# {{{
+      @riddl_xmpp_jid = jid
       @riddl_xmpp_pass = pass
     end# }}}
     def cross_site_xhr(csxhr)# {{{

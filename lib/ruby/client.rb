@@ -12,6 +12,7 @@ require File.expand_path(File.dirname(__FILE__) + '/error')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/generator')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/parser')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/generator')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/parser')
 require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/option')
 
@@ -41,7 +42,6 @@ unless Module.constants.include?('CLIENT_INCLUDED')
     class Client
       #{{{
       def initialize(base, riddl=nil, options={})
-
         @base = base.nil? ? '' : base.gsub(/\/+$/,'')
         @options = options
         @wrapper = nil
@@ -295,6 +295,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           url = URI.parse(url)
           qs = qparams.join('&')
           if url.class == URI::HTTP || url.class == URI::HTTPS
+            #{{{ 
             req = Riddl::Client::HTTPRequest.new(riddl_method,url.path,parameters,headers,qs)
             return req.simulate if simulate
 
@@ -307,7 +308,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end  
             deb = nil
             if @options[:debug]
-              http.set_debug_output STDOUT
+              http.set_debug_output @riddl_log
             end  
             http.start do
               http.request(req) do |resp|
@@ -335,11 +336,35 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               end  
             end
             return res.code.to_i, response, response_headers
+            #}}} 
           elsif url.class == URI::Generic && url.scheme.downcase == 'xmpp'
             req = Riddl::Client::XMPPRequest.new(riddl_method,url.user + "@" + url.host,url.path,parameters,headers,qs)
             return req.simulate if simulate
-            @options[:xmpp].write req.stanza
-            return nil, StringIO.new, []
+
+            sig = SignalWait.new
+            stanza = req.stanza
+            status = 404
+            response = []
+            response_headers = {}
+            @options[:xmpp].write_with_handler(stanza) do |raw|
+              res = XML::Smart::Dom::Element.new(raw).parent
+              res.register_namespace 'xr', Riddl::Protocols::XMPP::XR_NS
+              if res.find('/message/error').empty?
+                status = 200
+                response_headers = {}
+                res.find('/message/xr:header').each do |e|
+                  response_headers[e.attributes['name']] = e.text
+                end
+                response = Protocols::XMPP::Parser.new('', res).params
+              else
+                res.register_namespace 'se', Blather::StanzaError::STANZA_ERR_NS
+                err = res.find('string(/message/error/se:text)')
+                status = (err.match(/\d+/)[0] || 209).to_i
+              end  
+              sig.continue
+            end
+            sig.wait
+            return status, response, response_headers
           end
           raise URIError, "not a valid URI (http, https, xmpp are accepted)"
         end #}}}
@@ -375,7 +400,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         def initialize(method, to, path, parameters, headers, qs)
           path = (path.strip == '' ? '/' : path)
           path += "?#{qs}" unless qs == ''
-          @stanza = Protocols::XMPP::Generator.new(method,headers,parameters).generate
+          @stanza = Protocols::XMPP::Generator.new(method,parameters,headers).generate
           @stanza.to = to + path
         end
 

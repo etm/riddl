@@ -2,6 +2,16 @@ require 'tempfile'
 
 module Riddl
   module Parameter
+    class Array < ::Array
+      def value(index)
+        tmp = find_all{|e| e.name == index}
+        case tmp.length
+          when 0; nil
+          when 1; tmp[0].value
+          else tmp
+        end if tmp
+      end
+    end
     class Simple
       attr_accessor :name, :value, :type
       def initialize(name,value,type=:body)

@@ -1,25 +1,68 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../constants')
+require 'blather/client/client'
 
 module Riddl
   module Protocols
     module XMPP
-      class Generator
-        XR_NS = 'http://www.fp7-adventure.eu/ns/xmpp-rest/'.freeze
-        
-        class Stanza < Blather::Stanza
-          def self.new
-            node = super :message
-            node.type = :normal
-            node.id = SecureRandom.uuid
-            node
-          end  
+      XR_NS = 'http://www.fp7-adventure.eu/ns/xmpp-rest'.freeze
+
+      class Stanza < Blather::Stanza
+        def self.new
+          node = super :message
+          node.type = :normal
+          node.id = SecureRandom.uuid
+          node
+        end
+      end
+
+      class Error
+        MAPPING = {
+          302 => ['redirect'                , 'modify' , '302 Redirect'              ],
+          400 => ['bad-request'             , 'modify' , '400 Bad Request'           ],
+          401 => ['not-authorized'          , 'auth'   , '401 Not Authorized '       ],
+          402 => ['payment-required'        , 'auth'   , '402 Payment Required'      ],
+          403 => ['forbidden'               , 'auth'   , '403 Forbidden'             ],
+          404 => ['item-not-found'          , 'cancel' , '404 Not Found'             ],
+          405 => ['not-allowed'             , 'cancel' , '405 Not Allowed'           ],
+          406 => ['not-acceptable'          , 'modify' , '406 Not Acceptable'        ],
+          407 => ['registration-required'   , 'auth'   , '407 Registration Required' ],
+          408 => ['remote-server-timeout'   , 'wait'   , '408 Request Timeout'       ],
+          409 => ['conflict'                , 'cancel' , '409 Conflict'              ],
+          500 => ['internal-server-error'   , 'wait'   , '500 Internal Server Error' ],
+          501 => ['feature-not-implemented' , 'cancel' , '501 Not Implemented'       ],
+          502 => ['service-unavailable'     , 'wait'   , '502 Remote Server Error'   ],
+          503 => ['service-unavailable'     , 'cancel' , '503 Service Unavailable'   ],
+          504 => ['remote-server-timeout'   , 'wait'   , '504 Remote Server Timeout' ],
+          510 => ['service-unavailable'     , 'cancel' , '510 Disconnected'          ]
+        }.freeze
+        UNDEFINED = [
+          'undefined-condition', 'modify'
+        ].freeze
+
+        def initialize(err)
+          m = Stanza.new
+          @stanza = if MAPPING[err]
+            Blather::StanzaError.new(m,*MAPPING[err]).to_node
+          else
+            Blather::StanzaError.new(m,*UNDEFINED,'#{err} see http://www.iana.org/assignments/http-status-codes/http-status-codes.xml').to_node
+          end
         end
 
-        def initialize(method,headers,params)
+        def generate
+          @stanza
+        end
+      end
+
+      class Generator
+        def initialize(what,params,headers)
           @params = params
           @stanza = Stanza.new
           @node = XML::Smart::Dom::Element.new(@stanza)
-          @node.add('operation',method).namespaces.add(nil,XR_NS)
+          if what.is_a?(Fixnum)
+            @node.add('ok').namespaces.add(nil,XR_NS)
+          else
+            @node.add('operation',what).namespaces.add(nil,XR_NS)
+          end
           headers.each do |k,v|
             @node.add('header',v,:name => k).namespaces.add(nil,XR_NS)
           end
@@ -102,7 +145,6 @@ module Riddl
             n.text = res.join('&')
           else
             if scount + ccount > 0
-              @node.add('header',scount+ccount,:name => 'RIDDL-MULTIPART').namespaces.add(nil,XR_NS)
               @params.each do |r|
                 case r
                   when Riddl::Parameter::Simple
