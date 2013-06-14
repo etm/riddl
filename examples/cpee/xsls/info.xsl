@@ -4,8 +4,20 @@
     <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
       <head>
          <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+         <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+         <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
          <title>Further Explore this Instance</title>
-      </head>
+          <script>
+          $(function() {
+            $( document ).tooltip({
+              position: {
+                my: "center+200 bottom-20",
+                at: "center+200 top-200",
+              }
+            });
+          });
+          </script>
+     </head>
       <body>
       <nav>
         <a href="/.">Main</a>
@@ -21,6 +33,7 @@
             <li>
               <xsl:element name="a">
                 <xsl:attribute name="href">/<xsl:value-of select="../@instance"/>/<xsl:value-of select="name()"/>/</xsl:attribute>
+                <xsl:attribute name="title">Luke Skywalker</xsl:attribute>
                 <xsl:value-of select="name()"/>
               </xsl:element>
             </li>  

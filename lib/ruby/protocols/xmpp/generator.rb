@@ -1,5 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../constants')
 require 'blather/client/client'
+require 'securerandom'
 
 module Riddl
   module Protocols
