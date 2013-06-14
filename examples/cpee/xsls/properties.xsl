@@ -8,6 +8,22 @@
          <title>Further Explore the Notifications</title>
       </head>
       <body>
+        <div id="brot">
+          <nav>                                                                   
+            <a href="/.">Main</a>
+            &gt;
+            <xsl:element name="a">
+              <xsl:attribute name="href">../<xsl:value-of select="@instance"/>/</xsl:attribute>
+              Instanz
+            </xsl:element>
+            &gt;
+            <xsl:element name="a">
+              <xsl:attribute name="href">.</xsl:attribute>
+              Properties
+            </xsl:element>                                                        
+          </nav>
+        </div>
+
         <h1>Navigation </h1>
         <ul>
           <li><a href='schema'>Schema</a></li>  

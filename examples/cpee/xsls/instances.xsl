@@ -44,10 +44,11 @@
 		</script>
       </head>
       <body>
-        <h1>List of Instances</h1>
-        <nav>
-          <a href="/.">Main</a>
-        </nav>
+        <div id="brot">
+          <nav>
+            <a href="/.">Main</a>
+          </nav>
+        </div>
 	<table id="solo">
 		<thead>
 			<tr>

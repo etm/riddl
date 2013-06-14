@@ -7,35 +7,38 @@
          <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
          <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
          <title>Further Explore this Instance</title>
-          <script>
-          $(function() {
-            $( document ).tooltip({
-              position: {
-                my: "center+200 bottom-20",
-                at: "center+200 top-200",
-              }
-            });
-          });
-          </script>
      </head>
       <body>
-      <nav>
-        <a href="/.">Main</a>
-        &gt;
-        <xsl:element name="a">
-          <xsl:attribute name="href">../<xsl:value-of select="@instance"/>/</xsl:attribute>
-          Instanz
-       </xsl:element>                                                                    
-      </nav>
-        <h1>Instance <xsl:value-of select="@instance"/></h1>
+      <div id="brot">
+        <nav>
+          <a href="/.">Main</a>
+          &gt;
+          <xsl:element name="a">
+            <xsl:attribute name="href">../<xsl:value-of select="@instance"/>/</xsl:attribute>
+            Instanz
+          </xsl:element>                                                                    
+        </nav>
+      </div>
+        <h1>Uebersicht</h1>
         <ul>
           <xsl:for-each select="*">
             <li>
               <xsl:element name="a">
                 <xsl:attribute name="href">/<xsl:value-of select="../@instance"/>/<xsl:value-of select="name()"/>/</xsl:attribute>
-                <xsl:attribute name="title">Luke Skywalker</xsl:attribute>
                 <xsl:value-of select="name()"/>
               </xsl:element>
+              <xsl:variable name="first" select="name()"/>
+              <div id="descr">
+                <xsl:if test="contains($first, 'properties')">
+                  Eigenschaft. 
+                </xsl:if>
+                <xsl:if test="contains($first, 'noti')">
+                  Subscriptions von Entitaeten um Aenderungen zu erfahren
+                </xsl:if>
+                <xsl:if test="contains($first, 'callb')">
+                  URIs fuer Async-Methoden (z.B. Post,Puts,Delete) welche aufgeruft werden wenn fertig welche aufgeruft werden wenn fertig. 
+                </xsl:if>
+              </div>
             </li>  
           </xsl:for-each>
         </ul>
