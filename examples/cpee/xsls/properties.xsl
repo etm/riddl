@@ -11,7 +11,7 @@
         <h1>Navigation </h1>
         <ul>
           <li><a href='schema'>Schema</a></li>  
-          <li><a href='schema'>Values</a></li>  
+          <li><a href='values'>Values</a></li>  
         </ul>
         <h1>RAW</h1>
         <pre>

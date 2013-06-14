@@ -15,8 +15,7 @@
           type: 'get',
           dataType: 'html',
           success: function(data) {
-        //    target.text(data);
-          otable.fnUpdate(data, counter, 2 ); // Single cell
+            otable.fnUpdate(data, counter, 2 );
           } 
       });
     }
