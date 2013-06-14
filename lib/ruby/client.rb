@@ -126,7 +126,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
             if @options[:debug]
               conn.errback do |e|
-                STDERR.puts "WS ERROR: #{e}"
+                @options[:debug].puts "WS ERROR: #{e}"
               end
             end
 
@@ -308,7 +308,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end  
             deb = nil
             if @options[:debug]
-              http.set_debug_output @riddl_log
+              http.set_debug_output @options[:debug]
             end  
             http.start do
               http.request(req) do |resp|
@@ -343,11 +343,15 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
             sig = SignalWait.new
             stanza = req.stanza
+
+            @options[:debug].puts(stanza) if @options[:debug]
+
             status = 404
             response = []
             response_headers = {}
             @options[:xmpp].write_with_handler(stanza) do |raw|
               res = XML::Smart::Dom::Element.new(raw).parent
+              @options[:debug].puts(res.to_s) if @options[:debug]
               res.register_namespace 'xr', Riddl::Protocols::XMPP::XR_NS
               if res.find('/message/error').empty?
                 status = 200

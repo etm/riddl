@@ -1,7 +1,8 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.99.100"
+  s.version          = "0.99.101"
   s.platform         = Gem::Platform::RUBY
+  s.license               = "LGPL-2"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
 
   s.description      = "rest service interface definition, mixing, and evolution"
@@ -29,5 +30,4 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'mime-types'
   s.add_runtime_dependency 'minitest', '=4.7.4'
   s.add_runtime_dependency 'blather'
-  s.add_runtime_dependency 'securerandom'
 end
