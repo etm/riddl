@@ -18,6 +18,29 @@
             </script>
           </head>
           <body>
+            <div id="brot">
+              <nav>
+                <xsl:element name="a">
+                  <xsl:attribute name="href">../../../</xsl:attribute>
+                  Main
+                </xsl:element>
+                &gt;
+               <xsl:element name="a">
+                <xsl:attribute name="href">../../</xsl:attribute>
+                  Instanz
+                </xsl:element>
+                &gt;
+                <xsl:element name="a">
+                  <xsl:attribute name="href">../</xsl:attribute>
+                  Notifications
+                </xsl:element>
+                &gt;
+                <xsl:element name="a">
+                  <xsl:attribute name="href">.</xsl:attribute>
+                  Subscriptions                                                                                                                                                      
+                </xsl:element>                                                        
+              </nav>
+            </div>
            <h1>List of Subscriptions</h1>
            <ul>
             <xsl:for-each select="*">

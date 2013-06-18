@@ -8,6 +8,25 @@
          <title>List of Callbacks</title>
       </head>
       <body>
+        <div id="brot">
+          <nav> 
+            <xsl:element name="a">
+              <xsl:attribute name="href">../../</xsl:attribute>
+              Main
+            </xsl:element>
+            &gt;
+            <xsl:element name="a">
+              <xsl:attribute name="href">../</xsl:attribute>
+              Instanz
+            </xsl:element>
+            &gt;
+            <xsl:element name="a">
+              <xsl:attribute name="href">.</xsl:attribute>
+              Callbacks
+            </xsl:element>                                                        
+          </nav>
+        </div>
+ 
         <h1>List of Callbacks</h1>
         <ul>
           <xsl:for-each select="callback">

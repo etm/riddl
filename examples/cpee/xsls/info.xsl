@@ -11,10 +11,13 @@
       <body>
       <div id="brot">
         <nav>
-          <a href="/.">Main</a>
+          <xsl:element name="a">
+            <xsl:attribute name="href">../</xsl:attribute>
+            Main
+          </xsl:element>
           &gt;
           <xsl:element name="a">
-            <xsl:attribute name="href">../<xsl:value-of select="@instance"/>/</xsl:attribute>
+            <xsl:attribute name="href">./</xsl:attribute>
             Instanz
           </xsl:element>                                                                    
         </nav>
@@ -36,7 +39,7 @@
                   Subscriptions von Entitaeten um Aenderungen zu erfahren
                 </xsl:if>
                 <xsl:if test="contains($first, 'callb')">
-                  URIs fuer Async-Methoden (z.B. Post,Puts,Delete) welche aufgeruft werden wenn fertig welche aufgeruft werden wenn fertig. 
+                  URIs fuer Async-Methoden (z.B. Post,Puts,Delete) welche aufgeruft werden wenn fertig welche von den Methoden aufgerufen wird, wenn diese abgeschlossen sind.
                 </xsl:if>
               </div>
             </li>  

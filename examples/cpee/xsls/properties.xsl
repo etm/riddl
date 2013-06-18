@@ -10,10 +10,13 @@
       <body>
         <div id="brot">
           <nav>                                                                   
-            <a href="/.">Main</a>
+            <xsl:element name="a">
+              <xsl:attribute name="href">../../</xsl:attribute>
+              Main
+            </xsl:element>
             &gt;
             <xsl:element name="a">
-              <xsl:attribute name="href">../<xsl:value-of select="@instance"/>/</xsl:attribute>
+              <xsl:attribute name="href">../</xsl:attribute>
               Instanz
             </xsl:element>
             &gt;
