@@ -57,21 +57,46 @@ module Riddl
         attr_reader :schema, :properties, :rng, :id
 
         def initialize(schema,target,id=nil)
-          @id = id 
-          raise "schema file not found" unless File.exists?(schema)
-          @schema = XML::Smart.open_unprotected(schema.gsub(/^\/+/,'/'))
-          @schema.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-          if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
-            raise "properties schema transformation file not found"
-          end  
-          @rng = @schema.transform_with(XML::Smart.open_unprotected(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))
+          @id = id
+          @schemas = {}
+          @rngs = {}
+
+          if schema.is_a? Hash
+            schema.each { |k,v| add_schema k, v }
+          elsif schema.is_a? String  
+            add_schema 'default', schema
+          end
+          raise "no schemas provided" if @schemas.length == 0
+          @schema = @schemas.first[1]
+          @rng = @rngs.first[1]
 
           raise "properties file not found" unless File.exists?(target)
           @target = target.gsub(/^\/+/,'/')
           @properties = XML::Smart.open_unprotected(target)
           @properties.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
           @mutex = Mutex.new
-        end  
+        end
+
+        def activate_schema(name)
+          if @schemas[name]
+            @schema = @schemas[name][1]
+            @rng = @schemas[name][1]
+            true
+          else
+            false
+          end
+        end
+
+        def add_schema(id,name)
+          raise "schema file not found" unless File.exists?(name)
+          @schemas[id] = XML::Smart.open_unprotected(name.gsub(/^\/+/,'/'))
+          @schemas[id].register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
+          if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
+            raise "properties schema transformation file not found"
+          end  
+          @rngs[id] = @schemas[id].transform_with(XML::Smart.open_unprotected(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))
+        end
+        private :add_schema
 
         def modifiable?(property)
           @schema.find("boolean(/p:properties/p:#{property}[@modifiable='true'])") || schema.find("boolean(/p:properties/p:optional/p:#{property}[@modifiable='true'])")
