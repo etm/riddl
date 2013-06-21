@@ -45,7 +45,7 @@ module Riddl
         end #}}}
 
       class Backend #{{{
-        attr_reader :topics, :id, :target
+        attr_reader :topics
 
         class Sub #{{{
           def initialize(name)
@@ -113,9 +113,10 @@ module Riddl
           private :keys
         end #}}}
 
-        def initialize(topics,target,id=nil)
-          @id = id 
+        def initialize(topics,target)
           @target = target.gsub(/^\/+/,'/')
+
+          FileUtils::mkdir_p(@target) unless File.exists?(@target)
 
           raise "topics file not found" unless File.exists?(topics)
           @topics = XML::Smart.open_unprotected(topics.gsub(/^\/+/,'/'))

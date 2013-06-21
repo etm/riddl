@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
   s.name             = "riddl"
   s.version          = "0.99.102"
   s.platform         = Gem::Platform::RUBY
-  s.license               = "LGPL-2"
+  s.license          = "LGPL-2"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
 
   s.description      = "rest service interface definition, mixing, and evolution"
