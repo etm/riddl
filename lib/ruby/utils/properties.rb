@@ -7,7 +7,7 @@ module Riddl
       PROPERTIES_SCHEMA_XSL_RNG = "#{File.dirname(__FILE__)}/../ns/common-patterns/properties/#{VERSION_MAJOR}.#{VERSION_MINOR}/properties.schema.xsl"
 
       def self::implementation(backend,handler=nil,details=:production)
-        unless handler.nil? || (handler.class == Class && handler.superclass == Riddl::Utils::Properties::HandlerBase)
+        unless handler.nil? || (handler.is_a? Riddl::Utils::Properties::HandlerBase)
           raise "handler not a subclass of HandlerBase"
         end
         Proc.new do
@@ -43,10 +43,14 @@ module Riddl
 
       # Overloadable and Backends
       class HandlerBase #{{{
-        def initialize(backend,property)
-          @backend = backend
-          @property = property
+        def initialize(data)
+          @data = data
+          @property = nil
         end
+        def property(p)
+          @property = p
+          self
+        end  
         def create; end
         def read;   end
         def update; end
@@ -138,7 +142,7 @@ module Riddl
         def response
           backend = @a[0]
           handler = @a[1]
-          handler.new(backend,nil).read unless handler.nil?
+          handler.read unless handler.nil?
           return Riddl::Parameter::Complex.new("document","text/xml",backend.data.to_s)
         end
       end #}}}
@@ -147,7 +151,7 @@ module Riddl
         def response
           backend = @a[0]
           handler = @a[1]
-          handler.new(backend,nil).read unless handler.nil?
+          handler.read unless handler.nil?
 
           ret = XML::Smart.string("<properties xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
           backend.schema.find("/p:properties/*[name()!='optional']|/p:properties/p:optional/*").each do |r|
@@ -161,7 +165,7 @@ module Riddl
         def response
           backend = @a[0]
           handler = @a[1]
-          handler.new(backend,nil).read unless handler.nil?
+          handler.read unless handler.nil?
           query = (@p[0].value.to_s.strip.empty? ? '*' : @p[0].value)
 
           begin
@@ -203,7 +207,7 @@ module Riddl
           backend = @a[0]
           handler = @a[1]
 
-          handler.new(backend,@r[1]).read unless handler.nil?
+          handler.property(@r[1]).read unless handler.nil?
 
           if ret = extract_values(backend,@r[1],Riddl::Protocols::HTTP::Parser::unescape(@r[2..-1].join('/')))
             ret
@@ -293,7 +297,7 @@ module Riddl
             return # bad request
           end
           
-          handler.create(backend,property).update unless handler.nil?
+          handler.property(property).create unless handler.nil?
           return
         end
       end #}}}
@@ -344,7 +348,7 @@ module Riddl
               return # bad request
             end
             
-            handler.new(backend,property).update unless handler.nil?
+            handler.property(property).create unless handler.nil?
           end
           return
         end
@@ -379,7 +383,7 @@ module Riddl
             return # bad request
           end
 
-          handler.new(backend,property).create unless handler.nil?
+          handler.property(property).create unless handler.nil?
         end
       end #}}}
 
@@ -411,7 +415,7 @@ module Riddl
             return # bad request
           end
 
-          handler.new(backend,property).delete unless handler.nil?
+          handler.property(property).delete unless handler.nil?
           return
         end
       end #}}} 
@@ -461,7 +465,7 @@ module Riddl
             return # bad request
           end
           
-          handler.new(backend,property).update unless handler.nil?
+          handler.property(property).update unless handler.nil?
           return
         end
       end #}}}

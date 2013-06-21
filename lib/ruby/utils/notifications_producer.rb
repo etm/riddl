@@ -5,7 +5,7 @@ module Riddl
       module Producer
       
         def self::implementation(backend,handler=nil,details=:production) 
-          unless handler.nil? || (handler.class == Class && handler.superclass == Riddl::Utils::Notifications::Producer::HandlerBase)
+          unless handler.nil? || (handler.is_a? Riddl::Utils::Notifications::Producer::HandlerBase)
             raise "handler not a subclass of HandlerBase"
           end
           Proc.new do
@@ -31,103 +31,111 @@ module Riddl
         end  
       
         class HandlerBase #{{{
-          def initialize(backend,key,topics)
-            @backend = backend
+          def initialize(data)
+            @data = data
+            @key = nil
+            @topics = []
+          end
+          def key(k)
             @key = key
-            @topics = topics
+            self
+          end
+          def topics(t)
+            @topics = t
+            self
           end
           def ws_open(socket); end
           def ws_close; end
-          def ws_message(socket,backend); end
+          def ws_message(socket,data); end
           def create; end
           def delete; end
           def update; end
         end #}}}
 
-      class Backend #{{{
-        attr_reader :topics
+        class Backend #{{{
+          attr_reader :topics
 
-        class Sub #{{{
-          def initialize(name)
-            @name = name
-          end  
-          def modify(&block)
-            XML::Smart.modify(@name,"<subscription xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>") do |doc|
-              block.call doc
-            end
-          end
-          def delete
-            FileUtils::rm_rf(File.dirname(@name))
-          end
-          def to_s
-            File.read(@name)
-          end
-          def view
-            XML::Smart.open_unprotected(@name)
-          end
-        end #}}}
-
-        class Subs #{{{
-          def initialize(target)
-            @target = target
-          end
-
-          def each(&block)
-            keys.each do |key|
-              doc = XML::Smart.open_unprotected(@target + '/' + key + '/subscription.xml')
-              block.call doc, key
+          class Sub #{{{
+            def initialize(name)
+              @name = name
             end  
-          end
-
-          def [](key)
-            f = @target + '/' + key + '/subscription.xml'
-            File.exists?(f) ? Sub.new(f) : nil
-          end
-
-          def create(&block)
-            key = nil
-            begin
-              continue = true
-              key      = Digest::MD5.hexdigest(Kernel::rand().to_s)
-              Dir.mkdir(@target + '/' + key) rescue continue = false
-            end until continue
-            producer_secret = Digest::MD5.hexdigest(Kernel::rand().to_s)
-            consumer_secret = Digest::MD5.hexdigest(Kernel::rand().to_s)
-            File.open(@target + '/' + key + '/producer-secret','w') { |f| f.write producer_secret }
-            File.open(@target + '/' + key + '/consumer-secret','w') { |f| f.write consumer_secret }
-            XML::Smart::modify(@target + '/' + key + '/subscription.xml',"<subscription xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>") do |doc|
-              block.call doc, key
+            def modify(&block)
+              XML::Smart.modify(@name,"<subscription xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>") do |doc|
+                block.call doc
+              end
             end
-            [key, producer_secret, consumer_secret]
+            def delete
+              FileUtils::rm_rf(File.dirname(@name))
+            end
+            def to_s
+              File.read(@name)
+            end
+            def view
+              XML::Smart.open_unprotected(@name)
+            end
+          end #}}}
+
+          class Subs #{{{
+            def initialize(target)
+              @target = target
+            end
+
+            def each(&block)
+              keys.each do |key|
+                doc = XML::Smart.open_unprotected(@target + '/' + key + '/subscription.xml')
+                block.call doc, key
+              end  
+            end
+
+            def [](key)
+              f = @target + '/' + key + '/subscription.xml'
+              File.exists?(f) ? Sub.new(f) : nil
+            end
+
+            def create(&block)
+              key = nil
+              begin
+                continue = true
+                key      = Digest::MD5.hexdigest(Kernel::rand().to_s)
+                Dir.mkdir(@target + '/' + key) rescue continue = false
+              end until continue
+              producer_secret = Digest::MD5.hexdigest(Kernel::rand().to_s)
+              consumer_secret = Digest::MD5.hexdigest(Kernel::rand().to_s)
+              File.open(@target + '/' + key + '/producer-secret','w') { |f| f.write producer_secret }
+              File.open(@target + '/' + key + '/consumer-secret','w') { |f| f.write consumer_secret }
+              XML::Smart::modify(@target + '/' + key + '/subscription.xml',"<subscription xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>") do |doc|
+                block.call doc, key
+              end
+              [key, producer_secret, consumer_secret]
+            end
+
+            def keys
+              if File.directory?(@target)
+                Dir[@target + '/*'].map do |d|
+                  File.directory?(d) ? File.basename(d) : nil
+                end.compact
+              else
+                []
+              end
+            end
+            private :keys
+          end #}}}
+
+          def initialize(topics,target)
+            @target = target.gsub(/^\/+/,'/')
+
+            FileUtils::mkdir_p(@target) unless File.exists?(@target)
+
+            raise "topics file not found" unless File.exists?(topics)
+            @topics = XML::Smart.open_unprotected(topics.gsub(/^\/+/,'/'))
+            @topics.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
+          end  
+
+          def subscriptions
+            Subs.new(@target)
           end
 
-          def keys
-            if File.directory?(@target)
-              Dir[@target + '/*'].map do |d|
-                File.directory?(d) ? File.basename(d) : nil
-              end.compact
-            else
-              []
-            end
-          end
-          private :keys
         end #}}}
-
-        def initialize(topics,target)
-          @target = target.gsub(/^\/+/,'/')
-
-          FileUtils::mkdir_p(@target) unless File.exists?(@target)
-
-          raise "topics file not found" unless File.exists?(topics)
-          @topics = XML::Smart.open_unprotected(topics.gsub(/^\/+/,'/'))
-          @topics.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
-        end  
-
-        def subscriptions
-          Subs.new(@target)
-        end
-
-      end #}}}
 
         class Overview < Riddl::Implementation #{{{ 
           def response
@@ -208,7 +216,7 @@ module Riddl
               end
             end  
 
-            handler.new(backend,key,topics).create unless handler.nil?
+            handler.key(key).topics(topics).create unless handler.nil?
             [
               Riddl::Parameter::Simple.new('key',key),
               Riddl::Parameter::Simple.new('producer-secret',producer_secret),
@@ -224,7 +232,7 @@ module Riddl
             key     = @r.last
 
             backend.subscriptions[key].delete
-            handler.new(backend,key,nil).delete unless handler.nil?
+            handler.key(key).delete unless handler.nil?
             return
           end
         end #}}}
@@ -269,7 +277,7 @@ module Riddl
               end
             end  
 
-            handler.new(backend,key,topics).update unless handler.nil?
+            handler.key(key).topics(topics).update unless handler.nil?
             nil
           end
         end #}}}
@@ -279,15 +287,15 @@ module Riddl
             @backend = @a[0]
             @handler = @a[1]
             @key     = @r[-2]
-            @handler.new(@backend,@key,[]).ws_open(self) unless handler.nil?
+            @handler.key(@key).ws_open(self) unless handler.nil?
           end
 
-          def onmessage(backend)
-            @handler.new(@backend,@key,[]).ws_message(self,backend) unless handler.nil?
+          def onmessage
+            @handler.key(@key).ws_message(self,data) unless handler.nil?
           end
 
           def onclose
-            @handler.new(@backend,@key,[]).ws_close() unless handler.nil?
+            @handler.key(@key).ws_close() unless handler.nil?
           end
         end #}}}
         
