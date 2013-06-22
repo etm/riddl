@@ -61,6 +61,7 @@ module Riddl
             end  
             def modify(&block)
               XML::Smart.modify(@name,"<subscription xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>") do |doc|
+                doc.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
                 block.call doc
               end
             end
@@ -70,8 +71,11 @@ module Riddl
             def to_s
               File.read(@name)
             end
-            def view
-              XML::Smart.open_unprotected(@name)
+            def view(&block)
+              XML::Smart.open_unprotected(@name) do |doc|
+                doc.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
+                block.call doc
+              end  
             end
           end #}}}
 
@@ -83,6 +87,7 @@ module Riddl
             def each(&block)
               keys.each do |key|
                 doc = XML::Smart.open_unprotected(@target + '/' + key + '/subscription.xml')
+                doc.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
                 block.call doc, key
               end  
             end
