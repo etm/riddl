@@ -37,7 +37,7 @@ module Riddl
             @topics = []
           end
           def key(k)
-            @key = key
+            @key = k
             self
           end
           def topics(t)
@@ -123,7 +123,6 @@ module Riddl
                 []
               end
             end
-            private :keys
           end #}}}
 
           def initialize(topics,target)

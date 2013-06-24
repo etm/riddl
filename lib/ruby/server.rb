@@ -382,7 +382,25 @@ module Riddl
         if @riddl_info[:env]["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_info[:env]["HTTP_UPGRADE"] =~ /\AWebSocket\z/i
           # TODO raise error when declaration and route or (not route and non-local interface)
           # raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl.validate!
-          instance_exec(@riddl_info, &@riddl_interfaces[nil])
+          if @riddl.description?
+            instance_exec(@riddl_info, &@riddl_interfaces[nil])
+          elsif @riddl.declaration?
+            @riddl_message = @riddl.io_messages(@riddl_matching_path[0],'websocket',@riddl_parameters,@riddl_headers)
+            unless @riddl_message.nil?
+              ifs = @riddl_message.route? ? @riddl_message.route : [@riddl_message]
+              ifs.each do |m|
+                if @riddl_interfaces.key? m.interface.name
+                  @riddl_info[:r] = m.interface.real_path(@riddl_pinfo).sub(/\//,'').split('/')
+                  @riddl_info[:h]['RIDDL_DECLARATION_PATH'] = @riddl_pinfo
+                  @riddl_info[:h]['RIDDL_DECLARATION_RESOURCE'] = m.interface.top
+                  @riddl_info[:s] = m.interface.sub.sub(/\//,'').split('/')
+                  @riddl_info.merge!(:match => matching_path)
+                  instance_exec(@riddl_info, &@riddl_interfaces[m.interface.name])
+                  break # one ws connection, no overlay
+                end
+              end  
+            end  
+          end  
           return [-1, {}, []]
         else
           __call

@@ -396,7 +396,6 @@ module Riddl
           minor    = Riddl::Protocols::HTTP::Parser::unescape(@r[2])
 
           unless backend.modifiable?(property)
-            p 'aaaa'
             @status = 500
             return # change properties.schema
           end
