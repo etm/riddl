@@ -255,9 +255,9 @@ module Riddl
         private :add_request_pass
         
         def add_websocket(index,interface)
-          @access_methods[:websocket] ||= []
-          @access_methods[:websocket][index] ||= []
-          @access_methods[:websocket][index] << WebSocket.new(interface)
+          @access_methods['websocket'] ||= []
+          @access_methods['websocket'][index] ||= []
+          @access_methods['websocket'][index] << WebSocket.new(interface)
         end
         private :add_request_pass
         #}}}

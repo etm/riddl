@@ -33,10 +33,8 @@ module Riddl
           res.composition.each do |k,v|
             v.each do |m|
               m = m.result
-              if %w{get post put delete}.include?(k)
+              if %w{get post put delete websocket}.include?(k)
                 result << t + "<#{k} "
-              elsif  k == :websocket
-                result << t + "<#{k}"
               else
                 result << t + "<request method=\"#{k}\" "
               end  

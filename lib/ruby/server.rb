@@ -382,6 +382,7 @@ module Riddl
         if @riddl_info[:env]["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_info[:env]["HTTP_UPGRADE"] =~ /\AWebSocket\z/i
           # TODO raise error when declaration and route or (not route and non-local interface)
           # raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl.validate!
+          @riddl_info[:m] = @riddl_method = 'websocket'
           if @riddl.description?
             instance_exec(@riddl_info, &@riddl_interfaces[nil])
           elsif @riddl.declaration?
@@ -471,10 +472,9 @@ module Riddl
         data.query_string = @riddl_query_string
         data.http_method = @riddl_method
         data.body = @riddl_raw.read
-        w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_info[:env]['HTTP_SEC_WEBSOCKET_VERSION']), :match => matching_path)
+        w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_info[:env]['HTTP_SEC_WEBSOCKET_VERSION'], :match => matching_path))
         w.io = Riddl::WebSocket.new(w, @riddl_info[:env]['thin.connection'])
         w.io.dispatch(data)
-
       end  
       if what.class == Class && what.superclass == Riddl::Implementation
         w = what.new(@riddl_info.merge!(:a => args, :match => matching_path))
@@ -498,12 +498,11 @@ module Riddl
         false
       end
     end  # }}}
-    def post(min='*');   return false if     @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'post'   end
-    def get(min='*');    return false if     @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'get'    end
-    def delete(min='*'); return false if     @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'delete' end
-    def put(min='*');    return false if     @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'put'    end
-    def websocket;       return false unless @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/')                                                               end
-
+    def post(min='*');   return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'post'      end
+    def get(min='*');    return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'get'       end
+    def delete(min='*'); return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'delete'    end
+    def put(min='*');    return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'put'       end
+    def websocket;       return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/')                                  && @riddl_method == 'websocket' end 
     def resource(rname=nil); return rname.nil? ? '{}' : rname end
 
     def matching_path #{{{
