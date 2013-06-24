@@ -87,14 +87,14 @@ module Riddl
           end
         end
 
-        def add_schema(id,name)
+        def add_schema(key,name)
           raise "schema file not found" unless File.exists?(name)
-          @schemas[id] = XML::Smart.open_unprotected(name.gsub(/^\/+/,'/'))
-          @schemas[id].register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
+          @schemas[key] = XML::Smart.open_unprotected(name.gsub(/^\/+/,'/'))
+          @schemas[key].register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
           if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
             raise "properties schema transformation file not found"
           end  
-          @rngs[id] = @schemas[id].transform_with(XML::Smart.open_unprotected(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))
+          @rngs[key] = @schemas[key].transform_with(XML::Smart.open_unprotected(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))
         end
         private :add_schema
 
