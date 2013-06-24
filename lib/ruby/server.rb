@@ -16,6 +16,7 @@ require 'stringio'
 require 'rack/content_length'
 require 'rack/chunked'
 require 'securerandom'
+require 'yaml'
 require 'blather/client/client'
 
 module Riddl
@@ -197,7 +198,7 @@ module Riddl
       end
 
       if File.exists?(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile])
-        eval(File.read(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile]))
+        @riddl_opts.merge!(YAML::load_file(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile]))
       end
       @riddl_opts[:url] = (@riddl_opts[:secure] ? 'https://' : 'http://') + @riddl_opts[:host] + ':' + @riddl_opts[:port].to_s
 

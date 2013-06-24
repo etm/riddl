@@ -7,7 +7,7 @@ module Riddl
       PROPERTIES_SCHEMA_XSL_RNG = "#{File.dirname(__FILE__)}/../ns/common-patterns/properties/#{VERSION_MAJOR}.#{VERSION_MINOR}/properties.schema.xsl"
 
       def self::implementation(backend,handler=nil,details=:production)
-        unless handler.nil? || (handler.class == Class && handler.superclass == Riddl::Utils::Properties::HandlerBase)
+        unless handler.nil? || (handler.is_a? Riddl::Utils::Properties::HandlerBase)
           raise "handler not a subclass of HandlerBase"
         end
         Proc.new do
@@ -43,10 +43,14 @@ module Riddl
 
       # Overloadable and Backends
       class HandlerBase #{{{
-        def initialize(backend,property)
-          @backend = backend
-          @property = property
+        def initialize(data)
+          @data = data
+          @property = nil
         end
+        def property(p)
+          @property = p
+          self
+        end  
         def create; end
         def read;   end
         def update; end
@@ -54,10 +58,10 @@ module Riddl
       end #}}}
 
       class Backend #{{{
-        attr_reader :schema, :properties, :rng, :id
+        attr_reader :schema, :data, :rng 
 
-        def initialize(schema,target,id=nil)
-          @id = id
+        def initialize(schema,target,init=nil)
+          @target = target.gsub(/^\/+/,'/')
           @schemas = {}
           @rngs = {}
 
@@ -70,10 +74,12 @@ module Riddl
           @schema = @schemas.first[1]
           @rng = @rngs.first[1]
 
-          raise "properties file not found" unless File.exists?(target)
-          @target = target.gsub(/^\/+/,'/')
-          @properties = XML::Smart.open_unprotected(target)
-          @properties.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
+          FileUtils::mkdir_p(File::dirname(@target)) unless File.exists?(@target)
+          FileUtils::cp init, @target                if init and not File.exists?(@target)
+
+          raise "properties file not found" unless File.exists?(@target)
+          @data = XML::Smart.open_unprotected(@target)
+          @data.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
           @mutex = Mutex.new
         end
 
@@ -116,13 +122,13 @@ module Riddl
         end
 
         def modify(&block)
-          tdoc = @properties.root.to_doc
+          tdoc = @data.root.to_doc
           tdoc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
           @mutex.synchronize do
             block.call tdoc
             if tdoc.validate_against(@rng)
-              block.call @properties
-              @properties.save_as(@target)
+              block.call @data
+              @data.save_as(@target)
               true
             else
               false
@@ -136,8 +142,8 @@ module Riddl
         def response
           backend = @a[0]
           handler = @a[1]
-          handler.new(backend,nil).read unless handler.nil?
-          return Riddl::Parameter::Complex.new("document","text/xml",backend.properties.to_s)
+          handler.read unless handler.nil?
+          return Riddl::Parameter::Complex.new("document","text/xml",backend.data.to_s)
         end
       end #}}}
 
@@ -145,7 +151,7 @@ module Riddl
         def response
           backend = @a[0]
           handler = @a[1]
-          handler.new(backend,nil).read unless handler.nil?
+          handler.read unless handler.nil?
 
           ret = XML::Smart.string("<properties xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
           backend.schema.find("/p:properties/*[name()!='optional']|/p:properties/p:optional/*").each do |r|
@@ -159,11 +165,11 @@ module Riddl
         def response
           backend = @a[0]
           handler = @a[1]
-          handler.new(backend,nil).read unless handler.nil?
+          handler.read unless handler.nil?
           query = (@p[0].value.to_s.strip.empty? ? '*' : @p[0].value)
 
           begin
-            e = backend.properties.find(query)
+            e = backend.data.find(query)
           rescue => e
             prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>").to_s
             return Riddl::Parameter::Complex.new("value","text/xml",prop.to_s)
@@ -201,7 +207,7 @@ module Riddl
           backend = @a[0]
           handler = @a[1]
 
-          handler.new(backend,@r[1]).read unless handler.nil?
+          handler.property(@r[1]).read unless handler.nil?
 
           if ret = extract_values(backend,@r[1],Riddl::Protocols::HTTP::Parser::unescape(@r[2..-1].join('/')))
             ret
@@ -213,7 +219,7 @@ module Riddl
         def extract_values(backend,property,minor=nil)
           case backend.property_type(property)
             when :complex
-              res = backend.properties.find("/p:properties/*[name()=\"#{property}\"]#{minor == '' ? '' : "/p:#{minor}"}")
+              res = backend.data.find("/p:properties/*[name()=\"#{property}\"]#{minor == '' ? '' : "/p:#{minor}"}")
               if res.any?
                 prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
                 if res.length == 1
@@ -226,10 +232,10 @@ module Riddl
                 prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
               end
             when :simple, :state
-              res = backend.properties.find("string(/p:properties/*[name()=\"#{property}\"]#{minor})")
+              res = backend.data.find("string(/p:properties/*[name()=\"#{property}\"]#{minor})")
               return Riddl::Parameter::Simple.new("value",res.to_s)
             when :arbitrary
-              res = backend.properties.find("/p:properties/*[name()=\"#{property}\"]")
+              res = backend.data.find("/p:properties/*[name()=\"#{property}\"]")
               if res.any?
                 c = res.first.children
                 if c.length == 1 && c.first.class == XML::Smart::Dom::Element
@@ -265,7 +271,7 @@ module Riddl
           end
 
           path = "/p:properties/*[name()=\"#{property}\"]"
-          nodes = backend.properties.find(path)
+          nodes = backend.data.find(path)
           if nodes.any?
             @status = 404
             return # this property does not exist
@@ -291,7 +297,7 @@ module Riddl
             return # bad request
           end
           
-          handler.create(backend,property).update unless handler.nil?
+          handler.property(property).create unless handler.nil?
           return
         end
       end #}}}
@@ -313,7 +319,7 @@ module Riddl
             end
 
             path = "/p:properties/*[name()=\"#{property}\"]"
-            nodes = backend.properties.find(path)
+            nodes = backend.data.find(path)
             if nodes.empty?
               @status = 404
               return # this property does not exist
@@ -342,7 +348,7 @@ module Riddl
               return # bad request
             end
             
-            handler.new(backend,property).update unless handler.nil?
+            handler.property(property).create unless handler.nil?
           end
           return
         end
@@ -362,7 +368,7 @@ module Riddl
           end
 
           path = "/p:properties/p:#{property}"
-          node = backend.properties.find(path)
+          node = backend.data.find(path)
           if node.empty?
             @status = 404
             return # this property does not exist
@@ -377,7 +383,7 @@ module Riddl
             return # bad request
           end
 
-          handler.new(backend,property).create unless handler.nil?
+          handler.property(property).create unless handler.nil?
         end
       end #}}}
 
@@ -396,7 +402,7 @@ module Riddl
           end
 
           path = "/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}"
-          nodes = backend.properties.find(path)
+          nodes = backend.data.find(path)
           if nodes.empty?
             @status = 404
             return # this property does not exist
@@ -409,7 +415,7 @@ module Riddl
             return # bad request
           end
 
-          handler.new(backend,property).delete unless handler.nil?
+          handler.property(property).delete unless handler.nil?
           return
         end
       end #}}} 
@@ -430,7 +436,7 @@ module Riddl
           end
 
           path = "/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}"
-          nodes = backend.properties.find(path)
+          nodes = backend.data.find(path)
           if nodes.empty?
             @status = 404
             return # this property does not exist
@@ -459,7 +465,7 @@ module Riddl
             return # bad request
           end
           
-          handler.new(backend,property).update unless handler.nil?
+          handler.property(property).update unless handler.nil?
           return
         end
       end #}}}
