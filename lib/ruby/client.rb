@@ -64,7 +64,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           @wrapper = (riddl.class == Riddl::Wrapper ? riddl : Riddl::Wrapper::new(riddl))
           if @wrapper.declaration? && !base.nil?
             @wrapper = @wrapper.declaration.description
-          end  
+          end
           raise SpecificationError, 'No RIDDL description or declaration found.' if !@wrapper.description? && !@wrapper.declaration?
           raise SpecificationError, 'RIDDL does not conform to specification' unless @wrapper.validate!
           @wrapper.load_necessary_handlers!

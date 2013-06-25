@@ -16,27 +16,27 @@ module Riddl
 
         def add_access_methods(des,desres,index,interface)
           #{{{
-          desres.find("des:*[not(name()='resource') and @in and not(@in='*')]").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and @in and not(@in='*')]").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_in_out(index,interface,des,method,m.attributes['in'],m.attributes['out'])
           end
-          desres.find("des:*[not(name()='resource') and @pass and not(@pass='*')]").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and @pass and not(@pass='*')]").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_in_out(index,interface,des,method,m.attributes['pass'],m.attributes['pass'])
           end
-          desres.find("des:*[not(name()='resource') and @transformation]").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and @transformation]").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_transform(index,interface,des,method,m.attributes['transformation'])
           end
-          desres.find("des:*[not(name()='resource') and @in and @in='*']").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and @in and @in='*']").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_star_out(index,interface,des,method,m.attributes['out'])
           end
-          desres.find("des:*[not(name()='resource') and not(@in)]").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and not(@in)]").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_star_out(index,interface,des,method,m.attributes['out'])
           end
-          desres.find("des:*[not(name()='resource') and @pass and @pass='*']").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and @pass and @pass='*']").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_pass(index,interface,method)
           end
