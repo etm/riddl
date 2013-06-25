@@ -29,7 +29,7 @@ module Riddl
     def initialize(ws)
       @ws    = ws
       @r     = ws[:r]     # the matching resource path
-      @r     = ws[:s]     # the matching resource path schema
+      @s     = ws[:s]     # the matching resource path schema
       @match = ws[:match] # the path of the branch matching, important for recursive
       @env   = ws[:env]   # environment (all headers)
       @a     = ws[:a]     # args to run command

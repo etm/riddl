@@ -465,16 +465,18 @@ module Riddl
     def run(what,*args)# {{{
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
-        data = WebSocketParserData.new
-        data.headers = @riddl_headers
-        data.request_path = @riddl_pinfo
+        data = WebSocketParserData.new 
+        data.request_path = @riddl_pinfo                                                                                                                                     
         data.request_url = @riddl_pinfo + '?' + @riddl_query_string
         data.query_string = @riddl_query_string
-        data.http_method = @riddl_method
-        data.body = @riddl_raw.read
-        w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_info[:env]['HTTP_SEC_WEBSOCKET_VERSION'], :match => matching_path))
-        w.io = Riddl::WebSocket.new(w, @riddl_info[:env]['thin.connection'])
-        w.io.dispatch(data)
+        data.http_method = @riddl_env['REQUEST_METHOD'] 
+        data.body = @riddl_env['rack.input'].read 
+        data.headers = Hash[
+          @riddl_headers.map { |key, value|  [key.downcase.gsub('_','-'), value] }
+        ]
+        w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION'], :match => matching_path))
+        w.io = Riddl::WebSocket.new(w, @riddl_env['thin.connection']) 
+        w.io.dispatch(data) 
       end  
       if what.class == Class && what.superclass == Riddl::Implementation
         w = what.new(@riddl_info.merge!(:a => args, :match => matching_path))

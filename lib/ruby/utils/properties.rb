@@ -85,8 +85,8 @@ module Riddl
 
         def activate_schema(name)
           if @schemas[name]
-            @schema = @schemas[name][1]
-            @rng = @schemas[name][1]
+            @schema = @schemas[name]
+            @rng = @rngs[name]
             true
           else
             false

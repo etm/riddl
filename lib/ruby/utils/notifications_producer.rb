@@ -291,15 +291,15 @@ module Riddl
             @backend = @a[0]
             @handler = @a[1]
             @key     = @r[-2]
-            @handler.key(@key).ws_open(self) unless handler.nil?
+            @handler.key(@key).ws_open(self) unless @handler.nil?
           end
 
-          def onmessage
-            @handler.key(@key).ws_message(self,data) unless handler.nil?
+          def onmessage(data)
+            @handler.key(@key).ws_message(data) unless @handler.nil?
           end
 
           def onclose
-            @handler.key(@key).ws_close() unless handler.nil?
+            @handler.key(@key).ws_close() unless @handler.nil?
           end
         end #}}}
         
