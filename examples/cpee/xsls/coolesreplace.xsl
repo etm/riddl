@@ -23,15 +23,23 @@
                   taggl.children().each(function(){ replacing($(this));});
                 }
                 var temp = taggl.html().split("gt");
-                var replacement = "&lt;solo id=anakin&gt;"+temp[0]+"gt;&lt;/solo&gt;"; 
-                parent.children('#anakin').replaceWith(replacement);
-                var anakin = parent.children('#anakin');
-                anakin.toggle();
+                var replacement = "&lt;solo id=jacen&gt;"+temp[0]+"gt;&lt;/solo&gt;";
                 var real_one ="&lt;solo id=jacen&gt;"+taggl.html()+"&lt;/solo&gt;";
+                var visibility = 1;
                 parent.children('#jaina').click(function(){
-                  taggl.toggle();
-                  anakin.toggle();
-                });
+                 if(visibility!=0){
+                    taggl.replaceWith(replacement);
+                    visibility=0;
+                    taggl = parent.children('#jacen'); 
+                 }else{
+                    taggl.replaceWith(real_one);
+                    visibility=1;
+                    taggl = parent.children('#jacen');
+                    if(taggl.children().length>0){
+                      taggl.children().each(function(){ replacing($(this));});
+                    }                     
+                 }
+                 });
               }
           </script>
       </head>
@@ -89,8 +97,7 @@
     <xsl:choose>
       <xsl:when test="count(./*) &gt; 0">
       <xsl:element name="div">
-      <xsl:element name ="a"><xsl:attribute name="href">#stay</xsl:attribute><xsl:attribute name="id">jaina</xsl:attribute>Run Nudel</xsl:element> 
-      <xsl:element name="solo"><xsl:attribute name="id">anakin</xsl:attribute></xsl:element>
+        <xsl:element name ="a"><xsl:attribute name="href">#</xsl:attribute><xsl:attribute name="id">jaina</xsl:attribute>Run Nudel</xsl:element> 
       <xsl:element name="solo"><xsl:attribute name="id">jacen</xsl:attribute>
     <xsl:value-of select="concat($indent, $LT, name())" />
     <xsl:apply-templates select="@*" mode="XmlEscape" />
