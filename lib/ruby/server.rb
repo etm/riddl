@@ -387,19 +387,16 @@ module Riddl
             instance_exec(@riddl_info, &@riddl_interfaces[nil])
           elsif @riddl.declaration?
             @riddl_message = @riddl.io_messages(@riddl_matching_path[0],'websocket',@riddl_parameters,@riddl_headers)
+            # one ws connection, no overlay
             unless @riddl_message.nil?
-              ifs = @riddl_message.route? ? @riddl_message.route : [@riddl_message]
-              ifs.each do |m|
-                if @riddl_interfaces.key? m.interface.name
-                  @riddl_info[:r] = m.interface.real_path(@riddl_pinfo).sub(/\//,'').split('/')
-                  @riddl_info[:h]['RIDDL_DECLARATION_PATH'] = @riddl_pinfo
-                  @riddl_info[:h]['RIDDL_DECLARATION_RESOURCE'] = m.interface.top
-                  @riddl_info[:s] = m.interface.sub.sub(/\//,'').split('/')
-                  @riddl_info.merge!(:match => matching_path)
-                  instance_exec(@riddl_info, &@riddl_interfaces[m.interface.name])
-                  break # one ws connection, no overlay
-                end
-              end  
+              if @riddl_interfaces.key? @riddl_message.interface.name
+                @riddl_info[:r] = @riddl_message.interface.real_path(@riddl_pinfo).sub(/\//,'').split('/')
+                @riddl_info[:h]['RIDDL_DECLARATION_PATH'] = @riddl_pinfo
+                @riddl_info[:h]['RIDDL_DECLARATION_RESOURCE'] = @riddl_message.interface.top
+                @riddl_info[:s] = @riddl_message.interface.sub.sub(/\//,'').split('/')
+                @riddl_info.merge!(:match => matching_path)
+                instance_exec(@riddl_info, &@riddl_interfaces[@riddl_message.interface.name])
+              end
             end  
           end  
           return [-1, {}, []]

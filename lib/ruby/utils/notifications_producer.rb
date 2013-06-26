@@ -21,7 +21,7 @@ module Riddl
                   run Riddl::Utils::Notifications::Producer::Subscription, backend, details if get 'request'
                   run Riddl::Utils::Notifications::Producer::UpdateSubscription, backend, handler if put 'details'
                   run Riddl::Utils::Notifications::Producer::DeleteSubscription, backend, handler if delete 'delete'
-                  on resource 'ws' do |r|
+                  on resource 'ws' do
                     run Riddl::Utils::Notifications::Producer::WS, backend, handler if websocket
                   end
                 end
