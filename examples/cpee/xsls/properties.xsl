@@ -89,7 +89,16 @@
     <xsl:choose>
       <xsl:when test="count(./*) &gt; 0">
       <xsl:element name="div">
-      <xsl:element name ="a"><xsl:attribute name="href">#stay</xsl:attribute><xsl:attribute name="id">jaina</xsl:attribute>Run Nudel</xsl:element> 
+      <xsl:element name ="a">
+        <xsl:attribute name="href">#stay</xsl:attribute>
+        <xsl:attribute name="id">jaina</xsl:attribute>
+        <xsl:element name="img">
+          <xsl:attribute name="src">http://i49.tinypic.com/2ronmyu.gif</xsl:attribute>
+          <xsl:attribute name="alt">pikachu</xsl:attribute>
+          <xsl:attribute name="width">15</xsl:attribute>
+          <xsl:attribute name="height">15</xsl:attribute>  
+        </xsl:element>
+      </xsl:element> 
       <xsl:element name="solo"><xsl:attribute name="id">anakin</xsl:attribute></xsl:element>
       <xsl:element name="solo"><xsl:attribute name="id">jacen</xsl:attribute>
     <xsl:value-of select="concat($indent, $LT, name())" />
