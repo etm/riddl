@@ -160,32 +160,41 @@ module Riddl
         v.delete [Rack::Lint]
       end  
 
-      EM.run do
-        puts "Server (#{@riddl_opts[:url]}) started as #{Process.pid}"
-        puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass
-        server.start
-        if @riddl_xmpp_jid && @riddl_xmpp_pass
-          xmpp = Blather::Client.setup @riddl_xmpp_jid, @riddl_xmpp_pass
-          xmpp.register_handler(:message, :type => :normal) do |m|
-            began_at = Time.now
-            instance = dup
-            instance.__xmpp_call(xmpp,m)
-            now = Time.now
-            instance.riddl_log.write Rack::CommonLogger::FORMAT % [
-              @riddl_xmpp_jid || "-",
-              m.from || "-",
-              now.strftime("%d/%b/%Y %H:%M:%S"),
-              instance.riddl_method.upcase,
-              instance.riddl_pinfo,
-              '',
-              'XMPP',
-              instance.riddl_status,
-              '?',
-              now - began_at ]
-
-          end
-          xmpp.connect
-        end  
+      begin
+        EM.run do
+          puts "Server (#{@riddl_opts[:url]}) started as PID:#{Process.pid}"
+          puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass
+          server.start
+          if @riddl_xmpp_jid && @riddl_xmpp_pass
+            xmpp = Blather::Client.setup @riddl_xmpp_jid, @riddl_xmpp_pass
+            @riddl_opts[:xmpp] = xmpp
+            xmpp.register_handler(:message, :type => :normal) do |m|
+              began_at = Time.now
+              instance = dup
+              instance.__xmpp_call(xmpp,m)
+              now = Time.now
+              instance.riddl_log.write Rack::CommonLogger::FORMAT % [
+                @riddl_xmpp_jid || "-",
+                m.from || "-",
+                now.strftime("%d/%b/%Y %H:%M:%S"),
+                instance.riddl_method.upcase,
+                instance.riddl_pinfo,
+                '',
+                'XMPP',
+                instance.riddl_status,
+                '?',
+                now - began_at
+              ]
+            end
+            xmpp.connect
+          end  
+        end
+      rescue => e 
+        if e.is_a?(Blather::Stream::ConnectionFailed)
+          puts "Server (#{@riddl_xmpp_jid}) stopped due to connection error (PID:#{Process.pid})"
+        else  
+          puts "Server (#{@riddl_opts[:url]}) stopped due to connection error (PID:#{Process.pid})"
+        end
       end
     end #}}}
 
@@ -193,9 +202,7 @@ module Riddl
 
     def initialize(riddl,opts={},&blk)# {{{
       @riddl_opts = {}
-      OPTS.each do |k,v|
-        @riddl_opts[k] = opts.has_key?(k) ? opts[k] : v
-      end
+      @riddl_opts = OPTS.merge(opts) 
 
       if File.exists?(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile])
         @riddl_opts.merge!(YAML::load_file(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile]))
@@ -210,7 +217,7 @@ module Riddl
       @riddl_paths              = []  
 
       @riddl_interfaces = {}
-      instance_eval(&blk) if block_given?
+      instance_exec(@riddl_opts,&blk) if block_given?
 
       @riddl = Riddl::Wrapper.new(riddl,@accessible_description)
       if @riddl.description?
@@ -326,11 +333,14 @@ module Riddl
         @riddl_log.write "404: this resource for sure does not exist.\n"
         @riddl_status = 404 # client requests wrong path
       end
+     p  @riddl_message.out
+
       stanza = if @riddl_exe && @riddl_status == 200
         Protocols::XMPP::Generator.new(@riddl_status,@riddl_exe.response,@riddl_exe.headers).generate
       else
         Protocols::XMPP::Error.new(@riddl_status).generate
-      end  
+      end
+
       stanza.from = raw.to
       stanza.to = raw.from
       stanza.id = raw.id

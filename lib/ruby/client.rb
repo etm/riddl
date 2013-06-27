@@ -25,8 +25,8 @@ class SignalWait #{{{
     @q = Queue.new
   end
 
-  def wait
-    @q.deq
+  def wait(num=1)
+    num.times{ @q.deq }
   end
 
   def continue
@@ -48,17 +48,21 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         @thread = nil
         sig = SignalWait.new
         if URI.parse(@base).scheme == 'xmpp' &&  @options[:jid] && @options[:pass]
+          Thread::abort_on_exception = true
           @thread = Thread.new do
-            EM.run do
-              client = Blather::Client.setup @options[:jid], @options[:pass]
-              client.register_handler(:ready) { sig.continue; }
-              client.connect
-              @options[:xmpp] = client
-              sig.continue
+            begin
+              EM.run do
+                client = Blather::Client.setup @options[:jid], @options[:pass]
+                client.register_handler(:ready) { sig.continue; }
+                client.connect
+                @options[:xmpp] = client
+                sig.continue
+              end
+            rescue
+              raise ConnectionError, 'XMPP connection not successful'
             end  
           end
-          sig.wait
-          sig.wait
+          sig.wait 2
         end
         unless riddl.nil?
           @wrapper = (riddl.class == Riddl::Wrapper ? riddl : Riddl::Wrapper::new(riddl))
@@ -245,7 +249,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
           res = response = nil
           if @wrapper.nil? || @wrapper.description? || (@wrapper.declaration? && !@base.nil?)
-            status, response, response_headers = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate)
+            status, response, response_headers = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate,!riddl_message.out.nil?)
             return response if simulate
             if !@wrapper.nil? && status == 200
               unless @wrapper.check_message(response,response_headers,riddl_message.out)
@@ -255,7 +259,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           elsif !@wrapper.nil? && @base.nil? && @wrapper.declaration?
             headers['RIDDL-DECLARATION-PATH'] = @rpath
             if !riddl_message.route?
-              status, response, response_headers = make_request(riddl_message.interface.real_url(@rpath,@base),riddl_method,parameters,headers,qparams,simulate)
+              status, response, response_headers = make_request(riddl_message.interface.real_url(@rpath,@base),riddl_method,parameters,headers,qparams,simulate,!riddl_message.out.nil?)
               return response if simulate
               if status == 200
                 unless @wrapper.check_message(response,response_headers,riddl_message.out)
@@ -267,7 +271,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               th = headers
               tq = qparams
               riddl_message.route.each do |m|
-                status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate)
+                status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,!riddl_message.out.nil?)
                 return response if simulate
                 if status != 200 || !@wrapper.check_message(response,response_headers,m.out)
                   raise OutputError, "Not a valid output from service."
@@ -291,7 +295,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end #}}}
         private :exec_request
 
-        def make_request(url,riddl_method,parameters,headers,qparams,simulate) #{{{
+        def make_request(url,riddl_method,parameters,headers,qparams,simulate,out) #{{{
           url = URI.parse(url)
           qs = qparams.join('&')
           if url.class == URI::HTTP || url.class == URI::HTTPS
@@ -338,6 +342,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             return res.code.to_i, response, response_headers
             #}}} 
           elsif url.class == URI::Generic && url.scheme.downcase == 'xmpp'
+            #{{{
             req = Riddl::Client::XMPPRequest.new(riddl_method,url.user + "@" + url.host,url.path,parameters,headers,qs)
             return req.simulate if simulate
 
@@ -349,26 +354,32 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             status = 404
             response = []
             response_headers = {}
-            @options[:xmpp].write_with_handler(stanza) do |raw|
-              res = XML::Smart::Dom::Element.new(raw).parent
-              @options[:debug].puts(res.to_s) if @options[:debug]
-              res.register_namespace 'xr', Riddl::Protocols::XMPP::XR_NS
-              if res.find('/message/error').empty?
-                status = 200
-                response_headers = {}
-                res.find('/message/xr:header').each do |e|
-                  response_headers[e.attributes['name']] = e.text
-                end
-                response = Protocols::XMPP::Parser.new('', res).params
-              else
-                res.register_namespace 'se', Blather::StanzaError::STANZA_ERR_NS
-                err = res.find('string(/message/error/se:text)')
-                status = (err.match(/\d+/)[0] || 209).to_i
-              end  
-              sig.continue
+            if out
+              @options[:xmpp].write_with_handler(stanza) do |raw|
+                res = XML::Smart::Dom::Element.new(raw).parent
+                @options[:debug].puts(res.to_s) if @options[:debug]
+                res.register_namespace 'xr', Riddl::Protocols::XMPP::XR_NS
+                if res.find('/message/error').empty?
+                  status = 200
+                  response_headers = {}
+                  res.find('/message/xr:header').each do |e|
+                    response_headers[e.attributes['name']] = e.text
+                  end
+                  response = Protocols::XMPP::Parser.new('', res).params
+                else
+                  res.register_namespace 'se', Blather::StanzaError::STANZA_ERR_NS
+                  err = res.find('string(/message/error/se:text)')
+                  status = (err.match(/\d+/)[0] || 209).to_i
+                end  
+                sig.continue
+              end
+              sig.wait
+            else
+              status = 200
+              @options[:xmpp].write(stanza)
             end
-            sig.wait
             return status, response, response_headers
+            #}}}
           end
           raise URIError, "not a valid URI (http, https, xmpp are accepted)"
         end #}}}

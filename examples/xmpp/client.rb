@@ -3,8 +3,8 @@
 require '../../lib/ruby/client'
 require 'pp'
 
-#props = Riddl::Client.new("http://localhost:9292")
-props = Riddl::Client.new("xmpp://adventure_processexecution@fp7-adventure.eu", nil, :jid => 'jürgen@fp7-adventure.eu', :pass => 'mangler', :debug => STDOUT)
+#props = Riddl::Client.interface("http://localhost:9292","properties.xml")
+props = Riddl::Client.interface("xmpp://adventure_processexecution@fp7-adventure.eu", "properties.xml", :jid => 'jürgen@fp7-adventure.eu', :pass => 'mangler', :debug => STDOUT)
 
 test = props.resource("/values/state")
 status, res = test.get

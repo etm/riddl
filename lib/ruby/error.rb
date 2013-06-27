@@ -5,4 +5,5 @@ module Riddl
   class PathError < ::RuntimeError; end
   class BlockError < ::StandardError; end
   class SpecificationError < ::StandardError; end
+  class ConnectionError < ::StandardError; end
 end
