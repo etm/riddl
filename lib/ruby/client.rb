@@ -46,8 +46,11 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         @options = options
         @wrapper = nil
         @thread = nil
-        sig = SignalWait.new
-        if URI.parse(@base).scheme == 'xmpp' &&  @options[:jid] && @options[:pass]
+        if URI.parse(@base).scheme == 'xmpp' && !((@options[:jid] && @options[:pass]) || @options[:xmpp].is_a?(Blather::Client))
+          raise ConnectionError, 'XMPP connections need jid/pass or Blather::client object passed as options to be successful.'
+        end  
+        if URI.parse(@base).scheme == 'xmpp' && @options[:jid] && @options[:pass]
+          sig = SignalWait.new
           Thread::abort_on_exception = true
           @thread = Thread.new do
             begin
@@ -59,7 +62,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                 sig.continue
               end
             rescue
-              raise ConnectionError, 'XMPP connection not successful'
+              raise ConnectionError, 'XMPP connection not successful.'
             end  
           end
           sig.wait 2
