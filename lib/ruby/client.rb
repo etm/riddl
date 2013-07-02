@@ -252,7 +252,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
           res = response = nil
           if @wrapper.nil? || @wrapper.description? || (@wrapper.declaration? && !@base.nil?)
-            status, response, response_headers = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate,!riddl_message.out.nil?)
+            status, response, response_headers = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate,riddl_message && riddl_message.out)
             return response if simulate
             if !@wrapper.nil? && status == 200
               unless @wrapper.check_message(response,response_headers,riddl_message.out)
@@ -262,7 +262,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           elsif !@wrapper.nil? && @base.nil? && @wrapper.declaration?
             headers['RIDDL-DECLARATION-PATH'] = @rpath
             if !riddl_message.route?
-              status, response, response_headers = make_request(riddl_message.interface.real_url(@rpath,@base),riddl_method,parameters,headers,qparams,simulate,!riddl_message.out.nil?)
+              status, response, response_headers = make_request(riddl_message.interface.real_url(@rpath,@base),riddl_method,parameters,headers,qparams,simulate,riddl_message && riddl_message.out)
               return response if simulate
               if status == 200
                 unless @wrapper.check_message(response,response_headers,riddl_message.out)
@@ -274,7 +274,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               th = headers
               tq = qparams
               riddl_message.route.each do |m|
-                status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,!riddl_message.out.nil?)
+                status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,riddl_message && riddl_message.out)
                 return response if simulate
                 if status != 200 || !@wrapper.check_message(response,response_headers,m.out)
                   raise OutputError, "Not a valid output from service."

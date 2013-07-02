@@ -1,100 +1,44 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-  <message name="notification">
+  <message name="event">
     <parameter name="key" type="string"/>
-    <parameter name="topic" type="string"/>
-    <choice>
-      <parameter name="event" type="string">
-        <param name="pattern">[\w_]+</param>
-      </parameter>
-      <parameter name="vote" type="string">
-        <param name="pattern">[\w_]+</param>
-      </parameter>
-    </choice>  
-    <parameter name="notification" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
-      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-consumer/1.0">
-        <start>
-          <element name="notification">
-            <zeroOrMore>
-              <ref name="header"/>
-            </zeroOrMore>  
-            <zeroOrMore>
-              <ref name="parameter"/>
-            </zeroOrMore>  
-          </element>
-        </start>
-
-        <define name="header">
-          <element name="header">
-            <attribute name="name">
-              <data type="string"/>
-            </attribute>
-            <optional>
-              <attribute name="type">
-                <data type="string"/>
-              </attribute>  
-            </optional>  
-            <data type="string"/>
-          </element>
-        </define>  
-        
-        <define name="parameter">
-          <element name="parameter">
-            <attribute name="name">
-              <data type="string"/>
-            </attribute>
-            <optional>
-              <choice>
-                <attribute name="type">
-                  <data type="string"/>
-                </attribute>  
-                <attribute name="mimetype">
-                  <data type="string">
-                    <param name="pattern">[\c]+/[\c\+]+|\*</param>
-                  </data>  
-                </attribute>  
-              </choice>  
-            </optional>
-            <ref name="any"/>
-          </element>
-        </define>  
-
-        <define name="any">
-            <mixed>
-          <zeroOrMore>
-              <element>
-                <anyName/>
-                <zeroOrMore>
-                  <choice>
-                    <attribute>
-                      <anyName/>
-                    </attribute>
-                    <text/>
-                    <ref name="any"/>
-                  </choice>
-                </zeroOrMore>
-              </element>
-          </zeroOrMore>  
-            </mixed>  
-        </define>
-
-      </grammar>
+    <parameter name="topic" type="string">
+      <param name="pattern">[\w_\/]+</param>
     </parameter>
-    <parameter name="message-uid" type="string"/>
+    <parameter name="event" type="string">
+      <param name="pattern">[\w_]+</param>
+    </parameter>
+    <parameter name="notification" type="string"/>
+    <parameter name="fingerprint-with-consumer-secret" type="string"/>
+  </message>
+
+  <message name="vote">
+    <parameter name="key" type="string"/>
+    <parameter name="topic" type="string">
+      <param name="pattern">[\w_\/]+</param>
+    </parameter>
+    <parameter name="vote" type="string">
+      <param name="pattern">[\w_]+</param>
+    </parameter>
+    <parameter name="notification" type="string"/>
+    <parameter name="callback" type="string"/>
     <parameter name="fingerprint-with-consumer-secret" type="string"/>
   </message>
 
   <message name="acknowledgment">
-    <header name="CPEE_CALLBACK" type="boolean"/>
-    <optional>
-      <parameter name="continue" type="boolean"/>
-    </optional>
-    <parameter name="message-uid" type="string"/>
+    <parameter name="continue" type="string">
+      <choice>
+        <value>true</value>
+        <value>false</value>
+        <value>callback</value>
+      </choice>
+    </parameter>  
     <parameter name="fingerprint-with-consumer-secret" type="string"/>
   </message>
 
   <resource pattern="http://riddl.org/ns/common-patterns/notifications-consumer/1.0">
-    <post in="notification" out="acknowledgment"/>
+    <post in="event"/>
+    <post in="vote" out="acknowledgment"/>
   </resource>  
 
 </description>

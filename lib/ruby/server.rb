@@ -259,8 +259,10 @@ module Riddl
           if @riddl.description?
             instance_exec(@riddl_info, &@riddl_interfaces[nil])  
           elsif @riddl.declaration?
+            mess = @riddl_message
             ifs = @riddl_message.route? ? @riddl_message.route : [@riddl_message]
             ifs.each do |m|
+              @riddl_message = m
               @riddl_path = '/'
               if m.interface.base.nil?
                 if @riddl_interfaces.key? m.interface.name
@@ -281,6 +283,7 @@ module Riddl
               break unless @riddl_status == 200
               @riddl_info.merge!(:h => @riddl_exe.headers, :p => @riddl_exe.response)
             end
+            @riddl_message = mess
           end
         end
         if @riddl_info[:env].has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
@@ -333,9 +336,9 @@ module Riddl
         @riddl_log.write "404: this resource for sure does not exist.\n"
         @riddl_status = 404 # client requests wrong path
       end
-     p  @riddl_message.out
 
       stanza = if @riddl_exe && @riddl_status == 200
+        return if @riddl_message.out.nil?
         Protocols::XMPP::Generator.new(@riddl_status,@riddl_exe.response,@riddl_exe.headers).generate
       else
         Protocols::XMPP::Error.new(@riddl_status).generate
