@@ -55,6 +55,7 @@ module Riddl
     XINCLUDE = "http://www.w3.org/2001/XInclude"
     DESCRIPTION_FILE = "#{File.dirname(__FILE__)}/ns/description/#{VERSION_MAJOR}.#{VERSION_MINOR}/description.rng"
     DECLARATION_FILE = "#{File.dirname(__FILE__)}/ns/declaration/#{VERSION_MAJOR}.#{VERSION_MINOR}/declaration.rng"
+    RIDDL_DESCRIPTION_SHOW = "#{File.dirname(__FILE__)}/ns/common-patterns/riddl-description/show.xml"
     COMMON = "datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"#{DESCRIPTION}\" xmlns:xi=\"http://www.w3.org/2001/XInclude\""
     CHECK = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"><data/></element>"
     #}}}
@@ -80,6 +81,7 @@ module Riddl
           end
         end  
       end  
+
       @doc.register_namespace 'x', XINCLUDE
       @doc.find('//x:include/@href').each do |i|
         if i.value =~ /^http:\/\/(www\.)?riddl\.org(\/ns\/common-patterns\/.*)/
@@ -88,32 +90,26 @@ module Riddl
         end
       end
       fpath.nil? ? @doc.xinclude! : @doc.xinclude!(fpath)
-      @doc.register_namespace 'des', DESCRIPTION
-      @doc.register_namespace 'dec', DECLARATION
+
       qname = @doc.root.qname
       @is_description = qname.href == DESCRIPTION && qname.name ==  'description'
       @is_declaration = qname.href == DECLARATION && qname.name ==  'declaration'
-  
-      if @is_description && get_description
-        n = @doc.root.children
-        if n.empty?
-          @doc.root.add("message",:name=>"riddl-description-request").add("parameter",:name=>"riddl-description",:type=>"string")
-          @doc.root.add("message",:name=>"riddl-description-response").add("parameter",:name=>"riddl-description",:mimetype=>"text/xml")
-        else
-          n.first.add_before("message",:name=>"riddl-description-response").add("parameter",:name=>"riddl-description",:mimetype=>"text/xml")
-          n.first.add_before("message",:name=>"riddl-description-request").add("parameter",:name=>"riddl-description",:type=>"string")
-        end  
 
+      @doc.register_namespace 'des', DESCRIPTION
+      @doc.register_namespace 'dec', DECLARATION
+      if @is_description && get_description
+        rds = XML::Smart::open_unprotected(RIDDL_DESCRIPTION_SHOW)
+        @doc.root.prepend rds.find('/xmlns:description/xmlns:message')
         r = @doc.find("/des:description/des:resource")
-        unless r.empty?
-          n = r.first.children
-          if n.empty?
-            r.add("get",:in=>'riddl-description-request',:out=>'riddl-description-response')
-          else  
-            n.first.add_before("get",:in=>'riddl-description-request',:out=>'riddl-description-response')
-          end  
-        end
+        r.first.prepend rds.find('/xmlns:description/xmlns:resource/*') unless r.empty?
+        puts @doc
       end
+      if @is_declaration  && get_description
+        n = @doc.root.prepend("dec:interface",:name=>"riddldescription").add XML::Smart::open_unprotected(RIDDL_DESCRIPTION_SHOW).root
+        n = @doc.root.find("dec:facade/dec:tile")
+        n.first.prepend("layer",:name =>"riddldescription") if n.any?
+      end  
+
       @declaration = @description = nil
       #}}}
     end

@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.99.107"
+  s.version          = "0.99.108"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>=1.9.3'
 
-  s.add_runtime_dependency 'xml-smart', '>=0.3.4'
+  s.add_runtime_dependency 'xml-smart', '>=0.3.6'
   s.add_runtime_dependency 'rack'
   s.add_runtime_dependency 'thin'
   s.add_runtime_dependency 'eventmachine', '>= 1.0.0'

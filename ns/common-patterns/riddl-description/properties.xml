@@ -1,0 +1,150 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="value">
+    <choice>
+      <parameter name="value" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+        <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+          <start>
+            <choice>
+              <element name="value">
+                <ref name="value"/>
+              </element>
+              <element name="not-existing">
+                <empty/>
+              </element>  
+            </choice>
+          </start>
+
+          <define name="value">
+            <zeroOrMore>
+              <choice>
+                <text/>
+                <ref name="any"/>
+              </choice>
+            </zeroOrMore>
+          </define>
+          
+          <define name="any">
+            <element>
+              <anyName/>
+              <zeroOrMore>
+                <attribute>
+                  <anyName/>
+                </attribute>
+              </zeroOrMore>
+              <ref name="value"/>
+            </element>
+          </define>
+
+        </grammar>
+      </parameter>
+      <parameter name="value" type="string"/>
+
+      <parameter name="content" mimetype="text/xml"/>
+      <parameter name="content" mimetype="text/plain"/>
+    </choice>
+  </message>
+
+  <message name="resource-document">
+    <parameter name="document" mimetype="text/xml"/>
+  </message>
+  <message name="resource-document-schema">
+    <parameter name="document-schema" mimetype="text/xml"/>
+  </message>
+
+  <message name="properties">
+    <oneOrMore>
+      <parameter name="name" type="string"/>
+      <choice>
+        <parameter name="value" type="string"/>
+        <parameter name="value" mimetype="text/plain"/>
+        <parameter name="content" mimetype="text/xml"/> <!-- add everything inside the root tag -->
+        <parameter name="content" type="string"/> <!-- add everything inside the root tag -->
+      </choice>
+    </oneOrMore>
+  </message>
+
+  <message name="propertylist">
+    <parameter name="properties" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
+      <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+        <start>
+          <element name="properties">
+            <zeroOrMore>
+              <ref name="property"/>
+            </zeroOrMore>  
+          </element>
+        </start>
+
+        <define name="property">
+          <element>
+            <anyName/>
+            <data type="string"/>
+          </element>
+        </define>  
+
+      </grammar>
+    </parameter>
+  </message>
+  <message name="addcontent">
+    <choice>
+      <parameter name="value" type="string"/>
+      <parameter name="value" mimetype="text/xml"/>
+    </choice>  
+  </message>
+  <message name="updcontent">
+    <choice>
+      <parameter name="value" type="string"/>
+      <parameter name="value" mimetype="text/plain"/>
+      <parameter name="content" mimetype="text/xml"/> <!-- add everything inside the root tag -->
+      <parameter name="content" type="string"/> <!-- add everything inside the root tag -->
+    </choice>  
+  </message>
+  <message name="property">
+    <parameter name="name" type="string">
+      <param name="pattern">[a-zA-Z_][a-zA-Z0-9_]*</param>
+    </parameter>
+    <choice>
+      <parameter name="value" type="string"/>
+      <parameter name="value" mimetype="text/plain"/>
+      <parameter name="content" mimetype="text/xml"/> <!-- add everything inside the root tag -->
+      <parameter name="content" type="string"/> <!-- add everything inside the root tag -->
+    </choice>
+  </message>
+  <message name="query">
+    <parameter name="query" type="string"/>
+  </message>
+
+  <resource pattern="http://riddl.org/ns/common-patterns/properties/1.0">
+    <get in="*" out="resource-document"/>
+    <get in="query" out="value"/>
+    <resource relative="schema">
+      <get in="*" out="resource-document-schema"/>
+      <resource relative="rng">
+        <get in="*" out="resource-document-schema"/>
+      </resource>  
+      <resource relative="xsd">
+        <get in="*" out="resource-document-schema"/>
+      </resource>
+    </resource>
+    <resource relative="values">
+      <get in="*" out="propertylist"/>
+      <post in="property"/>
+      <put in="properties"/>
+      <resource>
+        <get in="*" out="value"/>
+        <delete in="*"/>
+        <post in="addcontent"/>
+        <put in="updcontent"/>
+        <resource>
+          <get in="*" out="value"/>
+          <put in="updcontent"/>
+          <delete in="*"/>
+          <resource recursive='true'>
+            <get in="*" out="value"/>
+          </resource>
+        </resource>
+      </resource>
+    </resource>
+  </resource>  
+
+</description>
