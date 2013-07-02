@@ -270,6 +270,23 @@ module Riddl
       def route?
         !(route.nil? || route.empty?)
       end
+      def route_to_a
+        if route?
+          @route.map do |m|
+            if m.class == Riddl::Wrapper::Description::RequestInOut
+              Riddl::Wrapper::IOMessages.new(m.in, m.out,nil,m.interface)
+            elsif m.class == Riddl::Wrapper::Description::RequestTransformation
+              Riddl::Wrapper::IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new,nil,m.interface)
+            elsif m.class == Riddl::Wrapper::Description::RequestStarOut
+              Riddl::Wrapper::IOMessages.new(Riddl::Wrapper::Description::Star.new, m.out,nil,m.interface)
+            elsif m.class == Riddl::Wrapper::Description::RequestPass
+              Riddl::Wrapper::IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new,nil,m.interface)
+            end
+          end    
+        else
+          [self]
+        end  
+      end
       attr_reader :in, :out, :route, :interface
       #}}}
     end

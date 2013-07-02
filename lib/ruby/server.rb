@@ -260,8 +260,7 @@ module Riddl
             instance_exec(@riddl_info, &@riddl_interfaces[nil])  
           elsif @riddl.declaration?
             mess = @riddl_message
-            ifs = @riddl_message.route? ? @riddl_message.route : [@riddl_message]
-            ifs.each do |m|
+            @riddl_message.route_to_a.each do |m|
               @riddl_message = m
               @riddl_path = '/'
               if m.interface.base.nil?

@@ -274,7 +274,11 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               th = headers
               tq = qparams
               riddl_message.route.each do |m|
-                status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,riddl_message && riddl_message.out)
+                if m == riddl_message.route.last
+                  status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,riddl_message && riddl_message.out)
+                else
+                  status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,true)
+                end  
                 return response if simulate
                 if status != 200 || !@wrapper.check_message(response,response_headers,m.out)
                   raise OutputError, "Not a valid output from service."
