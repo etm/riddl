@@ -102,12 +102,10 @@ module Riddl
         @doc.root.prepend rds.find('/xmlns:description/xmlns:message')
         r = @doc.find("/des:description/des:resource")
         r.first.prepend rds.find('/xmlns:description/xmlns:resource/*') unless r.empty?
-        puts @doc
       end
       if @is_declaration  && get_description
-        n = @doc.root.prepend("dec:interface",:name=>"riddldescription").add XML::Smart::open_unprotected(RIDDL_DESCRIPTION_SHOW).root
-        n = @doc.root.find("dec:facade/dec:tile")
-        n.first.prepend("layer",:name =>"riddldescription") if n.any?
+        @doc.root.prepend("dec:interface",:name=>"riddldescription").add XML::Smart::open_unprotected(RIDDL_DESCRIPTION_SHOW).root
+        @doc.root.find("dec:facade").first.append('dec:tile').append("layer",:name =>"riddldescription")
       end  
 
       @declaration = @description = nil
