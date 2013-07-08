@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<description xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <message name="riddl-description-response">
+    <parameter name="riddl-description" mimetype="text/xml"/>
+  </message>
+  <message name="riddl-resource-description-request">
+    <parameter name="riddl-resource-description" type="string"/>
+  </message>
+  <resource>
+    <get in="riddl-resource-description-request" out="riddl-description-response"/>
+  </resource>
+</description>
