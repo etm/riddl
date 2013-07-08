@@ -19,6 +19,7 @@ module Riddl
             t = mess.content.dup
             name = mess.name
             name += '_' while names.include?(name)
+            names << name
             t.root.attributes['name'] = name
             messages_result << t.root.dump + "\n"
           end

@@ -56,6 +56,7 @@ module Riddl
     DESCRIPTION_FILE = "#{File.dirname(__FILE__)}/ns/description/#{VERSION_MAJOR}.#{VERSION_MINOR}/description.rng"
     DECLARATION_FILE = "#{File.dirname(__FILE__)}/ns/declaration/#{VERSION_MAJOR}.#{VERSION_MINOR}/declaration.rng"
     RIDDL_DESCRIPTION_SHOW = "#{File.dirname(__FILE__)}/ns/common-patterns/riddl-description/show.xml"
+    RIDDL_DESCRIPTION_RESOURCE_SHOW = "#{File.dirname(__FILE__)}/ns/common-patterns/riddl-description/resource-show.xml"
     COMMON = "datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"#{DESCRIPTION}\" xmlns:xi=\"http://www.w3.org/2001/XInclude\""
     CHECK = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"><data/></element>"
     #}}}
@@ -99,13 +100,21 @@ module Riddl
       @doc.register_namespace 'dec', DECLARATION
       if @is_description && get_description
         rds = XML::Smart::open_unprotected(RIDDL_DESCRIPTION_SHOW)
+        rrds = XML::Smart::open_unprotected(RIDDL_DESCRIPTION_RESOUCE_SHOW)
         @doc.root.prepend rds.find('/xmlns:description/xmlns:message')
-        r = @doc.find("/des:description/des:resource")
-        r.first.prepend rds.find('/xmlns:description/xmlns:resource/*') unless r.empty?
+        @doc.root.prepend rrds.find('/xmlns:description/xmlns:message')
+        @doc.find("/des:description/des:resource").each do |r|
+          r.first.prepend rds.find('/xmlns:description/xmlns:resource/*')
+        end  
+        @doc.find("/des:description//des:resource").each do |r|
+          r.first.prepend rrds.find('/xmlns:description/xmlns:resource/*')
+        end  
       end
       if @is_declaration  && get_description
         @doc.root.prepend("dec:interface",:name=>"riddldescription").add XML::Smart::open_unprotected(RIDDL_DESCRIPTION_SHOW).root
-        @doc.root.find("dec:facade").first.append('dec:tile').append("layer",:name =>"riddldescription")
+        @doc.root.prepend("dec:interface",:name=>"riddlresourcedescription").add XML::Smart::open_unprotected(RIDDL_DESCRIPTION_RESOURCE_SHOW).root
+        @doc.root.find("dec:facade").first.append('dec:tile').append("layer",:name => "riddldescription")
+        @doc.root.find("dec:facade").first.append('dec:tile').append("layer",:name => "riddlresourcedescription",:everywhere => 'true')
       end  
 
       @declaration = @description = nil
@@ -114,7 +123,7 @@ module Riddl
 
     def declaration
       #{{{
-      if @is_declaration
+      if @declaration.nil? && @is_declaration
         @declaration = Riddl::Wrapper::Declaration.new(@doc)
       end
       @declaration
@@ -123,7 +132,7 @@ module Riddl
       
     def description
       #{{{
-      if @is_description
+      if @description.nil? && @is_description
         @description = Riddl::Wrapper::Description.new(@doc)
       end
       @description
@@ -137,6 +146,12 @@ module Riddl
       return @declaration.get_resource(path).role if @is_declaration
       nil
     end #}}}
+
+    def resource_description(path)
+      req = @description.get_resource(path).description_xml if @is_description
+      req = @declaration.get_resource(path).description_xml if @is_declaration
+      req.to_s
+    end
 
     def io_messages(path,operation,params,headers)
       #{{{

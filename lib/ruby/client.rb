@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'net/https'
-require 'socket'
 require 'eventmachine'
 require 'em-websocket-client'
 require 'blather/client/client'
@@ -322,20 +321,30 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               http.set_debug_output @options[:debug]
             end  
             http.start do
-              http.request(req) do |resp|
-                res = resp
-                bs = Parameter::Tempfile.new("RiddlBody")
-                res.read_body(bs)
-                bs.rewind
-                response = Riddl::Protocols::HTTP::Parser.new(
-                  "",
-                  bs,
-                  res['CONTENT-TYPE'],
-                  res['CONTENT-LENGTH'],
-                  res['CONTENT-DISPOSITION'],
-                  res['CONTENT-ID'],
-                  res['RIDDL-TYPE']
-                ).params
+              retrycount = 0
+              begin
+                http.request(req) do |resp|
+                  res = resp
+                  bs = Parameter::Tempfile.new("RiddlBody")
+                  res.read_body(bs)
+                  bs.rewind
+                  response = Riddl::Protocols::HTTP::Parser.new(
+                    "",
+                    bs,
+                    res['CONTENT-TYPE'],
+                    res['CONTENT-LENGTH'],
+                    res['CONTENT-DISPOSITION'],
+                    res['CONTENT-ID'],
+                    res['RIDDL-TYPE']
+                  ).params
+                end
+              rescue => e
+                retrycount += 1
+                if retrycount < 4
+                  retry
+                else
+                  raise Riddl::ConnectionError, "#{url.host}:#{url.port}/#{url.path} not reachable - #{e.message}."
+                end
               end
             end
             response_headers = {}

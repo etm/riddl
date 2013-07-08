@@ -6,6 +6,8 @@ require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/xslove
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/fileserve')
 
 Riddl::Server.new(File.dirname(__FILE__) + '/declaration.xml', :port => 9292) do
+  accessible_description true
+
   backend = Riddl::Utils::Properties::Backend.new( 
     @riddl_opts[:basepath] + '/server.properties.schema', 
     @riddl_opts[:basepath] + '/server.properties.xml' 

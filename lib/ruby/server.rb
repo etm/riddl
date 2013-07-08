@@ -253,8 +253,13 @@ module Riddl
           @riddl_status = 501 # not implemented?!
         end  
       else
-        if get 'riddl-description-request'
-          run Riddl::Utils::Description::XML, @riddl_description_string 
+        if !@riddl_message.nil? && @riddl_message.in.name == 'riddl-description-request' && @riddl_method == 'get' &&  '/' + @riddl_info[:s].join('/') == '/'
+          run Riddl::Utils::Description::RDR, @riddl_description_string 
+        elsif !@riddl_message.nil? && @riddl_message.in.name == 'riddl-resource-description-request' && @riddl_method == 'get'
+          @riddl_path = File.dirname('/' + @riddl_info[:s].join('/')).gsub(/\/+/,'/')
+          on resource File.basename('/' + @riddl_info[:s].join('/')).gsub(/\/+/,'/') do
+            run Riddl::Utils::Description::RDR, @riddl.resource_description(@riddl_matching_path[0])
+          end  
         else
           if @riddl.description?
             instance_exec(@riddl_info, &@riddl_interfaces[nil])  
@@ -458,7 +463,6 @@ module Riddl
       end  
 
       @riddl_path << (@riddl_path == '/' ? resource : '/' + resource)
-
 
       ### only descend when there is a possibility that it holds the right path
       rp = @riddl_path.sub(/\//,'').split('/')

@@ -224,6 +224,46 @@ module Riddl
         end
         private :add_to_path_and_split
 
+        def description_xml
+          collect = ''
+          messages = {}
+          messages_result = ''
+
+          if @composition.any?
+            @composition.each do |k,v|
+              v.each do |e|
+                collect << if e.result.class==Riddl::Wrapper::Description::RequestInOut
+                  messages[e.result.in.hash] = e.result.in
+                  messages[e.result.out.hash] = e.result.out if e.result.out
+                  "    <#{k} in=\"#{e.result.in.name}\"#{e.result.out.nil? ? '' : " out=\"#{e.result.out.name}\""}/>\n"
+                elsif e.result.class==Riddl::Wrapper::Description::RequestTransformation
+                  '    '
+                elsif e.result.class==Riddl::Wrapper::Description::RequestStarOut
+                  messages[e.result.out.hash] = e.result.out if e.result.out
+                  "    <#{k} in=\"*\" out=\"#{e.result.out.name}\"/>\n"
+                elsif e.result.class==Riddl::Wrapper::Description::RequestPass
+                  '   '
+                elsif e.result.class==Riddl::Wrapper::Description::WebSocket
+                  "   <websocket/>\n"
+                else
+                  ''
+                end
+              end
+            end
+          end  
+
+          names = []
+          messages.each do |hash,mess|
+            t = mess.content.dup
+            name = mess.name
+            name += '_' while names.include?(name)
+            names << name
+            t.root.attributes['name'] = name
+            messages_result << t.root.dump + "\n"
+          end
+          XML::Smart.string("<description #{Riddl::Wrapper::COMMON}>\n\n" + messages_result.gsub(/^/,'  ') + "\n  <resource>\n" + collect + "  </resource>\n</description>").to_s
+        end
+
         # add requests helper methods
         #{{{
         def add_request_in_out(index,interface,des,method,min,mout)
