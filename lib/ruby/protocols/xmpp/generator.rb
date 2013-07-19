@@ -55,14 +55,14 @@ module Riddl
       end
 
       class Generator
-        def initialize(what,params,headers)
+        def initialize(what,params,headers,ack=false)
           @params = params
           @stanza = Stanza.new
           @node = XML::Smart::Dom::Element.new(@stanza)
           if what.is_a?(Fixnum)
             @node.add('ok').namespaces.add(nil,XR_NS)
           else
-            @node.add('operation',what).namespaces.add(nil,XR_NS)
+            @node.add('operation',what,:ack=>ack).namespaces.add(nil,XR_NS)
           end
           headers.each do |k,v|
             @node.add('header',v,:name => k).namespaces.add(nil,XR_NS)

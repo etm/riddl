@@ -11,6 +11,6 @@
   </endpoints>
   <handlerwrapper>Test</handlerwrapper>
   <description>lala</description>
-  <state>stopped</state>
+  <state>running</state>
   <transformation>xxx</transformation>
 </properties>

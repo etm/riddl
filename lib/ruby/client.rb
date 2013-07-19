@@ -251,7 +251,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
           res = response = nil
           if @wrapper.nil? || @wrapper.description? || (@wrapper.declaration? && !@base.nil?)
-            status, response, response_headers = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate,riddl_message && riddl_message.out)
+            status, response, response_headers = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate,riddl_message && riddl_message.out ? true : false)
             return response if simulate
             if !@wrapper.nil? && status == 200
               unless @wrapper.check_message(response,response_headers,riddl_message.out)
@@ -261,7 +261,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           elsif !@wrapper.nil? && @base.nil? && @wrapper.declaration?
             headers['RIDDL-DECLARATION-PATH'] = @rpath
             if !riddl_message.route?
-              status, response, response_headers = make_request(riddl_message.interface.real_url(@rpath,@base),riddl_method,parameters,headers,qparams,simulate,riddl_message && riddl_message.out)
+              status, response, response_headers = make_request(riddl_message.interface.real_url(@rpath,@base),riddl_method,parameters,headers,qparams,simulate,riddl_message && riddl_message.out ? true : false)
               return response if simulate
               if status == 200
                 unless @wrapper.check_message(response,response_headers,riddl_message.out)
@@ -274,7 +274,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               tq = qparams
               riddl_message.route.each do |m|
                 if m == riddl_message.route.last
-                  status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,riddl_message && riddl_message.out)
+                  status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,riddl_message && riddl_message.out ? true : false)
                 else
                   status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,true)
                 end  
@@ -301,7 +301,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end #}}}
         private :exec_request
 
-        def make_request(url,riddl_method,parameters,headers,qparams,simulate,out) #{{{
+        def make_request(url,riddl_method,parameters,headers,qparams,simulate,ack) #{{{
           url = URI.parse(url)
           qs = qparams.join('&')
           if url.class == URI::HTTP || url.class == URI::HTTPS
@@ -359,7 +359,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             #}}} 
           elsif url.class == URI::Generic && url.scheme.downcase == 'xmpp'
             #{{{
-            req = Riddl::Client::XMPPRequest.new(riddl_method,url.user + "@" + url.host,url.path,parameters,headers,qs)
+            req = Riddl::Client::XMPPRequest.new(riddl_method,url.user + "@" + url.host,url.path,parameters,headers,qs,ack)
             return req.simulate if simulate
 
             sig = SignalWait.new
@@ -370,7 +370,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             status = 404
             response = []
             response_headers = {}
-            if out
+            if ack
               @options[:xmpp].write_with_handler(stanza) do |raw|
                 res = XML::Smart::Dom::Element.new(raw).parent
                 @options[:debug].puts(res.to_s) if @options[:debug]
@@ -428,10 +428,10 @@ unless Module.constants.include?('CLIENT_INCLUDED')
       class XMPPRequest #{{{
         attr_reader :stanza
 
-        def initialize(method, to, path, parameters, headers, qs)
+        def initialize(method, to, path, parameters, headers, qs, ack)
           path = (path.strip == '' ? '/' : path)
           path += "?#{qs}" unless qs == ''
-          @stanza = Protocols::XMPP::Generator.new(method,parameters,headers).generate
+          @stanza = Protocols::XMPP::Generator.new(method,parameters,headers,ack).generate
           @stanza.to = to + path
         end
 
