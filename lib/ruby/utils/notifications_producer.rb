@@ -92,6 +92,11 @@ module Riddl
               end  
             end
 
+            def include?(key)
+              f = @target + '/' + key + '/subscription.xml'
+              File.exists?(f)
+            end
+
             def [](key)
               f = @target + '/' + key + '/subscription.xml'
               File.exists?(f) ? Sub.new(f) : nil
