@@ -92,17 +92,17 @@ unless Module.constants.include?('CLIENT_INCLUDED')
       def resource(path="")
         Resource.new(@base,@wrapper,path,@options)
       end
-      def get(parameters = []);             resource('/').get(parameters);             end
-      def simulate_get(parameters = []);    resource('/').simulate_get(parameters);    end
-      def post(parameters = []);            resource('/').post(parameters);            end
-      def simulate_post(parameters = []);   resource('/').simulate_post(parameters);   end
-      def put(parameters = []);             resource('/').put(parameters);             end
-      def simulate_put(parameters = []);    resource('/').simulate_put(parameters);    end
-      def delete(parameters = []);          resource('/').delete(parameters);          end
-      def simulate_delete(parameters = []); resource('/').simulate_delete(parameters); end
-      def request(what)                     resource('/').request(what);               end
-      def simulate_request(what)            resource('/').simulate_request(what);      end
-      def ws(blk)                           resource('/').ws(blk);                     end
+      def get(parameters = []);             resource.get(parameters);             end
+      def simulate_get(parameters = []);    resource.simulate_get(parameters);    end
+      def post(parameters = []);            resource.post(parameters);            end
+      def simulate_post(parameters = []);   resource.simulate_post(parameters);   end
+      def put(parameters = []);             resource.put(parameters);             end
+      def simulate_put(parameters = []);    resource.simulate_put(parameters);    end
+      def delete(parameters = []);          resource.delete(parameters);          end
+      def simulate_delete(parameters = []); resource.simulate_delete(parameters); end
+      def request(what)                     resource.request(what);               end
+      def simulate_request(what)            resource.simulate_request(what);      end
+      def ws(blk)                           resource.ws(blk);                     end
       #}}}
 
       class Resource
