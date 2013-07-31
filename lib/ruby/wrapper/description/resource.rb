@@ -240,7 +240,7 @@ module Riddl
                   '    '
                 elsif e.result.class==Riddl::Wrapper::Description::RequestStarOut
                   messages[e.result.out.hash] = e.result.out if e.result.out
-                  "    <#{k} in=\"*\" out=\"#{e.result.out.name}\"/>\n"
+                  "    <#{k} in=\"*\"#{e.result.out.nil? ? '' : " out=\"#{e.result.out.name}\""}/>\n"
                 elsif e.result.class==Riddl::Wrapper::Description::RequestPass
                   '   '
                 elsif e.result.class==Riddl::Wrapper::Description::WebSocket

@@ -100,14 +100,14 @@ module Riddl
       @doc.register_namespace 'dec', DECLARATION
       if @is_description && get_description
         rds = XML::Smart::open_unprotected(RIDDL_DESCRIPTION_SHOW)
-        rrds = XML::Smart::open_unprotected(RIDDL_DESCRIPTION_RESOUCE_SHOW)
+        rrds = XML::Smart::open_unprotected(RIDDL_DESCRIPTION_RESOURCE_SHOW)
         @doc.root.prepend rds.find('/xmlns:description/xmlns:message')
         @doc.root.prepend rrds.find('/xmlns:description/xmlns:message')
         @doc.find("/des:description/des:resource").each do |r|
-          r.first.prepend rds.find('/xmlns:description/xmlns:resource/*')
+          r.prepend rds.find('/xmlns:description/xmlns:resource/*')
         end  
         @doc.find("/des:description//des:resource").each do |r|
-          r.first.prepend rrds.find('/xmlns:description/xmlns:resource/*')
+          r.prepend rrds.find('/xmlns:description/xmlns:resource/*')
         end  
       end
       if @is_declaration  && get_description

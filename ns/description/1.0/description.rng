@@ -37,7 +37,7 @@
       <ref name="riddl-header"/>
     </zeroOrMore>
     <zeroOrMore>
-      <ref name="riddl-message-other"/>
+      <ref name="riddl-message-content"/>
     </zeroOrMore>
   </define>
 
@@ -95,7 +95,7 @@
     </element>  
   </define>
 
-  <define name="riddl-message-other">
+  <define name="riddl-message-content">
     <choice>
       <ref name="riddl-zeroOrMore"/>
       <ref name="riddl-oneOrMore"/>
@@ -104,7 +104,7 @@
       <ref name="riddl-parameter"/>
     </choice>  
   </define>
-  <define name="riddl-message-other-trimmed">
+  <define name="riddl-message-content-trimmed">
     <choice>
       <ref name="riddl-zeroOrMore"/>
       <ref name="riddl-oneOrMore"/>
@@ -116,43 +116,48 @@
 
   <define name="riddl-zeroOrMore">
     <element name="zeroOrMore">
+      <ref name="riddl-description-others"/>
       <oneOrMore>
-        <ref name="riddl-message-other"/>
+        <ref name="riddl-message-content"/>
       </oneOrMore>  
     </element>  
   </define>
   <define name="riddl-oneOrMore">
     <element name="oneOrMore">
+      <ref name="riddl-description-others"/>
       <oneOrMore>
-        <ref name="riddl-message-other"/>
+        <ref name="riddl-message-content"/>
       </oneOrMore>
     </element>  
   </define>
   <define name="riddl-optional">
     <element name="optional">
+      <ref name="riddl-description-others"/>
       <oneOrMore>
-        <ref name="riddl-message-other"/>
+        <ref name="riddl-message-content"/>
       </oneOrMore>  
     </element>  
   </define>
   <define name="riddl-choice">
     <element name="choice">
+      <ref name="riddl-description-others"/>
       <oneOrMore>
-        <ref name="riddl-message-other-trimmed"/>
+        <ref name="riddl-message-content-trimmed"/>
       </oneOrMore>
     </element>
   </define>
   <define name="riddl-group">
     <element name="group">
+      <ref name="riddl-description-others"/>
       <oneOrMore>
-        <ref name="riddl-message-other"/>
+        <ref name="riddl-message-content"/>
       </oneOrMore>
     </element>  
   </define>
   <define name="riddl-parameter">
     <element name="parameter">
       <ref name="riddl-att-name-star"/>
-      <ref name="riddl-description-other-atts"/>
+      <ref name="riddl-description-others"/>
       <choice>
         <ref name="riddl-fixed"/>
         <ref name="data"/>
@@ -194,7 +199,7 @@
         <data type="anyURI"/>
       </attribute>  
     </optional>
-    <ref name="riddl-description-other-atts"/>
+    <ref name="riddl-description-others"/>
   </define>
     
   <define name="riddl-resource-recursive-choice">
