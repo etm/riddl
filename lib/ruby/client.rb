@@ -429,7 +429,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         attr_reader :stanza
 
         def initialize(method, to, path, parameters, headers, qs, ack)
-          path = (path.strip == '' ? '/' : path)
+          path = (path.strip == '' ? '' : path)
           path += "?#{qs}" unless qs == ''
           @stanza = Protocols::XMPP::Generator.new(method,parameters,headers,ack).generate
           @stanza.to = to + path
