@@ -168,7 +168,7 @@ module Riddl
           if @riddl_xmpp_jid && @riddl_xmpp_pass
             xmpp = Blather::Client.setup @riddl_xmpp_jid, @riddl_xmpp_pass
             @riddl_opts[:xmpp] = xmpp
-            xmpp.register_handler(:message, '/message/ns:operation', :ns => 'http://www.fp7-adventure.eu/ns/xmpp-rest') do |m|
+            xmpp.register_handler(:message, '/message/ns:operation', :ns => 'http://riddl.org/ns/xmpp-rest') do |m|
               began_at = Time.now
               instance = dup
               instance.__xmpp_call(xmpp,m)

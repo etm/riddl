@@ -5,7 +5,7 @@ require 'securerandom'
 module Riddl
   module Protocols
     module XMPP
-      XR_NS = 'http://www.fp7-adventure.eu/ns/xmpp-rest'.freeze
+      XR_NS = 'http://riddl.org/ns/xmpp-rest'.freeze
 
       class Stanza < Blather::Stanza
         def self.new
