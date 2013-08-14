@@ -392,7 +392,15 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               sig.wait
             else
               status = 200
-              @options[:xmpp].write(stanza)
+              @options[:xmpp].write stanza 
+
+              # xmpp writes in next_tick so we have to fucking wait also a tick
+              # to ensure that all shit has been written. fuck. not the best
+              # solution, but scripts may preemtively quit if we dont do it. if
+              # anybody knows a better solution, please tell me.
+              EM.next_tick { sig.continue }
+              sig.wait
+
             end
             return status, response, response_headers
             #}}}
