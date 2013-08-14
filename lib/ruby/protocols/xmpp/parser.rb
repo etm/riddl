@@ -50,7 +50,7 @@ module Riddl
           end
 
           input.each { |i| body << i.dump }
-          body.rewind # if body.respond_to?(:binmode)
+          body.rewind if body.respond_to?(:binmode)
 
           add_to_params(name,body,filename,ctype,head)
  #}}}
