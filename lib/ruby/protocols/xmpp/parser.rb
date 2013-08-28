@@ -49,7 +49,8 @@ module Riddl
             body = ''
           end
 
-          body << input
+          input.each { |i| body << i.dump }
+          body.rewind if body.respond_to?(:binmode)
 
           add_to_params(name,body,filename,ctype,head)
  #}}}
@@ -105,7 +106,7 @@ module Riddl
               # sub is a fix for Safari Ajax postings that always append \0
               parse_nested_query(p.text.sub(/\0\z/, ''),:body)
             else  
-              parse_part(p.text,p.attributes,content_type,p.attributes['content_disposition']||'',p.attributes['content-id']||'',p.attributes['RIDDL-TYPE']||'')
+              parse_part(p.children,p.attributes,content_type,p.attributes['content_disposition']||'',p.attributes['content-id']||'',p.attributes['RIDDL-TYPE']||'')
             end
           end
           #}}}
