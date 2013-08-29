@@ -1,7 +1,0 @@
-#!/usr/bin/ruby
-require '../../lib/ruby/client'
-
-library = Riddl::Client.new("http://sumatra.pri.univie.ac.at:9290/")
-books = library.resource("/groups")
-
-status, res = books.request :get => []

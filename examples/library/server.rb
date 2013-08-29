@@ -1,15 +1,12 @@
-require 'rack'
-require 'socket'
-require '../../lib/ruby/server'
-require '../../lib/ruby/utils/erbserve'
+#!/usr/bin/ruby
 require 'pp'
-
-use Rack::ShowStatus
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/erbserve')
 
 class BookQuery < Riddl::Implementation
   def response
     authors = @p.map{|e|e.name == "author" ?  "<author>" + e.value + "</author>" : nil }.compact
-    title = @p.map{|e|e.name == "title" ?  e.value : nil }.compact
+    title = @p.map{|e|e.name == "title" ?  e.value : nil }.compact.join
     Riddl::Parameter::Complex.new("list-of-books","text/xml") do
       <<-END
         <books>
@@ -37,8 +34,8 @@ class BookDescription < Riddl::Implementation
   end
 end
 
-run Riddl::Server.new("description.xml") {
-  process_out false
+Riddl::Server.new(File.dirname(__FILE__) + '/description.xml', :port => 9292) do
+  accessible_description true
 
   on resource do
     run Riddl::Utils::ERBServe, "static/info.txt"  if get
@@ -52,4 +49,4 @@ run Riddl::Server.new("description.xml") {
       run Riddl::Utils::ERBServe, "static/info.txt"  if get
     end
   end
-}
+end.loop!

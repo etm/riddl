@@ -46,12 +46,12 @@
     </parameter>
   </message>
 
-  <message name="html-output">
-    <parameter name="data" mimetype="text/html"/>
+  <message name="main-output">
+    <parameter name="data" mimetype="text/plain"/>
   </message>
 
   <resource>
-    <get in="*" out="html-output"/>
+    <get in="*" out="main-output"/>
     <resource relative="books">
       <post in="book-description-form" out="book-id"/>
       <post in="book-description" out="book-id"/>
@@ -73,7 +73,7 @@
       </resource>
     </resource>
     <resource relative="about">
-      <get in="*" out="html-output"/>
+      <get in="*" out="main-output"/>
     </resource>
   </resource>  
 
