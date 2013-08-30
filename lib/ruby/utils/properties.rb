@@ -126,7 +126,7 @@ module Riddl
           tdoc.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
           @mutex.synchronize do
             block.call tdoc
-            if tdoc.validate_against(@rng)
+            if tdoc.validate_against(@rng){|err| puts err.message }
               block.call @data
               @data.save_as(@target)
               true
