@@ -152,6 +152,7 @@ module Riddl
                     n = @node.add('part')
                     n.namespaces.add(nil,XR_NS)
                     n.attributes['RIDDL-TYPE'] = 'simple'
+                    n.attributes['content-type'] = 'text/plain'
                     n.attributes['content-disposition'] = "#{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\""
                     n.text = r.value
                   when Riddl::Parameter::Complex

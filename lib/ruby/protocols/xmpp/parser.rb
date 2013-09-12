@@ -35,7 +35,7 @@ module Riddl
  #{{{
           head = Hash[
             head.map do |h|
-              STD_ATTRIBUTES.include?(h.qname.name) ? nil : [h.qname.name, value]
+              STD_ATTRIBUTES.include?(h.qname.name) ? nil : [h.qname.name, h.value]
             end.compact
           ]
           ctype = nil if riddl_type == 'simple'
@@ -100,13 +100,13 @@ module Riddl
           parse_nested_query(query_string,:query)
 
           input.find('/message/xr:part').each do |p|
-            content_type = p.attributes['content-type'] || ''
+            content_type = p.attributes['content-type'] || 'text/plain'
             media_type = content_type && content_type.split(/\s*[;,]\s*/, 2).first.downcase
             if FORM_CONTENT_TYPES.include?(media_type)
               # sub is a fix for Safari Ajax postings that always append \0
               parse_nested_query(p.text.sub(/\0\z/, ''),:body)
             else  
-              parse_part(p.children,p.attributes,content_type,p.attributes['content_disposition']||'',p.attributes['content-id']||'',p.attributes['RIDDL-TYPE']||'')
+              parse_part(p.children,p.attributes,content_type,p.attributes['content-disposition']||'',p.attributes['content-id']||'',p.attributes['RIDDL-TYPE']||'')
             end
           end
           #}}}
