@@ -14,7 +14,6 @@ module Riddl
         ].freeze
         FORM_CONTENT_TYPES = [
           #{{{
-          nil,
           'application/x-www-form-urlencoded'
           #}}}
         ].freeze
