@@ -7,7 +7,6 @@ module Riddl
       class Parser
         FORM_CONTENT_TYPES = [
           #{{{
-          nil,
           'application/x-www-form-urlencoded'
           #}}}
         ].freeze
@@ -100,7 +99,7 @@ module Riddl
           parse_nested_query(query_string,:query)
 
           input.find('/message/xr:part').each do |p|
-            content_type = p.attributes['content-type'] || 'text/plain'
+            content_type = p.attributes['content-type'] || nil
             media_type = content_type && content_type.split(/\s*[;,]\s*/, 2).first.downcase
             if FORM_CONTENT_TYPES.include?(media_type)
               # sub is a fix for Safari Ajax postings that always append \0
