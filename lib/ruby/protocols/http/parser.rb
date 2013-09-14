@@ -44,18 +44,18 @@ module Riddl
 
           if content_length == 0 && name == ''
             body << input.read
-          end
-
-          bufsize = 16384
-          until content_length <= 0
-            c = input.read(bufsize < content_length ? bufsize : content_length)
-            raise EOFError, "bad content body"  if c.nil? || c.empty?
-            body << c
-            content_length -= c.size
+          else  
+            bufsize = 16384
+            until content_length <= 0
+              c = input.read(bufsize < content_length ? bufsize : content_length)
+              raise EOFError, "bad content body"  if c.nil? || c.empty?
+              body << c
+              content_length -= c.size
+            end
           end
           body.rewind if body.respond_to?(:binmode)
 
-          add_to_params(name,body,filename,ctype,nil)
+          add_to_params(name,body,filename,ctype,nil) if body.length > 0
           #}}}
         end
         private :parse_content
