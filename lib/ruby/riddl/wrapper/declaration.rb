@@ -15,11 +15,11 @@ module Riddl
       end
       
       def description_xml
-        @facade.description_xml
+        @facade.description_xml(@namespaces)
       end
 
       def description
-        Riddl::Wrapper.new(@facade.description_xml)
+        Riddl::Wrapper.new(@facade.description_xml(@namespaces))
       end
 
       def visualize_tiles_and_layers
@@ -58,7 +58,8 @@ module Riddl
       end
 
       def initialize(riddl)
-        @facade = Riddl::Wrapper::Declaration::Facade.new(riddl.namespaces)
+        @facade = Riddl::Wrapper::Declaration::Facade.new
+        @namespaces = riddl.namespaces
         #{{{
         ### create single tiles
         @tiles = []

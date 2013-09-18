@@ -9,7 +9,7 @@ module Riddl
         end  
         rng = XML::Smart.string("<payload>" + hinfo + "</payload>")
         rng.register_namespace 'r', 'http://relaxng.org/ns/structure/1.0'
-        w.validate_against(rng.find("//r:grammar").first.to_doc) rescue false
+        w.validate_against(rng.find("//r:grammar|//r:element").first.to_doc) rescue false
       end
     end
   end  
