@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/utils/downloadify')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/server')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/downloadify')
 
 Riddl::Server.new(::File.dirname(__FILE__) + '/server.declaration.xml', :port => 9299) do
   accessible_description true

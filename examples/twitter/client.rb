@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-require '../../lib/ruby/client'
+require '../../lib/ruby/riddl/client'
 require 'pp'
 
 twitter = Riddl::Client.interface("https://api.twitter.com/","twitter.xml")

@@ -1,8 +1,8 @@
 require 'rack'
 require 'socket'
-require '../../lib/ruby/server'
-require '../../lib/ruby/commonlogger'
-require '../../lib/ruby/utils/erbserve'
+require '../../lib/ruby/riddl/server'
+require '../../lib/ruby/riddl/commonlogger'
+require '../../lib/ruby/riddl/utils/erbserve'
 
 require 'pp'
 

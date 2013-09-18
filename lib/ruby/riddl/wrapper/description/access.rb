@@ -10,10 +10,12 @@ module Riddl
           @used || false
         end
         attr_reader :interface
+        attr_reader :custom
       end# }}}
 
       class RequestInOut < AccessBase# {{{
-        def initialize(des,min,mout,interface)
+        def initialize(des,min,mout,interface,custom=[])
+          @custom = custom
           @interface = interface
           if des.nil?
             @in = min
@@ -34,7 +36,8 @@ module Riddl
       end# }}}
 
       class RequestTransformation < AccessBase# {{{
-        def initialize(des,mtrans,interface)
+        def initialize(des,mtrans,interface,custom=[])
+          @custom = custom
           @interface = interface
           if des.nil?
             @trans = mtrans
@@ -65,7 +68,8 @@ module Riddl
       end# }}}
 
       class RequestStarOut < AccessBase# {{{
-        def initialize(des,mout,interface)
+        def initialize(des,mout,interface,custom=[])
+          @custom = custom
           @interface = interface
           if des.nil?
             @out = mout
@@ -84,7 +88,8 @@ module Riddl
       end# }}}
 
       class RequestPass < AccessBase# {{{
-        def initialize(interface)
+        def initialize(interface,custom=[])
+          @custom = custom
           @interface = interface
         end  
         def visualize; ""; end
@@ -94,10 +99,11 @@ module Riddl
       end# }}}
 
       class WebSocket < AccessBase# {{{
-        def visualize; ""; end
-        def initialize(interface)
+        def initialize(interface,custom=[])
+          @custom = custom
           @interface = interface
         end  
+        def visualize; ""; end
         def hash
           0
         end

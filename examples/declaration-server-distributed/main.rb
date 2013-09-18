@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 require 'pp'
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/fileserve')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/server')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/fileserve')
 
 class Info < Riddl::Implementation
   def response

@@ -47,6 +47,7 @@ module Riddl
           #{{{
           res = add_path(path,res,rec)
           res.add_access_methods(des,desres,index,interface)
+          res.add_custom(desres)
           block.each do |bl|
             bpath = bl.to_s.gsub(/\/+/,'/').gsub(/\/$/,'')
             bpath = (bpath == "" ? "/" : bpath)
@@ -73,9 +74,8 @@ module Riddl
           #}}}
         end
 
-        def add_path(path,res,rec=nil)
+        def add_path(path,pres,rec=nil)
           #{{{
-          pres = res
           path.split('/').each do |pa|
             next if pa == ""
             unless pres.resources.has_key?(pa)

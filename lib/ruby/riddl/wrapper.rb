@@ -129,7 +129,7 @@ module Riddl
       @declaration
       #}}}
     end
-      
+
     def description
       #{{{
       if @description.nil? && @is_description

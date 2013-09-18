@@ -11,6 +11,7 @@ module Riddl
           @access_methods = {}
           @composition = {}
           @recursive = recursive
+          @custom = []
           #}}}
         end
 
@@ -18,33 +19,39 @@ module Riddl
           #{{{
           desres.find("des:*[not(name()='resource') and not(name()='websocket') and @in and not(@in='*')]").each do |m|
             method = m.attributes['method'] || m.qname.name
-            add_request_in_out(index,interface,des,method,m.attributes['in'],m.attributes['out'])
+            add_request_in_out(index,interface,des,method,m.attributes['in'],m.attributes['out'],m.find('*|text()'))
           end
           desres.find("des:*[not(name()='resource') and not(name()='websocket') and @pass and not(@pass='*')]").each do |m|
             method = m.attributes['method'] || m.qname.name
-            add_request_in_out(index,interface,des,method,m.attributes['pass'],m.attributes['pass'])
+            add_request_in_out(index,interface,des,method,m.attributes['pass'],m.attributes['pass'],m.find('*|text()'))
           end
           desres.find("des:*[not(name()='resource') and not(name()='websocket') and @transformation]").each do |m|
             method = m.attributes['method'] || m.qname.name
-            add_request_transform(index,interface,des,method,m.attributes['transformation'])
+            add_request_transform(index,interface,des,method,m.attributes['transformation'],m.find('*|text()'))
           end
           desres.find("des:*[not(name()='resource') and not(name()='websocket') and @in and @in='*']").each do |m|
             method = m.attributes['method'] || m.qname.name
-            add_request_star_out(index,interface,des,method,m.attributes['out'])
+            add_request_star_out(index,interface,des,method,m.attributes['out'],m.find('*|text()'))
           end
           desres.find("des:*[not(name()='resource') and not(name()='websocket') and not(@in)]").each do |m|
             method = m.attributes['method'] || m.qname.name
-            add_request_star_out(index,interface,des,method,m.attributes['out'])
+            add_request_star_out(index,interface,des,method,m.attributes['out'],m.find('*|text()'))
           end
           desres.find("des:*[not(name()='resource') and not(name()='websocket') and @pass and @pass='*']").each do |m|
             method = m.attributes['method'] || m.qname.name
-            add_request_pass(index,interface,method)
+            add_request_pass(index,interface,method,m.find('*|text()'))
           end
           desres.find("des:*[not(name()='resource') and name()='websocket']").each do |m|
-            add_websocket(index,interface)
+            add_websocket(index,interface,m.find('*|text()'))
           end
           @role = desres.find("string(@role)")
           @role = nil if @role.strip == ''
+          #}}}
+        end
+
+        def add_custom(desres)
+          #{{{
+          @custom = desres.find("*[not(self::des:*)]").to_a
           #}}}
         end
 
@@ -225,6 +232,7 @@ module Riddl
         private :add_to_path_and_split
 
         def description_xml
+          #{{{
           collect = ''
           messages = {}
           messages_result = ''
@@ -262,47 +270,49 @@ module Riddl
             messages_result << t.root.dump + "\n"
           end
           XML::Smart.string("<description #{Riddl::Wrapper::COMMON}>\n\n" + messages_result.gsub(/^/,'  ') + "\n  <resource>\n" + collect + "  </resource>\n</description>").to_s
+          #}}}
         end
 
-        # add requests helper methods
+        # private add requests helper methods
         #{{{
-        def add_request_in_out(index,interface,des,method,min,mout)
+        def add_request_in_out(index,interface,des,method,min,mout,custom)
           @access_methods[method] ||= []
           @access_methods[method][index] ||= []
-          @access_methods[method][index] << RequestInOut.new(des,min,mout,interface)
+          @access_methods[method][index] << RequestInOut.new(des,min,mout,interface,custom)
         end
         private :add_request_in_out
 
-        def add_request_transform(index,interface,des,method,mtrans)
+        def add_request_transform(index,interface,des,method,mtrans,custom)
           @access_methods[method] ||= []
           @access_methods[method][index] ||= []
-          @access_methods[method][index] << RequestTransformation.new(des,mtrans,interface)
+          @access_methods[method][index] << RequestTransformation.new(des,mtrans,interface,custom)
         end
         private :add_request_transform
 
-        def add_request_star_out(index,interface,des,method,mout)
+        def add_request_star_out(index,interface,des,method,mout,custom)
           @access_methods[method] ||= []
           @access_methods[method][index] ||= []
-          @access_methods[method][index] << RequestStarOut.new(des,mout,interface)
+          @access_methods[method][index] << RequestStarOut.new(des,mout,interface,custom)
         end
         private :add_request_star_out
 
-        def add_request_pass(index,interface,method)
+        def add_request_pass(index,interface,method,custom)
           @access_methods[method] ||= []
           @access_methods[method][index] ||= []
-          @access_methods[method][index] << RequestPass.new(interface)
+          @access_methods[method][index] << RequestPass.new(interface,custom)
         end
         private :add_request_pass
         
-        def add_websocket(index,interface)
+        def add_websocket(index,interface,custom)
           @access_methods['websocket'] ||= []
           @access_methods['websocket'][index] ||= []
-          @access_methods['websocket'][index] << WebSocket.new(interface)
+          @access_methods['websocket'][index] << WebSocket.new(interface,custom)
         end
         private :add_request_pass
         #}}}
 
         attr_reader :resources,:path,:access_methods,:composition,:recursive,:role
+        attr_accessor :custom
       end
 
       Composition = Struct.new(:route,:result)

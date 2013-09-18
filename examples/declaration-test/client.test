@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-require '../../lib/ruby/client'
+require '../../lib/ruby/riddl/client'
 require 'pp'
 
 test = Riddl::Client.facade("declaration2.xml")

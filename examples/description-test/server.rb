@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/server')
 
 class Test < Riddl::Implementation
   def response  

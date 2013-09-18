@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 require 'pp'
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/properties')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/xsloverlay')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/fileserve')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/server')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/properties')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/xsloverlay')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/fileserve')
 
 Riddl::Server.new(File.dirname(__FILE__) + '/declaration.xml', :port => 9292) do
   accessible_description true

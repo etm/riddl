@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/fileserve')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/notifications_producer')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/server')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/fileserve')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/notifications_producer')
 
 Riddl::Server.new(::File.dirname(__FILE__) + '/producer.declaration.xml', :port => 9291) do
   accessible_description true

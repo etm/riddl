@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-require '../../lib/ruby/client'
+require '../../lib/ruby/riddl/client'
 require 'xml/smart'
 require 'pp'
 

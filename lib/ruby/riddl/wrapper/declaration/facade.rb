@@ -3,12 +3,17 @@ module Riddl
     class Declaration < WrapperUtils
 
       class Facade
-        def initialize
+        def initialize(namespaces)
+          @namespaces = namespaces.delete_if do |k,n|
+            k =~ /^xmlns\d+$/ || [Riddl::Wrapper::DESCRIPTION, Riddl::Wrapper::DECLARATION, Riddl::Wrapper::XINCLUDE].include?(n)
+          end.map do |k,n|
+            "xmlns:#{k}=\"#{n}\""
+          end.join(' ')
           @resource = Riddl::Wrapper::Description::Resource.new("/")
         end
 
         def description_xml
-          #{{{
+          #{{{ 
           result = ""
           messages = {}
           names = []
@@ -23,7 +28,7 @@ module Riddl
             t.root.attributes['name'] = name
             messages_result << t.root.dump + "\n"
           end
-          XML::Smart.string("<description #{Riddl::Wrapper::COMMON}>\n\n" + description_result + messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>").to_s
+          XML::Smart.string("<description #{Riddl::Wrapper::COMMON} #{@namespaces}>\n\n" + description_result + messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>").to_s
           #}}}
         end
         def description_xml_priv(result,messages,level,res=@resource)
@@ -31,6 +36,9 @@ module Riddl
           s = "  " * (level + 1)
           t = "  " * (level + 2)
           result << s + "<resource#{res.path != '/' && res.path != '{}' ? " relative=\"#{res.path}\"" : ''}#{res.recursive ? " recursive=\"true\"" : ''}>\n"
+          res.custom.each do |c|
+            result << c.dump
+          end
           res.composition.each do |k,v|
             v.each do |m|
               m = m.result
@@ -59,8 +67,20 @@ module Riddl
                 when Riddl::Wrapper::Description::RequestTransformation
                   messages[m.trans.hash] ||= m.trans
                   result << "transformation=\"#{messages[m.trans.hash].name}\""
+              end
+              if m.custom.length > 0
+                result << ">\n"
+                m.custom.each do |e|
+                  result << e.dump + "\n"
+                end  
+                if %w{get post put delete websocket}.include?(k)
+                  result << t + "</#{k}>"
+                else
+                  result << t + "</request>\n"
+                end  
+              else  
+                result << "/>\n"
               end  
-              result << "/>\n"
             end  
           end
           res.resources.each do |k,v|
@@ -74,6 +94,7 @@ module Riddl
       
         def merge_tiles(res,fac=@resource)
           #{{{
+          fac.custom = fac.custom + res.custom
           res.composition.each do |method,s|
             fac.composition[method] ||= []
             fac.composition[method] += s

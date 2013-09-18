@@ -4,7 +4,7 @@ $0 = "websocket"
 require 'rubygems'
 require 'pp'
 require 'fileutils'
-require '../../lib/ruby/server'
+require '../../lib/ruby/riddl/server'
 require 'digest/md5'
 
 class Bar < Riddl::Implementation

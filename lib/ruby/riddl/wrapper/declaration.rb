@@ -58,7 +58,7 @@ module Riddl
       end
 
       def initialize(riddl)
-        @facade = Riddl::Wrapper::Declaration::Facade.new
+        @facade = Riddl::Wrapper::Declaration::Facade.new(riddl.namespaces)
         #{{{
         ### create single tiles
         @tiles = []

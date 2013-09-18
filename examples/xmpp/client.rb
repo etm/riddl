@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 # encoding: UTF-8
-require '../../lib/ruby/client'
+require '../../lib/ruby/riddl/client'
 require 'pp'
 
 #props = Riddl::Client.interface("http://localhost:9191","properties.xml")

@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/server')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/commonlogger')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/riddl/utils/erbserve')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/server')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/commonlogger')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/erbserve')
 
 class A < Riddl::Implementation
   def response

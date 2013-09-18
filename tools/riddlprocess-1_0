@@ -4,7 +4,7 @@ while ::File::symlink?(curpath)
   curpath = ::File::dirname(curpath) + '/' + ::File::readlink(curpath)
 end  
 require 'rubygems'
-require ::File::dirname(curpath) + "/../lib/riddl/wrapper"
+require ::File::dirname(curpath) + "/../lib/ruby/riddl/wrapper"
 require 'optparse'
 require 'pp'
 

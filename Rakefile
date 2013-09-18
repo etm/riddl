@@ -15,3 +15,7 @@ Gem::PackageTask.new(spec) do |pkg|
   `rm pkg/* -rf`
   `ln -sf #{pkg.name}.gem pkg/riddl.gem`
 end
+
+task :push => :gem do |r|
+  `gem push pkg/riddl.gem`
+end  

@@ -1,5 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/smartrunner.rb')
-require File.expand_path(File.dirname(__FILE__) + '/../lib/riddl/wrapper')
+require File.expand_path(File.dirname(__FILE__) + '/../lib/ruby/riddl/wrapper')
 
 class TestHelloWorld <  MiniTest::Unit::TestCase
 

@@ -44,6 +44,7 @@ module Riddl
           res = res.resources[path]
         end
         res.add_access_methods(des,desres,0,nil)
+        res.add_custom(desres)
         desres.find("des:resource").each do |desres|
           cpath = desres.attributes['relative'] || "{}"
           rec = desres.attributes['recursive']

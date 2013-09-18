@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 require 'digest/md5'
-require '../../../lib/ruby/client'
+require '../../../lib/ruby/riddl/client'
 require 'pp'
 
 # no ready for use

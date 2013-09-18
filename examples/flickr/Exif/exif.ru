@@ -1,5 +1,5 @@
 require 'rack'
-require '../../../lib/ruby/server'
+require '../../../lib/ruby/riddl/server'
 require '../Helpers/gps.rb'
 require 'pp'
 
