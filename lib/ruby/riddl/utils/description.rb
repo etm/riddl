@@ -6,6 +6,7 @@ module Riddl
 
       class RDR < Riddl::Implementation
         def response
+          @headers << Riddl::Header.new("RIDDL_DESCRIPTION", 'oh my, a riddl description')
           return Riddl::Parameter::Complex.new("riddl-description","text/xml",@a[0])
         end
       end
@@ -15,11 +16,14 @@ module Riddl
           client = Riddl::Client.new(@a[3],@a[4])
 
           path = client.resource "/" + @a[5]
-          @status, result = if @a[0].nil?
+          @status, result, headers = if @a[0].nil?
             path.request @m => [ Riddl::Header.new("RIDDL_DECLARATION_RESOURCE", @a[2]), Riddl::Header.new("RIDDL-DECLARATION-PATH", @a[1]) ] + @h.map{|a,b| Riddl::Header.new(a,b)} + @p
           else 
             path.request @m => [ Riddl::Header.new("RIDDL_DECLARATION_RESOURCE", @a[2]), Riddl::Header.new("RIDDL-DECLARATION-PATH", @a[1]) ] + @a[0].headers.map{|a,b| Riddl::Header.new(a,b)} + @a[0].response
-          end  
+          end
+          headers.each do |k,v|
+            @headers << Riddl::Header.new(k,v) unless ["CONTENT_TYPE", "CONTENT_DISPOSITION", "RIDDL_TYPE", "CONTENT_ID", "CONTENT_LENGTH", "CONNECTION", "SERVER"].include?(k)
+          end
           result
         end
       end

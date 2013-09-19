@@ -148,8 +148,8 @@ module Riddl
     end #}}}
 
     def resource_description(path)
-      req = @description.get_resource(path).description_xml if @is_description
-      req = @declaration.get_resource(path).description_xml if @is_declaration
+      req = @description.get_resource(path).description_xml(@doc.namespaces) if @is_description
+      req = @declaration.get_resource(path).description_xml(@doc.namespaces) if @is_declaration
       req.to_s
     end
 

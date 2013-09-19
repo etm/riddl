@@ -253,9 +253,9 @@ module Riddl
           @riddl_status = 501 # not implemented?!
         end  
       else
-        if !@riddl_message.nil? && @riddl_message.in.name == 'riddl-description-request' && @riddl_method == 'get' &&  '/' + @riddl_info[:s].join('/') == '/'
+        if !@riddl_message.nil? && @accessible_description && @riddl_message.in.name == 'riddl-description-request' && @riddl_method == 'get' &&  '/' + @riddl_info[:s].join('/') == '/'
           run Riddl::Utils::Description::RDR, @riddl_description_string 
-        elsif !@riddl_message.nil? && @riddl_message.in.name == 'riddl-resource-description-request' && @riddl_method == 'get'
+        elsif !@riddl_message.nil? && @accessible_description && @riddl_message.in.name == 'riddl-resource-description-request' && @riddl_method == 'get'
           @riddl_path = File.dirname('/' + @riddl_info[:s].join('/')).gsub(/\/+/,'/')
           on resource File.basename('/' + @riddl_info[:s].join('/')).gsub(/\/+/,'/') do
             run Riddl::Utils::Description::RDR, @riddl.resource_description(@riddl_matching_path[0])

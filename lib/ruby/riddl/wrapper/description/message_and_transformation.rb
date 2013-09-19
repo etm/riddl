@@ -12,6 +12,7 @@ module Riddl
           else
             @content = layer.find("des:#{type}[@name='#{name}']").first.to_doc
             @content.root.find("@name").delete_all!
+            @content.root.find("@name").delete_all!
             @content.register_namespace 'des', Riddl::Wrapper::DESCRIPTION
             @content.register_namespace 'dec', Riddl::Wrapper::DECLARATION
           end  
