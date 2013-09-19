@@ -11,28 +11,43 @@ module Riddl
             @content = content
           else
             @content = layer.find("des:#{type}[@name='#{name}']").first.to_doc
-            @content.unformated = true
+            @content.root.find("@name").delete_all!
             @content.register_namespace 'des', Riddl::Wrapper::DESCRIPTION
-            @content.register_namespace 'dec', Riddl::Wrapper::DECLARATION
-            @content.find("//comment()").delete_all!
-            @content.find("//des:parameter/*").delete_all!
-            @content.find("//text()").delete_all!
-            @content.find("//des:header/*").delete_all!
-            @content.find("//des:parameter/@handler").delete_all!
-            @content.find("//des:parameter/@mimetype").each { |e| e.value = '' }
-            @content.find("//des:*/@name").delete_all!
-            @content.root.namespaces.delete_all!
           end  
           update_hash!
         end
         def update_hash!
           # TODO too simple
-          @hash = @content.to_s.hash
+          hb = @content.root.to_doc
+          hb.register_namespace 'des', Riddl::Wrapper::DESCRIPTION
+          hb.unformated = true
+          hb.find("//comment()").delete_all!
+          hb.find("//des:parameter/*").delete_all!
+          hb.find("//text()").delete_all!
+          hb.find("//des:header/*").delete_all!
+          hb.find("//des:parameter/@handler").delete_all!
+          hb.find("//des:parameter/@mimetype").each { |e| e.value = '' }
+          hb.root.namespaces.delete_all!
+          @hash_base = hb
+          @hash      = hb.serialize.hash
         end
         def traverse?(other)
-          other.name.nil? ? false : (self.hash == other.hash)
+          if other.name.nil? 
+            false 
+          else
+            paths = self.hash_base.find("//des:parameter").map{ |e| e.path + "/@name" }
+            hb2 = XML::Smart::string(other.hash_base.serialize)
+            hb2.register_namespace 'des', Riddl::Wrapper::DESCRIPTION
+            hb2.unformated = true
+
+            paths.each do |p|
+              (hb2.find(p).first.value = '*') rescue nil
+            end
+
+            self.hash_base.serialize.hash == hb2.serialize.hash
+          end 
         end
-        attr_reader :name, :content, :hash
+        attr_reader :name, :content, :hash, :hash_base
         #}}}
       end
 

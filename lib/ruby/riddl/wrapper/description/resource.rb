@@ -79,6 +79,7 @@ module Riddl
             reqs.delete_if do |req|
               if req.class == freq[0]
                 if req.class == RequestInOut
+                  # TODO These hash comparisons are maybe too trivial, as we want to catch name="*" parameters
                   if freq[1] && freq[1].hash == req.in.hash && freq[2] && req.out && freq[2].hash == req.out.hash
                     true
                   elsif freq[1] && freq[1].hash == req.in.hash && !freq[2]
