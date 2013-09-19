@@ -11,10 +11,17 @@ module Riddl
             @content = content
           else
             @content = layer.find("des:#{type}[@name='#{name}']").first.to_doc
-            @content.root.find("@name").delete_all!
-            @content.root.find("@name").delete_all!
+            @content.unformated = true
             @content.register_namespace 'des', Riddl::Wrapper::DESCRIPTION
             @content.register_namespace 'dec', Riddl::Wrapper::DECLARATION
+            @content.find("//comment()").delete_all!
+            @content.find("//des:parameter/*").delete_all!
+            @content.find("//text()").delete_all!
+            @content.find("//des:header/*").delete_all!
+            @content.find("//des:parameter/@handler").delete_all!
+            @content.find("//des:parameter/@mimetype").each { |e| e.value = '' }
+            @content.find("//des:*/@name").delete_all!
+            @content.root.namespaces.delete_all!
           end  
           update_hash!
         end
