@@ -78,6 +78,7 @@ module Riddl
 
     def close_connection(*args)
       EM.next_tick do
+        trigger_on_close
         @socket.close_connection(*args)
       end  
     end

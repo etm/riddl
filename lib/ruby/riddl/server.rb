@@ -1,4 +1,4 @@
-gem 'thin', '=1.5.1'
+#gem 'thin', '=1.5.1'
 require File.expand_path(File.dirname(__FILE__) + '/constants')
 require File.expand_path(File.dirname(__FILE__) + '/implementation')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/parser')
@@ -146,7 +146,7 @@ module Riddl
           :pid => File.expand_path(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile])
         )
       else
-        server = Rack::Server.new(
+        Rack::Server.new(
           :app => app,
           :Port => @riddl_opts[:port],
           :environment => 'none',
@@ -164,8 +164,9 @@ module Riddl
       begin
         EM.run do
           puts "Server (#{@riddl_opts[:url]}) started as PID:#{Process.pid}"
-          puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass
           server.start
+
+          puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass
           if @riddl_xmpp_jid && @riddl_xmpp_pass
             xmpp = Blather::Client.setup @riddl_xmpp_jid, @riddl_xmpp_pass
             @riddl_opts[:xmpp] = xmpp
@@ -188,8 +189,16 @@ module Riddl
               ]
             end
             xmpp.connect
+          end
+
+          [:INT, :TERM].each do |signal|
+            Signal.trap(signal) do
+              EM.stop
+            end
           end  
+
         end
+
       rescue => e 
         if e.is_a?(Blather::Stream::ConnectionFailed)
           puts "Server (#{@riddl_xmpp_jid}) stopped due to connection error (PID:#{Process.pid})"
@@ -242,7 +251,7 @@ module Riddl
     def __call #{{{
       @riddl_message = @riddl.io_messages(@riddl_matching_path[0],@riddl_method,@riddl_parameters,@riddl_headers)
       if @riddl_message.nil?
-        if @riddl_info[:env].has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr
+        if @riddl_info[:env].has_key?('HTTP_ORIGIN') && @riddl_cross_site_xhr && @riddl_method == 'options'
           @riddl_res['Access-Control-Allow-Origin'] = '*'
           @riddl_res['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
           @riddl_res['Access-Control-Allow-Headers'] = @riddl_info[:env]['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'] if @riddl_info[:env]['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']
@@ -401,10 +410,10 @@ module Riddl
           # TODO raise error when declaration and route or (not route and non-local interface)
           # raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl.validate!
           @riddl_info[:m] = @riddl_method = 'websocket'
+          @riddl_message = @riddl.io_messages(@riddl_matching_path[0],'websocket',@riddl_parameters,@riddl_headers)
           if @riddl.description?
             instance_exec(@riddl_info, &@riddl_interfaces[nil])
           elsif @riddl.declaration?
-            @riddl_message = @riddl.io_messages(@riddl_matching_path[0],'websocket',@riddl_parameters,@riddl_headers)
             # one ws connection, no overlay
             unless @riddl_message.nil?
               if @riddl_interfaces.key? @riddl_message.interface.name
@@ -514,11 +523,11 @@ module Riddl
         false
       end
     end  # }}}
-    def post(min='*');   return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'post'      end
-    def get(min='*');    return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'get'       end
-    def delete(min='*'); return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'delete'    end
-    def put(min='*');    return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && min == @riddl_message.in.name && @riddl_method == 'put'       end
-    def websocket;       return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/')                                  && @riddl_method == 'websocket' end 
+    def post(min='*');   return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && @riddl_message.in && min == @riddl_message.in.name && @riddl_method == 'post'      end
+    def get(min='*');    return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && @riddl_message.in && min == @riddl_message.in.name && @riddl_method == 'get'       end
+    def delete(min='*'); return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && @riddl_message.in && min == @riddl_message.in.name && @riddl_method == 'delete'    end
+    def put(min='*');    return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && @riddl_message.in && min == @riddl_message.in.name && @riddl_method == 'put'       end
+    def websocket;       return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/')                                                       && @riddl_method == 'websocket' end
     def resource(rname=nil); return rname.nil? ? '{}' : rname end
 
     def matching_path #{{{

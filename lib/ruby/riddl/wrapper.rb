@@ -179,7 +179,7 @@ module Riddl
             return IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new)
           end
           r.select{|o|o.class==Riddl::Wrapper::Description::WebSocket}.each do |o|
-            return IOMessages.new(nil,nil,nil,o.result.interface)
+            return IOMessages.new(nil,nil,nil,nil)
           end
         end  
         if @is_declaration

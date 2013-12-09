@@ -1,11 +1,6 @@
 #!/usr/bin/ruby
-$0 = "websocket"
-
-require 'rubygems'
 require 'pp'
-require 'fileutils'
-require '../../lib/ruby/riddl/server'
-require 'digest/md5'
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/server')
 
 class Bar < Riddl::Implementation
   def response  
@@ -29,7 +24,9 @@ class Echo < Riddl::WebSocketImplementation
   end
 end
 
-Riddl::Server.new($basepath + '/description.xml') do
+Riddl::Server.new(File.dirname(__FILE__) + '/description.xml', :port => 9292) do
+  cross_site_xhr true
+
   on resource do
     run Bar if get '*'
     run Echo if websocket
