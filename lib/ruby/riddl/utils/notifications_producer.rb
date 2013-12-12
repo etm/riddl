@@ -71,7 +71,7 @@ module Riddl
             def to_s
               File.read(@name)
             end
-            def view(&block)
+            def read(&block)
               XML::Smart.open_unprotected(@name) do |doc|
                 doc.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
                 block.call doc
@@ -86,9 +86,8 @@ module Riddl
 
             def each(&block)
               keys.each do |key|
-                doc = XML::Smart.open_unprotected(@target + '/' + key + '/subscription.xml')
-                doc.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
-                block.call doc, key
+                f = @target + '/' + key + '/subscription.xml'
+                block.call Sub.new(f), key if File.exists? f
               end  
             end
 
@@ -138,6 +137,14 @@ module Riddl
             raise "topics file not found" unless File.exists?(topics)
             @topics = XML::Smart.open_unprotected(topics.gsub(/^\/+/,'/'))
             @topics.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
+
+            subscriptions.each do |sub,key|
+              sub.read do |doc|
+                if doc.find('/*[@url]').empty?
+                  sub.delete
+                end
+              end
+            end
           end  
 
           def subscriptions
@@ -177,12 +184,14 @@ module Riddl
               ret = XML::Smart::string <<-END
                 <subscriptions details='#{details}' xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>
               END
-              backend.subscriptions.each do |doc,key|
-                if doc.root.attributes['url']
-                  ret.root.add('subscription', :id => key, :url => doc.root.attributes['url'])
-                else  
-                  ret.root.add('subscription', :id => key)
-                end  
+              backend.subscriptions.each do |sub,key|
+                sub.read do |doc|
+                  if doc.root.attributes['url']
+                    ret.root.add('subscription', :id => key, :url => doc.root.attributes['url'])
+                  else  
+                    ret.root.add('subscription', :id => key)
+                  end
+                end
               end
               ret.to_s
             end
