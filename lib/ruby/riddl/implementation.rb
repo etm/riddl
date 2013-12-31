@@ -53,5 +53,9 @@ module Riddl
     def closed?
       @ws[:io].closed?
     end  
+
+    def close
+      p @ws[:io].class
+    end
   end
 end

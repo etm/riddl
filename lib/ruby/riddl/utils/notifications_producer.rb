@@ -314,7 +314,6 @@ module Riddl
 
           def onclose
             @handler.key(@key).ws_close() unless @handler.nil?
-            @backend.subscriptions[@key].delete
           end
         end #}}}
         
