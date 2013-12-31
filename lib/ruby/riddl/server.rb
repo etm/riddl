@@ -488,7 +488,7 @@ module Riddl
     def run(what,*args)# {{{
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
-        data = WebSocketParserData.new 
+        data = Riddl::Protocols::WebSocket::ParserData.new 
         data.request_path = @riddl_pinfo                                                                                                                                     
         data.request_url = @riddl_pinfo + '?' + @riddl_query_string
         data.query_string = @riddl_query_string
@@ -498,7 +498,7 @@ module Riddl
           @riddl_headers.map { |key, value|  [key.downcase.gsub('_','-'), value] }
         ]
         w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION'], :match => matching_path))
-        w.io = Riddl::WebSocket.new(w, @riddl_env['thin.connection']) 
+        w.io = Riddl::Protocols::WebSocket.new(w, @riddl_env['thin.connection']) 
         w.io.dispatch(data) 
       end  
       if what.class == Class && what.superclass == Riddl::Implementation
