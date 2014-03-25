@@ -52,7 +52,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           Thread::abort_on_exception = true
           Thread.new do
             begin
-              EM.run do
+              EM.send EM.reactor_running? ? :defer : :run do
                 client = Blather::Client.setup @options[:jid], @options[:pass]
                 client.register_handler(:ready) { sig.continue }
                 client.connect
