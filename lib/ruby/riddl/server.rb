@@ -402,7 +402,7 @@ module Riddl
           :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::HTTP::Parser::unescape(e)}, 
           :s => @riddl_matching_path[0].sub(/\//,'').split('/'),
           :m => @riddl_method, 
-          :env => @riddl_env.reject{|k,v| k =~ /^rack\./}.merge({'riddl.transport' => 'xmpp'}),
+          :env => @riddl_env.reject{|k,v| k =~ /^rack\./}.merge({'riddl.transport' => 'http'}),
           :match => []
         }
 
