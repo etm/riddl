@@ -38,6 +38,8 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
   module Riddl
 
+    # URL PATTERN
+    #{{{
     RIDDL_URL_PATTERN = %r{
       \A
 
@@ -77,7 +79,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
       \z
     }xi
-
+    #}}}
 
     class Client
       #{{{
