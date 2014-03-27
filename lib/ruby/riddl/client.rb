@@ -234,6 +234,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         private :extract_qparams
 
         def exec_request(riddl_method,parameters,simulate) #{{{
+          parameters = [ parameters ] unless parameters.is_a? Array
           parameters = parameters.dup
           headers = extract_headers(parameters)
           options = extract_options(parameters)
