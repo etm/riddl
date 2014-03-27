@@ -38,12 +38,56 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
   module Riddl
 
+    RIDDL_URL_PATTERN = %r{
+      \A
+
+      # protocol identifier
+      (?:(?:https?|xmpp)://)
+
+      # user:pass authentication
+      (?:\S+(?::\S*)?@)?
+
+      (?:
+        # IP address dotted notation octets
+        # excludes loopback network 0.0.0.0
+        # excludes reserved space >= 224.0.0.0
+        # excludes network & broacast addresses
+        # (first & last IP address of each class)
+        (?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])
+        (?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}
+        (?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))
+      |
+        # host name
+        (?:(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)
+
+        # domain name
+        (?:\.(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)*
+
+        # TLD identifier
+        (?:\.(?:[a-z\u00a1-\uffff]{2,}))
+      |
+        localhost
+      )
+
+      # port number
+      (?::\d{2,5})?
+
+      # resource path
+      (?:/[^\s]*)?
+
+      \z
+    }xi
+
+
     class Client
       #{{{
       def initialize(base, riddl=nil, options={})
         @base = base.nil? ? '' : base.gsub(/\/+$/,'')
         @options = options
         @wrapper = nil
+        if @base !~ RIDDL_URL_PATTERN
+          raise ConnectionError, 'An RFC 3986 URI as target is required. Pro tip: (http|https|xmpp)://...'
+        end
         if URI.parse(@base).scheme == 'xmpp' && !((@options[:jid] && @options[:pass]) || @options[:xmpp].is_a?(Blather::Client))
           raise ConnectionError, 'XMPP connections need jid/pass or Blather::client object passed as options to be successful.'
         end  
