@@ -452,6 +452,7 @@ module Riddl
     def xmpp(jid,pass)# {{{
       @riddl_xmpp_jid = jid
       @riddl_xmpp_pass = pass
+      @riddl_opts[:jid] = jid
     end# }}}
     def cross_site_xhr(csxhr)# {{{
       @riddl_cross_site_xhr = csxhr
