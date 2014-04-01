@@ -341,7 +341,7 @@ module Riddl
           :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::HTTP::Parser::unescape(e)}, 
           :s => @riddl_matching_path[0].sub(/\//,'').split('/'),
           :m => @riddl_method, 
-          :env =>  Hash[@riddl_env.root.attributes.map{|a| [a.qname.name, a.value] }].merge({ 'riddl.transport' => 'xmpp' }),
+          :env =>  Hash[@riddl_env.root.attributes.map{|a| [a.qname.name, a.value] }].merge({ 'riddl.transport' => 'xmpp', 'xmpp' => @riddl_res }),
           :match => []
         }
 
