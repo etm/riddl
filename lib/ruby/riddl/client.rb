@@ -448,9 +448,10 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               # to ensure that all shit has been written. fuck. not the best
               # solution, but scripts may preemtively quit if we dont do it. if
               # anybody knows a better solution, please tell me.
-              EM.next_tick { sig.continue }
-              sig.wait
 
+              ### UPDATE todo, we produce deadlocks here, rethink this mess
+              # EM.next_tick { sig.continue }
+              # sig.wait
             end
             return status, response, response_headers
             #}}}
