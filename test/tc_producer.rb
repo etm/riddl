@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/smartrunner.rb')
 require File.expand_path(File.dirname(__FILE__) + '/../lib/ruby/riddl/client')
 require 'xml/smart'
 
-class TestProd <  MiniTest::Unit::TestCase
+class TestProd <  Minitest::Test
   include ServerCase
 
   SERVER = [

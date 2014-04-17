@@ -1,5 +1,5 @@
 require 'rubygems'
-gem 'minitest', '=4.7.4'
+gem 'minitest'
 require 'minitest/autorun'
 require 'socket'
 

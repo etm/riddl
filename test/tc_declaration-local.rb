@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../lib/ruby/riddl/client')
 require 'xml/smart'
 require 'pp'
 
-class TestDecLo <  MiniTest::Unit::TestCase
+class TestDecLo <  Minitest::Test
   include ServerCase
 
   SERVER = [
