@@ -232,58 +232,73 @@ module Riddl
         end
         private :add_to_path_and_split
 
+        def description_xml_string_analyse(messages,t,k,m)
+ #{{{
+          result = ''
+          if %w{get post put delete websocket}.include?(k)
+            result << t + "<#{k} "
+          else
+            result << t + "<request method=\"#{k}\" "
+          end  
+          case m
+            when Riddl::Wrapper::Description::RequestInOut
+              messages[m.in.hash] ||= m.in
+              result << "in=\"#{messages[m.in.hash].name}\""
+              unless m.out.nil?
+                messages[m.out.hash] ||= m.out
+                result << " out=\"#{messages[m.out.hash].name}\""
+              end  
+            when Riddl::Wrapper::Description::RequestStarOut
+              result << "in=\"*\""
+              unless m.out.nil?
+                messages[m.out.hash] ||= m.out
+                result << " out=\"#{messages[m.out.hash].name}\""
+              end  
+            when Riddl::Wrapper::Description::RequestPass
+              messages[m.pass.hash] ||= m.pass
+              result << "pass=\"#{messages[m.pass.hash].name}\""
+            when Riddl::Wrapper::Description::RequestTransformation
+              messages[m.trans.hash] ||= m.trans
+              result << "transformation=\"#{messages[m.trans.hash].name}\""
+          end
+          if m.custom.length > 0
+            result << ">\n"
+            m.custom.each do |e|
+              result << e.dump + "\n"
+            end  
+            if %w{get post put delete websocket}.include?(k)
+              result << t + "</#{k}>"
+            else
+              result << t + "</request>\n"
+            end  
+          else  
+            result << "/>\n"
+          end
+          result
+ #}}}
+        end
+        private :description_xml_string_analyse
+
         def description_xml_string(messages,t)
  #{{{
           result = ''
           @custom.each do |c|
             result << c.dump
           end
+
           if @composition.any?
             @composition.each do |k,v|
               v.each do |m|
-                m = m.result
-                if %w{get post put delete websocket}.include?(k)
-                  result << t + "<#{k} "
-                else
-                  result << t + "<request method=\"#{k}\" "
-                end  
-                case m
-                  when Riddl::Wrapper::Description::RequestInOut
-                    messages[m.in.hash] ||= m.in
-                    result << "in=\"#{messages[m.in.hash].name}\""
-                    unless m.out.nil?
-                      messages[m.out.hash] ||= m.out
-                      result << " out=\"#{messages[m.out.hash].name}\""
-                    end  
-                  when Riddl::Wrapper::Description::RequestStarOut
-                    result << "in=\"*\""
-                    unless m.out.nil?
-                      messages[m.out.hash] ||= m.out
-                      result << " out=\"#{messages[m.out.hash].name}\""
-                    end  
-                  when Riddl::Wrapper::Description::RequestPass
-                    messages[m.pass.hash] ||= m.pass
-                    result << "pass=\"#{messages[m.pass.hash].name}\""
-                  when Riddl::Wrapper::Description::RequestTransformation
-                    messages[m.trans.hash] ||= m.trans
-                    result << "transformation=\"#{messages[m.trans.hash].name}\""
-                end
-                if m.custom.length > 0
-                  result << ">\n"
-                  m.custom.each do |e|
-                    result << e.dump + "\n"
-                  end  
-                  if %w{get post put delete websocket}.include?(k)
-                    result << t + "</#{k}>"
-                  else
-                    result << t + "</request>\n"
-                  end  
-                else  
-                  result << "/>\n"
-                end
+                result << description_xml_string_analyse(messages,t,k,m.result)
               end  
             end
-          end
+          else
+            @access_methods.each do |k,v|
+              v.first.each do |m|
+                result << description_xml_string_analyse(messages,t,k,m)
+              end  
+            end
+          end  
           result
  #}}}
         end  
