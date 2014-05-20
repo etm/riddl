@@ -51,7 +51,7 @@ module Riddl
 
         def add_custom(desres)
           #{{{
-          @custom = desres.find("*[not(self::des:*)]").to_a
+          @custom += desres.find("*[not(self::des:*)]").to_a
           #}}}
         end
 
@@ -298,7 +298,13 @@ module Riddl
                 result << description_xml_string_analyse(messages,t,k,m)
               end  
             end
-          end  
+          end
+          @resources.each do |k,r|
+            tmp = r.custom.map{ |c| c.dump }.join
+            result << t + "<resource"
+            result << " relative=\"#{k}\"" unless k == "{}"
+            result << (tmp == '' ? "/>\n" : ">\n" + tmp + t + "</resource>\n")
+          end
           result
  #}}}
         end  
