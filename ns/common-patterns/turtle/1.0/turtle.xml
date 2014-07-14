@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<description xmlns="http://riddl.org/ns/description/1.0" xmlns:ann="http://riddl.org/ns/annotation/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns:doc="http://cpee.org/ns/documentation">
+  <message name="json">
+    <parameter name="value" mimetype="application/json"/>
+  </message>
+  <message name="query">
+    <parameter name="query" type="string"/>
+  </message>
+  <message name="query_resp">
+    <choice>
+      <parameter name="value" mimetype="application/json"/>
+      <parameter name="value" mimetype="text/plain"/>
+    </choice>
+  </message>
+  <message name="turtle">
+    <choice> 
+      <parameter name="list" mimetype="text/plain"/>
+      <parameter name="list" mimetype="text/turtle"/>
+    </choice> 
+  </message>
+
+  <!-- Resources -->
+  <resource>
+      <get in="*" out="turtle"/>
+      <get in="query" out="json"/>
+      <resource>
+        <get in="*" out="query_resp"/>
+      </resource>
+  </resource>
+</description>
