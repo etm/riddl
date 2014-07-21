@@ -303,7 +303,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           if @wrapper.nil? || @wrapper.description? || (@wrapper.declaration? && !@base.nil?)
             status, response, response_headers = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate,riddl_message && riddl_message.out ? true : false)
             return response if simulate
-            if !@wrapper.nil? && status == 200
+            if !@wrapper.nil? && status >= 200 && status < 300
               unless @wrapper.check_message(response,response_headers,riddl_message.out)
                 raise OutputError, "Not a valid output from service."
               end
@@ -313,7 +313,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             if !riddl_message.route?
               status, response, response_headers = make_request(riddl_message.interface.real_url(@rpath,@base),riddl_method,parameters,headers,qparams,simulate,riddl_message && riddl_message.out ? true : false)
               return response if simulate
-              if status == 200
+              if status >= 200 && status < 300
                 unless @wrapper.check_message(response,response_headers,riddl_message.out)
                   raise OutputError, "Not a valid output from service."
                 end
@@ -329,7 +329,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                   status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,true)
                 end  
                 return response if simulate
-                if status != 200 || !@wrapper.check_message(response,response_headers,m.out)
+                if status < 200 || status >= 300 || !@wrapper.check_message(response,response_headers,m.out)
                   raise OutputError, "Not a valid output from service."
                 end
                 unless m == riddl_message.route.last
