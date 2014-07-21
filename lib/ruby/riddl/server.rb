@@ -295,7 +295,7 @@ module Riddl
               else
                 run Riddl::Utils::Description::Call, @riddl_exe, @riddl_pinfo, m.interface.top, m.interface.base, m.interface.des.to_doc, m.interface.real_path(@riddl_pinfo)
               end
-              break unless @riddl_status == 200
+              break if @riddl_status < 200 || @riddl_status >= 300
               @riddl_info.merge!(:h => @riddl_exe.headers, :p => @riddl_exe.response)
             end
             @riddl_message = mess
@@ -352,7 +352,7 @@ module Riddl
         @riddl_status = 404 # client requests wrong path
       end
 
-      stanza = if @riddl_exe && @riddl_status == 200
+      stanza = if @riddl_exe && @riddl_status >= 200 && @riddl_status < 300
         return if @riddl_message.out.nil?
         Protocols::XMPP::Generator.new(@riddl_status,@riddl_exe.response,@riddl_exe.headers).generate
       else
@@ -436,7 +436,7 @@ module Riddl
         @riddl_status = 404 # client requests wrong path
       end
       if @riddl_exe
-        if @riddl_status == 200
+        if @riddl_status >= 200 && @riddl_status < 300
           @riddl_res.write Protocols::HTTP::Generator.new(@riddl_exe.response,@riddl_res).generate.read
         end  
         @riddl_exe.headers.each do |n,h|
@@ -507,7 +507,7 @@ module Riddl
         w = what.new(@riddl_info.merge!(:a => args, :match => matching_path))
         @riddl_exe = Riddl::Server::Execution.new(w.response,w.headers)
         @riddl_status = w.status
-        if @riddl_process_out && @riddl_status == 200
+        if @riddl_process_out && @riddl_status >= 200 && @riddl_status < 300
           unless @riddl.check_message(@riddl_exe.response,@riddl_exe.headers,@riddl_message.out)
             @riddl_log.write "500: the return for the #{@riddl_method} is not matching anything in the description.\n"
             @riddl_status = 500
