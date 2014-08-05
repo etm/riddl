@@ -56,11 +56,13 @@ module Riddl
       # parse arguments
       ########################################################################################################################
       verbose = false
+      http_only = false
       operation = "start"
       ARGV.options { |opt|
         opt.summary_indent = ' ' * 4
         opt.banner = "Usage:\n#{opt.summary_indent}ruby server.rb [options] start|startclean|stop|restart|info\n"
         opt.on("Options:")
+        opt.on("--http-only", "-ho", "Only http, no other protocols.") { http_only = true }
         opt.on("--verbose", "-v", "Do not daemonize. Write ouput to console.") { verbose = true }
         opt.on("--help", "-h", "This text.") { puts opt; exit }
         opt.separator(opt.summary_indent + "start|stop|restart|info".ljust(opt.summary_width+1) + "Do operation start, stop, restart or get information.")
@@ -166,9 +168,9 @@ module Riddl
           puts "Server (#{@riddl_opts[:url]}) started as PID:#{Process.pid}"
           server.start
 
-          puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass
+          puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass && !http_only
           @riddl_opts[:xmpp] = nil
-          if @riddl_xmpp_jid && @riddl_xmpp_pass
+          if @riddl_xmpp_jid && @riddl_xmpp_pass && !http_only
             xmpp = Blather::Client.setup @riddl_xmpp_jid, @riddl_xmpp_pass
             @riddl_opts[:xmpp] = xmpp
             xmpp.register_handler(:message, '/message/ns:operation', :ns => 'http://riddl.org/ns/xmpp-rest') do |m|
