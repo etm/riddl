@@ -62,7 +62,7 @@ module Riddl
         opt.summary_indent = ' ' * 4
         opt.banner = "Usage:\n#{opt.summary_indent}ruby server.rb [options] start|startclean|stop|restart|info\n"
         opt.on("Options:")
-        opt.on("--http-only", "-ho", "Only http, no other protocols.") { http_only = true }
+        opt.on("--http-only", "-s", "Only http, no other protocols.") { http_only = true }
         opt.on("--verbose", "-v", "Do not daemonize. Write ouput to console.") { verbose = true }
         opt.on("--help", "-h", "This text.") { puts opt; exit }
         opt.separator(opt.summary_indent + "start|stop|restart|info".ljust(opt.summary_width+1) + "Do operation start, stop, restart or get information.")
