@@ -299,6 +299,12 @@ module Riddl
               end  
             end
           end
+          result
+ #}}}
+        end  
+        def description_xml_string_sub(messages,t)
+ #{{{
+          result = ''
           @resources.each do |k,r|
             tmp = r.custom.map{ |c| c.dump }.join
             result << t + "<resource"
@@ -307,7 +313,7 @@ module Riddl
           end
           result
  #}}}
-        end  
+        end
 
         def description_xml(namespaces)
           #{{{
@@ -319,7 +325,7 @@ module Riddl
 
           messages = {}
           messages_result = ''
-          collect = description_xml_string(messages," " * 4)
+          collect = description_xml_string(messages," " * 4) + description_xml_string_sub(messages," " * 4)
 
           names = []
           messages.each do |hash,mess|
