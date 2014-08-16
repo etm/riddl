@@ -6,6 +6,7 @@ module Riddl
     class ERBServe < Riddl::Implementation
       def response
         path = File.file?(@a[0]) ? @a[0] : "#{@a[0]}/#{@r[@match.length..-1].join('/')}".gsub(/\/+/,'/')
+        input = @a[1]
         if File.directory?(path)
           @status = 404
           return []
