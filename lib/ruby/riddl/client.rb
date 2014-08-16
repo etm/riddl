@@ -433,6 +433,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                   end
                   response = Protocols::XMPP::Parser.new('', res).params
                 else
+                  p res.to_s
                   res.register_namespace 'se', Blather::StanzaError::STANZA_ERR_NS
                   err = res.find('string(/message/error/se:text)')
                   status = (err.match(/\d+/)[0] || 209).to_i
@@ -489,7 +490,8 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
         def initialize(method, to, path, parameters, headers, qs, ack)
           path = (path.strip == '' ? '' : path)
-          path += "?#{qs}" unless qs == ''
+          path += "/?#{qs}" unless qs == ''
+          path.gsub!(/\/+/,'/')
           @stanza = Protocols::XMPP::Generator.new(method,parameters,headers,ack).generate
           @stanza.to = to + path
         end
