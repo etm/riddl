@@ -69,6 +69,9 @@ module Riddl
       if name.is_a?(XML::Smart::Dom)
         @doc = name
       else  
+        if name.is_a?(String) && name =~ /^http:\/\/(www\.)?riddl\.org(\/ns\/common-patterns\/.*)/
+          name = File.expand_path(File.dirname(__FILE__)) + $2
+        end
         begin
           fh = name.respond_to?(:read) ? name : open(name)
           @doc = XML::Smart.string(fh.read)
