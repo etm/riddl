@@ -113,6 +113,7 @@ module Riddl
               File.open(@target + '/' + key + '/producer-secret','w') { |f| f.write producer_secret }
               File.open(@target + '/' + key + '/consumer-secret','w') { |f| f.write consumer_secret }
               XML::Smart::modify(@target + '/' + key + '/subscription.xml',"<subscription xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>") do |doc|
+                doc.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
                 block.call doc, key
               end
               [key, producer_secret, consumer_secret]
