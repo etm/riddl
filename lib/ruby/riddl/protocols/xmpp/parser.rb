@@ -24,9 +24,9 @@ module Riddl
         def self::unescape(s)
           #{{{
           return s if s.nil?  
-          s.tr('+', ' ').gsub(/((?:%[0-9a-fA-F]{2})+)/n){
+          s.force_encoding("ASCII-8BIT").tr('+', ' ').gsub(/((?:%[0-9a-fA-F]{2})+)/n){
             [$1.delete('%')].pack('H*')
-          }
+          }.force_encoding('UTF-8')
           #}}}
         end
 
