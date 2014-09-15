@@ -5,6 +5,7 @@ require File.expand_path(File.dirname(__FILE__) + '/protocols/http/parser')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/generator')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/parser')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/generator')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/utils')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/websocket')
 require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/parameter')
@@ -341,7 +342,7 @@ module Riddl
         @riddl_info = { 
           :h => @riddl_headers,
           :p => @riddl_parameters,
-          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::HTTP::Parser::unescape(e)}, 
+          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::Utils::unescape(e)}, 
           :s => @riddl_matching_path[0].sub(/\//,'').split('/'),
           :m => @riddl_method, 
           :env =>  Hash[@riddl_env.root.attributes.map{|a| [a.qname.name, a.value] }].merge({ 'riddl.transport' => 'xmpp', 'xmpp' => @riddl_res }),
@@ -402,7 +403,7 @@ module Riddl
         @riddl_info = { 
           :h => @riddl_headers,
           :p => @riddl_parameters,
-          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::HTTP::Parser::unescape(e)}, 
+          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::Utils::unescape(e)}, 
           :s => @riddl_matching_path[0].sub(/\//,'').split('/'),
           :m => @riddl_method, 
           :env => @riddl_env.reject{|k,v| k =~ /^rack\./}.merge({'riddl.transport' => 'http', 'xmpp' => @riddl_opts[:xmpp]}),

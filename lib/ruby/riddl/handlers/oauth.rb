@@ -7,7 +7,7 @@ module Riddl
         provided = []
         qs = what.read
         (qs || '').split(/[&] */n).each do |p|
-          k, v = Protocols::HTTP::Parser::unescape(p).split('=', 2)
+          k, v = Protocols::Utils::unescape(p).split('=', 2)
           provided << k.to_sym
         end
         WANTED.all?{ |e| provided.include?(e) }

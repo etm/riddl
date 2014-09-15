@@ -12,6 +12,7 @@ require File.expand_path(File.dirname(__FILE__) + '/protocols/http/generator')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/parser')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/generator')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/parser')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/utils')
 require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/option')
 
@@ -268,7 +269,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                p.type = :query
             end
             if p.class == Riddl::Parameter::Simple && p.type == :query
-              qparams << Protocols::HTTP::Generator::escape(p.name) + (p.value.nil? ? '' : '=' + Protocols::HTTP::Generator::escape(p.value))
+              qparams << Protocols::Utils::escape(p.name) + (p.value.nil? ? '' : '=' + Protocols::Utils::escape(p.value))
               true
             else
               starting = false

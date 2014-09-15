@@ -209,7 +209,7 @@ module Riddl
 
           EM.defer{handler.property(@r[1]).read} unless handler.nil?
 
-          if ret = extract_values(backend,@r[1],Riddl::Protocols::HTTP::Parser::unescape(@r[2..-1].join('/')))
+            if ret = extract_values(backend,@r[1],Riddl::Protocols::Utils::unescape(@r[2..-1].join('/')))
             ret
           else
             @status = 404
@@ -393,7 +393,7 @@ module Riddl
           handler = @a[1]
 
           property = @r[1]
-          minor    = Riddl::Protocols::HTTP::Parser::unescape(@r[2])
+          minor    = Riddl::Protocols::Utils::unescape(@r[2])
 
           unless backend.modifiable?(property)
             @status = 500

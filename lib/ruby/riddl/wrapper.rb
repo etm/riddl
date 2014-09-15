@@ -250,7 +250,7 @@ module Riddl
     def load_necessary_roles!
       #{{{
       @doc.find("//des:resource/@role").map{|h|h.to_s}.uniq.each do |h|
-        h = Protocols::HTTP::Generator::escape(h)
+        h = Protocols::Utils::escape(h)
         if File.exists?(File.dirname(__FILE__) + '/roles/' + h + '.rb')
           require File.expand_path(File.dirname(__FILE__) + '/roles/' + h)
         end
