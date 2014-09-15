@@ -1,5 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../constants')
 require File.expand_path(File.dirname(__FILE__) + '/../../parameter')
+require File.expand_path(File.dirname(__FILE__) + '/../utils')
 
 module Riddl
   module Protocols
@@ -17,15 +18,6 @@ module Riddl
           'application/x-www-form-urlencoded'
           #}}}
         ].freeze
-
-        def self::unescape(s)
-          #{{{
-          return s if s.nil?  
-          s.tr('+', ' ').gsub(/((?:%[0-9a-fA-F]{2})+)/n){
-            [$1.delete('%')].pack('H*')
-          }
-          #}}}
-        end
 
         def parse_content(input,ctype,content_length,content_disposition,content_id,riddl_type)
           #{{{
@@ -152,7 +144,7 @@ module Riddl
         def parse_nested_query(qs, type)
           #{{{
           (qs || '').split(/[#{D}] */n).each do |p|
-            k, v = self.class::unescape(p).split('=', 2)
+            k, v = Riddl::Protocols::Utils::unescape(p).split('=', 2)
             @params << Parameter::Simple.new(k,v,type)
           end
           #}}}

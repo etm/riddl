@@ -1,4 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../constants')
+require File.expand_path(File.dirname(__FILE__) + '/../utils')
 require 'blather/client/client'
 require 'securerandom'
 
@@ -69,15 +70,6 @@ module Riddl
           end
         end
 
-        # Performs URI escaping so that you can construct proper
-        # query strings faster.  Use this rather than the cgi.rb
-        # version since it's faster. (%20 instead of + for improved standards conformance).
-        def self.escape(s)
-          s.to_s.dup.force_encoding('ASCII-8BIT').gsub(/([^a-zA-Z0-9_.-]+)/n) {
-            '%'+$1.unpack('H2'*$1.size).join('%').upcase
-          }
-        end
-
         def generate(mode=:output)
           if @params.is_a?(Array) && @params.length == 1
             body(@params[0],mode)
@@ -104,7 +96,7 @@ module Riddl
                 n = @node.add('part')
                 n.namespaces.add(nil,XR_NS)
                 n.attributes['content-type'] = 'application/x-www-form-urlencoded'
-                n.text = self.class::escape(r.name) + '=' + self.class::escape(r.value)
+                n.text = Riddl::Protocols::Utils::escape(r.name) + '=' + Riddl::Protocols::Utils::escape(r.value)
               end
             when Riddl::Parameter::Complex
               n = @node.add('part')
@@ -140,7 +132,7 @@ module Riddl
             @params.each do |r|
               case r
                 when Riddl::Parameter::Simple
-                  res << self.class::escape(r.name) + '=' + self.class::escape(r.value)
+                  res << Riddl::Protocols::Utils::escape(r.name) + '=' + Riddl::Protocols::Utils::escape(r.value)
               end   
             end
             n.text = res.join('&')

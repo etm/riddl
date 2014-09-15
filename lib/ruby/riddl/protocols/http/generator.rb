@@ -1,4 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../constants')
+require File.expand_path(File.dirname(__FILE__) + '/../utils')
 require 'stringio'
 
 module Riddl
@@ -8,15 +9,6 @@ module Riddl
         def initialize(params,headers)
           @params = params
           @headers = headers
-        end
-
-        # Performs URI escaping so that you can construct proper
-        # query strings faster.  Use this rather than the cgi.rb
-        # version since it's faster. (%20 instead of + for improved standards conformance).
-        def self.escape(s)
-          s.to_s.gsub(/([^a-zA-Z0-9_.-]+)/n) {
-            '%'+$1.unpack('H2'*$1.size).join('%').upcase
-          }
         end
 
         def generate(mode=:output)
@@ -43,7 +35,7 @@ module Riddl
               end
               if mode == :input
                 @headers['Content-Type'] = 'application/x-www-form-urlencoded'
-                tmp.write self.class::escape(r.name) + '=' + self.class::escape(r.value)
+                tmp.write Riddl::Protocols::Utils::escape(r.name) + '=' + Riddl::Protocols::Utils::escape(r.value)
               end
             when Riddl::Parameter::Complex
               tmp.write(r.value.respond_to?(:read) ? r.value.read : r.value)
@@ -78,7 +70,7 @@ module Riddl
             @params.each do |r|
               case r
                 when Riddl::Parameter::Simple
-                  res << self.class::escape(r.name) + '=' + self.class::escape(r.value)
+                  res << Riddl::Protocols::Utils::escape(r.name) + '=' + Riddl::Protocols::Utils::escape(r.value)
               end   
             end
             tmp.write res.join('&')
