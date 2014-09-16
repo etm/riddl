@@ -21,11 +21,12 @@ module Riddl
       end
     end
     class Complex
-      attr_reader :mimetype, :filename, :value, :type, :additional
+      attr_reader :mimetype, :filename, :value, :type, :additional, :mimextra
       attr_accessor :name
       def initialize(name,mimetype,file=nil,filename=nil,additional=[])
         @name = name
-        @mimetype = mimetype.gsub(/;.*/,'')
+        @mimetype = mimetype.gsub(/(;.*)/,'')
+        @mimextra = $1 || ''
         @filename = filename
         @type = :body
         @additional = additional

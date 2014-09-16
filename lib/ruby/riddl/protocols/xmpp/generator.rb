@@ -102,7 +102,7 @@ module Riddl
               n = @node.add('part')
               n.namespaces.add(nil,XR_NS)
               n.text = (r.value.respond_to?(:read) ? r.value.read : r.value)
-              n.attributes['content-type'] = r.mimetype
+              n.attributes['content-type'] = r.mimetype + r.mimextra
               n.attributes['RIDDL-TYPE'] = 'complex'
               if r.filename.nil?
                 n.attributes['content-id'] = r.name
@@ -153,7 +153,7 @@ module Riddl
                     n.attributes['RIDDL-TYPE'] = 'complex'
                     n.attributes['content-disposition'] = "#{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\"#{r.filename.nil? ? '' : "; filename=\"#{r.filename}\""}"
                     n.attributes['content-transfer-encoding'] = 'binary'
-                    n.attributes['content-type'] = r.mimetype
+                    n.attributes['content-type'] = r.mimetype + r.mimextra
                     n.text = (r.value.respond_to?(:read) ? r.value.read : r.value)
                 end   
               end

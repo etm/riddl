@@ -39,7 +39,7 @@ module Riddl
               end
             when Riddl::Parameter::Complex
               tmp.write(r.value.respond_to?(:read) ? r.value.read : r.value)
-              @headers['Content-Type'] = r.mimetype
+              @headers['Content-Type'] = r.mimetype + r.mimextra
               @headers['RIDDL-TYPE'] = 'complex'
               if r.filename.nil?
                 @headers['Content-ID'] = r.name
@@ -92,7 +92,7 @@ module Riddl
                     tmp.write "Content-Disposition: #{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\""
                     tmp.write r.filename.nil? ? EOL : "; filename=\"#{r.filename}\"" + EOL
                     tmp.write "Content-Transfer-Encoding: binary" + EOL
-                    tmp.write "Content-Type: " + r.mimetype + EOL
+                    tmp.write "Content-Type: " + r.mimetype + r.mimextra + EOL
                     tmp.write EOL
                     tmp.write(r.value.respond_to?(:read) ? r.value.read : r.value)
                     tmp.write EOL

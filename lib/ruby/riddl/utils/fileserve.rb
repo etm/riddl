@@ -1,4 +1,5 @@
 require 'mime/types'
+require 'charlock_holmes'
 require 'digest/md5'
 
 module Riddl
@@ -21,7 +22,13 @@ module Riddl
             @status = 304 # Not modified
             return []
           else 
-            return Riddl::Parameter::Complex.new("file",MIME::Types.type_for(path).first.to_s,File.open(path,'r'))
+            mt = MIME::Types.type_for(path).first
+            apx = ''
+            if mt.ascii?
+              tstr = File.read(path,CharlockHolmes::EncodingDetector::DEFAULT_BINARY_SCAN_LEN)
+              apx = ';charset=' + CharlockHolmes::EncodingDetector.detect(tstr)[:encoding]
+            end
+            return Riddl::Parameter::Complex.new('file',mt.to_s + apx,File.open(path,'r'))
           end  
         end
         @status = 404
