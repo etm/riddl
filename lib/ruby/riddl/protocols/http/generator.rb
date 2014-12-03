@@ -19,6 +19,7 @@ module Riddl
           elsif @params.is_a?(Array) && @params.length > 1
             multipart(mode)
           else
+            @headers['Content-Type'] = 'text/plain'
             StringIO.new('','r+b')
           end  
         end
