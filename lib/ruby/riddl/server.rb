@@ -159,11 +159,6 @@ module Riddl
         )
       end
 
-      # remove LINT in any case as it breaks websockets
-      server.middleware.each do |k,v|
-        v.delete [Rack::Lint]
-      end  
-
       begin
         EM.run do
           puts "Server (#{@riddl_opts[:url]}) started as PID:#{Process.pid}"
@@ -430,7 +425,7 @@ module Riddl
               end
             end  
           end  
-          return [-1, {}, []]
+          throw :async 
         else
           __call
         end  
