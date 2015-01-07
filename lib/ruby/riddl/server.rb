@@ -143,6 +143,7 @@ module Riddl
       server = if verbose
         Rack::Server.new(
           :app => app,
+          :Host => '0.0.0.0',
           :Port => @riddl_opts[:port],
           :environment => (@riddl_opts[:mode] == :debug ? 'development' : 'deployment'),
           :server => 'thin',
@@ -151,6 +152,7 @@ module Riddl
       else
         Rack::Server.new(
           :app => app,
+          :Host => '0.0.0.0',
           :Port => @riddl_opts[:port],
           :environment => 'none',
           :server => 'thin',
