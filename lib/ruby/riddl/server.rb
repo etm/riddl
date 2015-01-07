@@ -79,7 +79,7 @@ module Riddl
       ########################################################################################################################
       # status and info
       ########################################################################################################################
-      pid = File.read(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile]).to_i rescue pid = 666
+      pid = File.read(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile]).to_i rescue pid = -1
       status = Proc.new do
         begin
           Process.getpgid pid
