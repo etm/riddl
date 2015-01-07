@@ -28,7 +28,7 @@ module Riddl
     class Execution #{{{
       attr_reader :response,:headers
       def initialize(response,headers)
-        @response = (response.is_a?(Array) ? response : [response])
+        @response = (response.is_a?(Array) ? response.dup : [response])
         @headers  = (headers.is_a?(Array) ? headers : [headers])
         @response.delete_if do |r|
           r.class != Riddl::Parameter::Simple && r.class != Riddl::Parameter::Complex
