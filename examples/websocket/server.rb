@@ -8,8 +8,11 @@ class Bar < Riddl::Implementation
   end  
 end
 
+$socket = []
+
 class Echo < Riddl::WebSocketImplementation
   def onopen
+    $socket << self
     puts "Connection established"
   end
 
@@ -20,7 +23,19 @@ class Echo < Riddl::WebSocketImplementation
   end
 
   def onclose
+    $socket.delete(self)
     puts "Connection closed"
+  end
+end
+
+Thread.new do
+  i = 1
+  while true
+    $socket.each do |sock|
+      sock.send("oasch #{i}")
+    end
+    i+=1
+    sleep 2
   end
 end
 

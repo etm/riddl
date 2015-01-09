@@ -14,6 +14,9 @@ module Riddl
     end
     class Simple
       attr_accessor :name, :value, :type
+      def to_json(*)
+        "{\"name\": \"#{@name}\", \"value\": \"#{@value}\"}"
+      end
       def initialize(name,value,type=:body)
         @name = name
         @value = value
@@ -23,6 +26,9 @@ module Riddl
     class Complex
       attr_reader :mimetype, :filename, :value, :type, :additional, :mimextra
       attr_accessor :name
+      def to_json(*)
+        "{\"name\": \"#{@name}\", \"value\": \"#{@value}\"}"
+      end
       def initialize(name,mimetype,file=nil,filename=nil,additional=[])
         @name = name
         @mimetype = mimetype.gsub(/(;.*)/,'')
