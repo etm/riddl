@@ -145,7 +145,7 @@ module Riddl
           :app => app,
           :Host => '0.0.0.0',
           :Port => @riddl_opts[:port],
-          :environment => (@riddl_opts[:mode] == :debug ? 'development' : 'deployment'),
+          :environment => 'deployment',
           :server => 'thin',
           :pid => File.expand_path(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile])
         )
