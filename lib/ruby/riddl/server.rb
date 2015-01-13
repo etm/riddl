@@ -140,37 +140,26 @@ module Riddl
         app.use Rack::CommonLogger, @riddl_logger
       end
 
-      server = if verbose
-        Rack::Server.new(
-          :app => app,
-          :Host => '0.0.0.0',
-          :Port => @riddl_opts[:port],
-          :environment => 'deployment',
-          :server => 'thin',
-          :pid => File.expand_path(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile])
-        )
-      else
-        Rack::Server.new(
-          :app => app,
-          :Host => '0.0.0.0',
-          :Port => @riddl_opts[:port],
-          :environment => 'none',
-          :server => 'thin',
-          :pid => File.expand_path(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile]),
-          :daemonize => true
-        )
-      end
+      server = Rack::Server.new(
+        :app => app,
+        :Host => '0.0.0.0',
+        :Port => @riddl_opts[:port],
+        :environment => verbose ? 'deployment' : 'none',
+        :server => 'thin',
+        :pid => File.expand_path(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile]),
+        :signals => false
+      )
 
+      puts "Server (#{@riddl_opts[:url]}) started as PID:#{Process.pid}"
+      puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass && !http_only
+      Process.daemon unless verbose
       ::Kernel::at_exit do
         @riddl_at_exit.call
       end  
-
       begin
         EM.run do
-          puts "Server (#{@riddl_opts[:url]}) started as PID:#{Process.pid}"
           server.start
 
-          puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass && !http_only
           @riddl_opts[:xmpp] = nil
           if @riddl_xmpp_jid && @riddl_xmpp_pass && !http_only
             xmpp = Blather::Client.setup @riddl_xmpp_jid, @riddl_xmpp_pass
@@ -252,7 +241,7 @@ module Riddl
     end# }}}
 
     def at_exit(&blk)
-      @riddl_exit = blk
+      @riddl_at_exit = blk
     end
 
     def call(env)# {{{
