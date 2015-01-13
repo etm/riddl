@@ -161,6 +161,10 @@ module Riddl
         )
       end
 
+      ::Kernel::at_exit do
+        @riddl_at_exit.call
+      end  
+
       begin
         EM.run do
           puts "Server (#{@riddl_opts[:url]}) started as PID:#{Process.pid}"
@@ -227,6 +231,8 @@ module Riddl
       @riddl_description_string = ''
       @riddl_paths              = []  
 
+      @riddl_at_exit            = nil
+
       @riddl_interfaces = {}
       instance_exec(@riddl_opts,&blk) if block_given?
 
@@ -244,6 +250,10 @@ module Riddl
       @riddl.load_necessary_handlers!
       @riddl_paths = @riddl.paths
     end# }}}
+
+    def at_exit(&blk)
+      @riddl_exit = blk
+    end
 
     def call(env)# {{{
       dup.__http_call(env)
