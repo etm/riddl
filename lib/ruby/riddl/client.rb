@@ -383,7 +383,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                     "",
                     bs,
                     res['CONTENT-TYPE'],
-                    res['CONTENT-LENGTH'],
+                    res['CONTENT-LENGTH'].to_i != bs.length ? 0 : res['CONTENT-LENGTH'], # because when gzip content length differs from bs length
                     res['CONTENT-DISPOSITION'],
                     res['CONTENT-ID'],
                     res['RIDDL-TYPE']
