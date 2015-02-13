@@ -73,7 +73,7 @@
       $ret = tmpfile();
       if ($scount > 0 && $ccount == 0) {
         $this->set_header("Content-Type",'application/x-www-form-urlencoded');
-        $res = [];
+        $res = array();
         foreach($this->params as $r) {
           array_push($res,urlencode($r->name()) . '=' . urlencode($r->value()));
         }
