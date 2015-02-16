@@ -154,7 +154,7 @@ module Riddl
       puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass && !http_only
       Process.daemon unless verbose
       ::Kernel::at_exit do
-        @riddl_at_exit.call
+        @riddl_at_exit.call if @riddl_at_exit
       end  
       begin
         EM.run do
