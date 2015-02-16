@@ -262,7 +262,6 @@ module Riddl
             handler = @a[1]
             key     = @r.last
 
-            muid = @p.shift.value
             url  = @p[0].name == 'url' ? @p.shift.value : nil
 
             # TODO check if message is valid (with producer secret)

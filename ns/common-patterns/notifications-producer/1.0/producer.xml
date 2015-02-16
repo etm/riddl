@@ -145,7 +145,6 @@
   </message>
 
   <message name="details">
-    <parameter name="message-uid" type="string"/>
     <optional>
       <parameter name="url" type="string"/>
     </optional>  
@@ -160,7 +159,10 @@
         </parameter>
       </choice>
     </oneOrMore>
-    <parameter name="fingerprint-with-producer-secret" type="string"/>
+    <optional>
+      <parameter name="message-uid" type="string"/>
+      <parameter name="fingerprint-with-producer-secret" type="string"/>
+    </optional>  
   </message>
 
   <message name="overview">
