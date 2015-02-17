@@ -8,10 +8,6 @@ Gem::Specification.new do |s|
   s.description      = "rest service interface definition, mixing, and evolution. supports mixed http and xmpp servers."
 
   s.files            = Dir['{lib/ruby/riddl/ns/**/*,tools/**/*,ns/**/*,contrib/**/*,lib/ruby/riddl/**/*,examples/**/*}'] + %w(COPYING Rakefile riddl.gemspec README.rdoc TODO AUTHORS INSTALL)
-  s.files.each do |f|
-    puts f
-  end
-  exit
 
   s.require_path     = 'lib/ruby'
   s.extra_rdoc_files = ['README.rdoc']
