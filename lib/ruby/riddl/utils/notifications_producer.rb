@@ -202,8 +202,12 @@ module Riddl
         class Subscription < Riddl::Implementation #{{{
           def response
             backend = @a[0]
-            Riddl::Parameter::Complex.new("subscription","text/xml") do
-              backend.subscriptions[@r.last].to_s
+            if(backend.subscriptions.include?(@r.last))
+              Riddl::Parameter::Complex.new("subscription","text/xml") do
+                backend.subscriptions[@r.last].to_s
+              end
+            else
+              @status = 404
             end
           end
         end #}}}
