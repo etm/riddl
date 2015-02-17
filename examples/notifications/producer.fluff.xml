@@ -3,7 +3,7 @@
   <message name="html">
   	<parameter name="type" mimetype="text/html"/>
   </message>
-  <message name="xsl">
+  <message name="details">
     <parameter name="xsl" mimetype="application/xml"/>
   </message>
 
@@ -17,7 +17,7 @@
     </resource>
     <resource relative='xsls'>
       <resource>
-        <get in="*" out="xsl"/>
+        <get in="*" out="details"/>
       </resource>  
     </resource>
   </resource>

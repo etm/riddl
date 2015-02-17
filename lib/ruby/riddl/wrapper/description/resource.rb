@@ -243,23 +243,23 @@ module Riddl
           case m
             when Riddl::Wrapper::Description::RequestInOut
               messages[m.in.hash] ||= m.in
-              result << "in=\"#{messages[m.in.hash].name}\""
+              result << "in=\"#{m.in.hash}\""
               unless m.out.nil?
                 messages[m.out.hash] ||= m.out
-                result << " out=\"#{messages[m.out.hash].name}\""
+                result << " out=\"#{m.out.hash}\""
               end  
             when Riddl::Wrapper::Description::RequestStarOut
               result << "in=\"*\""
               unless m.out.nil?
                 messages[m.out.hash] ||= m.out
-                result << " out=\"#{messages[m.out.hash].name}\""
+                result << " out=\"#{m.out.hash}\""
               end  
             when Riddl::Wrapper::Description::RequestPass
               messages[m.pass.hash] ||= m.pass
-              result << "pass=\"#{messages[m.pass.hash].name}\""
+              result << "pass=\"#{m.pass.hash}\""
             when Riddl::Wrapper::Description::RequestTransformation
               messages[m.trans.hash] ||= m.trans
-              result << "transformation=\"#{messages[m.trans.hash].name}\""
+              result << "transformation=\"#{m.trans.hash}\""
           end
           if m.custom.length > 0
             result << ">\n"
@@ -326,17 +326,19 @@ module Riddl
           messages = {}
           messages_result = ''
           collect = description_xml_string(messages," " * 4) + description_xml_string_sub(messages," " * 4)
+          collect = XML::Smart.string("<resource>\n" + collect + "  </resource>")
 
           names = []
           messages.each do |hash,mess|
             t = mess.content.dup
             name = mess.name
             name += '_' while names.include?(name)
+            collect.find("//@*[.=#{hash}]").each { |e| p e; e.value = name }
             names << name
             t.root.attributes['name'] = name
             messages_result << t.root.dump + "\n"
           end
-          XML::Smart.string("<description #{Riddl::Wrapper::COMMON} #{namespaces}>\n\n" + messages_result.gsub(/^/,'  ') + "\n  <resource>\n" + collect + "  </resource>\n</description>").to_s
+          XML::Smart.string("<description #{Riddl::Wrapper::COMMON} #{namespaces}>\n\n" + messages_result.gsub(/^/,'  ') + "\n  " + collect.root.dump + "\n</description>").to_s
           #}}}
         end
 

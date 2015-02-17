@@ -21,15 +21,18 @@ module Riddl
           messages_result = ""
           description_result = ""
           description_xml_priv(result,messages,0)
+
+          result = XML::Smart.string("<resource>\n" + result + "  </resource>")
           messages.each do |hash,mess|
             t = mess.content.dup
             name = mess.name
             name += '_' while names.include?(name)
+            result.find("//@*[.=#{hash}]").each { |e| p e; e.value = name }
             names << name
             t.root.attributes['name'] = name
             messages_result << t.root.dump + "\n"
           end
-          XML::Smart.string("<description #{Riddl::Wrapper::COMMON} #{namespaces}>\n\n" + description_result + messages_result.gsub(/^/,'  ') + "\n" + result + "\n</description>").to_s
+          XML::Smart.string("<description #{Riddl::Wrapper::COMMON} #{namespaces}>\n\n" + description_result + messages_result.gsub(/^/,'  ') + "\n" + result.root.dump + "\n</description>").to_s
           #}}}
         end
         def description_xml_priv(result,messages,level,res=@resource)
