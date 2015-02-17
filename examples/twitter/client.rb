@@ -5,11 +5,11 @@ require 'pp'
 twitter = Riddl::Client.interface("https://api.twitter.com/","twitter.xml")
 
 ### Base
-consumer_key      = File.read(File.expand_path(File.dirname(__FILE__) + '/twitter.consumer_key')).strip
-consumer_secret   = File.read(File.expand_path(File.dirname(__FILE__) + '/twitter.consumer_secret')).strip
-file_user_id      = File.expand_path(File.dirname(__FILE__) + '/twitter.user_id')
-file_token        = File.expand_path(File.dirname(__FILE__) + '/twitter.token')
-file_token_secret = File.expand_path(File.dirname(__FILE__) + '/twitter.token_secret')
+consumer_key      = File.read(File.expand_path(File.dirname(__FILE__) + '/.twitter.consumer_key')).strip
+consumer_secret   = File.read(File.expand_path(File.dirname(__FILE__) + '/.twitter.consumer_secret')).strip
+file_user_id      = File.expand_path(File.dirname(__FILE__) + '/.twitter.user_id')
+file_token        = File.expand_path(File.dirname(__FILE__) + '/.twitter.token')
+file_token_secret = File.expand_path(File.dirname(__FILE__) + '/.twitter.token_secret')
 
 ### When token and secret already saved, skip this part
 if !File.exists?(file_token) && !File.exists?(file_token_secret)
