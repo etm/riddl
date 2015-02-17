@@ -4,11 +4,11 @@ require 'xml/smart'
 require 'pp'
 
 ### Base
-consumer_key      = File.read(File.expand_path(File.dirname(__FILE__) + '/zotero.consumer_key')).strip
-consumer_secret   = File.read(File.expand_path(File.dirname(__FILE__) + '/zotero.consumer_secret')).strip
-file_user_id      = File.expand_path(File.dirname(__FILE__) + '/zotero.user_id')
-file_token        = File.expand_path(File.dirname(__FILE__) + '/zotero.token')
-file_token_secret = File.expand_path(File.dirname(__FILE__) + '/zotero.token_secret') #}}}
+consumer_key      = File.read(File.expand_path(File.dirname(__FILE__) + '/.zotero.consumer_key')).strip
+consumer_secret   = File.read(File.expand_path(File.dirname(__FILE__) + '/.zotero.consumer_secret')).strip
+file_user_id      = File.expand_path(File.dirname(__FILE__) + '/.zotero.user_id')
+file_token        = File.expand_path(File.dirname(__FILE__) + '/.zotero.token')
+file_token_secret = File.expand_path(File.dirname(__FILE__) + '/.zotero.token_secret') #}}}
 
 ### When token and secret already saved, skip this part #{{{
 if !File.exists?(file_token) && !File.exists?(file_token_secret)
