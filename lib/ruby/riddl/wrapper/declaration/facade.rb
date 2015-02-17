@@ -22,7 +22,7 @@ module Riddl
           description_result = ""
           description_xml_priv(result,messages,0)
 
-          result = XML::Smart.string("<resource>\n" + result + "  </resource>")
+          result = XML::Smart.string(result)
           messages.each do |hash,mess|
             t = mess.content.dup
             name = mess.name
