@@ -333,7 +333,7 @@ module Riddl
             t = mess.content.dup
             name = mess.name
             name += '_' while names.include?(name)
-            collect.find("//@*[.=#{hash}]").each { |e| p e; e.value = name }
+            collect.find("//@*[.=#{hash}]").each { |e| e.value = name }
             names << name
             t.root.attributes['name'] = name
             messages_result << t.root.dump + "\n"

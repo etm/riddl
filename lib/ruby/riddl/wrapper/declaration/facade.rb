@@ -27,7 +27,7 @@ module Riddl
             t = mess.content.dup
             name = mess.name
             name += '_' while names.include?(name)
-            result.find("//@*[.=#{hash}]").each { |e| p e; e.value = name }
+            result.find("//@*[.=#{hash}]").each { |e| e.value = name }
             names << name
             t.root.attributes['name'] = name
             messages_result << t.root.dump + "\n"
