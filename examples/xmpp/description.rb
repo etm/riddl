@@ -4,7 +4,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/server'
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/properties')
 
 Riddl::Server.new(File.dirname(__FILE__) + '/properties.xml', :port => 9191) do |opts|
-  xmpp 'adventure_processexecution@fp7-adventure.eu', 'adventure_processexecution' 
+  xmpp 'adventure_processexecution@cpee.org', 'adventure_processexecution' 
 
   backend = Riddl::Utils::Properties::Backend.new( 
     opts[:basepath] + '/server.properties.schema', 
