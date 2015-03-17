@@ -278,16 +278,25 @@
   </define>
 
   <define name="riddl-description-others">
-    <ref name="other"/>
     <zeroOrMore>
-      <attribute>
+      <element>
         <anyName>
           <except>
             <nsName/>
             <nsName ns=""/>
+            <nsName ns="http://riddl.org/ns/description/1.0/"/>
           </except>
         </anyName>
-      </attribute>
+        <zeroOrMore>
+          <choice>
+            <attribute>
+              <anyName/>
+            </attribute>
+            <text/>
+            <ref name="any"/>
+          </choice>
+        </zeroOrMore>
+      </element>
     </zeroOrMore>
   </define>  
 
@@ -298,6 +307,7 @@
           <except>
             <nsName/>
             <nsName ns=""/>
+            <nsName ns="http://riddl.org/ns/description/1.0/"/>
           </except>
         </anyName>
       </attribute>
