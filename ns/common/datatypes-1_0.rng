@@ -3,12 +3,12 @@
 
   <define name="riddl-datatype-relpath">
     <data type="string">
-      <param name="pattern">[\]\[()\c+\-*?.\\ ]+</param>
+      <param name="pattern">[\]\[()\c+\-*?.,\\{}0-9 ]+</param>
     </data>
   </define>
   <define name="riddl-datatype-pathtemplate">
     <data type="string">
-      <param name="pattern">/|(/([\[\]()\c+\-*?.\\ ]+|\{\}))*</param>
+      <param name="pattern">/|(/([\[\]()\c+\-*?.,\\{}0-9 ]+|\{\}))*</param>
     </data>
   </define>
 
