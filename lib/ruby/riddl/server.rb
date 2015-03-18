@@ -271,6 +271,7 @@ module Riddl
             run Riddl::Utils::Description::RDR, @riddl.resource_description(@riddl_matching_path[0])
           end  
         else
+          @riddl_info[:d] = @riddl.resource_description(@riddl_matching_path[0])
           if @riddl.description?
             instance_exec(@riddl_info, &@riddl_interfaces[nil])  
           elsif @riddl.declaration?
