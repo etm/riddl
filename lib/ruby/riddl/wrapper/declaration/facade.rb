@@ -58,13 +58,39 @@ module Riddl
             fac.composition[method] += s
           end  
           res.resources.each do |path,r|
-            unless fac.resources.has_key?(path)
+            if !fac.resources.has_key?(path) && path != '**/*' && path != '*'
               fac.resources[path] = Riddl::Wrapper::Description::Resource.new(path,r.recursive)
-            end  
-            merge_tiles(r,fac.resources[path])
+            end
+            if path == '**/*'
+              merge_tiles_to_all(r,fac)
+            elsif path == '*'
+              merge_tiles_to_layer(r,fac)
+            else
+              merge_tiles(r,fac.resources[path])
+            end
           end
           #}}}
         end
+
+        # recurse to all resources that currently exist in facade beneath the
+        # current resource path, and merge the tile contents
+        def merge_tiles_to_all(r,fac) 
+
+          fac.resources.keys.each do |fkey|
+            merge_tiles(r,fac.resources[fkey])
+            merge_tiles_to_all(r,fac.resources[fkey])
+          end
+        end
+        private :merge_tiles_to_all
+
+        # move to children in the facade (directly beneath the current resource
+        # path), and merge the tile contents
+        def merge_tiles_to_layer(r,fac)
+          fac.resources.keys.each do |fkey|
+            merge_tiles(r,fac.resources[fkey])
+          end
+        end
+        private :merge_tiles_to_all
 
         attr_reader :resource
       end

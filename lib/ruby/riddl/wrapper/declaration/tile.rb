@@ -76,7 +76,7 @@ module Riddl
 
         def add_path(path,pres,rec=nil)
           #{{{
-          path.split('/').each do |pa|
+          path.split(/(?<!\/\*\*)\//).each do |pa| # match a slash not preceeded by **
             next if pa == ""
             unless pres.resources.has_key?(pa)
               pres.resources[pa] = Riddl::Wrapper::Description::Resource.new(pa,rec.nil? ? false : true)
