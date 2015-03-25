@@ -199,7 +199,6 @@
         <data type="anyURI"/>
       </attribute>  
     </optional>
-    <ref name="riddl-description-other-atts"/>
     <ref name="riddl-description-others"/>
   </define>
     

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<description xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+<description xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns:doc="http://cpee.org/ns/documentation">
   <message name="riddl-description-response">
     <header name="RIDDL_DESCRIPTION" fixed="oh my, a riddl description"/>  
     <parameter name="riddl-description" mimetype="text/xml"/>
@@ -8,6 +8,6 @@
     <parameter name="riddl-resource-description" type="string"/>
   </message>
   <resource>
-    <get in="riddl-resource-description-request" out="riddl-description-response"/>
+    <get in="riddl-resource-description-request" out="riddl-description-response"><doc:documentation summary="Show a list of operations and sub-resources for the current resource."></doc:documentation></get>
   </resource>
 </description>

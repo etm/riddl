@@ -1,24 +1,88 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=EDGE">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
 
-    <title>CPEE Cockpit</title>
+    <title>Documentation</title>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.5.0/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
     <script>
-      var rpath = "<%= @h['RIDDL_DECLARATION_PATH'] %>" + "?riddl-resource-description";
+      $(document).ready(function(){
+        var rpath = "<%= @h['RIDDL_DECLARATION_PATH'] %>";
+        var pathele = _.compact(rpath.split('/'));
 
-      $.ajax({
-        url: rpath,
-        success: function(data){
-          console.log(data.documentElement);
-        }
+        var t = $('#breadcrumblink')[0];
+        var link = "";
+        _.each(pathele,function(e){
+          link = link + "/" + e; 
+          var clone = document.importNode(t.content, true); 
+          $('a',clone).attr('href',link + "/?doc=true");
+          $('a',clone).text(e);
+          $('#breadcrumb').append(clone);
+        });
+
+        $.ajax({
+          url: rpath + "?riddl-resource-description",
+          success: function(data){
+            $('#main').append(marked($('description > resource > documentation',data).text()));
+
+            $('description > resource > resource',data).each(function(k,ele){
+              var sum = $('documentation',ele).attr('summary');
+              var exa = $('documentation',ele).attr('example');
+              if (exa) {
+                var rell = exa;
+                var relt = exa + ' (' + $(ele).attr('relative') + ')';
+              } else {
+                var rell = $(ele).attr('relative');
+                var relt = _.trim(rell);
+              }
+              var t = $('#subresourceitem')[0];
+              var clone = document.importNode(t.content, true); 
+              $('a',clone).attr('href','./' + rell + '/?doc=true');
+              if (relt != "") {
+                $('a',clone).text(relt);
+              }
+              if (sum) { $('.content',clone).text(sum); }
+              $('#subresources .anchor').append(clone); 
+            });
+
+            $('description > resource > :not(documentation):not(resource):not(example)',data).each(function(k,ele){
+              var sum = $('documentation',ele).attr('summary');
+              
+              var t = $('#operationitem')[0];
+              var clone = document.importNode(t.content, true); 
+              $('.what',clone).text($(ele).prop('tagName'));
+              if (sum) { $('.content',clone).text(sum); }
+              $('#operations .anchor').append(clone); 
+            });
+
+          }
+        });
       });
     </script> 
   </head>
   <body>
+    <template id="breadcrumblink"><span> / </span><a href=""></a></template>
+    <template id="subresourceitem"><li><div class='what'><a href=''>Example missing</a></div><div class="content"></div></li></template>
+    <template id="operationitem"><li><div class='what'></div><div class="content"></div></li></template>
+
+    <nav id="breadcrumb">[<a href="/">TOP</a>]</nav>
+    <section id="main"></section> 
+    <section id="subresources">
+       <h1>Sub-Resources</h1>
+       <p>From here on you can go to the following sub resources:</p>
+       <ul class="anchor">
+       </ul>
+    </section> 
+    <section id="operations">
+       <h1>Operations</h1>
+       <p>For this resource the following operations are possible:</p>
+       <ul class="anchor">
+       </ul>
+    </section> 
   </body>
 </html>
 
