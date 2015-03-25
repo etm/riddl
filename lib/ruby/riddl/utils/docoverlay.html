@@ -51,11 +51,27 @@
 
             $('description > resource > :not(documentation):not(resource):not(example)',data).each(function(k,ele){
               var sum = $('documentation',ele).attr('summary');
-              
+              var sum = $('documentation',ele).attr('example');
+              var whatl = $(ele).prop('tagName');
+              var whatd = $(ele).attr('in') == "*" ? '' : '( ' + $(ele).attr('in') + ' )';
+                  whatd += $(ele).attr('out') ? ' : ' +  $(ele).attr('out') : '';
               var t = $('#operationitem')[0];
               var clone = document.importNode(t.content, true); 
-              $('.what',clone).text($(ele).prop('tagName'));
+              $('.what a',clone).text(whatl);
+              $('.what a',clone).attr('href','#' + whatl + ' ' + whatd);
+              $('.what span',clone).append(whatd);
               if (sum) { $('.content',clone).text(sum); }
+              $('#operations .anchor').append(clone); 
+            });
+            $('description > resource > :not(documentation):not(resource):not(example)',data).each(function(k,ele){
+              var whatl = $(ele).prop('tagName');
+              var whatd = $(ele).attr('in') == "*" ? '' : '( ' + $(ele).attr('in') + ' )';
+                  whatd += $(ele).attr('out') ? ' : ' +  $(ele).attr('out') : '';
+              var t = $('#operationitem')[0];
+              var clone = document.importNode(t.content, true); 
+              $('.what a',clone).text(whatl);
+              $('.what a',clone).attr('href','#' + whatl + ' ' + whatd);
+              $('.what span',clone).append(whatd);
               $('#operations .anchor').append(clone); 
             });
 
@@ -67,21 +83,22 @@
   <body>
     <template id="breadcrumblink"><span> / </span><a href=""></a></template>
     <template id="subresourceitem"><li><div class='what'><a href=''>Example missing</a></div><div class="content"></div></li></template>
-    <template id="operationitem"><li><div class='what'></div><div class="content"></div></li></template>
+    <template id="operationitem"><li><div class='what'><a href=''></a> <span></span></div><div class="content"></div></li></template>
+    <template id="operationsec"><section><h2></h2></section></template>
 
     <nav id="breadcrumb">[<a href="/">TOP</a>]</nav>
     <section id="main"></section> 
     <section id="subresources">
-       <h1>Sub-Resources</h1>
-       <p>From here on you can go to the following sub resources:</p>
-       <ul class="anchor">
-       </ul>
+      <h1>Sub-Resources</h1>
+      <p>From here on you can go to the following sub resources:</p>
+      <ul class="anchor"></ul>
     </section> 
     <section id="operations">
-       <h1>Operations</h1>
-       <p>For this resource the following operations are possible:</p>
-       <ul class="anchor">
-       </ul>
+      <section>
+        <h1>Operations</h1>
+        <p>For this resource the following operations are possible:</p>
+        <ul class="anchor"></ul>
+      </section>
     </section> 
   </body>
 </html>
