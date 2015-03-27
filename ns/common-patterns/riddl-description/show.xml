@@ -4,12 +4,12 @@
     <header name="RIDDL_DESCRIPTION" fixed="oh my, a riddl description"/>  
     <parameter name="riddl-description" mimetype="text/xml"/>
   </message>
-  <message name="riddl-description-request" xmlns:doc="http://cpee.org/ns/documentation" doc:example="riddl-description">
+  <message name="riddl-description-request" xmlns:doc="http://riddl.org/ns/documentation/1.0" doc:example="riddl-description">
     <parameter name="riddl-description" type="string"/>
   </message>
   <resource>
     <get in="riddl-description-request" out="riddl-description-response">
-      <documentation xmlns="http://cpee.org/ns/documentation" summary="Show all operations and the full resource tree for this REST service."/>
+      <documentation xmlns="http://riddl.org/ns/documentation/1.0" summary="Show all operations and the full resource tree for this REST service."/>
     </get>
   </resource>
 </description>

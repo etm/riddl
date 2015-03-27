@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<description xmlns="http://riddl.org/ns/description/1.0" xmlns:ann="http://riddl.org/ns/annotation/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns:doc="http://cpee.org/ns/documentation">
+<description xmlns="http://riddl.org/ns/description/1.0" xmlns:ann="http://riddl.org/ns/annotation/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns:doc="http://riddl.org/ns/documentation/1.0">
   <message name="json">
     <parameter name="value" mimetype="application/json"/>
   </message>
