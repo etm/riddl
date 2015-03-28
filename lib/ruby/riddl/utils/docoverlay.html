@@ -139,7 +139,11 @@
                 var clone = document.importNode(t.content, true); 
                 $('.what',clone).text(whatl + ' ' + whatd);
                 $('.what',clone).attr('id',(whatl + '_' + whatd).replace(/ /g,'_'));
-                $('.text',clone).text(details == "" ? sum : marked(details));
+                if (details == "") {
+                  $('.text',clone).text(sum);
+                } else {
+                  $('.text',clone).append(marked(details));
+                }  
                 if (ex != "") {
                   $('.try a',clone).attr('href','?' + ex);
                   $('.try a',clone).text('?' + ex);
