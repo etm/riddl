@@ -63,94 +63,103 @@
           success: function(data){
             $('#main').append(marked($('description > resource > documentation',data).text()));
 
-            $('description > resource > resource',data).each(function(k,ele){
-              var sum = $('documentation',ele).attr('summary');
-              var exa = $('example',ele).length == 0 ? null :  $('example',ele).text();
-              if (exa) {
-                var rell = exa;
-                var relt = exa + ' (' + $(ele).attr('relative') + ')';
-              } else {
-                var rell = $(ele).attr('relative');
-                var relt = _.trim(rell);
-              }
-              var t = $('#subresourceitem')[0];
-              var clone = document.importNode(t.content, true); 
-              $('a',clone).attr('href','./' + rell + '/?doc=true');
-              if (relt != "") {
-                $('a',clone).text(relt);
-              }
-              if (sum) { $('.content',clone).text(sum); }
-              $('#subresources .anchor').append(clone); 
-            });
+            var subr = $('description > resource > resource',data);
+            if (subr.length == 0) {
+              $('#subresources').remove();
+            } else {
+              $('description > resource > resource',data).each(function(k,ele){
+                var sum = $('documentation',ele).attr('summary');
+                var exa = $('example',ele).length == 0 ? null :  $('example',ele).text();
+                if (exa) {
+                  var rell = exa;
+                  var relt = exa + ' (' + $(ele).attr('relative') + ')';
+                } else {
+                  var rell = $(ele).attr('relative');
+                  var relt = _.trim(rell);
+                }
+                var t = $('#subresourceitem')[0];
+                var clone = document.importNode(t.content, true); 
+                $('a',clone).attr('href','./' + rell + '/?doc=true');
+                if (relt != "") {
+                  $('a',clone).text(relt);
+                }
+                if (sum) { $('.content',clone).text(sum); }
+                $('#subresources .anchor').append(clone); 
+              });
+            }
 
-            $('description > resource > :not(documentation):not(resource):not(example)',data).each(function(k,ele){
-              var sum = $('documentation',ele).attr('summary');
-              var details = $('documentation',ele).text();
-              var tin = $(ele).attr('in');
-              var tout = $(ele).attr('out');
-              var whatl = $(ele).prop('tagName');
-              var whatd = tin == "*" ? '' : '( ' + tin + ' )';
-                  whatd += tout ? ' : ' +  tout : '';
+            var oprs = $('description > resource > :not(documentation):not(resource):not(example)',data);
+            if (oprs.length == 0) {
+              $('#operations').remove();
+            } else {
+              $('description > resource > :not(documentation):not(resource):not(example)',data).each(function(k,ele){
+                var sum = $('documentation',ele).attr('summary');
+                var details = $('documentation',ele).text();
+                var tin = $(ele).attr('in');
+                var tout = $(ele).attr('out');
+                var whatl = $(ele).prop('tagName');
+                var whatd = tin == "*" ? '' : '( ' + tin + ' )';
+                    whatd += tout ? ' : ' +  tout : '';
 
-              var ex = "";
-              var tinmess = "";
-              if (tin && tin != "*") {
-                $('description > message[name="' + tin + '"]',data).each(function(k,mess){
-                  tinmess = mess;
-                  _.each(mess.attributes,function(attr){
-                    if (attr.localName == 'example' && attr.namespaceURI == "http://riddl.org/ns/documentation/1.0") {
-                      ex = attr.nodeValue; 
-                    }
+                var ex = "";
+                var tinmess = "";
+                if (tin && tin != "*") {
+                  $('description > message[name="' + tin + '"]',data).each(function(k,mess){
+                    tinmess = mess;
+                    _.each(mess.attributes,function(attr){
+                      if (attr.localName == 'example' && attr.namespaceURI == "http://riddl.org/ns/documentation/1.0") {
+                        ex = attr.nodeValue; 
+                      }
+                    });
                   });
-                });
-              }
-              var toutmess = "";
-              if (tout && tout != "*") {
-                $('description > message[name="' + tout + '"]',data).each(function(k,mess){
-                  toutmess = mess;
-                });
-              }
+                }
+                var toutmess = "";
+                if (tout && tout != "*") {
+                  $('description > message[name="' + tout + '"]',data).each(function(k,mess){
+                    toutmess = mess;
+                  });
+                }
 
-              // Overview
-              var t = $('#operationitem')[0];
-              var clone = document.importNode(t.content, true); 
-              $('.what .link',clone).text(whatl);
-              $('.what .link',clone).attr('href','#' + (whatl + '_' + whatd).replace(/ /g,'_'));
-              $('.what .details',clone).text(whatd);
-              if (ex != "") {
-                $('.what .try a',clone).attr('href','?' + ex);
-              } else {
-                $('.what .try',clone).remove();
-              }
-              if (sum) { $('.content',clone).text(sum); }
-              $('#operations .anchor').append(clone); 
+                // Overview
+                var t = $('#operationitem')[0];
+                var clone = document.importNode(t.content, true); 
+                $('.what .link',clone).text(whatl);
+                $('.what .link',clone).attr('href','#' + (whatl + '_' + whatd).replace(/ /g,'_'));
+                $('.what .details',clone).text(whatd);
+                if (ex != "") {
+                  $('.what .try a',clone).attr('href','?' + ex);
+                } else {
+                  $('.what .try',clone).remove();
+                }
+                if (sum) { $('.content',clone).text(sum); }
+                $('#operations .anchor').append(clone); 
 
-              //Details
-              var t = $('#operationsec')[0];
-              var clone = document.importNode(t.content, true); 
-              $('.what',clone).text(whatl + ' ' + whatd);
-              $('.what',clone).attr('id',(whatl + '_' + whatd).replace(/ /g,'_'));
-              $('.text',clone).text(details == "" ? sum : details);
-              if (ex != "") {
-                $('.try a',clone).attr('href','?' + ex);
-                $('.try a',clone).text('?' + ex);
-              } else {
-                $('.try',clone).remove();
-              }
+                //Details
+                var t = $('#operationsec')[0];
+                var clone = document.importNode(t.content, true); 
+                $('.what',clone).text(whatl + ' ' + whatd);
+                $('.what',clone).attr('id',(whatl + '_' + whatd).replace(/ /g,'_'));
+                $('.text',clone).text(details == "" ? sum : marked(details));
+                if (ex != "") {
+                  $('.try a',clone).attr('href','?' + ex);
+                  $('.try a',clone).text('?' + ex);
+                } else {
+                  $('.try',clone).remove();
+                }
 
-              if (tin && tin != "*") {
-                $('.input .message',clone).text(vkbeautify.xml($(tinmess).serializeXML()));
-              } else {
-                $('.input',clone).remove();
-              }
-              if (tout) {
-                $('.output .message',clone).text(vkbeautify.xml($(toutmess).serializeXML()));
-              } else {
-                $('.output',clone).remove();
-              }
-              $('#operations').append(clone); 
-            });
-
+                if (tin && tin != "*") {
+                  $('.input .message',clone).text(vkbeautify.xml($(tinmess).serializeXML()));
+                } else {
+                  $('.input',clone).remove();
+                }
+                if (tout) {
+                  $('.output .message',clone).text(vkbeautify.xml($(toutmess).serializeXML()));
+                } else {
+                  $('.output',clone).remove();
+                }
+                $('#operations').append(clone); 
+              });
+            }
           }
         });
       });
