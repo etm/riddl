@@ -6,10 +6,44 @@
 
     <title>Documentation</title>
 
+    <style>
+      body {
+        counter-reset: h1counter;
+      }
+      h1 { font-size: 1.5em }
+      h2 { font-size: 1.2em }
+      h3 { font-size: 1.0em }
+      h1:before {
+          content: counter(h1counter) ".\0000a0\0000a0";
+          counter-increment: h1counter;
+          counter-reset: h2counter;
+      }
+      h2:before {
+        content: counter(h1counter) "." counter(h2counter) ".\0000a0\0000a0";
+        counter-increment: h2counter;
+      }
+    </style>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.5.0/lodash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
-    <script>
+    <script src="https://cdn.rawgit.com/vkiryukhin/vkBeautify/master/vkbeautify.js"></script>
+    <script>//<![CDATA[
+      $.fn.serializeXML = function(){
+        var out = '';
+        if (typeof XMLSerializer == 'function') {
+          var xs = new XMLSerializer();
+          this.each(function() {
+            out += xs.serializeToString(this);
+          });
+        } else if (this[0] && this[0].xml != 'undefined') {
+          this.each(function() {
+            out += this.xml;
+          });
+        }
+        return out;
+      };
+
       $(document).ready(function(){
         var rpath = "<%= @h['RIDDL_DECLARATION_PATH'] %>";
         var pathele = _.compact(rpath.split('/'));
@@ -31,7 +65,7 @@
 
             $('description > resource > resource',data).each(function(k,ele){
               var sum = $('documentation',ele).attr('summary');
-              var exa = $('documentation',ele).attr('example');
+              var exa = $('example',ele).length == 0 ? null :  $('example',ele).text();
               if (exa) {
                 var rell = exa;
                 var relt = exa + ' (' + $(ele).attr('relative') + ')';
@@ -51,40 +85,68 @@
 
             $('description > resource > :not(documentation):not(resource):not(example)',data).each(function(k,ele){
               var sum = $('documentation',ele).attr('summary');
-              var whatl = $(ele).prop('tagName');
-              var whatd = $(ele).attr('in') == "*" ? '' : '( ' + $(ele).attr('in') + ' )';
-                  whatd += $(ele).attr('out') ? ' : ' +  $(ele).attr('out') : '';
-              var t = $('#operationitem')[0];
-              var clone = document.importNode(t.content, true); 
-              $('.what a',clone).text(whatl);
-              $('.what a',clone).attr('href','#' + (whatl + '_' + whatd).replace(/ /g,'_'));
-              $('.what span',clone).append(whatd);
-              if (sum) { $('.content',clone).text(sum); }
-              $('#operations .anchor').append(clone); 
-            });
-
-            $('description > resource > :not(documentation):not(resource):not(example)',data).each(function(k,ele){
-              var sum = $('documentation',ele).attr('summary');
               var details = $('documentation',ele).text();
               var tin = $(ele).attr('in');
               var tout = $(ele).attr('out');
               var whatl = $(ele).prop('tagName');
               var whatd = tin == "*" ? '' : '( ' + tin + ' )';
                   whatd += tout ? ' : ' +  tout : '';
-              var t = $('#operationsec')[0];
-              var clone = document.importNode(t.content, true); 
+
               var ex = "";
-              $('.what',clone).text(whatl + ' ' + whatd);
-              $('.what',clone).attr('id',(whatl + '_' + whatd).replace(/ /g,'_'));
-              $('.text',clone).text(details == "" ? sum : details);
+              var tinmess = "";
               if (tin && tin != "*") {
                 $('description > message[name="' + tin + '"]',data).each(function(k,mess){
+                  tinmess = mess;
                   _.each(mess.attributes,function(attr){
-                    if (attr.localname == 'exmaple' && attr.namespaceURI == "http://riddl.org/ns/documentation/1.0") {
+                    if (attr.localName == 'example' && attr.namespaceURI == "http://riddl.org/ns/documentation/1.0") {
                       ex = attr.nodeValue; 
                     }
                   });
                 });
+              }
+              var toutmess = "";
+              if (tout && tout != "*") {
+                $('description > message[name="' + tout + '"]',data).each(function(k,mess){
+                  toutmess = mess;
+                });
+              }
+
+              // Overview
+              var t = $('#operationitem')[0];
+              var clone = document.importNode(t.content, true); 
+              $('.what .link',clone).text(whatl);
+              $('.what .link',clone).attr('href','#' + (whatl + '_' + whatd).replace(/ /g,'_'));
+              $('.what .details',clone).text(whatd);
+              if (ex != "") {
+                $('.what .try a',clone).attr('href','?' + ex);
+              } else {
+                $('.what .try',clone).remove();
+              }
+              if (sum) { $('.content',clone).text(sum); }
+              $('#operations .anchor').append(clone); 
+
+              //Details
+              var t = $('#operationsec')[0];
+              var clone = document.importNode(t.content, true); 
+              $('.what',clone).text(whatl + ' ' + whatd);
+              $('.what',clone).attr('id',(whatl + '_' + whatd).replace(/ /g,'_'));
+              $('.text',clone).text(details == "" ? sum : details);
+              if (ex != "") {
+                $('.try a',clone).attr('href','?' + ex);
+                $('.try a',clone).text('?' + ex);
+              } else {
+                $('.try',clone).remove();
+              }
+
+              if (tin && tin != "*") {
+                $('.input .message',clone).text(vkbeautify.xml($(tinmess).serializeXML()));
+              } else {
+                $('.input',clone).remove();
+              }
+              if (tout) {
+                $('.output .message',clone).text(vkbeautify.xml($(toutmess).serializeXML()));
+              } else {
+                $('.output',clone).remove();
               }
               $('#operations').append(clone); 
             });
@@ -92,13 +154,27 @@
           }
         });
       });
-    </script> 
+    //]]></script> 
   </head>
   <body>
     <template id="breadcrumblink"><span> / </span><a href=""></a></template>
-    <template id="subresourceitem"><li><div class='what'><a href=''>Example missing</a></div><div class="content"></div></li></template>
-    <template id="operationitem"><li><div class='what'><a href=''></a> <span></span></div><div class="content"></div></li></template>
-    <template id="operationsec"><section><h1 class="what" id=""></h1><p class="text"></p></section></template>
+    <template id="subresourceitem"><li><div class='what'><a class='details' href=''>Example missing</a></div><div class="content"></div></li></template>
+    <template id="operationitem"><li><div class='what'><a class='link' href=''></a> <span class='details'></span> <span class='try'>(<a href=''>Try it!</a>)</span></div><div class="content"></div></li></template>
+    <template id="operationsec">
+      <section>
+        <h2 class="what" id=""></h2>
+        <p class="try">Example: <a href=""></a></p>
+        <p class="text"></p>
+        <div class="input">
+          <h3>Input</h3>
+          <pre class='message'></pre>
+        </div>
+        <div class="output">
+          <h3>Output</h3>
+          <pre class='message'></pre>
+        </div>
+      </section>
+    </template>
 
     <nav id="breadcrumb">[<a href="/">TOP</a>]</nav>
     <section id="main"></section> 

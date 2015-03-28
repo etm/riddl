@@ -13,9 +13,9 @@ module Riddl
 
       class Call < Riddl::Implementation
         def response
-          client = Riddl::Client.new(@a[3],@a[4])
+          client = Riddl::Client.new @a[3]
 
-          path = client.resource "/" + @a[5]
+          path = client.resource "/" + @a[4]
           @status, result, headers = if @a[0].nil?
             path.request @m => [ Riddl::Header.new("RIDDL_DECLARATION_RESOURCE", @a[2]), Riddl::Header.new("RIDDL-DECLARATION-PATH", @a[1]) ] + @h.map{|a,b| Riddl::Header.new(a,b)} + @p
           else 

@@ -292,7 +292,7 @@ module Riddl
                   break
                 end  
               else
-                run Riddl::Utils::Description::Call, @riddl_exe, @riddl_pinfo, m.interface.top, m.interface.base, m.interface.des.to_doc, m.interface.real_path(@riddl_pinfo)
+                run Riddl::Utils::Description::Call, @riddl_exe, @riddl_pinfo, m.interface.top, m.interface.base, m.interface.real_path(@riddl_pinfo)
               end
               break if @riddl_status < 200 || @riddl_status >= 300
               @riddl_info.merge!(:h => @riddl_exe.headers, :p => @riddl_exe.response)
