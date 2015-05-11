@@ -101,7 +101,7 @@
                 var whatd = tin == "*" ? '' : '( ' + tin + ' )';
                     whatd += tout ? ' : ' +  tout : '';
 
-                var ex = "";
+                var ex = null;
                 var tinmess = "";
                 if (tin && tin != "*") {
                   $('description > message[name="' + tin + '"]',data).each(function(k,mess){
@@ -113,6 +113,7 @@
                     });
                   });
                 }
+                if ($('example',ele).length > 0) { ex = $('example',ele).text(); }
                 var toutmess = "";
                 if (tout && tout != "*") {
                   $('description > message[name="' + tout + '"]',data).each(function(k,mess){
@@ -126,8 +127,11 @@
                 $('.what .link',clone).text(whatl);
                 $('.what .link',clone).attr('href','#' + (whatl + '_' + whatd).replace(/ /g,'_'));
                 $('.what .details',clone).text(whatd);
-                if (ex != "") {
-                  $('.what .try a',clone).attr('href','?' + ex);
+                if (ex != null) {
+                  if (ex == "")
+                    $('.what .try a',clone).attr('href',window.location.pathname);
+                  else
+                    $('.what .try a',clone).attr('href','?' + ex);
                 } else {
                   $('.what .try',clone).remove();
                 }
@@ -143,10 +147,14 @@
                   $('.text',clone).text(sum);
                 } else {
                   $('.text',clone).append(marked(details));
-                }  
-                if (ex != "") {
-                  $('.try a',clone).attr('href','?' + ex);
-                  $('.try a',clone).text('?' + ex);
+                }
+                if (ex != null) {
+                  if (ex == "") {
+                    $('.try a',clone).attr('href',window.location.pathname);
+                  } else {
+                    $('.try a',clone).attr('href','?' + ex);
+                    $('.try a',clone).text('?' + ex);
+                  } 
                 } else {
                   $('.try',clone).remove();
                 }
@@ -176,7 +184,7 @@
     <template id="operationsec">
       <section>
         <h2 class="what" id=""></h2>
-        <p class="try">Example: <a href=""></a></p>
+        <p class="try">Example: <a href=""><i>no parameters</i></a></p>
         <p class="text"></p>
         <div class="input">
           <h3>Input</h3>
