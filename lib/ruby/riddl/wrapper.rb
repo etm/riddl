@@ -104,13 +104,15 @@ module Riddl
       if @is_description && get_description
         rds = XML::Smart::open_unprotected(RIDDL_DESCRIPTION_SHOW)
         rrds = XML::Smart::open_unprotected(RIDDL_DESCRIPTION_RESOURCE_SHOW)
-        @doc.root.prepend rds.find('/xmlns:description/xmlns:message')
-        @doc.root.prepend rrds.find('/xmlns:description/xmlns:message')
+        rds.register_namespace('des','http://riddl.org/ns/description/1.0')
+        rrds.register_namespace('des','http://riddl.org/ns/description/1.0')
+        @doc.root.prepend rds.find('/des:description/des:message')
+        @doc.root.prepend rrds.find('/des:description/des:message')
         @doc.find("/des:description/des:resource").each do |r|
-          r.prepend rds.find('/xmlns:description/xmlns:resource/*')
+          r.prepend rds.find('/des:description/des:resource/*')
         end  
         @doc.find("/des:description//des:resource").each do |r|
-          r.prepend rrds.find('/xmlns:description/xmlns:resource/*')
+          r.prepend rrds.find('/des:description/des:resource/*')
         end  
       end
       if @is_declaration  && get_description
