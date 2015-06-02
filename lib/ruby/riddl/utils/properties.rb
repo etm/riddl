@@ -348,8 +348,13 @@ module Riddl
               return # bad request
             end
             
-            EM.defer{handler.property(property).create} unless handler.nil?
           end
+          EM.defer do
+            0.upto(@p.length/2-1) do |i|
+              property = @p[i*2].value
+              handler.property(property).create
+            end
+          end unless handler.nil?
           return
         end
       end #}}}
