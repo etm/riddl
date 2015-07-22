@@ -158,7 +158,14 @@ module Riddl
       end  
       begin
         EM.run do
-          server.start
+          if @riddl_opts[:secure]
+            server.start do |srv|
+              srv.ssl = true
+              srv.ssl_options = @riddl_opts[:secure_options]
+            end
+          else
+            server.start
+          end
 
           @riddl_opts[:xmpp] = nil
           if @riddl_xmpp_jid && @riddl_xmpp_pass && !http_only
