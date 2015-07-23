@@ -152,7 +152,8 @@ module Riddl
 
       puts "Server (#{@riddl_opts[:url]}) started as PID:#{Process.pid}"
       puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass && !http_only
-      Process.daemon unless verbose
+      Process.daemon(@riddl_opts[:basepath]) unless verbose
+      Dir.chdir(@riddl_opts[:basepath])
       ::Kernel::at_exit do
         @riddl_at_exit.call if @riddl_at_exit
       end  
@@ -315,7 +316,6 @@ module Riddl
     end #}}}
 
     def __xmpp_call(env,raw) #{{{
-      Dir.chdir(@riddl_opts[:basepath]) if @riddl_opts[:basepath]
       @riddl_log = @riddl_logger || STDOUT
 
       @riddl_env = XML::Smart::Dom::Element.new(raw).parent
@@ -372,7 +372,6 @@ module Riddl
     end #}}}
 
     def __http_call(env) #{{{
-      Dir.chdir(@riddl_opts[:basepath]) if @riddl_opts[:basepath]
 
       @riddl_env = env
       @riddl_env['rack.logger'] =  @riddl_logger if @riddl_logger
