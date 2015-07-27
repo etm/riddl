@@ -49,6 +49,6 @@ class TestProd <  Minitest::Test
 
     test = nots.resource("/notifications/subscriptions/#{key}")
     status, res = test.get
-    assert status == 500
+    assert status == 404
   end
 end
