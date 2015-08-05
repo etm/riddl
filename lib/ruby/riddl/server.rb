@@ -379,7 +379,7 @@ module Riddl
       @riddl_res = Rack::Response.new
       @riddl_status = 404
 
-      @riddl_pinfo = @riddl_env["PATH_INFO"].gsub(/\/+/,'/')
+      @riddl_pinfo = Riddl::Protocols::Utils::unescape(@riddl_env["PATH_INFO"].gsub(/\/+/,'/'))
       @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
 
       if @riddl_matching_path
