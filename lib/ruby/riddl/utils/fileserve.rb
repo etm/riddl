@@ -21,18 +21,25 @@ module Riddl
             @headers << Riddl::Header.new("Connection","close")
             @status = 304 # Not modified
             return []
-          else 
-            mt = MIME::Types.type_for(path).first
-            apx = ''
-            if mt.ascii?
-              tstr = File.read(path,CharlockHolmes::EncodingDetector::DEFAULT_BINARY_SCAN_LEN)
-              apx = ';charset=' + CharlockHolmes::EncodingDetector.detect(tstr)[:encoding]
+          else
+            fmt = @a[1] || begin
+              mt = MIME::Types.type_for(path).first
+              if mt.nil?
+                'text/plain;charset=utf-8'
+              else
+                apx = ''
+                if mt.ascii?
+                  tstr = File.read(path,CharlockHolmes::EncodingDetector::DEFAULT_BINARY_SCAN_LEN)
+                  apx = ';charset=' + CharlockHolmes::EncodingDetector.detect(tstr)[:encoding]
+                end
+                mt.to_s + apx
+              end
             end
-            return Riddl::Parameter::Complex.new('file',mt.to_s + apx,File.open(path,'r'))
-          end  
+            return Riddl::Parameter::Complex.new('file',fmt,File.open(path,'r'))
+          end
         end
         @status = 404
-      end  
+      end
     end
-  end  
-end  
+  end
+end
