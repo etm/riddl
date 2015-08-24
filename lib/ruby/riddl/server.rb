@@ -43,13 +43,14 @@ module Riddl
     end #}}}
 
     OPTS = { 
-      :host     => 'localhost',
-      :port     => 9292,
-      :secure   => false,
-      :mode     => :debug,
-      :basepath => File.expand_path(File.dirname($0)),
-      :pidfile  => File.basename($0,'.rb') + '.pid',
-      :conffile => File.basename($0,'.rb') + '.conf'
+      :host            => 'localhost',
+      :port            => 9292,
+      :secure          => false,
+      :mode            => :debug,
+      :basepath        => File.expand_path(File.dirname($0)),
+      :pidfile         => File.basename($0,'.rb') + '.pid',
+      :conffile        => File.basename($0,'.rb') + '.conf',
+      :runtime_options => []
     }
 
     def loop! #{{{
@@ -61,16 +62,18 @@ module Riddl
       operation = "start"
       ARGV.options { |opt|
         opt.summary_indent = ' ' * 4
-        opt.banner = "Usage:\n#{opt.summary_indent}ruby server.rb [options] start|startclean|stop|restart|info\n"
+        opt.banner = "Usage:\n#{opt.summary_indent}ruby server.rb [options] start|stop|restart|info|...\n"
         opt.on("Options:")
         opt.on("--http-only", "-s", "Only http, no other protocols.") { http_only = true }
         opt.on("--verbose", "-v", "Do not daemonize. Write ouput to console.") { verbose = true }
         opt.on("--help", "-h", "This text.") { puts opt; exit }
         opt.separator(opt.summary_indent + "start|stop|restart|info".ljust(opt.summary_width+1) + "Do operation start, stop, restart or get information.")
-        opt.separator(opt.summary_indent + "startclean".ljust(opt.summary_width+1) + "Delete all instances before starting.")
+        @riddl_opts[:runtime_options].each do |ro|
+          opt.separator(opt.summary_indent + ro[0].ljust(opt.summary_width+1) + ro[1])
+        end
         opt.parse!
       }
-      unless %w{start startclean stop restart info}.include?(ARGV[0])
+      unless (%w{start stop restart info} + @riddl_opts[:runtime_options].map{|ro| ro[0] }).include?(ARGV[0])
         puts ARGV.options
         exit
       end
@@ -104,10 +107,12 @@ module Riddl
         end
         exit
       end
-      if %w{start startclean}.include?(operation) && status.call == true
+      if %w{start}.include?(operation) && status.call == true
         puts "Server (#{@riddl_opts[:url]}) already started"
         exit
       end
+
+
       
       ########################################################################################################################
       # stop/restart server
@@ -127,12 +132,10 @@ module Riddl
       end
       
       ########################################################################################################################
-      # start server
+      # go through user defined startup thingis
       ########################################################################################################################
-      if operation == 'startclean'
-        Dir.glob(File.expand_path(@riddl_opts[:basepath] + '/instances/*')).each do |d|
-          FileUtils.rm_r(d) if File.basename(d) =~ /^\d+$/
-        end
+      @riddl_opts[:runtime_options].each do |ro|
+        ro[2].call(status.call) if operation == ro[0]
       end
 
       app = Rack::Builder.new self
