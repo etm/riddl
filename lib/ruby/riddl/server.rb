@@ -62,7 +62,7 @@ module Riddl
       operation = "start"
       ARGV.options { |opt|
         opt.summary_indent = ' ' * 4
-        opt.banner = "Usage:\n#{opt.summary_indent}ruby server.rb [options] start|stop|restart|info|...\n"
+        opt.banner = "Usage:\n#{opt.summary_indent}ruby server.rb [options] start|stop|restart|info" + (@riddl_opts[:runtime_options].length > 0 ? '|' : '') + @riddl_opts[:runtime_options].map{|ro| ro[0]}.join('|') + "\n"
         opt.on("Options:")
         opt.on("--http-only", "-s", "Only http, no other protocols.") { http_only = true }
         opt.on("--verbose", "-v", "Do not daemonize. Write ouput to console.") { verbose = true }
@@ -111,8 +111,6 @@ module Riddl
         puts "Server (#{@riddl_opts[:url]}) already started"
         exit
       end
-
-
       
       ########################################################################################################################
       # stop/restart server
