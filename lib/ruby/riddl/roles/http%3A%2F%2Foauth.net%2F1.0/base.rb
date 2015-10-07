@@ -5,7 +5,7 @@ require 'base64'
 module Riddl
   module Roles
     module OAuth
-      DIGEST = OpenSSL::Digest::Digest.new('sha1')
+      DIGEST = OpenSSL::Digest::Sha1.new
       VERSION_MAJOR = 1
       VERSION_MINOR = 0
 

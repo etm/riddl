@@ -373,7 +373,6 @@ module Riddl
     end #}}}
 
     def __http_call(env) #{{{
-
       @riddl_env = env
       @riddl_env['rack.logger'] =  @riddl_logger if @riddl_logger
       @riddl_log = @riddl_logger || @riddl_env['rack.errors'] 
@@ -442,9 +441,7 @@ module Riddl
         @riddl_status = 404 # client requests wrong path
       end
       if @riddl_exe
-        if @riddl_status >= 200 && @riddl_status < 300
-          @riddl_res.write Protocols::HTTP::Generator.new(@riddl_exe.response,@riddl_res).generate.read
-        end  
+        @riddl_res.write Protocols::HTTP::Generator.new(@riddl_exe.response,@riddl_res).generate.read
         @riddl_exe.headers.each do |n,h|
           @riddl_res[n] = h
         end
