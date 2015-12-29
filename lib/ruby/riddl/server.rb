@@ -38,47 +38,26 @@ module Riddl
         end
         @headers.compact!
         @response.compact!
-        @headers = Hash[ @headers.map{ |h| [h.name, h.value] } ]  
+        @headers = Hash[ @headers.map{ |h| [h.name, h.value] } ]
       end
     end #}}}
 
-    OPTS = { 
+    OPTS = {
       :host            => 'localhost',
       :port            => 9292,
       :secure          => false,
       :mode            => :debug,
+      :verbose         => false,
+      :http_only       => false,
       :basepath        => File.expand_path(File.dirname($0)),
       :pidfile         => File.basename($0,'.rb') + '.pid',
       :conffile        => File.basename($0,'.rb') + '.conf',
-      :runtime_options => []
+      :runtime_options => [],
+      :cmdl_parsing    => true,
+      :cmdl_operation  => 'start'
     }
 
     def loop! #{{{
-      ########################################################################################################################
-      # parse arguments
-      ########################################################################################################################
-      verbose = false
-      http_only = false
-      operation = "start"
-      ARGV.options { |opt|
-        opt.summary_indent = ' ' * 4
-        opt.banner = "Usage:\n#{opt.summary_indent}ruby server.rb [options] start|stop|restart|info" + (@riddl_opts[:runtime_options].length > 0 ? '|' : '') + @riddl_opts[:runtime_options].map{|ro| ro[0]}.join('|') + "\n"
-        opt.on("Options:")
-        opt.on("--http-only", "-s", "Only http, no other protocols.") { http_only = true }
-        opt.on("--verbose", "-v", "Do not daemonize. Write ouput to console.") { verbose = true }
-        opt.on("--help", "-h", "This text.") { puts opt; exit }
-        opt.separator(opt.summary_indent + "start|stop|restart|info".ljust(opt.summary_width+1) + "Do operation start, stop, restart or get information.")
-        @riddl_opts[:runtime_options].each do |ro|
-          opt.separator(opt.summary_indent + ro[0].ljust(opt.summary_width+1) + ro[1])
-        end
-        opt.parse!
-      }
-      unless (%w{start stop restart info} + @riddl_opts[:runtime_options].map{|ro| ro[0] }).include?(ARGV[0])
-        puts ARGV.options
-        exit
-      end
-      operation = ARGV[0]
-      
       ########################################################################################################################
       # status and info
       ########################################################################################################################
@@ -91,11 +70,11 @@ module Riddl
           false
         end
       end
-      if operation == "info" && status.call == false
+      if @riddl_opts[:cmdl_operation] == "info" && status.call == false
         puts "Server (#{@riddl_opts[:url]}) not running"
         exit
       end
-      if operation == "info" && status.call == true
+      if @riddl_opts[:cmdl_operation] == "info" && status.call == true
         puts "Server (#{@riddl_opts[:url]}) running as #{pid}"
         begin
           stats = `ps -o "vsz,rss,lstart,time" -p #{pid}`.split("\n")[1].strip.split(/ +/)
@@ -107,15 +86,15 @@ module Riddl
         end
         exit
       end
-      if %w{start}.include?(operation) && status.call == true
+      if %w{start}.include?(@riddl_opts[:cmdl_operation]) && status.call == true
         puts "Server (#{@riddl_opts[:url]}) already started"
         exit
       end
-      
+
       ########################################################################################################################
       # stop/restart server
       ########################################################################################################################
-      if %w{stop restart}.include?(operation)
+      if %w{stop restart}.include?(@riddl_opts[:cmdl_operation])
         if status.call == false
           puts "Server (#{@riddl_opts[:url]}) maybe not started?"
         else
@@ -124,16 +103,16 @@ module Riddl
           while status.call
             Process.kill "SIGTERM", pid
             sleep 0.3
-          end  
+          end
         end
-        exit unless operation == "restart"
+        exit unless @riddl_opts[:cmdl_operation] == "restart"
       end
-      
+
       ########################################################################################################################
       # go through user defined startup thingis
       ########################################################################################################################
       @riddl_opts[:runtime_options].each do |ro|
-        ro[2].call(status.call) if operation == ro[0]
+        ro[2].call(status.call) if @riddl_opts[:cmdl_operation] == ro[0]
       end
 
       app = Rack::Builder.new self
@@ -145,19 +124,19 @@ module Riddl
         :app => app,
         :Host => '0.0.0.0',
         :Port => @riddl_opts[:port],
-        :environment => verbose ? 'deployment' : 'none',
+        :environment => @riddl_opts[:verbose] ? 'deployment' : 'none',
         :server => 'thin',
         :pid => File.expand_path(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile]),
         :signals => false
       )
 
       puts "Server (#{@riddl_opts[:url]}) started as PID:#{Process.pid}"
-      puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass && !http_only
-      Process.daemon(@riddl_opts[:basepath]) unless verbose
+      puts "XMPP support (#{@riddl_xmpp_jid}) active" if @riddl_xmpp_jid && @riddl_xmpp_pass && !@riddl_opts[:http_only]
+      Process.daemon(@riddl_opts[:basepath]) unless @riddl_opts[:verbose]
       Dir.chdir(@riddl_opts[:basepath])
       ::Kernel::at_exit do
         @riddl_at_exit.call if @riddl_at_exit
-      end  
+      end
       begin
         EM.run do
           if @riddl_opts[:secure]
@@ -170,7 +149,7 @@ module Riddl
           end
 
           @riddl_opts[:xmpp] = nil
-          if @riddl_xmpp_jid && @riddl_xmpp_pass && !http_only
+          if @riddl_xmpp_jid && @riddl_xmpp_pass && !@riddl_opts[:http_only]
             xmpp = Blather::Client.setup @riddl_xmpp_jid, @riddl_xmpp_pass
             @riddl_opts[:xmpp] = xmpp
             xmpp.register_handler(:message, '/message/ns:operation', :ns => 'http://riddl.org/ns/xmpp-rest') do |m|
@@ -198,14 +177,14 @@ module Riddl
             Signal.trap(signal) do
               EM.stop
             end
-          end  
+          end
 
         end
 
-      rescue => e 
+      rescue => e
         if e.is_a?(Blather::Stream::ConnectionFailed)
           puts "Server (#{@riddl_xmpp_jid}) stopped due to connection error (PID:#{Process.pid})"
-        else  
+        else
           puts "Server (#{@riddl_opts[:url]}) stopped due to connection error (PID:#{Process.pid})"
         end
       end
@@ -215,19 +194,49 @@ module Riddl
 
     def initialize(riddl,opts={},&blk)# {{{
       @riddl_opts = {}
-      @riddl_opts = OPTS.merge(opts) 
+      @riddl_opts = OPTS.merge(opts)
 
       if File.exists?(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile])
         @riddl_opts.merge!(Psych::load_file(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile]))
       end
+
+      ########################################################################################################################
+      # parse arguments
+      ########################################################################################################################
+      if @riddl_opts[:cmdl_parsing]
+        @riddl_opts[:cmdl_operation] = "start"
+        ARGV.options { |opt|
+          opt.summary_indent = ' ' * 4
+          opt.banner = "Usage:\n#{opt.summary_indent}ruby server.rb [options] start|stop|restart|info" + (@riddl_opts[:runtime_options].length > 0 ? '|' : '') + @riddl_opts[:runtime_options].map{|ro| ro[0]}.join('|') + "\n"
+          opt.on("Options:")
+          opt.on("--port [PORT]", "-p [PORT]", "Specify http port.") do |p|
+            @riddl_opts[:port] = p.to_i
+            @riddl_opts[:pidfile] = @riddl_opts[:pidfile].gsub(/\.pid/,'') + '-' + @riddl_opts[:port].to_s + '.pid'
+          end
+          opt.on("--http-only", "-s", "Only http, no other protocols.") { @riddl_opts[:http_only] = true }
+          opt.on("--verbose", "-v", "Do not daemonize. Write ouput to console.") { @riddl_opts[:verbose] = true }
+          opt.on("--help", "-h", "This text.") { puts opt; exit }
+          opt.separator(opt.summary_indent + "start|stop|restart|info".ljust(opt.summary_width+1) + "Do operation start, stop, restart or get information.")
+          @riddl_opts[:runtime_options].each do |ro|
+            opt.separator(opt.summary_indent + ro[0].ljust(opt.summary_width+1) + ro[1])
+          end
+          opt.parse!
+        }
+        unless (%w{start stop restart info} + @riddl_opts[:runtime_options].map{|ro| ro[0] }).include?(ARGV[0])
+          puts ARGV.options
+          exit
+        end
+        @riddl_opts[:cmdl_operation] = ARGV[0]
+      end
+      ########################################################################################################################
       @riddl_opts[:url] = (@riddl_opts[:secure] ? 'https://' : 'http://') + @riddl_opts[:host] + ':' + @riddl_opts[:port].to_s
 
       @riddl_logger             = nil
-      @riddl_process_out        = true 
+      @riddl_process_out        = true
       @riddl_cross_site_xhr     = false
       @accessible_description   = false
       @riddl_description_string = ''
-      @riddl_paths              = []  
+      @riddl_paths              = []
 
       @riddl_at_exit            = nil
 
@@ -270,18 +279,18 @@ module Riddl
         else
           @riddl_log.write "501: the #{@riddl_method} parameters are not matching anything in the description.\n"
           @riddl_status = 501 # not implemented?!
-        end  
+        end
       else
         if !@riddl_message.nil? && @accessible_description && @riddl_message.in.name == 'riddl-description-request' && @riddl_method == 'get' &&  '/' + @riddl_info[:s].join('/') == '/'
-          run Riddl::Utils::Description::RDR, @riddl_description_string 
+          run Riddl::Utils::Description::RDR, @riddl_description_string
         elsif !@riddl_message.nil? && @accessible_description && @riddl_message.in.name == 'riddl-resource-description-request' && @riddl_method == 'get'
           @riddl_path = File.dirname('/' + @riddl_info[:s].join('/')).gsub(/\/+/,'/')
           on resource File.basename('/' + @riddl_info[:s].join('/')).gsub(/\/+/,'/') do
             run Riddl::Utils::Description::RDR, @riddl.resource_description(@riddl_matching_path[0])
-          end  
+          end
         else
           if @riddl.description?
-            instance_exec(@riddl_info, &@riddl_interfaces[nil])  
+            instance_exec(@riddl_info, &@riddl_interfaces[nil])
           elsif @riddl.declaration?
             mess = @riddl_message
             @riddl_message.route_to_a.each do |m|
@@ -295,11 +304,11 @@ module Riddl
                   @riddl_info[:s] = m.interface.sub.sub(/\//,'').split('/')
                   @riddl_info.merge!(:match => matching_path)
                   instance_exec(@riddl_info, &@riddl_interfaces[m.interface.name])
-                else  
+                else
                   @riddl_log.write "501: not implemented (for remote: add @location in declaration; for local: add to Riddl::Server).\n"
                   @riddl_status = 501 # not implemented?!
                   break
-                end  
+                end
               else
                 run Riddl::Utils::Description::Call, @riddl_exe, @riddl_pinfo, m.interface.top, m.interface.base, m.interface.real_path(@riddl_pinfo)
               end
@@ -313,7 +322,7 @@ module Riddl
           @riddl_res['Access-Control-Allow-Origin'] = '*'
           @riddl_res['Access-Control-Max-Age'] = '0'
         end
-      end  
+      end
     end #}}}
 
     def __xmpp_call(env,raw) #{{{
@@ -343,12 +352,12 @@ module Riddl
         ).params
 
         @riddl_path = '/'
-        @riddl_info = { 
+        @riddl_info = {
           :h => @riddl_headers,
           :p => @riddl_parameters,
-          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::Utils::unescape(e)}, 
+          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::Utils::unescape(e)},
           :s => @riddl_matching_path[0].sub(/\//,'').split('/'),
-          :m => @riddl_method, 
+          :m => @riddl_method,
           :env =>  Hash[@riddl_env.root.attributes.map{|a| [a.qname.name, a.value] }].merge({ 'riddl.transport' => 'xmpp', 'xmpp' => @riddl_res }),
           :match => []
         }
@@ -375,7 +384,7 @@ module Riddl
     def __http_call(env) #{{{
       @riddl_env = env
       @riddl_env['rack.logger'] =  @riddl_logger if @riddl_logger
-      @riddl_log = @riddl_logger || @riddl_env['rack.errors'] 
+      @riddl_log = @riddl_logger || @riddl_env['rack.errors']
       @riddl_res = Rack::Response.new
       @riddl_status = 404
 
@@ -402,12 +411,12 @@ module Riddl
 
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
         @riddl_path = '/'
-        @riddl_info = { 
+        @riddl_info = {
           :h => @riddl_headers,
           :p => @riddl_parameters,
-          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::Utils::unescape(e)}, 
+          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::Utils::unescape(e)},
           :s => @riddl_matching_path[0].sub(/\//,'').split('/'),
-          :m => @riddl_method, 
+          :m => @riddl_method,
           :env => @riddl_env.reject{|k,v| k =~ /^rack\./}.merge({'riddl.transport' => 'http', 'xmpp' => @riddl_opts[:xmpp]}),
           :match => []
         }
@@ -430,12 +439,12 @@ module Riddl
                 @riddl_info.merge!(:match => matching_path)
                 instance_exec(@riddl_info, &@riddl_interfaces[@riddl_message.interface.name])
               end
-            end  
-          end  
-          throw :async 
+            end
+          end
+          throw :async
         else
           __call
-        end  
+        end
       else
         @riddl_log.write "404: this resource for sure does not exist.\n"
         @riddl_status = 404 # client requests wrong path
@@ -448,8 +457,8 @@ module Riddl
       end
       @riddl_res.status = @riddl_status
       @riddl_res.finish
-    end #}}} 
-    
+    end #}}}
+
     def process_out(pout)# {{{
       @riddl_process_out = pout
     end# }}}
@@ -475,7 +484,7 @@ module Riddl
       if @riddl_paths.empty? # default interface, when a description and "on" syntax in server
         @riddl_interfaces[nil] = block
         return
-      end  
+      end
 
       @riddl_path << (@riddl_path == '/' ? resource : '/' + resource)
 
@@ -493,19 +502,19 @@ module Riddl
     def run(what,*args)# {{{
       return if @riddl_path == ''
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
-        data = Riddl::Protocols::WebSocket::ParserData.new 
-        data.request_path = @riddl_pinfo                                                                                                                                     
+        data = Riddl::Protocols::WebSocket::ParserData.new
+        data.request_path = @riddl_pinfo
         data.request_url = @riddl_pinfo + '?' + @riddl_query_string
         data.query_string = @riddl_query_string
-        data.http_method = @riddl_env['REQUEST_METHOD'] 
-        data.body = @riddl_env['rack.input'].read 
+        data.http_method = @riddl_env['REQUEST_METHOD']
+        data.body = @riddl_env['rack.input'].read
         data.headers = Hash[
           @riddl_headers.map { |key, value|  [key.downcase.gsub('_','-'), value] }
         ]
         w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION'], :match => matching_path))
-        w.io = Riddl::Protocols::WebSocket.new(w, @riddl_env['thin.connection']) 
-        w.io.dispatch(data) 
-      end  
+        w.io = Riddl::Protocols::WebSocket.new(w, @riddl_env['thin.connection'])
+        w.io.dispatch(data)
+      end
       if what.class == Class && what.superclass == Riddl::Implementation
         w = what.new(@riddl_info.merge!(:a => args, :match => matching_path))
         @riddl_exe = Riddl::Server::Execution.new(w.response,w.headers)
@@ -515,7 +524,7 @@ module Riddl
             @riddl_log.write "500: the return for the #{@riddl_method} is not matching anything in the description.\n"
             @riddl_status = 500
             return
-          end  
+          end
         end
       end
     end# }}}
@@ -524,7 +533,7 @@ module Riddl
       if !@riddl_message.nil? && what.class == Hash && what.length == 1
         met, min = what.first
         @riddl_path == @riddl_matching_path[0] && min == @riddl_message.in.name && @riddl_method == met.to_s.downcase
-      else  
+      else
         false
       end
     end  # }}}
@@ -536,7 +545,7 @@ module Riddl
     def resource(rname=nil); return rname.nil? ? '{}' : rname end
 
     def matching_path #{{{
-      @riddl_path.sub(/\//,'').split('/') 
+      @riddl_path.sub(/\//,'').split('/')
     end #}}}
 
     def declaration_path #{{{
