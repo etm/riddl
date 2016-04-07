@@ -46,6 +46,7 @@ module Riddl
       :host            => 'localhost',
       :port            => 9292,
       :secure          => false,
+      :mode            => :debug,
       :verbose         => false,
       :http_only       => false,
       :basepath        => File.expand_path(File.dirname($0)),

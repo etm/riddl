@@ -8,23 +8,24 @@ module Riddl
     class WrapperUtils
       def get_resource_deep(path,pres)
         #{{{
-        path.split('/').each do |pa|
+        path.split('/(').each do |pa|
+          pa.chop!
           next if pa == ""
           if pres.resources.has_key?(pa)
             pres = pres.resources[pa]
           else
             return nil
           end
-        end
+        end unless path == '/'
         pres
         #}}}
       end
-      def rpaths(res,what)
+      def rpaths(res,what,finalize=false)
         #{{{
-        what += what == '' ? '/' : res.path
+        what += what == '' ? '/' : (finalize ? '(' + res.path + ')' : res.path)
         ret = [[what,res.recursive]]
         res.resources.each do |name,r|
-          ret += rpaths(r,what == '/' ? what : what + '/')
+          ret += rpaths(r,what == '/' ? what : what + '/',finalize)
         end
         ret.sort!
         ret
@@ -265,6 +266,7 @@ module Riddl
       description
       declaration
       tmp = []
+
       tmp = @description.paths if @is_description 
       tmp = @declaration.paths if @is_declaration
       tmp.map do |t|

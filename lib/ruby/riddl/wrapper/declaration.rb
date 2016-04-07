@@ -11,7 +11,7 @@ module Riddl
         get_resource_deep(path,@facade.resource)
       end  
       def paths
-        rpaths(@facade.resource,'')
+        rpaths(@facade.resource,'',true)
       end
       
       def description_xml

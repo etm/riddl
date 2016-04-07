@@ -7,7 +7,7 @@ module Riddl
     class Description < WrapperUtils
 
       def paths(res=@resource,what='')
-        rpaths(res,what)
+        rpaths(res,what,true)
       end
       def get_resource(path)
         get_resource_deep(path,@resource)
