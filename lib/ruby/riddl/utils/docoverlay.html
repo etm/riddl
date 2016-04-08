@@ -123,8 +123,8 @@
               $('#operations').remove();
             } else {
               oprs.each(function(k,ele){
-                var sum = $('documentation',ele).attr('summary');
-                var details = $('documentation',ele).text();
+                var sum = docChildren(null,'documentation',ele).attr('summary');
+                var details = docChildren(null,'documentation',ele).text();
                 var tin = $(ele).attr('in');
                 var tout = $(ele).attr('out');
                 var whatl = $(ele).prop('tagName');
