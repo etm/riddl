@@ -11,7 +11,7 @@ module Riddl
         get_resource_deep(path,@facade.resource)
       end  
       def paths
-        rpaths(@facade.resource,'',true)
+        rpaths(@facade.resource)
       end
       
       def description_xml
@@ -81,7 +81,7 @@ module Riddl
             desres = des.find("des:resource").first
             if everywhere
               @tiles.map do |til| # extract all currently existing paths for all tiles
-                rpaths(til.resource,'').map{|a,b| a}
+                rpaths(til.resource).map{|a,b| a}
               end.flatten.uniq.each do |path| # apply current to all paths
                 int = Interface.new(lname,path,lpath,"/",des)
                 rec = desres.attributes['recursive']
