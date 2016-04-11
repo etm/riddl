@@ -9,7 +9,9 @@
       <param name="pattern">[\w_]+</param>
     </parameter>
     <parameter name="notification" type="string"/>
-    <parameter name="fingerprint-with-consumer-secret" type="string"/>
+    <optional>
+      <parameter name="fingerprint-with-consumer-secret" type="string"/>
+    </optional>
   </message>
 
   <message name="vote">
@@ -22,18 +24,24 @@
     </parameter>
     <parameter name="notification" type="string"/>
     <parameter name="callback" type="string"/>
-    <parameter name="fingerprint-with-consumer-secret" type="string"/>
+    <optional>
+      <parameter name="fingerprint-with-consumer-secret" type="string"/>
+    </optional>
   </message>
 
   <message name="acknowledgment">
-    <parameter name="continue" type="string">
-      <choice>
-        <value>true</value>
-        <value>false</value>
-        <value>callback</value>
-      </choice>
-    </parameter>  
-    <parameter name="fingerprint-with-consumer-secret" type="string"/>
+    <optional>
+      <parameter name="continue" type="string">
+        <choice>
+          <value>true</value>
+          <value>false</value>
+          <value>callback</value>
+        </choice>
+      </parameter>  
+    </optional>  
+    <optional>
+      <parameter name="fingerprint-with-consumer-secret" type="string"/>
+    </optional>
   </message>
 
   <resource pattern="http://riddl.org/ns/common-patterns/notifications-consumer/1.0">
