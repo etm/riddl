@@ -102,7 +102,11 @@
                     exa = exa.length == 0 ? null : exa.text();
                 if (exa) {
                   var rell = exa;
-                  var relt = exa + ' (' + $(ele).attr('relative') + ')';
+		  if ($(ele).attr('relative')) {
+	            var relt = exa + ' (' + $(ele).attr('relative') + ')';
+		  } else {
+	            var relt = '{} (any string possible)';
+		  }
                 } else {
                   var rell = $(ele).attr('relative');
                   var relt = _.trim(rell);
