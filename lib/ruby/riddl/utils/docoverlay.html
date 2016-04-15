@@ -129,13 +129,15 @@
               oprs.each(function(k,ele){
                 var sum = docChildren(null,'documentation',ele).attr('summary');
                 var details = docChildren(null,'documentation',ele).text();
+		var example =  docChildren(null,'example',ele);
+                var ex = null;
+
                 var tin = $(ele).attr('in');
                 var tout = $(ele).attr('out');
                 var whatl = $(ele).prop('tagName');
                 var whatd = tin == "*" ? '' : '( ' + tin + ' )';
                     whatd += tout ? ' : ' +  tout : '';
 
-                var ex = null;
                 var tinmess = "";
                 if (tin && tin != "*") {
                   $('description > message[name="' + tin + '"]',data).each(function(k,mess){
@@ -147,7 +149,8 @@
                     });
                   });
                 }
-                if ($('example',ele).length > 0) { ex = $('example',ele).text(); }
+                if (example.length > 0) { ex = example.text(); }
+
                 var toutmess = "";
                 if (tout && tout != "*") {
                   $('description > message[name="' + tout + '"]',data).each(function(k,mess){

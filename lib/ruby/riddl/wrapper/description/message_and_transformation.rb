@@ -26,7 +26,7 @@ module Riddl
           hb.find("//text()").delete_all!
           hb.find("//des:header/*").delete_all!
           hb.find("//des:parameter/@handler").delete_all!
-          hb.find("//des:parameter/@mimetype").each { |e| e.value = '' }
+          # hb.find("//des:parameter/@mimetype").each { |e| e.value = '' }
           hb.root.namespaces.delete_all!
           @hash_base = hb
           @hash      = hb.serialize.hash
