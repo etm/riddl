@@ -22,7 +22,11 @@ module Riddl
       def rpaths(res,what='',rewhat='')
         #{{{
         what += what == '' ? '/' : res.path
-        rewhat += rewhat == '' ? '/' : '(' + res.path + ')'
+        if res.recursive
+          rewhat += rewhat == '' ? '/' : '(' + res.path + ')(\/(' + res.path + '))*'
+        else
+          rewhat += rewhat == '' ? '/' : '(' + res.path + ')'
+        end
         ret = [[what,rewhat,res.recursive]]
         res.resources.each do |name,r|
           ret += rpaths(r,what == '/' ? what : what + '/',rewhat == '/' ? rewhat : rewhat + '/')

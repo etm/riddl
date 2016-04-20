@@ -337,7 +337,7 @@ module Riddl
       @riddl_pinfo.gsub!(/\?(.*)/).each do
         @riddl_query_string = $1; ''
       end
-      @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
+      @riddl_matching_path = @riddl_paths.find{ |e| @riddl_pinfo.match(e[1]).to_s.length == @riddl_pinfo.length }
 
       if @riddl_matching_path
         @riddl_method = @riddl_env.find('string(/message/xr:operation)').downcase
@@ -389,7 +389,7 @@ module Riddl
       @riddl_status = 404
 
       @riddl_pinfo = Riddl::Protocols::Utils::unescape(@riddl_env["PATH_INFO"].gsub(/\/+/,'/'))
-      @riddl_matching_path = @riddl_paths.map{ |e| e[1] =~ @riddl_pinfo; $~ ? [$~.to_s.length,e] : nil }.compact.max{|e| e[0]}[1] rescue nil
+      @riddl_matching_path = @riddl_paths.find{ |e| @riddl_pinfo.match(e[1]).to_s.length == @riddl_pinfo.length }
 
       if @riddl_matching_path
         @riddl_query_string = @riddl_env['QUERY_STRING']
