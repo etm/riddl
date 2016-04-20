@@ -389,7 +389,7 @@ module Riddl
       @riddl_status = 404
 
       @riddl_pinfo = Riddl::Protocols::Utils::unescape(@riddl_env["PATH_INFO"].gsub(/\/+/,'/'))
-      @riddl_matching_path = @riddl_paths.find{ |e| e[1] =~ @riddl_pinfo }
+      @riddl_matching_path = @riddl_paths.map{ |e| e[1] =~ @riddl_pinfo; $~ ? [$~.to_s.length,e] : nil }.compact.max{|e| e[0]}[1] rescue nil
 
       if @riddl_matching_path
         @riddl_query_string = @riddl_env['QUERY_STRING']
