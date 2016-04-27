@@ -1,0 +1,37 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="verify_in">                                                                                                                                                                                                                                        
+    <parameter name="code" type="string"/>
+  </message>
+
+  <message name="verify_out">
+    <parameter name="data" mimetype="application/json"/>
+  </message>
+
+  <message name="refresh_token_in">
+    <parameter name="grant_type" fixed="refresh_token"/>
+    <!-- <parameter name="client_id" type="string"/> -->
+    <parameter name="refresh_token" type="string"/>
+  </message>
+
+  <message name="refresh_token_out">
+    <parameter name="data" mimetype="application/json"/>
+  </message>
+
+  <message name="revoke_in">
+    <parameter name="token" type="string"/>
+  </message>
+
+  <resource>
+    <resource relative="verify">
+      <post in="verify_in" out="verify_out"/>
+    </resource>
+    <resource relative="token">
+      <post in="refresh_token_in" out="refresh_token_out"/>
+    </resource>
+    <resource relative="revoke">
+      <get in="revoke_in"/>
+    </resource>
+  </resource>
+
+</description>

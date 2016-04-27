@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.99.208"
+  s.version          = "0.99.209"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
@@ -16,7 +16,8 @@ Gem::Specification.new do |s|
   s.test_files       = Dir['test/tc_*.rb','test/smartrunner.rb']
 
 
-  s.authors          = ['Juergen eTM Mangler']
+  s.email            = 'juergen.mangler@gmail.com'
+  s.authors          = ['Juergen \'eTM\' Mangler','Florian Stertz','Sonja Biedermann']
   s.email            = 'juergen.mangler@gmail.com'
   s.homepage         = 'http://www.wst.univie.ac.at/communities/riddl/'
 
