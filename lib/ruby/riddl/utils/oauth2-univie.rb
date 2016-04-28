@@ -72,6 +72,7 @@ module Riddl
             raise "client_id, client_secret or token storage not available."
           end
           Proc.new do
+            run Riddl::Utils::OAuth2::UnivieBearer::CheckAuth, client_id, client_secret, access_tokens if get
             on resource 'verify' do
               run VerifyIdentity, access_tokens, refresh_tokens, client_id, client_secret if post 'verify_in'
             end

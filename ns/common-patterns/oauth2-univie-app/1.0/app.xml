@@ -23,6 +23,7 @@
   </message>
 
   <resource>
+    <get/>
     <resource relative="verify">
       <post in="verify_in" out="verify_out"/>
     </resource>
