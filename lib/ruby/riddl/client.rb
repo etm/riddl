@@ -360,7 +360,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             req = Riddl::Client::HTTPRequest.new(riddl_method,url.path,parameters,headers,qs)
             return req.simulate if simulate
 
-            response = nil
+            res = response = nil
 
             http = Net::HTTP.new(url.host, url.port)
             if url.class == URI::HTTPS
