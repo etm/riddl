@@ -90,7 +90,6 @@ module Riddl
                 elsif req.class == RequestTransformation
                   true if freq[1] && freq[1].hash == req.trans.hash
                 elsif req.class == RequestPass
-                  p 'rrrr'
                   true
                 end
               end
@@ -103,7 +102,8 @@ module Riddl
           #{{{
           @access_methods.each do |k,v|
             ### remove all emtpy layers
-            v = v.map{|e| e.empty? ? nil: e}.compact
+            v.map!{|e| (e.nil? || e.empty?) ? nil: e }
+            v.compact!
             case v.size
               when 0
               when 1
