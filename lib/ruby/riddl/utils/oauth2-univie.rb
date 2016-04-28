@@ -6,7 +6,7 @@ module Riddl
       
       module UnivieBearer
         def self::implementation(client_id, client_secret, access_tokens)
-          unless access_tokens.is_a?(Riddl::Utils::OAuth2::Helper::Tokens) client_id.is_a?(String) && client_secret.is_a?(String)
+          unless access_tokens.is_a?(Riddl::Utils::OAuth2::Helper::Tokens) && client_id.is_a?(String) && client_secret.is_a?(String)
             raise "client_id, client_secret or token storage not available."
           end
           Proc.new do
