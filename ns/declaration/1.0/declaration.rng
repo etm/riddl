@@ -53,11 +53,6 @@
     <attribute name="name">
       <ref name="riddl-datatype-name"/>
     </attribute>
-    <optional>
-      <attribute name="everywhere">
-        <data type="boolean"/>
-      </attribute>  
-    </optional>  
     <zeroOrMore>
       <element name="apply-to">
         <ref name="riddl-datatype-pathtemplate"/>

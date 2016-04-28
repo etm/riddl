@@ -1,0 +1,25 @@
+<declaration xmlns="http://riddl.org/ns/declaration/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <interface name="structure">
+    <xi:include href="structure.xml"/>
+  </interface>
+  <interface name="oauth2-univie-client">
+    <xi:include href="oc.xml"/>
+  </interface>
+  <interface name="ara">
+    <xi:include href="ara.xml"/>
+  </interface>
+
+  <facade>
+    <tile>
+      <layer name="oauth2-univie-client">
+        <apply-to>/**/*</apply-to>
+      </layer>
+      <layer name="structure"/>
+    </tile>
+    <tile>
+      <layer name="ara">
+        <apply-to>/**/*</apply-to>
+      </layer>
+    </tile>
+  </facade>
+</declaration>

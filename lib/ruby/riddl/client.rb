@@ -300,7 +300,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
           qparams = extract_qparams(parameters,riddl_method.downcase)
 
-          res = response = nil
+          response = nil
           if @wrapper.nil? || @wrapper.description? || (@wrapper.declaration? && !@base.nil?)
             status, response, response_headers = make_request(@base + @rpath,riddl_method,parameters,headers,qparams,simulate,riddl_message && riddl_message.out ? true : false)
             return response if simulate
@@ -360,14 +360,13 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             req = Riddl::Client::HTTPRequest.new(riddl_method,url.path,parameters,headers,qs)
             return req.simulate if simulate
 
-            res = response = nil
+            response = nil
 
             http = Net::HTTP.new(url.host, url.port)
             if url.class == URI::HTTPS
               http.use_ssl = true
               http.verify_mode = OpenSSL::SSL::VERIFY_NONE
             end  
-            deb = nil
             if @options[:debug]
               http.set_debug_output @options[:debug]
             end  

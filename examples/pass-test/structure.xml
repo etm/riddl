@@ -1,0 +1,19 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:doc="http://riddl.org/ns/documentation/1.0">
+
+  <message name="currentsemester">
+    <parameter name="return" type="string">
+      <param name="pattern">\d{4}[SW]</param>
+    </parameter>
+  </message>
+
+
+  <resource>
+    <resource relative="currentsemester">
+      <get in="*" out="currentsemester"/>
+      <resource relative="currentsemester">
+        <get in="*" out="currentsemester"/>
+      </resource>
+    </resource>
+  </resource>
+
+</description>

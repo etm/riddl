@@ -33,7 +33,7 @@ module Riddl
             method = m.attributes['method'] || m.qname.name
             add_request_star_out(index,interface,des,method,m.attributes['out'],m.find('*|text()'))
           end
-          desres.find("des:*[not(name()='resource') and not(name()='websocket') and not(@in)]").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and not(@in) and not(@pass)]").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_star_out(index,interface,des,method,m.attributes['out'],m.find('*|text()'))
           end

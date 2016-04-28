@@ -58,16 +58,10 @@ module Riddl
             fac.composition[method] += s
           end  
           res.resources.each do |path,r|
-            if !fac.resources.has_key?(path) && path != '**/*' && path != '*'
+            if !fac.resources.has_key?(path)
               fac.resources[path] = Riddl::Wrapper::Description::Resource.new(path,r.recursive)
             end
-            if path == '**/*'
-              merge_tiles_to_all(r,fac)
-            elsif path == '*'
-              merge_tiles_to_layer(r,fac)
-            else
-              merge_tiles(r,fac.resources[path])
-            end
+            merge_tiles(r,fac.resources[path])
           end
           #}}}
         end

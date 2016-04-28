@@ -16,9 +16,9 @@ module Riddl
         end
 
         def real_path(real)
-          t = @top.sub(/^\/*/,'').split(/(?<!\*\*)\//)
-          real = real.sub(/^\/*/,'').split('/')
-          real = t.last == "**/*" ? [] : real[t.length..-1]
+          t = @top.split('/')
+          real = real.split('/')
+          real = real[t.length..-1]
           '/' + real.join('/')
         end
 

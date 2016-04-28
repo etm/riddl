@@ -124,7 +124,7 @@ module Riddl
         @doc.root.prepend("dec:interface",:name=>"riddldescription").add XML::Smart::open_unprotected(RIDDL_DESCRIPTION_SHOW).root
         @doc.root.prepend("dec:interface",:name=>"riddlresourcedescription").add XML::Smart::open_unprotected(RIDDL_DESCRIPTION_RESOURCE_SHOW).root
         @doc.root.find("dec:facade").first.append('dec:tile').append("layer",:name => "riddldescription")
-        @doc.root.find("dec:facade").first.append('dec:tile').append("layer",:name => "riddlresourcedescription",:everywhere => 'true')
+        @doc.root.find("dec:facade").first.append('dec:tile').append("layer",:name => "riddlresourcedescription").append("apply-to","/**/*")
       end  
 
       @declaration = @description = nil

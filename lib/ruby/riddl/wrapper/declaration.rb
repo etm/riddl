@@ -71,34 +71,44 @@ module Riddl
           @tiles << (til = Tile.new)
           res = til.base_path(tile.attributes['path'] || '/')
           # res.clean! # for overlapping tiles, each tile gets an empty path TODO
+          later = []
           tile.find("dec:layer").each_with_index do |layer,index|
             apply_to = layer.find("dec:apply-to")
             block = layer.find("dec:block")
 
-            everywhere = layer.attributes['everywhere'] == 'true'
             lname = layer.attributes['name']
             lpath, des = @interfaces[lname]
             desres = des.find("des:resource").first
-            if everywhere
-              @tiles.map do |til| # extract all currently existing paths for all tiles
-                rpaths(til.resource).map{|a,b| a}
-              end.flatten.uniq.each do |path| # apply current to all paths
-                int = Interface.new(lname,path,lpath,"/",des)
-                rec = desres.attributes['recursive']
-                til.add_description(des,desres,path,index,int,block,rec)
-              end
+            if apply_to.empty?
+              int = Interface.new(lname,"/",lpath,"/",des)
+              rec = desres.attributes['recursive']
+              til.add_description(des,desres,"/",index,int,block,rec)
             else
-              if apply_to.empty?
-                int = Interface.new(lname,"/",lpath,"/",des)
-                rec = desres.attributes['recursive']
-                til.add_description(des,desres,"/",index,int,block,rec)
-              else
-                apply_to.each do |at|
+              apply_to.each do |at|
+                t = at.to_s.sub(/^\/*/,'').split(/(?<!\*\*)\//)
+                if t.last == "**/*" || t.last == "*"
+                  later << [des,desres,lname,lpath,at.to_s.strip,index,block,t.last == "**/*" ? :descendants : :children]
+                else  
                   int = Interface.new(lname,at.to_s,lpath,"/",des)
                   til.add_description(des,desres,at.to_s,index,int,block)
                 end
               end
-            end  
+            end
+          end
+          paths = @tiles.map do |til| # extract all currently existing paths for all tiles
+            rpaths(til.resource).map{|a,b| a}
+          end.flatten.uniq
+          later.each do |lat|
+            mpath = lat[4].gsub(/\/\*\*\/\*$/,'').gsub(/\/\*$/,'')
+            paths.each do |path|
+              pbefore, pafter = path[0..mpath.length].chop, path[mpath.length+1..-1]
+              if mpath == pbefore 
+                if (lat[7] == :descendants && pafter != '') || (lat[7] == :children && !pafter.nil? && pafter != '' && pafter !~ /\//)
+                  int = Interface.new(lat[2],path,lat[3],"/",lat[1])
+                  til.add_description(lat[0],lat[1],path,lat[5],int,lat[6])
+                end  
+              end
+            end
           end
           til.compose!
         end

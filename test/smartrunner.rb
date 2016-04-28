@@ -30,7 +30,7 @@ module ServerCase
           begin
             TCPSocket.new('localhost', s.port)
             up = true
-          rescue => e
+          rescue
             sleep 0.2
           end  
         end
