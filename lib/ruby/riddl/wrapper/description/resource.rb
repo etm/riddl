@@ -1,7 +1,7 @@
 module Riddl
   class Wrapper
     class Description < WrapperUtils
-      
+
       class Resource
         def initialize(path=nil,recursive=false)
           #{{{
@@ -57,7 +57,7 @@ module Riddl
 
         # TODO add websockets
 
-        def remove_access_methods(des,filter)
+        def remove_access_methods(des,filter,index)
           #{{{
           freq = if filter['in'] && filter['in'] != '*'
             t = [RequestInOut,Riddl::Wrapper::Description::Message.new(des,filter['in'])]
@@ -75,7 +75,7 @@ module Riddl
           raise BlockError, "blocking #{filter.inspect} not possible" if freq.nil?
 
           if reqs = @access_methods[filter['method']]
-            reqs = reqs.last # current layer
+            reqs = reqs[index]
             reqs.delete_if do |req|
               if req.class == freq[0]
                 if req.class == RequestInOut
@@ -90,19 +90,20 @@ module Riddl
                 elsif req.class == RequestTransformation
                   true if freq[1] && freq[1].hash == req.trans.hash
                 elsif req.class == RequestPass
+                  p 'rrrr'
                   true
                 end
-              end  
+              end
             end
-          end  
+          end
           #}}}
         end
 
         def compose!
           #{{{
           @access_methods.each do |k,v|
-            ### remove all emtpy layers  
-            v.compact!
+            ### remove all emtpy layers
+            v = v.map{|e| e.empty? ? nil: e}.compact
             case v.size
               when 0
               when 1
@@ -110,10 +111,10 @@ module Riddl
               else
                 @composition[k] = compose_layers(k,v)
             end
-          end  
+          end
           #}}}
         end
-        
+
         def compose_layers(k,layers)
           #{{{
           routes = []
@@ -152,9 +153,9 @@ module Riddl
                 if r.size > 1
                   teh_last = r[-2]
                   success = false
-                else 
+                else
                   ret = teh_last
-                end  
+                end
               end
             end while !success
             Composition.new(r,ret)
@@ -171,18 +172,18 @@ module Riddl
           #}}}
         end
         private :compose_plain
-        
+
         def traverse_layers(container,path,layers,layer)
           #{{{
           return if layers.count <= layer
           current = path.last
-          current_path = path.dup 
+          current_path = path.dup
 
           # messages RequestInOut and RequestStarOut with no out are not processed
           return if ((current.class == RequestInOut || current.class == RequestStarOut) && current.out.nil?)
 
-          if current.class == RequestInOut || 
-            (current.class == RequestTransformation && !current.out.nil?) || 
+          if current.class == RequestInOut ||
+            (current.class == RequestTransformation && !current.out.nil?) ||
              current.class == RequestStarOut
             # Find all where "in" matches
             layers[layer].find_all{ |l| (l.class == RequestInOut && l.in.traverse?(current.out) && !l.used?) }.each do |r|
@@ -196,7 +197,7 @@ module Riddl
               if num > 0
                 path = current_path.dup
                 container << path
-              end  
+              end
               path << r.transform(current)
               r.used = true
               traverse_layers(container,path,layers,layer+1)
@@ -206,7 +207,7 @@ module Riddl
               add_to_path_and_split(container,path,layers,layer,num,current_path,r)
             end
             return
-          end  
+          end
 
           if (current.class == RequestTransformation && current.out.nil?) ||
               current.class == RequestPass
@@ -214,7 +215,7 @@ module Riddl
             layers[layer].find_all{|l| (l.class == RequestInOut && !l.used?) || (l.class != RequestInOut) }.each_with_index do |r,num|
               add_to_path_and_split(container,path,layers,layer,num,current_path,r)
             end
-          end  
+          end
         #}}}
         end
         private :traverse_layers
@@ -224,7 +225,7 @@ module Riddl
           if num > 0
             path = current_path.dup
             container << path
-          end  
+          end
           path << r
           path.last.used = true
           traverse_layers(container,path,layers,layer+1)
@@ -239,7 +240,7 @@ module Riddl
             result << t + "<#{k} "
           else
             result << t + "<request method=\"#{k}\" "
-          end  
+          end
           case m
             when Riddl::Wrapper::Description::RequestInOut
               messages[m.in.hash] ||= m.in
@@ -247,16 +248,15 @@ module Riddl
               unless m.out.nil?
                 messages[m.out.hash] ||= m.out
                 result << " out=\"#{m.out.hash}\""
-              end  
+              end
             when Riddl::Wrapper::Description::RequestStarOut
               result << "in=\"*\""
               unless m.out.nil?
                 messages[m.out.hash] ||= m.out
                 result << " out=\"#{m.out.hash}\""
-              end  
+              end
             when Riddl::Wrapper::Description::RequestPass
-              messages[m.pass.hash] ||= m.pass
-              result << "pass=\"#{m.pass.hash}\""
+              result << "pass=\"*\""
             when Riddl::Wrapper::Description::RequestTransformation
               messages[m.trans.hash] ||= m.trans
               result << "transformation=\"#{m.trans.hash}\""
@@ -265,13 +265,13 @@ module Riddl
             result << ">\n"
             m.custom.each do |e|
               result << e.dump + "\n"
-            end  
+            end
             if %w{get post put delete websocket}.include?(k)
               result << t + "</#{k}>"
             else
               result << t + "</request>\n"
-            end  
-          else  
+            end
+          else
             result << "/>\n"
           end
           result
@@ -290,18 +290,18 @@ module Riddl
             @composition.each do |k,v|
               v.each do |m|
                 result << description_xml_string_analyse(messages,t,k,m.result)
-              end  
+              end
             end
           else
             @access_methods.each do |k,v|
               v.first.each do |m|
                 result << description_xml_string_analyse(messages,t,k,m)
-              end  
+              end
             end
           end
           result
  #}}}
-        end  
+        end
         def description_xml_string_sub(messages,t)
  #{{{
           result = ''
@@ -371,7 +371,7 @@ module Riddl
           @access_methods[method][index] << RequestPass.new(interface,custom)
         end
         private :add_request_pass
-        
+
         def add_websocket(index,interface,custom)
           @access_methods['websocket'] ||= []
           @access_methods['websocket'][index] ||= []

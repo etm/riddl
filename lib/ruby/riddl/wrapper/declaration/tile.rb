@@ -10,7 +10,7 @@ module Riddl
           @base_path = @resource
           #}}}
         end
-        
+
         def visualize(mode,res=@resource,what='')
           #{{{
           what += res.path
@@ -48,23 +48,23 @@ module Riddl
           res = add_path(path,res,rec)
           res.add_access_methods(des,desres,index,interface)
           res.add_custom(desres)
-          block.each do |bl|
-            bpath = bl.to_s.gsub(/\/+/,'/').gsub(/\/$/,'')
-            bpath = (bpath == "" ? "/" : bpath)
-            if interface.sub == bpath
-              res.remove_access_methods(des,bl.attributes)
-            end  
-          end
           desres.find("des:resource").each do |desres|
             cpath = desres.attributes['relative'] || "{}"
             rec = desres.attributes['recursive']
             int = Interface.new_from_interface(interface,(interface.sub+"/"+cpath).gsub(/\/+/,'/'))
             add_description(des,desres,cpath,index,int,block,rec,res)
           end
+          block.each do |bl|
+            bpath = bl.to_s.gsub(/\/+/,'/').gsub(/\/$/,'')
+            bpath = (bpath == "" ? "/" : bpath)
+            if path == bpath
+              res.remove_access_methods(des,bl.attributes,index)
+            end
+          end
           nil
           #}}}
         end
-          
+
         def compose!(res=@base_path)
           #{{{
           res.compose!

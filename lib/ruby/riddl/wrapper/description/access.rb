@@ -92,7 +92,7 @@ module Riddl
           @custom = custom
           @interface = interface
         end  
-        def visualize; ""; end
+        def visualize; "pass *"; end
         def hash
           0
         end

@@ -13,6 +13,7 @@
     <tile>
       <layer name="oauth2-univie-client">
         <apply-to>/**/*</apply-to>
+        <block method="get" pass="*">/currentsemester</block>
       </layer>
       <layer name="structure"/>
     </tile>
