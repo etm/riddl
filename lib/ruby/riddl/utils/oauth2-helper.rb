@@ -2,6 +2,7 @@ require 'openssl'
 require 'base64'
 require 'securerandom'
 require 'json'
+require 'redis'
 
 module Riddl
   module Utils
