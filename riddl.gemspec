@@ -34,5 +34,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'minitest', '>= 5.0.0', '~>5'
   s.add_runtime_dependency 'blather', '~>1'
   s.add_runtime_dependency 'charlock_holmes', '>= 0.7', '~>0'
-  s.add_runtime_dependency 'eventmachine', '>= 3.3.0', '~>3.3'
+  s.add_runtime_dependency 'redis', '>= 3.3.0', '~>3.3'
 end
