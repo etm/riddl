@@ -298,7 +298,7 @@ module Riddl
               @riddl_path = '/'
               if m.interface.base.nil?
                 if @riddl_interfaces.key? m.interface.name
-                  @riddl_info[:r] = m.interface.real_path(@riddl_pinfo).sub(/\//,'').split('/')
+                  @riddl_info[:r] = m.interface.real_path(@riddl_pinfo).sub(/\/*/,'').split('/')
                   @riddl_info[:h]['RIDDL_DECLARATION_PATH'] = @riddl_pinfo
                   @riddl_info[:h]['RIDDL_DECLARATION_RESOURCE'] = m.interface.top
                   @riddl_info[:s] = m.interface.sub.sub(/\//,'').split('/')
@@ -414,7 +414,7 @@ module Riddl
         @riddl_info = {
           :h => @riddl_headers,
           :p => @riddl_parameters,
-          :r => @riddl_pinfo.sub(/\//,'').split('/').map{|e|Protocols::Utils::unescape(e)},
+          :r => @riddl_pinfo.sub(/\/*/,'').split('/').map{|e|Protocols::Utils::unescape(e)},
           :s => @riddl_matching_path[0].sub(/\//,'').split('/'),
           :m => @riddl_method,
           :env => @riddl_env.reject{|k,v| k =~ /^rack\./}.merge({'riddl.transport' => 'http', 'xmpp' => @riddl_opts[:xmpp]}),
