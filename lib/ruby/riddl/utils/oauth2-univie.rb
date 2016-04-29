@@ -6,9 +6,6 @@ module Riddl
       
       module UnivieBearer
         def self::implementation(client_id, client_secret, access_tokens)
-          unless access_tokens.is_a?(Riddl::Utils::OAuth2::Helper::Tokens) && client_id.is_a?(String) && client_secret.is_a?(String)
-            raise "client_id, client_secret or token storage not available."
-          end
           Proc.new do
 						run CheckAuth, client_id, client_secret, access_tokens if get
           end
@@ -68,9 +65,6 @@ module Riddl
 
       module UnivieApp
         def self::implementation(client_id, client_secret, access_tokens, refresh_tokens)
-          unless access_tokens.is_a?(Riddl::Utils::OAuth2::Helper::Tokens) && refresh_tokens.is_a?(Riddl::Utils::OAuth2::Helper::Tokens) && client_id.is_a?(String) && client_secret.is_a?(String)
-            raise "client_id, client_secret or token storage not available."
-          end
           Proc.new do
             on resource 'verify' do
               run VerifyIdentity, access_tokens, refresh_tokens, client_id, client_secret if post 'verify_in'
@@ -96,8 +90,8 @@ module Riddl
             client_pass   = "#{client_id}:#{client_secret}"
             user_id, decrypted            = Riddl::Utils::OAuth2::Helper::decrypt_with_shared_secret(code, client_pass).split(':', 2)
             token, refresh_token          = Riddl::Utils::OAuth2::Helper::generate_optimistic_token(client_id, client_pass)
-            access_tokens[token]          = user_id
-            refresh_tokens[refresh_token] = token
+            access_tokens.set(token, user_id, 3600)
+            refresh_tokens.set(refresh_token, token, 7776000)
 
             json_response = {
               :access_token => token,
@@ -160,8 +154,8 @@ module Riddl
 
             token = Riddl::Utils::OAuth2::Helper::make_access_token(client_id, client_id + ':' + client_secret)
 
-            refresh_tokens[refresh_token] = token
-            access_tokens[token] = user
+            access_tokens.set(token,user,3600)
+            refresh_tokens.set(refresh_token, token, 7776000)
 
             Riddl::Parameter::Complex.new('data', 'application/json', { :token => token }.to_json)
           end
