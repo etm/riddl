@@ -76,7 +76,7 @@ module Riddl
               run VerifyIdentity, access_tokens, refresh_tokens, client_id, client_secret if post 'verify_in'
             end
             on resource 'token' do
-              run RefreshToken, access_tokens, refresh_tokens if post 'refresh_token_in'
+              run RefreshToken, access_tokens, refresh_tokens, client_id, client_secret if post 'refresh_token_in'
             end
             on resource 'revoke' do
               run RevokeTokenFlow, access_tokens, refresh_tokens if get 'revoke_token_in'
@@ -158,7 +158,7 @@ module Riddl
             old_token = refresh_tokens[refresh_token]
             user = access_tokens.delete old_token
 
-            token = OAuth2Fed::make_access_token(client_id, client_id + ':' + client_secret)
+            token = Riddl::Utils::OAuth2::Helper::make_access_token(client_id, client_id + ':' + client_secret)
 
             refresh_tokens[refresh_token] = token
             access_tokens[token] = user
