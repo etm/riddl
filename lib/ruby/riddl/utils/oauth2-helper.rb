@@ -13,7 +13,7 @@ module Riddl
 
           class Redis #{{{
             def initialize(url)
-              @redis = Redis.new(:url => url)
+              @redis = ::Redis.new(:url => url)
             end
 
             def get(key)
