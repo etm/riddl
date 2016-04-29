@@ -15,16 +15,16 @@ module Riddl
             read
           end
 
-          def [](name)
+          def get(name,valuem,dur)
             read if changed != @changed
             @tokens[name]
           end
 
-          def method_missing(name,*opts)
-            @tokens.send(name,*opts)
+          def key?(key)
+            @tokens.key?(key)
           end
 
-          def []=(name,value)
+          def set(name,value,dur)
             @tokens[name] = value
             write
             nil
@@ -38,6 +38,7 @@ module Riddl
               write
             end
           end
+          private :changed
 
           def write
             EM.defer {
@@ -72,40 +73,45 @@ module Riddl
           }.to_json
         end #}}}
 
-        def self::nonce
-          SecureRandom::hex(32)
-        end
-
-        def self::payload(client_id) #{{{
+        def self::access_payload(client_id, dur) #{{{
           {
             :iss => client_id,
             :sub => nonce,
             :aud => client_id,
-            :exp => Time.now.to_i + 3600
+            :exp => Time.now.to_i + dur
           }.to_json
+        end #}}}
+
+        def self::refresh_payload(client_id, dur) #{{{
+          {
+            :iss => client_id,
+            :sub => nonce,
+            :exp => Time.now.to_i + dur
+          }.to_json
+        end #}}}
+
+        def self::nonce #{{{
+          SecureRandom::hex(32)
         end #}}}
 
         def self::sign(secret, what) #{{{
           Base64::urlsafe_encode64 OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha256'), secret, what)
         end #}}}
 
-        def self::make_access_token(client_id, secret)# {{{
+        def self::generate_access_token(client_id, secret, dur)# {{{
           h = Base64::urlsafe_encode64 header
-          p = Base64::urlsafe_encode64 payload(client_id)
+          p = Base64::urlsafe_encode64 access_payload(client_id,dur)
           s = sign(secret, "#{h}.#{p}")
           "#{h}.#{p}.#{s}"
         end# }}}
-        def self::make_refresh_token(client_id, secret) # {{{
-          token = Base64::urlsafe_encode64({
-            :iss => client_id,
-            :sub => nonce,
-            :exp => Time.now.to_i + 7.884e6
-          }.to_json)
-          "#{token}.#{sign(secret,token)}"
+        def self::generate_refresh_token(client_id, secret, dur) # {{{
+          p = Base64::urlsafe_encode64 refresh_payload(client_id,dur)
+          s = sign(secret, p)
+          "#{p}.#{s}"
         end# }}}
-        def self::generate_optimistic_token(client_id, secret) #{{{
-          t = make_access_token(client_id, secret)
-          r = make_refresh_token(client_id, secret)
+        def self::generate_optimistic_token(client_id, secret, adur, rdur) #{{{
+          t = generate_access_token(client_id, secret, adur)
+          r = generate_refresh_token(client_id, secret, rdur)
           [t, r]
         end #}}}
 
@@ -130,7 +136,7 @@ module Riddl
           cipher.key = key
           cipher.iv = iv
 
-           Base64::urlsafe_encode64(iv + cipher.update(data) + cipher.final) rescue nil
+          Base64::urlsafe_encode64(iv + cipher.update(data) + cipher.final) rescue nil
         end #}}}
       end
     end

@@ -64,13 +64,13 @@ module Riddl
 			end
 
       module UnivieApp
-        def self::implementation(client_id, client_secret, access_tokens, refresh_tokens)
+        def self::implementation(client_id, client_secret, access_tokens, refresh_tokens, adur, rdur)
           Proc.new do
             on resource 'verify' do
-              run VerifyIdentity, access_tokens, refresh_tokens, client_id, client_secret if post 'verify_in'
+              run VerifyIdentity, access_tokens, refresh_tokens, client_id, client_secret, adur, rdur if post 'verify_in'
             end
             on resource 'token' do
-              run RefreshToken, access_tokens, refresh_tokens, client_id, client_secret if post 'refresh_token_in'
+              run RefreshToken, access_tokens, refresh_tokens, client_id, client_secret, adur, rdur if post 'refresh_token_in'
             end
             on resource 'revoke' do
               run RevokeTokenFlow, access_tokens, refresh_tokens if get 'revoke_token_in'
@@ -82,16 +82,18 @@ module Riddl
         class VerifyIdentity < Riddl::Implementation
           def response
             code = Base64::urlsafe_decode64 @p[0].value
-            access_tokens = @a[0]
+            access_tokens  = @a[0]
             refresh_tokens = @a[1]
-            client_id = @a[2]
-            client_secret = @a[3]
+            client_id      = @a[2]
+            client_secret  = @a[3]
+            adur           = @a[4]
+            rdur           = @a[5]
 
             client_pass   = "#{client_id}:#{client_secret}"
             user_id, decrypted            = Riddl::Utils::OAuth2::Helper::decrypt_with_shared_secret(code, client_pass).split(':', 2)
-            token, refresh_token          = Riddl::Utils::OAuth2::Helper::generate_optimistic_token(client_id, client_pass)
-            access_tokens.set(token, user_id, 3600)
-            refresh_tokens.set(refresh_token, token, 7776000)
+            token, refresh_token          = Riddl::Utils::OAuth2::Helper::generate_optimistic_token(client_id, client_pass, adur, rdur)
+            access_tokens.set(token, user_id, adur)
+            refresh_tokens.set(refresh_token, token, rdur)
 
             json_response = {
               :access_token => token,
@@ -127,11 +129,13 @@ module Riddl
 
         class RefreshToken < Riddl::Implementation
           def response
-            refresh_token = @p[1].value
-            access_tokens = @a[0]
+            refresh_token  = @p[1].value
+            access_tokens  = @a[0]
             refresh_tokens = @a[1]
-            client_id = @a[2]
-            client_secret = @a[3]
+            client_id      = @a[2]
+            client_secret  = @a[3]
+            adur           = @a[4]
+            rdur           = @a[5]
 
             token, _ = refresh_token.split '.'
             token_data = JSON::parse(Base64::urlsafe_decode64 token)
@@ -152,10 +156,10 @@ module Riddl
             old_token = refresh_tokens[refresh_token]
             user = access_tokens.delete old_token
 
-            token = Riddl::Utils::OAuth2::Helper::make_access_token(client_id, client_id + ':' + client_secret)
+            token = Riddl::Utils::OAuth2::Helper::generate_access_token(client_id, client_id + ':' + client_secret, adur)
 
-            access_tokens.set(token,user,3600)
-            refresh_tokens.set(refresh_token, token, 7776000)
+            access_tokens.set(token,user,adur)
+            refresh_tokens.set(refresh_token, token, rdur)
 
             Riddl::Parameter::Complex.new('data', 'application/json', { :token => token }.to_json)
           end
