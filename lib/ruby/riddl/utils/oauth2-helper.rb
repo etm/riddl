@@ -78,8 +78,8 @@ module Riddl
             end
 
             def changed
-              if File.exists?(@tfile)
-                File.stat(@tfile).mtime
+              if ::File.exists?(@tfile)
+                ::File.stat(@tfile).mtime
               else
                 @tokens = {}
                 write
@@ -89,14 +89,14 @@ module Riddl
 
             def write
               EM.defer {
-                File.write(@tfile, JSON::pretty_generate(@tokens)) rescue {}
+                ::File.write(@tfile, JSON::pretty_generate(@tokens)) rescue {}
               }
               @changed = changed
             end
             private :write
 
             def read
-              @tokens = JSON::parse(File.read(@tfile)) rescue {}
+              @tokens = JSON::parse(::File.read(@tfile)) rescue {}
             end
             private :read
 
