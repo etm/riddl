@@ -40,7 +40,9 @@ module Riddl
           end
 
           def write
-            File.write(@tfile, JSON::pretty_generate(@tokens)) rescue {}
+            EM.defer {
+              File.write(@tfile, JSON::pretty_generate(@tokens)) rescue {}
+            }
             @changed = changed
           end
           private :write
@@ -133,4 +135,4 @@ module Riddl
       end
     end
   end
-end  
+end

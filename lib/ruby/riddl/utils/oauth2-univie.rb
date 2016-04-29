@@ -72,7 +72,6 @@ module Riddl
             raise "client_id, client_secret or token storage not available."
           end
           Proc.new do
-            run Riddl::Utils::OAuth2::UnivieBearer::CheckAuth, client_id, client_secret, access_tokens if get
             on resource 'verify' do
               run VerifyIdentity, access_tokens, refresh_tokens, client_id, client_secret if post 'verify_in'
             end
@@ -129,6 +128,42 @@ module Riddl
 
             token = access_tokens.delete_by_user user_id
             refresh_tokens.delete_by_token token
+          end
+        end
+
+        class RefreshToken < Riddl::Implementation
+          def response
+            refresh_token = @p[1].value
+            access_tokens = @a[0]
+            refresh_tokens = @a[1]
+            client_id = @a[2]
+            client_secret = @a[3]
+
+            token, _ = refresh_token.split '.'
+            token_data = JSON::parse(Base64::urlsafe_decode64 token)
+
+            if token_data['iss'] != client_id
+              @status = 401
+              return Riddl::Parameter::Complex.new('data', 'application/json', {
+                :error => 'Token must be refreshed by issuer.'
+              }.to_json)
+            elsif refresh_tokens[refresh_token].nil? || token_data['exp'] <= Time.now.to_i
+              @status = 403
+              puts "i dont know #{refresh_token}", "#{refresh_tokens[refresh_token]}"
+              return Riddl::Parameter::Complex.new('data', 'application/json', {
+                :error => 'Invalid refresh token.'
+              }.to_json)
+            end
+
+            old_token = refresh_tokens[refresh_token]
+            user = access_tokens.delete old_token
+
+            token = OAuth2Fed::make_access_token(client_id, client_id + ':' + client_secret)
+
+            refresh_tokens[refresh_token] = token
+            access_tokens[token] = user
+
+            Riddl::Parameter::Complex.new('data', 'application/json', { :token => token }.to_json)
           end
         end
       end
