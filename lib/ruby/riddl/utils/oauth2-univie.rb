@@ -55,7 +55,7 @@ module Riddl
 								}.to_json)
 							end
 
-							@headers << Riddl::Header.new('AUTHORIZATION_BEARER', access_tokens[token])
+							@headers << Riddl::Header.new('AUTHORIZATION_BEARER', access_tokens.get(token))
 						end
 
 						@p
@@ -145,15 +145,15 @@ module Riddl
               return Riddl::Parameter::Complex.new('data', 'application/json', {
                 :error => 'Token must be refreshed by issuer.'
               }.to_json)
-            elsif refresh_tokens[refresh_token].nil? || token_data['exp'] <= Time.now.to_i
+            elsif !refresh_tokens.key?(refresh_token) || token_data['exp'] <= Time.now.to_i
               @status = 403
-              puts "i dont know #{refresh_token}", "#{refresh_tokens[refresh_token]}"
+              puts "i dont know #{refresh_token}", "#{refresh_tokens.get(refresh_token)}"
               return Riddl::Parameter::Complex.new('data', 'application/json', {
                 :error => 'Invalid refresh token.'
               }.to_json)
             end
 
-            old_token = refresh_tokens[refresh_token]
+            old_token = refresh_tokens.get(refresh_token)
             user = access_tokens.delete old_token
 
             token = Riddl::Utils::OAuth2::Helper::generate_access_token(client_id, client_id + ':' + client_secret, adur)

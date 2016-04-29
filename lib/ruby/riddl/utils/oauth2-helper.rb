@@ -15,7 +15,7 @@ module Riddl
             read
           end
 
-          def get(name,value)
+          def get(name)
             read if changed != @changed
             @tokens[name]
           end
