@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.99.221"
+  s.version          = "0.99.222"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
@@ -34,4 +34,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'minitest', '>= 5.0.0', '~>5'
   s.add_runtime_dependency 'blather', '~>1'
   s.add_runtime_dependency 'charlock_holmes', '>= 0.7', '~>0'
+  s.add_runtime_dependency 'eventmachine', '>= 3.3.0', '~>3.3'
 end

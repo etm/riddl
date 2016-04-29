@@ -8,62 +8,110 @@ module Riddl
     module OAuth2
 
       module Helper
-        class Tokens #{{{
-          def initialize(tfile)
-            @tfile = tfile
-            @changed = changed
-            read
-          end
+        module Tokens #{{{
 
-          def get(name)
-            read if changed != @changed
-            @tokens[name]
-          end
-
-          def key?(key)
-            @tokens.key?(key)
-          end
-
-          def set(name,value,dur)
-            @tokens[name] = value
-            write
-            nil
-          end
-
-          def changed
-            if File.exists?(@tfile)
-              File.stat(@tfile).mtime
-            else
-              @tokens = {}
-              write
+          class Redis #{{{
+            def initialize(url)
+              @redis = Redis.new(:url => url)
             end
-          end
-          private :changed
 
-          def write
-            EM.defer {
-              File.write(@tfile, JSON::pretty_generate(@tokens)) rescue {}
-            }
-            @changed = changed
-          end
-          private :write
+            def get(key)
+              @redis.get key
+            end
 
-          def read
-            @tokens = JSON::parse(File.read(@tfile)) rescue {}
-          end
-          private :read
+            def key?(key)
+              @redis.exists(key)
+            end
 
-          def delete(token)
-            deleted = @tokens.delete(token)
-            write
-            deleted
-          end
+            def set(key,value,dur)
+              @redis.multi do
+                @redis.set key, value
+                @redis.set value, key
+                @redis.expire key, dur
+                @redis.expire value, dur
+              end
+              nil
+            end
 
-          def delete_by_user(user_id)
-            deleted = @tokens.delete_if { |_, v| v == user_id }
-            write
-            deleted
-          end
+            def delete(key)
+              value = nil
+              @redis.multi do
+                value = @redis.get key
+                @redis.del key
+                @redis.del value
+              end
+              value
+            end
+
+            def delete_by_value(value)
+              key = nil
+              @redis.multi do
+                key = @redis.get value
+                @redis.del key
+                @redis.del value
+              end
+              key
+            end
+          end #}}}
+
+          class File #{{{
+            def initialize(tfile)
+              @tfile = tfile
+              @changed = changed
+              read
+            end
+
+            def get(name)
+              read if changed != @changed
+              @tokens[name]
+            end
+
+            def key?(key)
+              @tokens.key?(key)
+            end
+
+            def set(name,value,dur)
+              @tokens[name] = value
+              write
+              nil
+            end
+
+            def changed
+              if File.exists?(@tfile)
+                File.stat(@tfile).mtime
+              else
+                @tokens = {}
+                write
+              end
+            end
+            private :changed
+
+            def write
+              EM.defer {
+                File.write(@tfile, JSON::pretty_generate(@tokens)) rescue {}
+              }
+              @changed = changed
+            end
+            private :write
+
+            def read
+              @tokens = JSON::parse(File.read(@tfile)) rescue {}
+            end
+            private :read
+
+            def delete(token)
+              deleted = @tokens.delete(token)
+              write
+              deleted
+            end
+
+            def delete_by_user(user_id)
+              deleted = @tokens.delete_if { |_, v| v == user_id }
+              write
+              deleted
+            end
+          end #}}}
+        
         end #}}}
 
         def self::header #{{{
