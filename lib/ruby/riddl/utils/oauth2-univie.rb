@@ -116,7 +116,7 @@ module Riddl
             refresh_tokens = @a[1]
 
             access_tokens.delete(token)
-            refresh_tokens.delete_by_token(token)
+            refresh_tokens.delete_by_value(token)
           end
         end
 
@@ -126,8 +126,8 @@ module Riddl
             access_tokens = @a[0]
             refresh_tokens = @a[1]
 
-            token = access_tokens.delete_by_user user_id
-            refresh_tokens.delete_by_token token
+            token = access_tokens.delete_by_value user_id
+            refresh_tokens.delete_by_value token
           end
         end
 
