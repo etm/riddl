@@ -137,24 +137,34 @@ module Riddl
           routes.map do |r|
             ret = nil
             teh_last = r.last
+            teh_first = r.first
+            lcount = r.size
+            fcount = 0
             begin
               success = true
-              if r.first.respond_to?(:in) && teh_last.respond_to?(:out)
+              if teh_first.respond_to?(:in) && teh_last.respond_to?(:out)
                 #1: responds first in + last out -> new InOut
-                ret = RequestInOut.new_from_message(r.first.in,teh_last.out)
-              elsif r.first.class == RequestTransformation && teh_last.class == RequestTransformation && teh_last.out.nil?
+                ret = RequestInOut.new_from_message(teh_first.in,teh_last.out)
+              elsif teh_first.class == RequestTransformation && teh_last.class == RequestTransformation && teh_last.out.nil?
                 #2: first transform + last transform -> merge transformations
-                ret = RequestTransformation.new_from_transformation(r.first.trans,teh_last.trans)
+                ret = RequestTransformation.new_from_transformation(teh_first.trans,teh_last.trans)
+              elsif teh_first.class == RequestPass  
+                if r.size > (fcount + 1)
+                  teh_first = r[fcount+=1]
+                  success = false
+                else
+                  ret = teh_last
+                end
               elsif teh_last.respond_to?(:out)
                 #3: responds last out only -> new StarOut
                 ret = RequestStarOut.new_from_message(teh_last.out)
               elsif teh_last.class == RequestPass
                 #4: last pass -> remove last until #1 or #2 or #3 or size == 1
-                if r.size > 1
-                  teh_last = r[-2]
+                if lcount - 1 > 0
+                  teh_last = r[lcount -= 1]
                   success = false
                 else
-                  ret = teh_last
+                  ret = teh_first
                 end
               end
             end while !success
