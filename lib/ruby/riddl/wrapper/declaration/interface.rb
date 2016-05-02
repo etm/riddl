@@ -19,7 +19,7 @@ module Riddl
           t = @top.split('/')
           real = real.split('/')
           real = real[t.length..-1]
-          '/' + real.join('/')
+          real.join('/')
         end
 
         def real_url(real,base)
