@@ -25,8 +25,8 @@ module Riddl
             @out = mout.nil? ? nil : Riddl::Wrapper::Description::Message.new(des,mout)
           end
         end
-        def self.new_from_message(min,mout)
-          RequestInOut.new(nil,min,mout,nil)
+        def self.new_from_message(min,mout,custom)
+          RequestInOut.new(nil,min,mout,nil,custom)
         end
         def hash
           @in.hash + (@out.nil? ? 0 : @out.hash)
@@ -46,11 +46,11 @@ module Riddl
           end  
           @out = nil
         end
-        def self.new_from_transformation(mtrans1,mtrans2)
+        def self.new_from_transformation(mtrans1,mtrans2,custom)
           tmp = XML::Smart::string("<transformation/>")
           tmp.root.add mtrans1.content.root.children
           tmp.root.add mtrans2.content.root.children
-          RequestTransformation.new(nil,Riddl::Wrapper::Description::Transformation.new_from_xml("#{mtrans2.name}_#{mtrans2.name}_merged",tmp),nil)
+          RequestTransformation.new(nil,Riddl::Wrapper::Description::Transformation.new_from_xml("#{mtrans2.name}_#{mtrans2.name}_merged",tmp),nil,custom)
         end
         def transform(min)
           tmp = self.dup
@@ -77,8 +77,8 @@ module Riddl
             @out = mout.nil? ? nil : Riddl::Wrapper::Description::Message.new(des,mout)
           end  
         end
-        def self.new_from_message(mout)
-          RequestStarOut.new(nil,mout,nil)
+        def self.new_from_message(mout,custom)
+          RequestStarOut.new(nil,mout,nil,custom)
         end
         attr_reader :out
         def hash

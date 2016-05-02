@@ -144,10 +144,10 @@ module Riddl
               success = true
               if teh_first.respond_to?(:in) && teh_last.respond_to?(:out)
                 #1: responds first in + last out -> new InOut
-                ret = RequestInOut.new_from_message(teh_first.in,teh_last.out)
+                ret = RequestInOut.new_from_message(teh_first.in,teh_last.out,teh_first.custom)
               elsif teh_first.class == RequestTransformation && teh_last.class == RequestTransformation && teh_last.out.nil?
                 #2: first transform + last transform -> merge transformations
-                ret = RequestTransformation.new_from_transformation(teh_first.trans,teh_last.trans)
+                ret = RequestTransformation.new_from_transformation(teh_first.trans,teh_last.trans,teh_first.custom)
               elsif teh_first.class == RequestPass  
                 if r.size > (fcount + 1)
                   teh_first = r[fcount+=1]
@@ -157,7 +157,7 @@ module Riddl
                 end
               elsif teh_last.respond_to?(:out)
                 #3: responds last out only -> new StarOut
-                ret = RequestStarOut.new_from_message(teh_last.out)
+                ret = RequestStarOut.new_from_message(teh_last.out,teh_last.custom)
               elsif teh_last.class == RequestPass
                 #4: last pass -> remove last until #1 or #2 or #3 or size == 1
                 if lcount - 1 > 0
