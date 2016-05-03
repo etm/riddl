@@ -23,14 +23,28 @@
   </message>
 
   <resource>
-    <get/>
+    <documentation xmlns="http://riddl.org/ns/documentation/1.0" summary="Federated UNIVIE OAuth2 Slave.">
+# Federated UNIVIE OAuth2 Slave - FU:AUTH
+
+Works only in conjunction with the UNIVIE OAuth2 Master. Allows you to:
+* Verify requests.
+* Get tokens and refresh tokens.
+* Logout (revoke) tokens.
+    </documentation>
+    <get>
+      <documentation xmlns="http://riddl.org/ns/documentation/1.0" summary="Check if your client is correctly authenticated. 20x good, everything else bad."/>
+      <example xmlns="http://riddl.org/ns/documentation/1.0"></example>
+    </get>
     <resource relative="verify">
+      <documentation xmlns="http://riddl.org/ns/documentation/1.0" summary="Verify requests from the FU:AUTH Master."/>
       <post in="verify_in" out="verify_out"/>
     </resource>
     <resource relative="token">
+      <documentation xmlns="http://riddl.org/ns/documentation/1.0" summary="Get and refresh tokens."/>
       <post in="refresh_token_in" out="refresh_token_out"/>
     </resource>
     <resource relative="revoke">
+      <documentation xmlns="http://riddl.org/ns/documentation/1.0" summary="Logout."/>
       <get in="revoke_in"/>
     </resource>
   </resource>
