@@ -16,6 +16,10 @@ module Riddl
               @redis = ::Redis.new(:url => url)
             end
 
+            def [](key)
+              get(key)
+            end  
+
             def get(key)
               @redis.get key
             end
@@ -25,6 +29,7 @@ module Riddl
             end
 
             def set(key,value,dur)
+              value = value.is_a?(String) ? value.to_s : (JSON::generate(value) rescue {})
               @redis.multi do
                 @redis.set key, value
                 @redis.set value, key
@@ -46,6 +51,7 @@ module Riddl
 
             def delete_by_value(value)
               key = nil
+              value = value.is_a?(String) ? value.to_s : (JSON::generate(value) rescue {})
               @redis.multi do
                 key = @redis.get value
                 @redis.del key
@@ -62,17 +68,21 @@ module Riddl
               read
             end
 
-            def get(name)
+            def [](key)
+              get(key)
+            end  
+
+            def get(key)
               read if changed != @changed
-              @tokens[name]
+              @tokens[key]
             end
 
             def key?(key)
               @tokens.key?(key)
             end
 
-            def set(name,value,dur)
-              @tokens[name] = value
+            def set(key,value,dur)
+              @tokens[key] = value
               write
               nil
             end
