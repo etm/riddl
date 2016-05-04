@@ -28,6 +28,16 @@ module Riddl
               @redis.exists(key)
             end
 
+            def each
+              if block_given?
+                @redis.keys.each do |e| 
+                  yield e, get(e)
+                end
+              else
+                @redis.keys.lazy.map{|e| [e,get(e)]}
+              end
+            end
+
             def set(key,value,dur)
               value = value.is_a?(String) ? value.to_s : (JSON::generate(value) rescue {})
               @redis.multi do
@@ -75,6 +85,16 @@ module Riddl
             def get(key)
               read if changed != @changed
               @tokens[key]
+            end
+
+            def each
+              if block_given?
+                @tokens.each do |k,v| 
+                  yield k,v
+                end
+              else
+                @tokens.each
+              end
             end
 
             def key?(key)
