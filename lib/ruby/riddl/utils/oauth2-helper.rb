@@ -50,9 +50,8 @@ module Riddl
             end
 
             def delete(key)
-              value = nil
+              value = @redis.get key
               @redis.multi do
-                value = @redis.get key
                 @redis.del key
                 @redis.del value
               end
@@ -60,10 +59,9 @@ module Riddl
             end
 
             def delete_by_value(value)
-              key = nil
               value = value.is_a?(String) ? value.to_s : (JSON::generate(value) rescue {})
+              key = @redis.get value
               @redis.multi do
-                key = @redis.get value
                 @redis.del key
                 @redis.del value
               end
