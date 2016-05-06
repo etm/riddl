@@ -22,6 +22,10 @@
     <parameter name="token" type="string"/>
   </message>
 
+  <message name="check">
+    <parameter name="Authorization" type="string"/>
+  </message>
+
   <resource>
     <documentation xmlns="http://riddl.org/ns/documentation/1.0" summary="Federated UNIVIE OAuth2 Slave.">
 # Federated UNIVIE OAuth2 Slave - FU:AUTH
@@ -31,7 +35,7 @@ Works only in conjunction with the UNIVIE OAuth2 Master. Allows you to:
 * Get tokens and refresh tokens.
 * Logout (revoke) tokens.
     </documentation>
-    <get>
+    <get in="check">
       <documentation xmlns="http://riddl.org/ns/documentation/1.0" summary="Check if your client is correctly authenticated. 20x good, everything else bad."/>
       <example xmlns="http://riddl.org/ns/documentation/1.0"></example>
     </get>
