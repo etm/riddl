@@ -23,7 +23,7 @@
   </message>
 
   <message name="check">
-    <parameter name="Authorization" type="string"/>
+    <header name="Authorization" type="string"/>
   </message>
 
   <resource>

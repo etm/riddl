@@ -66,7 +66,7 @@ module Riddl
       module UnivieApp
         def self::implementation(client_id, client_secret, access_tokens, refresh_tokens, adur, rdur)
           Proc.new do
-            run UnivieBearer::CheckAuth, client_id, client_secret, access_tokens if get
+            run UnivieBearer::CheckAuth, client_id, client_secret, access_tokens if get 'check'
             on resource 'verify' do
               run VerifyIdentity, access_tokens, refresh_tokens, client_id, client_secret, adur, rdur if post 'verify_in'
             end
