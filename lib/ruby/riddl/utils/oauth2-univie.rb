@@ -64,18 +64,17 @@ module Riddl
       end
 
       module UnivieApp
-        def self::implementation(client_id, client_secret, access_tokens, refresh_tokens, adur, rdur)
+        def self::implementation(client_id, client_secret, access_tokens, refresh_tokens, codes, adur, rdur)
           Proc.new do
             run UnivieBearer::CheckAuth, client_id, client_secret, access_tokens if get 'check'
             on resource 'verify' do
-              run VerifyIdentity, access_tokens, refresh_tokens, client_id, client_secret, adur, rdur if post 'verify_in'
+              run VerifyIdentity, access_tokens, refresh_tokens, codes, client_id, client_secret, adur, rdur if post 'verify_in'
             end
             on resource 'token' do
               run RefreshToken, access_tokens, refresh_tokens, client_id, client_secret, adur, rdur if post 'refresh_token_in'
             end
             on resource 'revoke' do
-              run RevokeTokenFlow, access_tokens, refresh_tokens if get 'revoke_token_in'
-              run RevokeUserFlow, access_tokens, refresh_tokens if get 'revoke_user_in'
+              run RevokeFlow, access_tokens, refresh_tokens, codes if get 'revoke_in'
             end
           end
         end
@@ -85,10 +84,11 @@ module Riddl
             code = Base64::urlsafe_decode64 @p[0].value
             access_tokens  = @a[0]
             refresh_tokens = @a[1]
-            client_id      = @a[2]
-            client_secret  = @a[3]
-            adur           = @a[4]
-            rdur           = @a[5]
+            codes          = @a[2]
+            client_id      = @a[3]
+            client_secret  = @a[4]
+            adur           = @a[5]
+            rdur           = @a[6]
             client_pass    = "#{client_id}:#{client_secret}"
 
             user_id, decrypted = Riddl::Utils::OAuth2::Helper::decrypt_with_shared_secret(code, client_pass).split(':', 2) rescue [nil,nil]
@@ -99,6 +99,7 @@ module Riddl
               }.to_json)
             else
               token, refresh_token          = Riddl::Utils::OAuth2::Helper::generate_optimistic_token(client_id, client_pass, adur, rdur)
+              codes.set(code, refresh_token, rdur)
               access_tokens.set(token, user_id, adur)
               refresh_tokens.set(refresh_token, token, rdur)
 
@@ -113,25 +114,16 @@ module Riddl
           end
         end
 
-        class RevokeTokenFlow < Riddl::Implementation
+        class RevokeFlow < Riddl::Implementation
           def response
-            token = @p[0].value
-            access_tokens = @a[0]
+            code           = Base64::urlsafe_decode64 @p[0].value
+            access_tokens  = @a[0]
             refresh_tokens = @a[1]
+            codes          = @a[2]
 
-            access_tokens.delete(token)
-            refresh_tokens.delete_by_value(token)
-          end
-        end
-
-        class RevokeUserFlow < Riddl::Implementation
-          def response
-            user_id = @p[0].value
-            access_tokens = @a[0]
-            refresh_tokens = @a[1]
-
-            token = access_tokens.delete_by_value user_id
-            refresh_tokens.delete_by_value token
+            rt = codes.delete(code)
+            at = refresh_tokens.delete(rt)
+            access_tokens.delete(at)
           end
         end
 

@@ -19,7 +19,7 @@
   </message>
 
   <message name="revoke_in">
-    <parameter name="token" type="string"/>
+    <parameter name="code" type="string"/>
   </message>
 
   <message name="check">
