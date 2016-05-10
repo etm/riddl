@@ -42,30 +42,15 @@ module Riddl
               value = value.is_a?(String) ? value.to_s : (JSON::generate(value) rescue {})
               @redis.multi do
                 @redis.set key, value
-                @redis.set value, key
                 @redis.expire key, dur
-                @redis.expire value, dur
               end
               nil
             end
 
             def delete(key)
               value = @redis.get key
-              @redis.multi do
-                @redis.del key
-                @redis.del value
-              end
+              @redis.del key
               value
-            end
-
-            def delete_by_value(value)
-              value = value.is_a?(String) ? value.to_s : (JSON::generate(value) rescue {})
-              key = @redis.get value
-              @redis.multi do
-                @redis.del key
-                @redis.del value
-              end
-              key
             end
           end #}}}
 
@@ -130,12 +115,6 @@ module Riddl
 
             def delete(token)
               deleted = @tokens.delete(token)
-              write
-              deleted
-            end
-
-            def delete_by_user(user_id)
-              deleted = @tokens.delete_if { |_, v| v == user_id }
               write
               deleted
             end
