@@ -98,9 +98,9 @@ module Riddl
                 :error => 'Code invalid. Client_id or client_secret not suitable for decryption.'
               }.to_json)
             else
-              token, refresh_token          = Riddl::Utils::OAuth2::Helper::generate_optimistic_token(client_id, client_pass, adur, rdur)
+              token, refresh_token = Riddl::Utils::OAuth2::Helper::generate_optimistic_token(client_id, client_pass, adur, rdur)
               codes.set(code, refresh_token, rdur)
-              access_tokens.set(token, user_id, adur)
+              access_tokens.set(token, user_id, rdur) # not adur, to identify expired access tokens
               refresh_tokens.set(refresh_token, token, rdur)
 
               json_response = {
@@ -158,7 +158,7 @@ module Riddl
 
             token = Riddl::Utils::OAuth2::Helper::generate_access_token(client_id, client_id + ':' + client_secret, adur)
 
-            access_tokens.set(token,user,adur)
+            access_tokens.set(token,user,rdur) # not adur, to identify expired access tokens
             refresh_tokens.set(refresh_token, token, rdur)
 
             Riddl::Parameter::Complex.new('data', 'application/json', { :token => token }.to_json)
