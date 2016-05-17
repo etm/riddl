@@ -38,11 +38,11 @@ module Riddl
               end
             end
 
-            def set(key,value,dur)
-              value = value.is_a?(String) ? value.to_s : (JSON::generate(value) rescue {})
+            def set(key,value,dur=nil)
+              value = value.is_a?(String) ? value.to_s : (JSON::generate(value) rescue '')
               @redis.multi do
                 @redis.set key, value
-                @redis.expire key, dur
+                @redis.expire key, dur unless dur.nil?
               end
               nil
             end

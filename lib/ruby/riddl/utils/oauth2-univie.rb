@@ -159,7 +159,7 @@ module Riddl
             token = Riddl::Utils::OAuth2::Helper::generate_access_token(client_id, client_id + ':' + client_secret, adur)
 
             access_tokens.set(token,user,rdur) # not adur, to identify expired access tokens
-            refresh_tokens.set(refresh_token, token, rdur)
+            refresh_tokens.set(refresh_token, token)
 
             Riddl::Parameter::Complex.new('data', 'application/json', { :token => token }.to_json)
           end
