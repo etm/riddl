@@ -74,7 +74,7 @@ module Riddl
               run RefreshToken, access_tokens, refresh_tokens, client_id, client_secret, adur, rdur if post 'refresh_token_in'
             end
             on resource 'revoke' do
-              run RevokeFlow, access_tokens, refresh_tokens, codes if get 'revoke_in'
+              run RevokeFlow, access_tokens, refresh_tokens, codes if delete 'revoke_in'
             end
           end
         end

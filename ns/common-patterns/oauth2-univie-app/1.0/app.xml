@@ -49,7 +49,7 @@ Works only in conjunction with the UNIVIE OAuth2 Master. Allows you to:
     </resource>
     <resource relative="revoke">
       <documentation xmlns="http://riddl.org/ns/documentation/1.0" summary="Logout."/>
-      <get in="revoke_in"/>
+      <delete in="revoke_in"/>
     </resource>
   </resource>
 
