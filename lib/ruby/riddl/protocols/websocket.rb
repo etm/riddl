@@ -42,6 +42,7 @@ module EventMachine
   module WebSocket
     class Handshake
       def receive_data(data)
+        data.request_url = Riddl::Protocols::Utils::escape(data.request_url)
         @parser = data
         @headers = data.headers
         process(@headers, data.body)
