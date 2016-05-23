@@ -5,12 +5,6 @@ module Riddl
     module OAuth2
 
       module UnivieBearer
-        def self::implementation(client_id, client_secret, access_tokens)
-          Proc.new do
-            run CheckAuth, client_id, client_secret, access_tokens if get
-          end
-        end
-
         class CheckAuth < Riddl::Implementation
           def response
             client_id = @a[0]
