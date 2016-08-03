@@ -21,7 +21,7 @@ class StringIO #{{{
 end #}}}
 
 class SignalWait #{{{
-  def initialize 
+  def initialize
     @q = Queue.new
   end
 
@@ -93,7 +93,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end
         if URI.parse(@base).scheme == 'xmpp' && !((@options[:jid] && @options[:pass]) || @options[:xmpp].is_a?(Blather::Client))
           raise ConnectionError, 'XMPP connections need jid/pass or Blather::client object passed as options to be successful.'
-        end  
+        end
         if URI.parse(@base).scheme == 'xmpp' && @options[:jid] && @options[:pass]
           sig = SignalWait.new
           Thread::abort_on_exception = true
@@ -108,7 +108,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               end
             rescue
               raise ConnectionError, 'XMPP connection not successful.'
-            end  
+            end
           end
           sig.wait 2
         end
@@ -168,7 +168,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             raise PathError, 'Path not found.' if @path.nil?
             @path[0]
           end
-          @rpath = @rpath == '/' ? '' : @rpath 
+          @rpath = @rpath == '/' ? '' : @rpath
         end #}}}
         attr_reader :rpath
 
@@ -187,7 +187,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end
 
             blk.call(conn)
-          end   
+          end
         end #}}}
 
         def get(parameters = []) #{{{
@@ -196,7 +196,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         def simulate_get(parameters = []) #{{{
           exec_request('GET',parameters,true)
         end #}}}
-        
+
         def post(parameters = []) #{{{
           exec_request('POST',parameters,false)
         end #}}}
@@ -231,7 +231,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end
           end
           raise ArgumentError, "Hash with ONE method => parameters pair required"
-        end #}}} 
+        end #}}}
         private :priv_request
 
         def extract_options(parameters) #{{{
@@ -260,7 +260,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           headers
         end #}}}
         private :extract_headers
-        
+
         def extract_qparams(parameters,method) #{{{
           qparams = []
           starting = true
@@ -291,7 +291,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             role = @wrapper.role(@path)
             if Riddl::Roles::roles[role]
               Riddl::Roles::roles[role]::before(@base + @rpath,riddl_method.downcase,parameters,headers,options) if Riddl::Roles::roles[role].respond_to?(:before)
-            end  
+            end
             riddl_message = @wrapper.io_messages(@path,riddl_method.downcase,parameters,headers)
             if riddl_message.nil?
               raise InputError, "Not a valid input to service."
@@ -318,7 +318,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                 unless @wrapper.check_message(response,response_headers,riddl_message.out)
                   raise OutputError, "Not a valid output from service."
                 end
-              end  
+              end
             else
               tp = parameters
               th = headers
@@ -328,7 +328,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                   status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,riddl_message && riddl_message.out ? true : false)
                 else
                   status, response, response_headers = make_request(m.interface.real_url(@rpath,@base),riddl_method,tp,th,tq,simulate,true)
-                end  
+                end
                 return response if simulate
                 if status < 200 || status >= 300 || !@wrapper.check_message(response,response_headers,m.out)
                   raise OutputError, "Not a valid output from service."
@@ -346,8 +346,8 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           unless role.nil?
             if Riddl::Roles::roles[role]
               response = Riddl::Roles::roles[role]::after(@base + @rpath,riddl_method.downcase,status,response,response_headers,options) if Riddl::Roles::roles[role].respond_to?(:after)
-            end  
-          end  
+            end
+          end
           return status, response, response_headers
         end #}}}
         private :exec_request
@@ -356,7 +356,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           url = URI.parse(url)
           qs = qparams.join('&')
           if url.class == URI::HTTP || url.class == URI::HTTPS
-            #{{{ 
+            #{{{
             req = Riddl::Client::HTTPRequest.new(riddl_method,url.path,parameters,headers,qs)
             return req.simulate if simulate
 
@@ -366,10 +366,10 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             if url.class == URI::HTTPS
               http.use_ssl = true
               http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-            end  
+            end
             if @options[:debug]
               http.set_debug_output @options[:debug]
-            end  
+            end
             http.start do
               retrycount = 0
               begin
@@ -401,12 +401,12 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             res.each do |k,v|
               if v.nil?
                 response_headers[k.name.upcase.gsub(/\-/,'_')] = v
-              else  
+              else
                 response_headers[k.upcase.gsub(/\-/,'_')] = v
-              end  
+              end
             end
             return res.code.to_i, response, response_headers
-            #}}} 
+            #}}}
           elsif url.class == URI::Generic && url.scheme.downcase == 'xmpp'
             #{{{
             req = Riddl::Client::XMPPRequest.new(riddl_method,url.user + "@" + url.host,url.path,parameters,headers,qs,ack)
@@ -436,13 +436,13 @@ unless Module.constants.include?('CLIENT_INCLUDED')
                   res.register_namespace 'se', Blather::StanzaError::STANZA_ERR_NS
                   err = res.find('string(/message/error/se:text)')
                   status = (err.match(/\d+/)[0] || 209).to_i
-                end  
+                end
                 sig.continue
               end
               sig.wait
             else
               status = 200
-              @options[:xmpp].write stanza 
+              @options[:xmpp].write stanza
 
               # xmpp writes in next_tick so we have to fucking wait also a tick
               # to ensure that all shit has been written. fuck. not the best
@@ -478,6 +478,9 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
         def simulate
           sock = StringIO.new('')
+          sock.define_singleton_method(:io) do
+            sock
+          end
           self.exec(sock,"1.1",self.path)
           sock.rewind
           [nil, sock, []]
