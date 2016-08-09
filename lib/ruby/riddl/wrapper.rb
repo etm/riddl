@@ -34,12 +34,12 @@ module Riddl
         ret.sort!
         ret
         #}}}
-      end  
+      end
       protected :rpaths, :get_resource_deep
     end
-  end  
+  end
 end
-    
+
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/description')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/declaration')
 require File.expand_path(File.dirname(__FILE__) + '/wrapper/messageparser')
@@ -73,7 +73,7 @@ module Riddl
       fpath = nil
       if name.is_a?(XML::Smart::Dom)
         @doc = name
-      else  
+      else
         if name.is_a?(String) && name =~ /^http:\/\/(www\.)?riddl\.org(\/ns\/common-patterns\/.*)/
           name = File.expand_path(File.dirname(__FILE__)) + $2
         end
@@ -88,8 +88,8 @@ module Riddl
           rescue
             raise SpecificationError, "#{name.inspect} is no RIDDL description or declaration (neither a file, url or string)."
           end
-        end  
-      end  
+        end
+      end
 
       @doc.register_namespace 'x', XINCLUDE
       @doc.find('//x:include/@href').each do |i|
@@ -115,10 +115,10 @@ module Riddl
         @doc.root.prepend rrds.find('/des:description/des:message')
         @doc.find("/des:description/des:resource").each do |r|
           r.prepend rds.find('/des:description/des:resource/*')
-        end  
+        end
         @doc.find("/des:description//des:resource").each do |r|
           r.prepend rrds.find('/des:description/des:resource/*')
-        end  
+        end
       end
       if @is_declaration  && get_description
         @doc.root.prepend("dec:interface",:name=>"riddldescription").add XML::Smart::open_unprotected(RIDDL_DESCRIPTION_SHOW).root
@@ -128,7 +128,7 @@ module Riddl
           x.append("apply-to","/")
           x.append("apply-to","/**/*")
         end
-      end  
+      end
 
       @declaration = @description = nil
       #}}}
@@ -170,7 +170,7 @@ module Riddl
       #{{{
       description
       declaration
-     
+
       req = @description.get_resource(path).access_methods if @is_description
       req = @declaration.get_resource(path).composition    if @is_declaration
 
@@ -194,7 +194,7 @@ module Riddl
           r.select{|o|o.class==Riddl::Wrapper::Description::WebSocket}.each do |o|
             return IOMessages.new(nil,nil,nil,nil)
           end
-        end  
+        end
         if @is_declaration
           r = req[operation]
           r.select{|o|o.result.class==Riddl::Wrapper::Description::RequestInOut}.each do |o|
@@ -213,8 +213,8 @@ module Riddl
           r.select{|o|o.result.class==Riddl::Wrapper::Description::WebSocket}.each do |o|
             return IOMessages.new(nil,nil,nil,o.result.interface)
           end
-        end  
-      end  
+        end
+      end
       return nil
       #}}}
     end
@@ -251,7 +251,7 @@ module Riddl
     def load_necessary_handlers!
       #{{{
       @doc.find("//des:parameter/@handler").map{|h|h.to_s}.uniq.each do |h|
-        if File.exists?(File.dirname(__FILE__) + '/handlers/' + File.basename(h) + ".rb")
+        if File.exist?(File.dirname(__FILE__) + '/handlers/' + File.basename(h) + ".rb")
           require File.expand_path(File.dirname(__FILE__) + '/handlers/' + File.basename(h))
         end
       end
@@ -274,7 +274,7 @@ module Riddl
       declaration
       tmp = []
 
-      tmp = @description.paths if @is_description 
+      tmp = @description.paths if @is_description
       tmp = @declaration.paths if @is_declaration
       tmp.map do |t|
         [t[0],Regexp.new("^" + t[1].gsub(/\{\}/,"[^/]+") + (t[2] ? '\/?' : '\/?$'))]
@@ -305,15 +305,15 @@ module Riddl
             elsif m.class == Riddl::Wrapper::Description::RequestPass
               Riddl::Wrapper::IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new,nil,m.interface)
             end
-          end    
+          end
         else
           [self]
-        end  
+        end
       end
       attr_reader :in, :out, :route, :interface
       #}}}
     end
-    
+
     def declaration?; @is_declaration; end
     def description?; @is_description; end
   end

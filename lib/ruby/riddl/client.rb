@@ -1,11 +1,5 @@
-require 'rubygems'
-require 'net/https'
-require 'eventmachine'
-require 'em-websocket-client'
-require 'blather/client/client'
-require 'uri'
-require 'openssl'
-require 'digest/md5'
+gem 'blather', '=1.1.4'
+
 require File.expand_path(File.dirname(__FILE__) + '/wrapper')
 require File.expand_path(File.dirname(__FILE__) + '/error')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/generator')
@@ -15,6 +9,14 @@ require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/parser')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/utils')
 require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/option')
+
+require 'net/https'
+require 'eventmachine'
+require 'em-websocket-client'
+require 'blather/client/client'
+require 'uri'
+require 'openssl'
+require 'digest/md5'
 
 class StringIO #{{{
   def continue_timeout; nil; end

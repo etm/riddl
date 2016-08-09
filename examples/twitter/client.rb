@@ -15,27 +15,27 @@ file_token_secret = File.expand_path(File.dirname(__FILE__) + '/.twitter.token_s
 if !File.exists?(file_token) && !File.exists?(file_token_secret)
   ### go to request token resource and set necessary role options
   resource = twitter.resource("/oauth/request_token")
-  params = [ 
+  params = [
     Riddl::Option.new(:consumer_key,consumer_key),
     Riddl::Option.new(:consumer_secret,consumer_secret)
   ]
-  
+
   ### simulate request token
   # puts resource.simulate_post(params).read
-  
+
   ### get request token and save it to variables
   status, response, headers = resource.post params
   token = response.oauth_token
   token_secret = response.oauth_token_secret
-  
+
   ### send user away for authorization
   puts "Authorize at https://twitter.com/oauth/authorize?oauth_token=#{token}"
   print "Insert verifier here: "
   verifier = STDIN.gets.strip # wait for verifier
-  
+
   ### exchange the token for an access token and save the results
   resource = twitter.resource("/oauth/access_token")
-  status, response, headers = resource.post [ 
+  status, response, headers = resource.post [
     Riddl::Option.new(:consumer_key,consumer_key),
     Riddl::Option.new(:consumer_secret,consumer_secret),
     Riddl::Option.new(:token,token),
@@ -86,6 +86,6 @@ if ARGV.length >= 1
     Riddl::Option.new(:token_secret,token_secret)
   ]
   puts "something went wrong!" if status != 200
-else  
+else
   puts "Usage: #{__FILE__} [TWEET]"
 end

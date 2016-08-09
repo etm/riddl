@@ -7,6 +7,7 @@ module Riddl
           @used = value
         end
         def used?
+          @used ||= nil
           @used || false
         end
         attr_reader :interface
@@ -41,9 +42,9 @@ module Riddl
           @interface = interface
           if des.nil?
             @trans = mtrans
-          else  
+          else
             @trans = Riddl::Wrapper::Description::Transformation.new(des,mtrans)
-          end  
+          end
           @out = nil
         end
         def self.new_from_transformation(mtrans1,mtrans2,custom)
@@ -75,7 +76,7 @@ module Riddl
             @out = mout
           else
             @out = mout.nil? ? nil : Riddl::Wrapper::Description::Message.new(des,mout)
-          end  
+          end
         end
         def self.new_from_message(mout,custom)
           RequestStarOut.new(nil,mout,nil,custom)
@@ -91,7 +92,7 @@ module Riddl
         def initialize(interface,custom=[])
           @custom = custom
           @interface = interface
-        end  
+        end
         def visualize; "pass *"; end
         def hash
           0
@@ -102,13 +103,13 @@ module Riddl
         def initialize(interface,custom=[])
           @custom = custom
           @interface = interface
-        end  
+        end
         def visualize; ""; end
         def hash
           0
         end
       end# }}}
-      
+
     end
   end
 end

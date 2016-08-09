@@ -1,4 +1,5 @@
-#gem 'thin', '=1.5.1'
+gem 'blather', '=1.1.4'
+
 require File.expand_path(File.dirname(__FILE__) + '/constants')
 require File.expand_path(File.dirname(__FILE__) + '/implementation')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/parser')

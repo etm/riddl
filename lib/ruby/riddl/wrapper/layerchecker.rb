@@ -12,8 +12,8 @@ module Riddl
       def check_layers(res)
         #{{{
         messages = []
-        res.each do |res|
-          messages += check_field(res.attributes['name'],res.parent.attributes['relative'] || '/')
+        res.each do |tres|
+          messages += check_field(tres.attributes['name'],tres.parent.attributes['relative'] || '/')
         end
         messages
         #}}}

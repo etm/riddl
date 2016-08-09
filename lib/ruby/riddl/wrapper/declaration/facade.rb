@@ -46,12 +46,11 @@ module Riddl
           res.resources.each do |k,v|
             description_xml_priv(result,messages,level+1,v)
           end
-          ""
           result << s + "</resource>\n"
           #}}}
         end
         private :description_xml_priv
-      
+
         def merge_tiles(res,fac=@resource)
           #{{{
           fac.custom = fac.custom + res.custom

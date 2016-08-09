@@ -11,8 +11,8 @@ module Riddl
       end
       def get_resource(path)
         get_resource_deep(path,@resource)
-      end  
-      
+      end
+
       def visualize(res=@resource,what='')
         #{{{
         what += res.path
@@ -45,10 +45,10 @@ module Riddl
         end
         res.add_access_methods(des,desres,0,nil)
         res.add_custom(desres)
-        desres.find("des:resource").each do |desres|
-          cpath = desres.attributes['relative'] || "{}"
-          rec = desres.attributes['recursive']
-          add_description(des,res,desres,cpath,rec)
+        desres.find("des:resource").each do |tdesres|
+          cpath = tdesres.attributes['relative'] || "{}"
+          rec = tdesres.attributes['recursive']
+          add_description(des,res,tdesres,cpath,rec)
         end
         nil
         #}}}

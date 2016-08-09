@@ -12,17 +12,17 @@ module Riddl
       def check_rec_resources(res,path='')
         #{{{
         messages = []
-        res.each do |res|
+        res.each do |tres|
           tpath = if path == ''
             '/'
           else
-            res.attributes['relative'].nil? ? path + '{}/' : path + res.attributes['relative'] + '/'
+            tres.attributes['relative'].nil? ? path + '{}/' : path + tres.attributes['relative'] + '/'
           end
 
           h_ifield = {}; h_pfield = {}
           h_ofield = {}; h_tfield = {}
           h_cfield = {}
-          res.find("des:get|des:put|des:delete|des:post|des:request").each do |mt|
+          tres.find("des:get|des:put|des:delete|des:post|des:request").each do |mt|
             mn = (mt.attributes['type'].nil? ? mt.qname.to_s : mt.attributes['type'])
 
             h_ifield[mn] ||= {}; h_pfield[mn] ||= {}
@@ -51,14 +51,14 @@ module Riddl
           end
           h_ofield.each do |mn,ofield|
             messages += check_fields(ofield,"#{tpath} -> #{mn}","out","message")
-          end  
+          end
           h_tfield.each do |mn,tfield|
             messages += check_fields(tfield,"#{tpath} -> #{mn}","transformation","transformation")
-          end  
+          end
           h_cfield.each do |mn,cfield|
             messages << "#{tpath} -> #{mn}: more than one catchall (*) operation is not allowed." if cfield > 1
           end
-          messages += check_rec_resources(res.find("des:resource"),tpath)
+          messages += check_rec_resources(tres.find("des:resource"),tpath)
         end
         messages
         #}}}

@@ -5,7 +5,7 @@ require 'base64'
 module Riddl
   module Roles
     module OAuth
-      DIGEST = OpenSSL::Digest::Sha1.new
+      DIGEST = OpenSSL::Digest::SHA1.new
       VERSION_MAJOR = 1
       VERSION_MINOR = 0
 
@@ -61,7 +61,7 @@ module Riddl
         headers['Authorization'] = 'OAuth ' + oparams.map{|e|e[0]+'='+"\"#{e[1]}\""}.join(', ')
       end
 
-    end  
+    end
 
   end
 end

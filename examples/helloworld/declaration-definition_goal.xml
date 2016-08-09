@@ -23,14 +23,10 @@
   <resource>
     <post in="hello"/>
     <post in="hello-form"/>
-    <get in="type-html"/>
     <get in="type-html" out="hello-list-html"/>
-    <get in="*"/>
     <get in="*" out="hello-form"/>
     <resource>
-      <put in="hello"/>
       <put in="hello" out="hello"/>
-      <get in="*"/>
       <get in="*" out="hello"/>
       <delete in="*"/>
       <resource relative="hello">

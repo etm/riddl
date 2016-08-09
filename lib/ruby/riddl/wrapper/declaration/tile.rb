@@ -48,11 +48,11 @@ module Riddl
           res = add_path(path,res,rec)
           res.add_access_methods(des,desres,index,interface)
           res.add_custom(desres)
-          desres.find("des:resource").each do |desres|
-            cpath = desres.attributes['relative'] || "{}"
-            rec = desres.attributes['recursive']
+          desres.find("des:resource").each do |tdesres|
+            cpath = tdesres.attributes['relative'] || "{}"
+            rec = tdesres.attributes['recursive']
             int = Interface.new_from_interface(interface,(interface.sub+"/"+cpath).gsub(/\/+/,'/'))
-            add_description(des,desres,cpath,index,int,block,rec,res)
+            add_description(des,tdesres,cpath,index,int,block,rec,res)
           end
           block.each do |bl|
             bpath = bl.to_s.gsub(/\/+/,'/').gsub(/\/$/,'')
