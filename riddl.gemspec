@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.99.247"
+  s.version          = "0.99.250"
   s.platform         = Gem::Platform::RUBY
-  s.license          = "LGPL-3"
+  s.license          = "LGPL-3.0"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
 
   s.description      = "rest service interface definition, mixing, and evolution. supports mixed http and xmpp servers."
@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.email            = 'juergen.mangler@gmail.com'
   s.homepage         = 'http://www.wst.univie.ac.at/communities/riddl/'
 
-  s.required_ruby_version = '>=1.9.3'
+  s.required_ruby_version = '>=2.2.0'
 
   s.add_runtime_dependency 'xml-smart', '>=0.3.6', '~>0'
   s.add_runtime_dependency 'rdf-smart', '>=0.0.160', '~>0'

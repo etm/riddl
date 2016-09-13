@@ -100,7 +100,8 @@ module Riddl
               json_response = {
                 :access_token => token,
                 :refresh_token => refresh_token,
-                :code => Base64.urlsafe_encode64(decrypted)
+                :code => Base64.urlsafe_encode64(decrypted),
+                :user_id => user_id
               }.to_json
 
               Riddl::Parameter::Complex.new('data', 'application/json', json_response)
