@@ -3,8 +3,8 @@ module Riddl
     module Notifications
 
       module Producer
-      
-        def self::implementation(backend,handler=nil,details=:production) 
+
+        def self::implementation(backend,handler=nil,details=:production)
           unless handler.nil? || (handler.is_a? Riddl::Utils::Notifications::Producer::HandlerBase)
             raise "handler not a subclass of HandlerBase"
           end
@@ -26,10 +26,10 @@ module Riddl
                   end
                 end
               end
-            end  
+            end
           end
-        end  
-      
+        end
+
         class HandlerBase #{{{
           def initialize(data)
             @data = data
@@ -58,7 +58,7 @@ module Riddl
           class Sub #{{{
             def initialize(name)
               @name = name
-            end  
+            end
             def modify(&block)
               XML::Smart.modify(@name,"<subscription xmlns='http://riddl.org/ns/common-patterns/notifications-producer/1.0'/>") do |doc|
                 doc.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
@@ -75,7 +75,7 @@ module Riddl
               XML::Smart.open_unprotected(@name) do |doc|
                 doc.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
                 block.call doc
-              end  
+              end
             end
           end #}}}
 
@@ -88,7 +88,7 @@ module Riddl
               keys.each do |key|
                 f = @target + '/' + key + '/subscription.xml'
                 block.call Sub.new(f), key if File.exists? f
-              end  
+              end
             end
 
             def include?(key)
@@ -130,10 +130,15 @@ module Riddl
             end
           end #}}}
 
-          def initialize(topics,target)
+          def initialize(topics,target,init=nil)
             @target = target.gsub(/^\/+/,'/')
 
-            FileUtils::mkdir_p(@target) unless File.exists?(@target)
+
+            if init and not File.exists?(@target)
+              FileUtils::cp_r init, @target
+            else
+              FileUtils::mkdir_p(@target) unless File.exists?(@target)
+            end
 
             raise "topics file not found" unless File.exists?(topics)
             @topics = XML::Smart.open_unprotected(topics.gsub(/^\/+/,'/'))
@@ -146,7 +151,7 @@ module Riddl
                 end
               end
             end
-          end  
+          end
 
           def subscriptions
             Subs.new(@target)
@@ -154,7 +159,7 @@ module Riddl
 
         end #}}}
 
-        class Overview < Riddl::Implementation #{{{ 
+        class Overview < Riddl::Implementation #{{{
           def response
             Riddl::Parameter::Complex.new("overview","text/xml") do
               <<-END
@@ -167,7 +172,7 @@ module Riddl
 
           end
         end #}}}
-        
+
         class Topics < Riddl::Implementation #{{{
           def response
             backend = @a[0]
@@ -176,7 +181,7 @@ module Riddl
             end
           end
         end #}}}
-        
+
         class Subscriptions < Riddl::Implementation #{{{
           def response
             backend = @a[0]
@@ -189,7 +194,7 @@ module Riddl
                 sub.read do |doc|
                   if doc.root.attributes['url']
                     ret.root.add('subscription', :id => key, :url => doc.root.attributes['url'])
-                  else  
+                  else
                     ret.root.add('subscription', :id => key)
                   end
                 end
@@ -198,7 +203,7 @@ module Riddl
             end
           end
         end #}}}
-       
+
         class Subscription < Riddl::Implementation #{{{
           def response
             backend = @a[0]
@@ -211,7 +216,7 @@ module Riddl
             end
           end
         end #}}}
-        
+
         class CreateSubscription < Riddl::Implementation #{{{
           def response
             backend = @a[0]
@@ -237,14 +242,14 @@ module Riddl
                   t.add(type[0..-2], i)
                 end
               end
-            end  
+            end
 
             handler.key(key).topics(topics).create unless handler.nil?
             [
               Riddl::Parameter::Simple.new('key',key),
               Riddl::Parameter::Simple.new('producer-secret',producer_secret),
               Riddl::Parameter::Simple.new('consumer-secret',consumer_secret)
-            ]  
+            ]
           end
         end #}}}
 
@@ -259,7 +264,7 @@ module Riddl
             return
           end
         end #}}}
-        
+
         class UpdateSubscription < Riddl::Implementation #{{{
           def response
             backend = @a[0]
@@ -297,13 +302,13 @@ module Riddl
                   t.add(type[0..-2], i)
                 end
               end
-            end  
+            end
 
             handler.key(key).topics(topics).update unless handler.nil?
             nil
           end
         end #}}}
-                  
+
         class WS < Riddl::WebSocketImplementation #{{{
           def onopen
             @backend = @a[0]
@@ -320,8 +325,8 @@ module Riddl
             @handler.key(@key).ws_close() unless @handler.nil?
           end
         end #}}}
-        
-      end  
+
+      end
 
     end
   end

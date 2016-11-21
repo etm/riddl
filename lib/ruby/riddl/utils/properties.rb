@@ -17,7 +17,7 @@ module Riddl
             run        Riddl::Utils::Properties::Schema,        backend          if get
             on resource 'rng' do
               run      Riddl::Utils::Properties::RngSchema,     backend          if get
-            end  
+            end
           end
           on resource 'values' do
             run        Riddl::Utils::Properties::Properties,    backend, handler if get
@@ -37,9 +37,9 @@ module Riddl
                 end
               end
             end
-          end  
+          end
         end
-      end  
+      end
 
       # Overloadable and Backends
       class HandlerBase #{{{
@@ -50,7 +50,7 @@ module Riddl
         def property(p)
           @property = p
           self
-        end  
+        end
         def create; end
         def read;   end
         def update; end
@@ -58,7 +58,7 @@ module Riddl
       end #}}}
 
       class Backend #{{{
-        attr_reader :schema, :data, :rng 
+        attr_reader :schema, :data, :rng
 
         def initialize(schema,target,init=nil)
           @target = target.gsub(/^\/+/,'/')
@@ -67,7 +67,7 @@ module Riddl
 
           if schema.is_a? Hash
             schema.each { |k,v| add_schema k, v }
-          elsif schema.is_a? String  
+          elsif schema.is_a? String
             add_schema 'default', schema
           end
           raise "no schemas provided" if @schemas.length == 0
@@ -99,7 +99,7 @@ module Riddl
           @schemas[key].register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
           if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
             raise "properties schema transformation file not found"
-          end  
+          end
           @rngs[key] = @schemas[key].transform_with(XML::Smart.open_unprotected(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))
         end
         private :add_schema
@@ -133,7 +133,7 @@ module Riddl
             else
               false
             end
-          end  
+          end
         end
        end #}}}
 
@@ -159,7 +159,7 @@ module Riddl
           end
           return Riddl::Parameter::Complex.new("keys","text/xml",ret.to_s)
         end
-      end #}}} 
+      end #}}}
 
       class Query < Riddl::Implementation #{{{
         def response
@@ -215,7 +215,7 @@ module Riddl
             @status = 404
           end
         end
-        
+
         def extract_values(backend,property,minor=nil)
           case backend.property_type(property)
             when :complex
@@ -224,9 +224,9 @@ module Riddl
                 prop = XML::Smart::string("<value xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
                 if res.length == 1
                   prop.root.add(res.first.children)
-                else  
+                else
                   prop.root.add(res)
-                end  
+                end
                 return Riddl::Parameter::Complex.new("value","text/xml",prop.to_s)
               else
                 prop = XML::Smart::string("<not-existing xmlns=\"http://riddl.org/ns/common-patterns/properties/1.0\"/>")
@@ -253,7 +253,7 @@ module Riddl
         private :extract_values
 
       end #}}}
-      
+
       # Modifiable
       class AddProperty < Riddl::Implementation #{{{
         def response
@@ -282,7 +282,7 @@ module Riddl
               @status = 404
               return # not a valid state from here on
             end
-          end  
+          end
 
           newstuff = value.nil? ? XML::Smart.string(content).root.children : value
           backend.modify do |doc|
@@ -291,17 +291,17 @@ module Riddl
               ele.add newstuff
             else
               ele.text = newstuff
-            end  
+            end
           end || begin
             @status = 400
             return # bad request
           end
-          
+
           EM.defer{handler.property(property).create} unless handler.nil?
           return
         end
       end #}}}
-      
+
       class AddProperties < Riddl::Implementation #{{{
         def response
           backend = @a[0]
@@ -330,24 +330,24 @@ module Riddl
                 @status = 404
                 return # not a valid state from here on
               end
-            end  
+            end
 
             newstuff = value.nil? ? XML::Smart.string(content).root.children : value
             backend.modify do |doc|
               nodes = doc.find(path)
               nods = nodes.map{|ele| ele.children.delete_all!; ele}
-              nods.each do |ele| 
+              nods.each do |ele|
                 if value.nil?
                   ele.add newstuff
                 else
                   ele.text = newstuff
-                end  
-              end  
+                end
+              end
             end || begin
               @status = 400
               return # bad request
             end
-            
+
           end
           EM.defer do
             0.upto(@p.length/2-1) do |i|
@@ -377,7 +377,7 @@ module Riddl
           if node.empty?
             @status = 404
             return # this property does not exist
-          end  
+          end
 
           newstuff = XML::Smart.string(value)
           backend.modify do |doc|
@@ -422,7 +422,7 @@ module Riddl
           EM.defer{handler.property(property).delete} unless handler.nil?
           return
         end
-      end #}}} 
+      end #}}}
 
       class UpdContent < Riddl::Implementation #{{{
         def response
@@ -451,24 +451,24 @@ module Riddl
               @status = 404
               return # not a valid state from here on
             end
-          end  
+          end
 
           newstuff = value.nil? ? XML::Smart.string(content).root.children : value
           backend.modify do |doc|
             nodes = doc.root.find(path)
             nods = nodes.map{|ele| ele.children.delete_all!; ele}
-            nods.each do |ele| 
+            nods.each do |ele|
               if value.nil?
                 ele.add newstuff
               else
                 ele.text = newstuff
               end
-            end  
+            end
           end || begin
             @status = 400
             return # bad request
           end
-          
+
           EM.defer{handler.property(property).update} unless handler.nil?
           return
         end
