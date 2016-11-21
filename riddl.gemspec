@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.99.251"
+  s.version          = "0.99.252"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3.0"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"

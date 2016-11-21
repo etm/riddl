@@ -133,11 +133,12 @@ module Riddl
           def initialize(topics,target,init=nil)
             @target = target.gsub(/^\/+/,'/')
 
-
-            if init and not File.exists?(@target)
-              FileUtils::cp_r init, @target
-            else
-              FileUtils::mkdir_p(@target) unless File.exists?(@target)
+            unless File.exists?(@target)
+              if init
+                FileUtils::cp_r init, @target
+              else
+                FileUtils::mkdir_p(@target)
+              end
             end
 
             raise "topics file not found" unless File.exists?(topics)
