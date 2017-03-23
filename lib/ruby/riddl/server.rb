@@ -44,6 +44,7 @@ module Riddl
     end #}}}
 
     OPTS = {
+      :bind            => '0.0.0.0',
       :host            => 'localhost',
       :port            => 9292,
       :secure          => false,
@@ -123,7 +124,7 @@ module Riddl
 
       server = Rack::Server.new(
         :app => app,
-        :Host => '0.0.0.0',
+        :Host => @riddl_opts[:bind],
         :Port => @riddl_opts[:port],
         :environment => @riddl_opts[:verbose] ? 'deployment' : 'none',
         :server => 'thin',

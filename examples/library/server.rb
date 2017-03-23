@@ -14,7 +14,7 @@ class BookQuery < Riddl::Implementation
             <title>#{title}</title>
             <author>Agador</author>
             #{authors.join}
-          </book>  
+          </book>
         </books>
       END
     end
@@ -34,7 +34,7 @@ class BookDescription < Riddl::Implementation
   end
 end
 
-Riddl::Server.new(File.dirname(__FILE__) + '/description.xml', :port => 9292) do
+Riddl::Server.new(File.dirname(__FILE__) + '/description.xml', :port => 9292, :bind => '::') do
   accessible_description true
 
   on resource do
