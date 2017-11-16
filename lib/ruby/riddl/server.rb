@@ -1,4 +1,4 @@
-gem 'blather', '=1.1.4'
+gem 'blather'
 
 require File.expand_path(File.dirname(__FILE__) + '/constants')
 require File.expand_path(File.dirname(__FILE__) + '/implementation')

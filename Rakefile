@@ -18,8 +18,8 @@ end
 
 task :push => :gem do |r|
   `gem push pkg/riddl.gem`
-end  
+end
 
 task :install => :gem do |r|
-  `sudo gem install pkg/riddl.gem`
-end  
+  `gem install pkg/riddl.gem`
+end

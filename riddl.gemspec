@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.99.254"
+  s.version          = "0.99.255"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3.0"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'em-websocket-client', '>= 0.1', '~>0'
   s.add_runtime_dependency 'mime-types', '>= 2.4', '~>2'
   s.add_runtime_dependency 'minitest', '>= 5.0.0', '~>5'
-  s.add_runtime_dependency 'blather', '~>1.1'
+  s.add_runtime_dependency 'blather', '~>1.2'
   s.add_runtime_dependency 'charlock_holmes', '>= 0.7', '~>0'
   s.add_runtime_dependency 'redis', '>= 3.3.0', '~>3.3'
 end

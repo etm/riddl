@@ -1,4 +1,4 @@
-gem 'blather', '=1.1.4'
+gem 'blather'
 
 require File.expand_path(File.dirname(__FILE__) + '/wrapper')
 require File.expand_path(File.dirname(__FILE__) + '/error')
