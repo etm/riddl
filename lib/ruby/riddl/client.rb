@@ -1,11 +1,7 @@
-gem 'blather'
-
 require File.expand_path(File.dirname(__FILE__) + '/wrapper')
 require File.expand_path(File.dirname(__FILE__) + '/error')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/generator')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/parser')
-require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/generator')
-require File.expand_path(File.dirname(__FILE__) + '/protocols/xmpp/parser')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/utils')
 require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/option')
@@ -13,7 +9,6 @@ require File.expand_path(File.dirname(__FILE__) + '/option')
 require 'net/https'
 require 'eventmachine'
 require 'em-websocket-client'
-require 'blather/client/client'
 require 'uri'
 require 'openssl'
 require 'digest/md5'
@@ -47,7 +42,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
       \A
 
       # protocol identifier
-      (?:(?:https?|xmpp)://)
+      (?:(?:https?|[a-z]{4})://)
 
       # user:pass authentication
       (?:\S+(?::\S*)?@)?
@@ -93,26 +88,8 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         if @base !~ RIDDL_URL_PATTERN
           raise ConnectionError, 'An RFC 3986 URI as target is required. Pro tip: (http|https|xmpp)://...'
         end
-        if URI.parse(@base).scheme == 'xmpp' && !((@options[:jid] && @options[:pass]) || @options[:xmpp].is_a?(Blather::Client))
-          raise ConnectionError, 'XMPP connections need jid/pass or Blather::client object passed as options to be successful.'
-        end
-        if URI.parse(@base).scheme == 'xmpp' && @options[:jid] && @options[:pass]
-          sig = SignalWait.new
-          Thread::abort_on_exception = true
-          Thread.new do
-            begin
-              EM.send EM.reactor_running? ? :defer : :run do
-                client = Blather::Client.setup @options[:jid], @options[:pass]
-                client.register_handler(:ready) { sig.continue }
-                client.connect
-                @options[:xmpp] = client
-                sig.continue
-              end
-            rescue
-              raise ConnectionError, 'XMPP connection not successful.'
-            end
-          end
-          sig.wait 2
+        if @options[:custom_protocol]
+          @options[:custom_protocol] = @options[:custom_protocol].new(@base,@options)
         end
         unless riddl.nil?
           @wrapper = (riddl.class == Riddl::Wrapper ? riddl : Riddl::Wrapper::new(riddl))
@@ -126,10 +103,6 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end
       end
       attr_reader :base
-
-      def close_xmpp
-        @options[:xmpp].close if @options[:xmpp]
-      end
 
       def self::location(base,options={})
         new(base,nil,options)
@@ -409,56 +382,12 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end
             return res.code.to_i, response, response_headers
             #}}}
-          elsif url.class == URI::Generic && url.scheme.downcase == 'xmpp'
-            #{{{
-            req = Riddl::Client::XMPPRequest.new(riddl_method,url.user + "@" + url.host,url.path,parameters,headers,qs,ack)
-            return req.simulate if simulate
-
-            sig = SignalWait.new
-            stanza = req.stanza
-
-            @options[:debug].puts(stanza) if @options[:debug]
-
-            status = 404
-            response = []
-            response_headers = {}
-            if ack
-              @options[:xmpp].write_with_handler(stanza) do |raw|
-                res = XML::Smart::Dom::Element.new(raw).parent
-                @options[:debug].puts(res.to_s) if @options[:debug]
-                res.register_namespace 'xr', Riddl::Protocols::XMPP::XR_NS
-                if res.find('/message/error').empty?
-                  status = 200
-                  response_headers = {}
-                  res.find('/message/xr:header').each do |e|
-                    response_headers[e.attributes['name']] = e.text
-                  end
-                  response = Protocols::XMPP::Parser.new('', res).params
-                else
-                  res.register_namespace 'se', Blather::StanzaError::STANZA_ERR_NS
-                  err = res.find('string(/message/error/se:text)')
-                  status = (err.match(/\d+/)[0] || 209).to_i
-                end
-                sig.continue
-              end
-              sig.wait
-            else
-              status = 200
-              @options[:xmpp].write stanza
-
-              # xmpp writes in next_tick so we have to fucking wait also a tick
-              # to ensure that all shit has been written. fuck. not the best
-              # solution, but scripts may preemtively quit if we dont do it. if
-              # anybody knows a better solution, please tell me.
-
-              ### UPDATE todo, we produce deadlocks here, rethink this mess
-              # EM.next_tick { sig.continue }
-              # sig.wait
+          else
+            if @options[:custom_protocol]
+              return @options[:custom_protocol].handle(url,riddl_method,parameters,headers,qs,simulate,ack)
             end
-            return status, response, response_headers
-            #}}}
           end
-          raise URIError, "not a valid URI (http, https, xmpp are accepted)"
+          raise URIError, "not a valid URI (http, https, ... are accepted)"
         end #}}}
         private :make_request
 
@@ -488,25 +417,6 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           [nil, sock, []]
         end
       end # }}}
-
-      class XMPPRequest #{{{
-        attr_reader :stanza
-
-        def initialize(method, to, path, parameters, headers, qs, ack)
-          path = (path.strip == '' ? '' : path)
-          path += "/?#{qs}" unless qs == ''
-          path.gsub!(/\/+/,'/')
-          @stanza = Protocols::XMPP::Generator.new(method,parameters,headers,ack).generate
-          @stanza.to = to + path
-        end
-
-        def simulate
-          sock = StringIO.new('')
-          sock.write @stanza.to_s
-          sock.rewind
-          [nil, sock, []]
-        end
-      end #}}}
 
     end
 
