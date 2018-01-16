@@ -257,6 +257,10 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
         def exec_request(riddl_method,parameters,simulate) #{{{
           parameters = [ parameters ] unless parameters.is_a? Array
+          (URI.parse(@base)&.query || '').split(/[#{D}] */n).each do |p|
+            k, v = Riddl::Protocols::Utils::unescape(p).split('=', 2)
+            parameters << Parameter::Simple.new(k,v,:query)
+          end
           parameters = parameters.dup
           headers = extract_headers(parameters)
           options = extract_options(parameters)
