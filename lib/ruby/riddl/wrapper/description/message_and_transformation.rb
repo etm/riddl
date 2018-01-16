@@ -10,10 +10,13 @@ module Riddl
           if layer.nil?
             @content = content
           else
+            puts layer.dump
+            puts "des:#{type}[@name='#{name}']"
+
             @content = layer.find("des:#{type}[@name='#{name}']").first.to_doc
             @content.root.find("@name").delete_all!
             @content.register_namespace 'des', Riddl::Wrapper::DESCRIPTION
-          end  
+          end
           update_hash!
         end
         def update_hash!
@@ -32,8 +35,8 @@ module Riddl
           @hash      = hb.serialize.hash
         end
         def traverse?(other)
-          if other.name.nil? 
-            false 
+          if other.name.nil?
+            false
           else
             paths = self.hash_base.find("//des:parameter").map{ |e| e.path + "/@name" }
             hb2 = XML::Smart::string(other.hash_base.serialize)
@@ -45,7 +48,7 @@ module Riddl
             end
 
             self.hash_base.serialize.hash == hb2.serialize.hash
-          end 
+          end
         end
         attr_reader :name, :content, :hash, :hash_base
         #}}}
@@ -68,7 +71,7 @@ module Riddl
           super layer,name,:message
         end
         def initialize_copy(o)
-          @content = @content.dup 
+          @content = @content.dup
         end
         def transform(trans)
           ret = self.dup
@@ -82,18 +85,18 @@ module Riddl
                 when 'add_after'
                   raise "TODO"
                 when 'add_as_first'
-                  t = ret.content.root 
+                  t = ret.content.root
                   n = t.find("header[last()]").first
                   if n.nil?
                     m = t.find("*[not(header)]").first
                     if m.nil?
                       t.add(e.children)
-                    else  
+                    else
                       m.add_before(e.children)
                     end
-                  else  
+                  else
                     n.add_after(e.children)
-                  end  
+                  end
                 when 'add_as_last'
                   ret.content.root.add(e.children)
                   ret.update_hash!
@@ -108,14 +111,14 @@ module Riddl
                         opt.add(node)
                       when 'header'
                         ret.content.find("header[@name=\"#{e.attributes['name']}\"]").delete_all!
-                    end    
+                    end
                   else
                     case e.attributes['type']
                       when 'parameter', nil
                         ret.content.find("//parameter[first()]").delete_all!
                       when 'header'
                         ret.content.find("//header[first()]").delete_all!
-                    end    
+                    end
                   end
                 when 'remove_last'
                   if e.attributes['name']
@@ -126,18 +129,18 @@ module Riddl
                         opt.add(node)
                       when 'header'
                         ret.content.find("header[@name=\"#{e.attributes['name']}\"]").delete_all!
-                    end    
+                    end
                   else
                     case e.attributes['type']
                       when 'parameter', nil
                         ret.content.find("//parameter[last()]").delete_all!
                       when 'header'
                         ret.content.find("//header[last()]").delete_all!
-                    end    
+                    end
                   end
-              end  
-            end  
-          end  
+              end
+            end
+          end
           return ret
         end
         #}}}
