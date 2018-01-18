@@ -10,9 +10,6 @@ module Riddl
           if layer.nil?
             @content = content
           else
-            puts layer.dump
-            puts "des:#{type}[@name='#{name}']"
-
             @content = layer.find("des:#{type}[@name='#{name}']").first.to_doc
             @content.root.find("@name").delete_all!
             @content.register_namespace 'des', Riddl::Wrapper::DESCRIPTION
