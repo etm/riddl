@@ -2,7 +2,7 @@
 require '../../lib/ruby/riddl/client'
 require 'pp'
 
-library = Riddl::Client.new("http://sumatra.wst.univie.ac.at/services/delay.php")
+library = Riddl::Client.new("http://demo.wst.univie.ac.at/services/delay.php")
 status, res = library.post [
   Riddl::Parameter::Simple.new("delay","10"),
 ]
@@ -14,4 +14,4 @@ p id
   pp status
   pp res[0]
   sleep 1
-end  
+end

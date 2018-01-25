@@ -1,1 +1,1 @@
-map <F10> :!./xmppclient.rb<CR>
+map <F10> :!./test3.rb<CR>

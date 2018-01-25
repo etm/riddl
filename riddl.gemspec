@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.99.259"
+  s.version          = "0.99.260"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3.0"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>=2.2.0'
 
+  s.add_runtime_dependency 'typhoeus', '~>1.3'
   s.add_runtime_dependency 'xml-smart', '>=0.3.6', '~>0'
   s.add_runtime_dependency 'rdf-smart', '>=0.0.160', '~>0'
   s.add_runtime_dependency 'rack', '~>1.6'

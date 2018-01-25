@@ -6,7 +6,7 @@ require File.expand_path(File.dirname(__FILE__) + '/protocols/utils')
 require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/option')
 
-require 'net/https'
+require 'typhoeus'
 require 'eventmachine'
 require 'em-websocket-client'
 require 'uri'
@@ -241,7 +241,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           starting = true
           parameters.delete_if do |p|
             if starting && p.class == Riddl::Parameter::Simple && method == 'get'
-               p.type = :query
+              p.type = :query
             end
             if p.class == Riddl::Parameter::Simple && p.type == :query
               qparams << Protocols::Utils::escape(p.name) + (p.value.nil? ? '' : '=' + Protocols::Utils::escape(p.value))
@@ -336,54 +336,55 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           qs = qparams.join('&')
           if url.class == URI::HTTP || url.class == URI::HTTPS
             #{{{
-            req = Riddl::Client::HTTPRequest.new(riddl_method,url.path,parameters,headers,qs)
-            return req.simulate if simulate
+            return Riddl::Client::HTTPRequest.new(riddl_method,url.path,parameters,headers,qs).simulate if simulate
 
-            res = response = nil
+            path = (url.path.strip == '' ? '/' : url.path)
+            path += "?#{qs}" unless qs == ''
+            uri = url.scheme + '://' + url.host + ':' + url.port.to_s + path
 
-            http = Net::HTTP.new(url.host, url.port)
-            if url.class == URI::HTTPS
-              http.use_ssl = true
-              http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+            tmp = Protocols::HTTP::Generator.new(parameters,headers).generate(:input)
+
+            opts = {
+              :method         => riddl_method,
+              :headers        => headers,
+              :body           => tmp.read,
+              :ssl_verifypeer => false
+            }
+            if url.user && url.password
+              opts[:username] = url.user
+              opts[:password] = url.password
+              opts[:httpauth] = :auto
             end
             if @options[:debug]
-              http.set_debug_output @options[:debug]
+              opts[:verbose] = true ### sadly only to console, does not respect @options[:debug]
             end
-            http.start do
-              retrycount = 0
-              begin
-                http.request(req) do |resp|
-                  res = resp
-                  bs = Parameter::Tempfile.new("RiddlBody")
-                  res.read_body(bs)
-                  bs.rewind
-                  response = Riddl::Protocols::HTTP::Parser.new(
-                    "",
-                    bs,
-                    res['CONTENT-TYPE'],
-                    res['CONTENT-LENGTH'].to_i != bs.length ? 0 : res['CONTENT-LENGTH'], # because when gzip content length differs from bs length
-                    res['CONTENT-DISPOSITION'],
-                    res['CONTENT-ID'],
-                    res['RIDDL-TYPE']
-                  ).params
-                end
-              rescue => e
-                retrycount += 1
-                if retrycount < 4
-                  retry
-                else
-                  raise Riddl::ConnectionError, "#{url.host}:#{url.port}/#{url.path} not reachable - #{e.message}."
-                end
-              end
-            end
+
+            req = Typhoeus::Request.new(uri,opts)
+            res = req.run
+
+            bs = Parameter::Tempfile.new("RiddlBody")
+            bs.write res.body
+            bs.rewind
+
             response_headers = {}
-            res.each do |k,v|
+            res.headers.each do |k,v|
               if v.nil?
                 response_headers[k.name.upcase.gsub(/\-/,'_')] = v
               else
                 response_headers[k.upcase.gsub(/\-/,'_')] = v
               end
             end
+
+            response = Riddl::Protocols::HTTP::Parser.new(
+              "",
+              bs,
+              response_headers['CONTENT_TYPE'],
+              response_headers['CONTENT_LENGTH'].to_i != bs.length ? 0 : response_headers['CONTENT_LENGTH'], # because when gzip content length differs from bs length
+              response_headers['CONTENT_DISPOSITION'],
+              response_headers['CONTENT_ID'],
+              response_headers['RIDDL_TYPE']
+            ).params
+
             return res.code.to_i, response, response_headers
             #}}}
           else
@@ -397,7 +398,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
       end #}}}
 
-      class HTTPRequest < Net::HTTPGenericRequest #{{{
+      class HTTPRequest #{{{
         def initialize(method, path, parameters, headers, qs)
           path = (path.strip == '' ? '/' : path)
           path += "?#{qs}" unless qs == ''
@@ -405,10 +406,6 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           tmp = Protocols::HTTP::Generator.new(parameters,self).generate(:input)
           self.content_length = tmp.size
           self.body_stream = tmp
-        end
-
-        def supply_default_content_type
-          ### none, Protocols::HTTP::Generator handles this
         end
 
         def simulate
