@@ -11,6 +11,6 @@ status, res = library.post [
   Riddl::Parameter::Simple.new('action','stop')
 ]
 p status
-puts res[0].value.read
+puts res[0].value.read unless res.empty?
 puts Time.now-s
 

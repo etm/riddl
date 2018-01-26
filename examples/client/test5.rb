@@ -16,6 +16,6 @@ status, res = library.post [
   Riddl::Parameter::Simple.new('alltaskbytsp',false)
 ]
 p status
-puts res
+puts res[0].value.read unless res.empty?
 puts Time.now-s
 
