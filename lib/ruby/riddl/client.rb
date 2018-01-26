@@ -351,8 +351,8 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               :ssl_verifypeer => false
             }
             if url.user && url.password
-              opts[:username] = url.user
-              opts[:password] = url.password
+              opts[:username] = Protocols::Utils::unescape(url.user)
+              opts[:password] = Protocols::Utils::unescape(url.password)
               opts[:httpauth] = :auto
             end
             if @options[:debug]
