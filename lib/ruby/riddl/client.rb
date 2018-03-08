@@ -356,21 +356,27 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               opts[:verbose] = true ### sadly only to console, does not respect @options[:debug]
             end
 
-            req = Typhoeus::Request.new(uri,opts)
-            res = req.run
+            begin
+              req = Typhoeus::Request.new(uri,opts)
+              res = req.run
+
+              response_headers = {}
+              res.headers.each do |k,v|
+                if v.nil?
+                  response_headers[k.name.upcase.gsub(/\-/,'_')] = v
+                else
+                  response_headers[k.upcase.gsub(/\-/,'_')] = v
+                end
+              end
+
+              if res.code.to_i == 302 || res.code.to_i == 301
+                uri = response_headers['LOCATION']
+              end
+            end while res.code.to_i == 302 || res.code.to_i == 301
 
             bs = Parameter::Tempfile.new("RiddlBody")
             bs.write res.body
             bs.rewind
-
-            response_headers = {}
-            res.headers.each do |k,v|
-              if v.nil?
-                response_headers[k.name.upcase.gsub(/\-/,'_')] = v
-              else
-                response_headers[k.upcase.gsub(/\-/,'_')] = v
-              end
-            end
 
             response = Riddl::Protocols::HTTP::Parser.new(
               "",
