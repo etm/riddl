@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>=2.2.0'
 
+  s.add_runtime_dependency 'daemonite', '~>0.2'
   s.add_runtime_dependency 'typhoeus', '~>1.3'
   s.add_runtime_dependency 'xml-smart', '>=0.3.6', '~>0'
   s.add_runtime_dependency 'rdf-smart', '>=0.0.160', '~>0'
