@@ -7,8 +7,9 @@ require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/option')
 
 require 'typhoeus'
+require 'net/https'
 require 'eventmachine'
-require 'em-websocket-client'
+require 'faye/websocket'
 require 'uri'
 require 'openssl'
 require 'digest/md5'
@@ -149,14 +150,10 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
         def ws(&blk) #{{{
           EM.run do
-            conn = EventMachine::WebSocketClient.connect((@base + @rpath).sub(/^http/,'ws'))
-
-            conn.disconnect do
-              EM::stop_event_loop
-            end
+            conn = Faye::WebSocket::Client.new((@base + @rpath).sub(/^http/,'ws'))
 
             if @options[:debug]
-              conn.errback do |e|
+              conn.on :error do |e|
                 @options[:debug].puts "WS ERROR: #{e}"
               end
             end
@@ -336,7 +333,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           qs = qparams.join('&')
           if url.class == URI::HTTP || url.class == URI::HTTPS
             #{{{
-            return Riddl::Client::HTTPRequest.new(riddl_method,url.path,parameters,headers,qs).simulate if simulate
+            return Riddl::Client::SimulateRequest.new(riddl_method,url.path,parameters,headers,qs).simulate if simulate
 
             path = (url.path.strip == '' ? '/' : url.path)
             path += "?#{qs}" unless qs == ''
@@ -359,21 +356,27 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               opts[:verbose] = true ### sadly only to console, does not respect @options[:debug]
             end
 
-            req = Typhoeus::Request.new(uri,opts)
-            res = req.run
+            begin
+              req = Typhoeus::Request.new(uri,opts)
+              res = req.run
+
+              response_headers = {}
+              res.headers.each do |k,v|
+                if v.nil?
+                  response_headers[k.name.upcase.gsub(/\-/,'_')] = v
+                else
+                  response_headers[k.upcase.gsub(/\-/,'_')] = v
+                end
+              end
+
+              if res.code.to_i == 302 || res.code.to_i == 301
+                uri = response_headers['LOCATION']
+              end
+            end while res.code.to_i == 302 || res.code.to_i == 301
 
             bs = Parameter::Tempfile.new("RiddlBody")
             bs.write res.body
             bs.rewind
-
-            response_headers = {}
-            res.headers.each do |k,v|
-              if v.nil?
-                response_headers[k.name.upcase.gsub(/\-/,'_')] = v
-              else
-                response_headers[k.upcase.gsub(/\-/,'_')] = v
-              end
-            end
 
             response = Riddl::Protocols::HTTP::Parser.new(
               "",
@@ -398,7 +401,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
 
       end #}}}
 
-      class HTTPRequest #{{{
+      class SimulateRequest < Net::HTTPGenericRequest #{{{
         def initialize(method, path, parameters, headers, qs)
           path = (path.strip == '' ? '/' : path)
           path += "?#{qs}" unless qs == ''
@@ -406,6 +409,10 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           tmp = Protocols::HTTP::Generator.new(parameters,self).generate(:input)
           self.content_length = tmp.size
           self.body_stream = tmp
+        end
+
+        def supply_default_content_type
+          ### none, Protocols::HTTP::Generator handles this
         end
 
         def simulate
