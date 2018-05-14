@@ -11,6 +11,7 @@ require File.expand_path(File.dirname(__FILE__) + '/wrapper')
 require File.expand_path(File.dirname(__FILE__) + '/utils/description')
 
 require 'optparse'
+require 'daemonite'
 require 'stringio'
 require 'rack/content_length'
 require 'rack/chunked'
@@ -39,80 +40,61 @@ module Riddl
       end
     end #}}}
 
-    OPTS = {
-      :bind            => '0.0.0.0',
-      :host            => 'localhost',
-      :port            => 9292,
-      :secure          => false,
-      :mode            => :debug,
-      :verbose         => false,
-      :http_only       => false,
-      :basepath        => File.expand_path(File.dirname($0)),
-      :pidfile         => File.basename($0,'.rb') + '.pid',
-      :conffile        => File.basename($0,'.rb') + '.conf',
-      :runtime_options => [],
-      :cmdl_parsing    => true,
-      :cmdl_operation  => 'start'
-    }
+    include Daemonism
+
+    attr_reader :riddl_log, :riddl_method, :riddl_pinfo, :riddl_status
+
+    def initialize(riddl,opts={},&blk)# {{{
+      @riddl_opts = DAEMONISM_DEFAULT_OPTS.merge({
+        :bind         => '0.0.0.0',
+        :host         => 'localhost',
+        :port         => 9292,
+        :secure       => false,
+        :verbose      => false,
+        :http_only    => false,
+        :runtime_opts => [
+          ["--port [PORT]", "-p [PORT]", "Specify http port.", ->(p){
+            @riddl_opts[:port] = p.to_i
+            @riddl_opts[:pidfile] = @riddl_opts[:pidfile].gsub(/\.pid/,'') + '-' + @riddl_opts[:port].to_s + '.pid'
+          }],
+          ["--http-only", "-s", "Only http, no other protocols.", ->(){ @riddl_opts[:http_only] = true }]
+        ],
+        :runtime_cmds => [],
+        :runtime_proc => Proc.new { |opts|
+          @riddl_opts[:cmdl_info] = (@riddl_opts[:secure] ? 'https://' : 'http://') + @riddl_opts[:host] + ':' + @riddl_opts[:port].to_s
+          @riddl_opts[:url] ||= @riddl_opts[:cmdl_info]
+        }
+      }).merge(opts)
+
+      @riddl_logger             = nil
+      @riddl_process_out        = true
+      @riddl_cross_site_xhr     = false
+      @accessible_description   = false
+      @riddl_description_string = ''
+      @riddl_paths              = []
+
+      @riddl_at_exit            = nil
+
+      @riddl_interfaces         = {}
+
+      daemonism @riddl_opts, &blk
+
+      @riddl = Riddl::Wrapper.new(riddl,@accessible_description)
+      if @riddl.description?
+        raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl.validate!
+        @riddl_description_string = @riddl.description.xml
+      elsif @riddl.declaration?
+        raise SpecificationError, 'RIDDL declaration does not conform to specification' unless @riddl.validate!
+        @riddl_description_string = @riddl.declaration.description_xml
+      else
+        raise SpecificationError, 'Not a RIDDL file'
+      end
+
+      @riddl.load_necessary_handlers!
+      @riddl_paths = @riddl.paths
+    end# }}}
 
     def loop! #{{{
-      ########################################################################################################################
-      # status and info
-      ########################################################################################################################
-      pid = File.read(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile]).to_i rescue pid = -1
-      status = Proc.new do
-        begin
-          Process.getpgid pid
-          true
-        rescue Errno::ESRCH
-          false
-        end
-      end
-      if @riddl_opts[:cmdl_operation] == "info" && status.call == false
-        puts "Server (#{@riddl_opts[:url]}) not running"
-        exit
-      end
-      if @riddl_opts[:cmdl_operation] == "info" && status.call == true
-        puts "Server (#{@riddl_opts[:url]}) running as #{pid}"
-        begin
-          stats = `ps -o "vsz,rss,lstart,time" -p #{pid}`.split("\n")[1].strip.split(/ +/)
-          puts "Virtual:  #{"%0.2f" % (stats[0].to_f/1024)} MiB"
-          puts "Resident: #{"%0.2f" % (stats[1].to_f/1024)} MiB"
-          puts "Started:  #{stats[2..-2].join(' ')}"
-          puts "CPU Time: #{stats.last}"
-        rescue
-        end
-        exit
-      end
-      if %w{start}.include?(@riddl_opts[:cmdl_operation]) && status.call == true
-        puts "Server (#{@riddl_opts[:url]}) already started"
-        exit
-      end
-
-      ########################################################################################################################
-      # stop/restart server
-      ########################################################################################################################
-      if %w{stop restart}.include?(@riddl_opts[:cmdl_operation])
-        if status.call == false
-          puts "Server (#{@riddl_opts[:url]}) maybe not started?"
-        else
-          puts "Server (#{@riddl_opts[:url]}) stopped"
-          puts "Waiting while server goes down ..."
-          while status.call
-            Process.kill "SIGTERM", pid
-            sleep 0.3
-          end
-        end
-        exit unless @riddl_opts[:cmdl_operation] == "restart"
-      end
-
-      ########################################################################################################################
-      # go through user defined startup thingis
-      ########################################################################################################################
-      @riddl_opts[:runtime_options].each do |ro|
-        ro[2].call(status.call) if @riddl_opts[:cmdl_operation] == ro[0]
-      end
-
       app = Rack::Builder.new self
       unless @riddl_logger.nil?
         app.use Rack::CommonLogger, @riddl_logger
@@ -124,19 +106,11 @@ module Riddl
         :Port => @riddl_opts[:port],
         :environment => @riddl_opts[:verbose] ? 'deployment' : 'none',
         :server => 'thin',
-        :pid => File.expand_path(@riddl_opts[:basepath] + '/' + @riddl_opts[:pidfile]),
         :signals => false
       )
-
-      puts "Server (#{@riddl_opts[:url]}) started as PID:#{Process.pid}"
       if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
         @riddl_opts[:custom_protocol] = @riddl_opts[:custom_protocol].new(@riddl_opts)
         puts @riddl_opts[:custom_protocol].support if @riddl_opts[:custom_protocol].support
-      end
-      Process.daemon(@riddl_opts[:basepath]) unless @riddl_opts[:verbose]
-      Dir.chdir(@riddl_opts[:basepath])
-      ::Kernel::at_exit do
-        @riddl_at_exit.call if @riddl_at_exit
       end
       begin
         EM.run do
@@ -165,81 +139,9 @@ module Riddl
         if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
           @riddl_opts[:custom_protocol].error_handling(e)
         end
-        puts "Server (#{@riddl_opts[:url]}) stopped due to connection error (PID:#{Process.pid})"
+        puts "Server (#{@riddl_opts[:cmdl_info]}) stopped due to connection error (PID:#{Process.pid})"
       end
     end #}}}
-
-    attr_reader :riddl_log, :riddl_method, :riddl_pinfo, :riddl_status
-
-    def initialize(riddl,opts={},&blk)# {{{
-      @riddl_opts = {}
-      @riddl_opts = OPTS.merge(opts)
-
-      if File.exists?(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile])
-        @riddl_opts.merge!(Psych::load_file(@riddl_opts[:basepath] + '/' + @riddl_opts[:conffile]))
-      end
-
-      ########################################################################################################################
-      # parse arguments
-      ########################################################################################################################
-      if @riddl_opts[:cmdl_parsing]
-        @riddl_opts[:cmdl_operation] = "start"
-        ARGV.options { |opt|
-          opt.summary_indent = ' ' * 4
-          opt.banner = "Usage:\n#{opt.summary_indent}ruby server.rb [options] start|stop|restart|info" + (@riddl_opts[:runtime_options].length > 0 ? '|' : '') + @riddl_opts[:runtime_options].map{|ro| ro[0]}.join('|') + "\n"
-          opt.on("Options:")
-          opt.on("--port [PORT]", "-p [PORT]", "Specify http port.") do |p|
-            @riddl_opts[:port] = p.to_i
-            @riddl_opts[:pidfile] = @riddl_opts[:pidfile].gsub(/\.pid/,'') + '-' + @riddl_opts[:port].to_s + '.pid'
-          end
-          opt.on("--http-only", "-s", "Only http, no other protocols.") { @riddl_opts[:http_only] = true }
-          opt.on("--verbose", "-v", "Do not daemonize. Write ouput to console.") { @riddl_opts[:verbose] = true }
-          opt.on("--help", "-h", "This text.") { puts opt; exit }
-          opt.separator(opt.summary_indent + "start|stop|restart|info".ljust(opt.summary_width+1) + "Do operation start, stop, restart or get information.")
-          @riddl_opts[:runtime_options].each do |ro|
-            opt.separator(opt.summary_indent + ro[0].ljust(opt.summary_width+1) + ro[1])
-          end
-          opt.parse!
-        }
-        unless (%w{start stop restart info} + @riddl_opts[:runtime_options].map{|ro| ro[0] }).include?(ARGV[0])
-          puts ARGV.options
-          exit
-        end
-        @riddl_opts[:cmdl_operation] = ARGV[0]
-      end
-      ########################################################################################################################
-      @riddl_opts[:url] = (@riddl_opts[:secure] ? 'https://' : 'http://') + @riddl_opts[:host] + ':' + @riddl_opts[:port].to_s
-
-      @riddl_logger             = nil
-      @riddl_process_out        = true
-      @riddl_cross_site_xhr     = false
-      @accessible_description   = false
-      @riddl_description_string = ''
-      @riddl_paths              = []
-
-      @riddl_at_exit            = nil
-
-      @riddl_interfaces = {}
-      instance_exec(@riddl_opts,&blk) if block_given?
-
-      @riddl = Riddl::Wrapper.new(riddl,@accessible_description)
-      if @riddl.description?
-        raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl.validate!
-        @riddl_description_string = @riddl.description.xml
-      elsif @riddl.declaration?
-        raise SpecificationError, 'RIDDL declaration does not conform to specification' unless @riddl.validate!
-        @riddl_description_string = @riddl.declaration.description_xml
-      else
-        raise SpecificationError, 'Not a RIDDL file'
-      end
-
-      @riddl.load_necessary_handlers!
-      @riddl_paths = @riddl.paths
-    end# }}}
-
-    def at_exit(&blk)
-      @riddl_at_exit = blk
-    end
 
     def call(env)# {{{
       dup.__http_call(env)
