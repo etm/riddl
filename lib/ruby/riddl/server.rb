@@ -61,7 +61,8 @@ module Riddl
         ],
         :runtime_cmds => [],
         :runtime_proc => Proc.new { |opts|
-          @riddl_opts[:cmdl_info] = @riddl_opts[:url] = (@riddl_opts[:secure] ? 'https://' : 'http://') + @riddl_opts[:host] + ':' + @riddl_opts[:port].to_s
+          @riddl_opts[:cmdl_info] = (@riddl_opts[:secure] ? 'https://' : 'http://') + @riddl_opts[:host] + ':' + @riddl_opts[:port].to_s
+          @riddl_opts[:url] ||= @riddl_opts[:cmdl_info]
         }
       }).merge(opts)
 
@@ -138,7 +139,7 @@ module Riddl
         if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
           @riddl_opts[:custom_protocol].error_handling(e)
         end
-        puts "Server (#{@riddl_opts[:url]}) stopped due to connection error (PID:#{Process.pid})"
+        puts "Server (#{@riddl_opts[:cmdl_info]}) stopped due to connection error (PID:#{Process.pid})"
       end
     end #}}}
 
