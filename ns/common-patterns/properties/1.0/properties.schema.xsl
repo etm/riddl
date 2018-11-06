@@ -11,8 +11,8 @@
             <xsl:apply-templates select="./*[name()!='optional']"/>
             <xsl:apply-templates select="p:optional"/>
           </interleave>
-        </element>  
-      </start>  
+        </element>
+      </start>
 
       <define name="arbitrary">
         <zeroOrMore>
@@ -40,7 +40,7 @@
         </element>
       </define>
 
-    </grammar>  
+    </grammar>
   </xsl:template>
 
   <xsl:template match="p:optional">
@@ -59,12 +59,17 @@
       <xsl:if test="@type='arbitrary'">
         <ref name="arbitrary"/>
       </xsl:if>
-        
+
       <xsl:if test="@type='complex'">
         <xsl:apply-templates mode="copy-no-ns"/>
-      </xsl:if>  
+      </xsl:if>
 
       <xsl:if test="@type='state'">
+        <optional>
+          <attribute name="changed">
+            <data type="dateTime"/>
+          </attribute>
+        </optional>
         <choice>
           <xsl:for-each select='*'>
             <value><xsl:value-of select='name()'/></value>
