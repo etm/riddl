@@ -289,8 +289,10 @@ module Riddl
             ele = doc.root.add property
             if value.nil?
               ele.add newstuff
+              ele.attributes['changed'] = Time.now.xmlschema if backend.is_state?(property)
             else
               ele.text = newstuff
+              ele.attributes['changed'] = Time.now.xmlschema if backend.is_state?(property)
             end
           end || begin
             @status = 400
@@ -339,8 +341,10 @@ module Riddl
               nods.each do |ele|
                 if value.nil?
                   ele.add newstuff
+                  ele.attributes['changed'] = Time.now.xmlschema if backend.is_state?(property)
                 else
                   ele.text = newstuff
+                  ele.attributes['changed'] = Time.now.xmlschema if backend.is_state?(property)
                 end
               end
             end || begin
@@ -460,8 +464,10 @@ module Riddl
             nods.each do |ele|
               if value.nil?
                 ele.add newstuff
+                ele.children.first.attributes['changed'] = Time.now.xmlschema if backend.is_state?(property)
               else
                 ele.text = newstuff
+                ele.attributes['changed'] = Time.now.xmlschema if backend.is_state?(property)
               end
             end
           end || begin
