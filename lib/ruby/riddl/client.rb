@@ -393,6 +393,11 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           else
             if @options[:custom_protocol]
               return @options[:custom_protocol].handle(url,riddl_method,parameters,headers,qs,simulate,ack)
+            else
+              path = (url.path.strip == '' ? '/' : url.path)
+              uri = url + (qs.empty? ? '' : "?#{qs}")
+              res = Typhoeus.get(uri)
+              return (res.return_code == :ok ? 200 : 500), [Riddl::Parameter::Simple.new('result',res.body)], {}
             end
           end
           raise URIError, "not a valid URI (http, https, ... are accepted)"
