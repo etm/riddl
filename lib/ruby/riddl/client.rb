@@ -43,7 +43,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
       \A
 
       # protocol identifier
-      (?:(?:https?|[a-z]{4})://)
+      (?:(?!(?i:file://))[a-zA-Z_-]+://)
 
       # user:pass authentication
       (?:\S+(?::\S*)?@)?
