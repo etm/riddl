@@ -123,6 +123,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
       def post(parameters = []);            resource.post(parameters);            end
       def simulate_post(parameters = []);   resource.simulate_post(parameters);   end
       def put(parameters = []);             resource.put(parameters);             end
+      def patch(parameters = []);           resource.patch(parameters);           end
       def simulate_put(parameters = []);    resource.simulate_put(parameters);    end
       def delete(parameters = []);          resource.delete(parameters);          end
       def simulate_delete(parameters = []); resource.simulate_delete(parameters); end
@@ -181,6 +182,13 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         end #}}}
         def simulate_put(parameters = []) #{{{
           exec_request('PUT',parameters,true)
+        end #}}}
+
+        def patch(parameters = []) #{{{
+          exec_request('PATCH',parameters,false)
+        end #}}}
+        def simulate_patch(parameters = []) #{{{
+          exec_request('PATCH',parameters,true)
         end #}}}
 
         def delete(parameters = []) #{{{

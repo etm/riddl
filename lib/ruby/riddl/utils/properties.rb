@@ -28,6 +28,7 @@ module Riddl
               run      Riddl::Utils::Properties::DelContent,    backend, handler if delete
               run      Riddl::Utils::Properties::AddContent,    backend, handler if post   'addcontent'
               run      Riddl::Utils::Properties::UpdContent,    backend, handler if put    'updcontent'
+              run      Riddl::Utils::Properties::PtcContent,    backend, handler if patch  'updcontent'
               on resource do
                 run    Riddl::Utils::Properties::GetContent,    backend, handler if get
                 run    Riddl::Utils::Properties::DelContent,    backend, handler if delete
@@ -424,6 +425,65 @@ module Riddl
           end
 
           EM.defer{handler.property(property).delete} unless handler.nil?
+          return
+        end
+      end #}}}
+
+      class PtcContent < Riddl::Implementation #{{{
+        def response
+          backend = @a[0]
+          handler = @a[1]
+
+          property = @r[1]
+          value    = @p.detect{|p| p.name == 'value'}; value = value.nil? ? value : value.value
+          content  = @p.detect{|p| p.name == 'content'}; content = content.nil? ? content : content.value
+          minor    = @r[2]
+
+          unless backend.modifiable?(property)
+            @status = 500
+            return # change properties.schema
+          end
+
+          path = "/p:properties/*[name()=\"#{property}\"]#{minor.nil? ? '' : "/p:#{minor}"}"
+          nodes = backend.data.find(path)
+          if nodes.empty?
+            @status = 404
+            return # this property does not exist
+          end
+
+          if backend.is_state?(property)
+            unless backend.valid_state?(property,nodes.first.to_s,value)
+              @status = 404
+              return # not a valid state from here on
+            end
+          end
+
+          newstuff = value.nil? ? XML::Smart.string(content).root.children : value
+          backend.modify do |doc|
+            nodes = doc.root.find(path)
+            nodes.each do |ele|
+              if value.nil?
+                newstuff.each do |child|
+                  path = File.basename(child.path)
+                  subele = ele.find(path).first
+                  if subele
+                    subele.replace_by(child)
+                  else
+                    ele.add(child)
+                  end
+                end
+                ele.children.first.attributes['changed'] = Time.now.xmlschema if backend.is_state?(property)
+              else
+                ele.text = newstuff
+                ele.attributes['changed'] = Time.now.xmlschema if backend.is_state?(property)
+              end
+            end
+          end || begin
+            @status = 400
+            return # bad request
+          end
+
+          EM.defer{handler.property(property).update} unless handler.nil?
           return
         end
       end #}}}

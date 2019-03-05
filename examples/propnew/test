@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:p="http://riddl.org/ns/common-patterns/properties/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
+  <start>
+    <element name="properties">
+      <interleave>
+        <element name="attributes">
+          <element>
+            <anyName/>
+            <data type="string"/>
+          </element>
+        </element>
+        <element name="handlerwrapper">
+          <data type="string">
+            <param name="pattern">[A-Z][a-zA-Z]*</param>
+          </data>
+        </element>
+        <element name="dsl">
+          <data type="string"/>
+        </element>
+        <element name="dslx">
+          <ref name="xml"/>
+        </element>
+        <element name="description">
+          <ref name="xml"/>
+        </element>
+        <element name="transformation">
+          <element name="description">
+            <attribute name="type">
+              <choice>
+                <value>copy</value>
+                <value>rest</value>
+                <value>xslt</value>
+                <value>clean</value>
+                <value>none</value>
+              </choice>
+            </attribute>
+            <data type="string"/>
+          </element>
+          <element name="dataelements">
+            <attribute name="type">
+              <choice>
+                <value>rest</value>
+                <value>xslt</value>
+                <value>clean</value>
+                <value>none</value>
+              </choice>
+            </attribute>
+            <data type="string"/>
+          </element>
+          <element name="endpoints">
+            <attribute name="type">
+              <choice>
+                <value>rest</value>
+                <value>xslt</value>
+                <value>clean</value>
+                <value>none</value>
+              </choice>
+            </attribute>
+            <data type="string"/>
+          </element>
+        </element>
+        <element name="state">
+          <optional>
+            <attribute name="changed">
+              <data type="dateTime"/>
+            </attribute>
+          </optional>
+          <choice>
+            <value>ready</value>
+            <value>running</value>
+            <value>simulating</value>
+            <value>stopping</value>
+            <value>stopped</value>
+            <value>abandoned</value>
+            <value>finished</value>
+          </choice>
+        </element>
+        <element name="status">
+          <attribute name="id">
+            <data type="integer"/>
+          </attribute>
+          <data type="string"/>
+        </element>
+        <element name="positions">
+          <element>
+            <anyName/>
+            <attribute name="passthrough">
+              <data type="string"/>
+            </attribute>
+            <data type="string">
+              <param name="pattern">(at|after)</param>
+            </data>
+          </element>
+        </element>
+        <element name="dataelements">
+          <element>
+            <anyName/>
+            <data type="string"/>
+          </element>
+        </element>
+        <element name="endpoints">
+          <element>
+            <anyName/>
+            <data type="string"/>
+          </element>
+        </element>
+      </interleave>
+    </element>
+  </start>
+  <define name="xml">
+    <element>
+      <anyName/>
+      <zeroOrMore>
+        <attribute>
+          <anyName/>
+        </attribute>
+      </zeroOrMore>
+      <zeroOrMore>
+        <choice>
+          <text/>
+          <ref name="any"/>
+        </choice>
+      </zeroOrMore>
+    </element>
+  </define>
+</grammar>

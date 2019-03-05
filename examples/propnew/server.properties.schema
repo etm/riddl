@@ -1,0 +1,95 @@
+<!--
+  This file is part of CPEE.
+
+  CPEE is free software: you can redistribute it and/or modify it under the terms
+  of the GNU General Public License as published by the Free Software Foundation,
+  either version 3 of the License, or (at your option) any later version.
+
+  CPEE is distributed in the hope that it will be useful, but WITHOUT ANY
+  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License along with
+  CPEE (file COPYING in the main directory).  If not, see
+  <http://www.gnu.org/licenses/>.
+-->
+
+<properties xmlns="http://riddl.org/ns/common-patterns/properties/1.0">
+  <attributes type="hash" modifiable="true"/>
+  <handlerwrapper type="value" modifiable="true">
+    <param name="pattern">[A-Z][a-zA-Z]*</param>
+  </handlerwrapper>
+  <dsl type="value" modifiable="false" mutable="false"/>
+  <dslx type="xml" modifiable="false" mutable="false"/>
+  <description type="xml" modifiable="true"/>
+  <transformation type="collection" modifiable="true">
+    <description type="value">
+      <attribute name='type'>
+        <choice>
+          <value>copy</value>
+          <value>rest</value>
+          <value>xslt</value>
+          <value>clean</value>
+          <value>none</value>
+        </choice>
+      </attribute>
+    </description>
+    <dataelements type="value">
+      <attribute name='type'>
+        <choice>
+          <value>rest</value>
+          <value>xslt</value>
+          <value>clean</value>
+          <value>none</value>
+        </choice>
+      </attribute>
+    </dataelements>
+    <endpoints type="value">
+      <attribute name='type'>
+        <choice>
+          <value>rest</value>
+          <value>xslt</value>
+          <value>clean</value>
+          <value>none</value>
+        </choice>
+      </attribute>
+    </endpoints>
+  </transformation>
+  <state type="state" modifiable="true">
+    <ready>
+      <running putable="true"/>
+      <ready putable="true"/>
+      <simulating putable="true"/>
+      <abandoned putable="true"/>
+    </ready>
+    <running>
+      <stopping putable="true"/>
+      <finishing putable="false"/>
+      <finished putable="false"/>
+    </running>
+    <simulating>
+      <ready putable="false"/>
+      <stopped putable="false"/>
+    </simulating>
+    <stopping>
+      <stopped putable="false"/>
+    </stopping>
+    <stopped>
+      <abandoned putable="true"/>
+      <stopped putable="true"/>
+      <running putable="true"/>
+      <simulating putable="true"/>
+    </stopped>
+    <abandoned/>
+    <finished/>
+  </state>
+  <status type="value" modifiable="false" mutable="false">
+    <attribute name='id' type="integer"/>
+  </status>
+  <positions type="hash" modifiable="true">
+    <attribute name='passthrough' type="string"/>
+    <param name="pattern">(at|after)</param>
+  </positions>
+  <dataelements type="hash" modifiable="true"/>
+  <endpoints type="hash" modifiable="true"/>
+</properties>

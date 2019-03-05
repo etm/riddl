@@ -11,7 +11,7 @@
               </element>
               <element name="not-existing">
                 <empty/>
-              </element>  
+              </element>
             </choice>
           </start>
 
@@ -23,7 +23,7 @@
               </choice>
             </zeroOrMore>
           </define>
-          
+
           <define name="any">
             <element>
               <anyName/>
@@ -71,7 +71,7 @@
           <element name="properties">
             <zeroOrMore>
               <ref name="property"/>
-            </zeroOrMore>  
+            </zeroOrMore>
           </element>
         </start>
 
@@ -80,7 +80,7 @@
             <anyName/>
             <data type="string"/>
           </element>
-        </define>  
+        </define>
 
       </grammar>
     </parameter>
@@ -89,7 +89,7 @@
     <choice>
       <parameter name="value" type="string"/>
       <parameter name="value" mimetype="text/xml"/>
-    </choice>  
+    </choice>
   </message>
   <message name="updcontent">
     <choice>
@@ -97,7 +97,7 @@
       <parameter name="value" mimetype="text/plain"/>
       <parameter name="content" mimetype="text/xml"/> <!-- add everything inside the root tag -->
       <parameter name="content" type="string"/> <!-- add everything inside the root tag -->
-    </choice>  
+    </choice>
   </message>
   <message name="property">
     <parameter name="name" type="string">
@@ -121,7 +121,7 @@
       <get in="*" out="resource-document-schema"/>
       <resource relative="rng">
         <get in="*" out="resource-document-schema"/>
-      </resource>  
+      </resource>
       <resource relative="xsd">
         <get in="*" out="resource-document-schema"/>
       </resource>
@@ -135,6 +135,7 @@
         <delete in="*"/>
         <post in="addcontent"/>
         <put in="updcontent"/>
+        <patch in="updcontent"/>
         <resource>
           <get in="*" out="value"/>
           <put in="updcontent"/>
@@ -145,6 +146,6 @@
         </resource>
       </resource>
     </resource>
-  </resource>  
+  </resource>
 
 </description>

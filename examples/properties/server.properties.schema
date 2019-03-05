@@ -5,12 +5,12 @@
   <handlerwrapper type="simple" modifiable="false" mutable="false">
     <data type="string">
       <param name="pattern">[A-Z][a-zA-Z]*</param>
-    </data>  
+    </data>
   </handlerwrapper>
   <description type="arbitrary" modifiable="false" mutable="false"/>
   <optional>
     <transformation type="arbitrary" modifiable="true" mutable="false"/>
-  </optional>  
+  </optional>
   <state type="state" modifiable="true">
     <running>
       <stopped putable="true"/>
@@ -18,17 +18,17 @@
     </running>
     <stopped>
       <running putable="true"/>
-    </stopped>  
+    </stopped>
     <finished/>
-  </state>  
+  </state>
   <dataelements type="complex" modifiable="true" mutable="true">
     <zeroOrMore>
       <element><anyName/><text/></element>
-    </zeroOrMore>  
-  </dataelements>  
+    </zeroOrMore>
+  </dataelements>
   <endpoints type="complex" modifiable="false" mutable="true">
     <zeroOrMore>
       <element><anyName/><text/></element>
-    </zeroOrMore>  
+    </zeroOrMore>
   </endpoints>
 </properties>

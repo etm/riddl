@@ -361,6 +361,7 @@ module Riddl
     def get(min='*');    return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && @riddl_message.in && min == @riddl_message.in.name && @riddl_method == 'get'       end
     def delete(min='*'); return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && @riddl_message.in && min == @riddl_message.in.name && @riddl_method == 'delete'    end
     def put(min='*');    return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && @riddl_message.in && min == @riddl_message.in.name && @riddl_method == 'put'       end
+    def patch(min='*');  return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && @riddl_message.in && min == @riddl_message.in.name && @riddl_method == 'patch'     end
     def websocket;       return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/')                                                       && @riddl_method == 'websocket' end
     def resource(rname=nil); return rname.nil? ? '{}' : rname end
 
