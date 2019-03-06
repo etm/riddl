@@ -80,8 +80,8 @@
         var t = $('#breadcrumblink')[0];
         var link = "";
         _.each(pathele,function(e){
-          link = link + "/" + e; 
-          var clone = document.importNode(t.content, true); 
+          link = link + "/" + e;
+          var clone = document.importNode(t.content, true);
           $('a',clone).attr('href',link + "/?doc=true");
           $('a',clone).text(e);
           $('#breadcrumb').append(clone);
@@ -112,17 +112,17 @@
                   var relt = _.trim(rell);
                 }
                 var t = $('#subresourceitem')[0];
-                var clone = document.importNode(t.content, true); 
+                var clone = document.importNode(t.content, true);
                 $('a',clone).attr('href','./' + rell + '/?doc=true');
                 if (relt != "") {
                   $('a',clone).text(relt);
                 }
                 if (sum) { $('.content',clone).text(sum); }
-                $('#subresources .anchor').append(clone); 
+                $('#subresources .anchor').append(clone);
               });
             }
 
-            var oprs = $('description > resource > get, description > resource > post, description > resource > put, description > resource > delete, description > resource > request',data);
+            var oprs = $('description > resource > get, description > resource > post, description > resource > put, description > resource > patch, description > resource > delete, description > resource > request',data);
             if (oprs.length == 0) {
               $('#operations').remove();
             } else {
@@ -144,7 +144,7 @@
                     tinmess = mess;
                     _.each(mess.attributes,function(attr){
                       if (attr.localName == 'example' && attr.namespaceURI == "http://riddl.org/ns/documentation/1.0") {
-                        ex = attr.nodeValue; 
+                        ex = attr.nodeValue;
                       }
                     });
                   });
@@ -160,7 +160,7 @@
 
                 // Overview
                 var t = $('#operationitem')[0];
-                var clone = document.importNode(t.content, true); 
+                var clone = document.importNode(t.content, true);
                 $('.what .link',clone).text(whatl);
                 $('.what .link',clone).attr('href','#' + (whatl + '_' + whatd).replace(/ /g,'_'));
                 $('.what .details',clone).text(whatd);
@@ -173,11 +173,11 @@
                   $('.what .try',clone).remove();
                 }
                 if (sum) { $('.content',clone).text(sum); }
-                $('#operations .anchor').append(clone); 
+                $('#operations .anchor').append(clone);
 
                 //Details
                 var t = $('#operationsec')[0];
-                var clone = document.importNode(t.content, true); 
+                var clone = document.importNode(t.content, true);
                 $('.what',clone).text(whatl + ' ' + whatd);
                 $('.what',clone).attr('id',(whatl + '_' + whatd).replace(/ /g,'_'));
                 if (_.trim(details) == "") {
@@ -191,7 +191,7 @@
                   } else {
                     $('.try a',clone).attr('href','?' + ex);
                     $('.try a',clone).text('?' + ex);
-                  } 
+                  }
                 } else {
                   $('.try',clone).remove();
                 }
@@ -206,13 +206,13 @@
                 } else {
                   $('.output',clone).remove();
                 }
-                $('#operations').append(clone); 
+                $('#operations').append(clone);
               });
             }
           }
         });
       });
-    //]]></script> 
+    //]]></script>
   </head>
   <body>
     <template id="breadcrumblink"><span> / </span><a href=""></a></template>
@@ -235,19 +235,19 @@
     </template>
 
     <nav id="breadcrumb">[<a href="/">TOP</a>]</nav>
-    <section id="main"></section> 
+    <section id="main"></section>
     <section id="subresources">
       <h1>Sub-Resources</h1>
       <p>From here on you can go to the following sub resources:</p>
       <ul class="anchor"></ul>
-    </section> 
+    </section>
     <section id="operations">
       <h1>Operations</h1>
       <section>
         <p>For this resource the following operations are possible:</p>
         <ul class="anchor"></ul>
       </section>
-    </section> 
+    </section>
   </body>
 </html>
 

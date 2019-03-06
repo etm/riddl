@@ -148,7 +148,7 @@ module Riddl
               elsif teh_first.class == RequestTransformation && teh_last.class == RequestTransformation && teh_last.out.nil?
                 #2: first transform + last transform -> merge transformations
                 ret = RequestTransformation.new_from_transformation(teh_first.trans,teh_last.trans,teh_first.custom)
-              elsif teh_first.class == RequestPass  
+              elsif teh_first.class == RequestPass
                 if r.size > (fcount + 1)
                   teh_first = r[fcount+=1]
                   success = false
@@ -246,7 +246,7 @@ module Riddl
         def description_xml_string_analyse(messages,t,k,m)
  #{{{
           result = ''
-          if %w{get post put delete websocket}.include?(k)
+          if %w{get post put patch delete websocket}.include?(k)
             result << t + "<#{k} "
           else
             result << t + "<request method=\"#{k}\" "
@@ -276,7 +276,7 @@ module Riddl
             m.custom.each do |e|
               result << e.dump + "\n"
             end
-            if %w{get post put delete websocket}.include?(k)
+            if %w{get post put patch delete websocket}.include?(k)
               result << t + "</#{k}>"
             else
               result << t + "</request>\n"

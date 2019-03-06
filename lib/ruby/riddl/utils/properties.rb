@@ -437,6 +437,7 @@ module Riddl
           property = @r[1]
           value    = @p.detect{|p| p.name == 'value'}; value = value.nil? ? value : value.value
           content  = @p.detect{|p| p.name == 'content'}; content = content.nil? ? content : content.value
+          content  = content.read if content.respond_to? :read
           minor    = @r[2]
 
           unless backend.modifiable?(property)
@@ -459,13 +460,14 @@ module Riddl
           end
 
           newstuff = value.nil? ? XML::Smart.string(content).root.children : value
+
           backend.modify do |doc|
             nodes = doc.root.find(path)
             nodes.each do |ele|
               if value.nil?
                 newstuff.each do |child|
-                  path = File.basename(child.path)
-                  subele = ele.find(path).first
+                  cpath = File.basename(child.path)
+                  subele = ele.find("p:" + cpath).first
                   if subele
                     subele.replace_by(child)
                   else
