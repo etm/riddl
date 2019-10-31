@@ -8,5 +8,5 @@
     <get in="*" out="hello"/>
     <websocket/>
   </resource>
-  
+
 </description>
