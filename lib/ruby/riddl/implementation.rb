@@ -25,6 +25,42 @@ module Riddl
     end
   end
 
+  class SSEImplementation
+    def initialize(ws)
+      @ws    = ws
+      @r     = ws[:r]     # the matching resource path
+      @s     = ws[:s]     # the matching resource path schema
+      @match = ws[:match] # the path of the branch matching, important for recursive
+      @env   = ws[:env]   # environment (all headers)
+      @a     = ws[:a]     # args to run command
+    end
+
+    def onopen;end
+    def onclose;end
+    def onerror(err);end
+
+    def send(data)
+      self.io.send_with_id 'data', data
+    end
+    def send_with_id(id,data)
+      self.io.send_with_id id, data
+    end
+
+    def io=(connection)
+      @ws[:io] = connection
+    end
+    def io
+      @ws[:io]
+    end
+    def closed?
+      @ws[:io].closed?
+    end
+
+    def close
+      @ws[:io].close
+    end
+  end
+
   class WebSocketImplementation
     def initialize(ws)
       @ws    = ws
@@ -52,7 +88,7 @@ module Riddl
     end
     def closed?
       @ws[:io].closed?
-    end  
+    end
 
     def close
       p @ws[:io].class

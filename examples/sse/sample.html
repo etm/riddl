@@ -1,0 +1,43 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Sample of riddl serversent events support</title>
+
+  <script type="text/javascript">
+    var es;
+
+    function init() {
+      es = new EventSource('http://localhost:9292/');
+      es.onopen = function() {
+        output("onopen");
+      };
+      es.onmessage = function(e) {
+        output("onmessage: " + e.data);
+      };
+      es.onerror = function() {
+        output("onerror/onclose");
+      };
+    }
+
+    function onCloseClick() {
+      es.close();
+    }
+
+    function output(str) {
+      var log = document.getElementById("log");
+      var escaped = str.replace(/&/, "&amp;").replace(/</, "&lt;").
+        replace(/>/, "&gt;").replace(/"/, "&quot;"); // "
+      log.innerHTML = escaped + "<br>" + log.innerHTML;
+    }
+  </script>
+</head>
+<body onload="init();">
+  <p>
+    Also try: curl -N -H "Accept:text/event-stream" http://localhost:9292/
+  </p>
+  <form onsubmit="onSubmit(); return false;">
+    <button onclick="onCloseClick(); return false;">close</button>
+  </form>
+  <div id="log"></div>
+</body>
+</html>
