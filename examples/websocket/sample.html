@@ -2,7 +2,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Sample of riddl websocket support</title>
-  
+
   <script type="text/javascript">
     function init() {
       var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
@@ -18,7 +18,7 @@
         output("onclose");
       };
     }
-    
+
     function onSubmit() {
       var input = document.getElementById("input");
       // You can send message to the Web Socket using ws.send.
@@ -27,11 +27,11 @@
       input.value = "";
       input.focus();
     }
-    
+
     function onCloseClick() {
       ws.close();
     }
-    
+
     function output(str) {
       var log = document.getElementById("log");
       var escaped = str.replace(/&/, "&amp;").replace(/</, "&lt;").

@@ -48,8 +48,8 @@ module EventMachine
         process(@headers, data.body)
       end
     end
-  end  
-end  
+  end
+end
 
 module Riddl
   module Protocols
@@ -59,7 +59,7 @@ module Riddl
       class ParserData
         attr_accessor :headers, :request_path, :query_string, :http_method, :body, :request_url
         def match(what)
-          @body =~ what 
+          @body =~ what
         end
         def upgrade?
           true
@@ -72,17 +72,19 @@ module Riddl
         instance
       end
 
-      def send_data(*args)
+      def send_data(data)
         EM.next_tick do
-          @socket.send_data(*args)
-        end  
+          @socket.send_data(data) unless closed?
+        end
       end
 
       def close_connection(*args)
         EM.next_tick do
-          trigger_on_close
-          @socket.close_connection(*args)
-        end  
+          unless closed?
+            @socket.close_connection(*args)
+            trigger_on_close
+          end
+        end
       end
 
       def trigger_on_message(msg);    @app.onmessage(msg);                        end

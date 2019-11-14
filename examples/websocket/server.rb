@@ -3,17 +3,21 @@ require 'pp'
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/server')
 
 class Bar < Riddl::Implementation
-  def response  
+  def response
     Riddl::Parameter::Complex.new("return","text/plain","hello world")
-  end  
+  end
 end
-
-$socket = []
 
 class Echo < Riddl::WebSocketImplementation
   def onopen
-    $socket << self
     puts "Connection established"
+    Thread.new do
+      1.upto 10 do |i|
+        send("oasch #{i}")
+        sleep 1
+      end
+      close
+    end
   end
 
   def onmessage(data)
@@ -23,19 +27,7 @@ class Echo < Riddl::WebSocketImplementation
   end
 
   def onclose
-    $socket.delete(self)
     puts "Connection closed"
-  end
-end
-
-Thread.new do
-  i = 1
-  while true
-    $socket.each do |sock|
-      sock.send("oasch #{i}")
-    end
-    i+=1
-    sleep 2
   end
 end
 

@@ -4,8 +4,6 @@
   <title>Sample of riddl serversent events support</title>
 
   <script type="text/javascript">
-    var es;
-
     function init() {
       es = new EventSource('http://localhost:9292/');
       es.onopen = function() {
@@ -20,6 +18,7 @@
     }
 
     function onCloseClick() {
+      output("onclose");
       es.close();
     }
 

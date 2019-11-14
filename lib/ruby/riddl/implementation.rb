@@ -91,7 +91,7 @@ module Riddl
     end
 
     def close
-      p @ws[:io].class
+      @ws[:io].close_connection
     end
   end
 end

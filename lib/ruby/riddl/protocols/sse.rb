@@ -22,15 +22,15 @@ module Riddl
 			end
 
       def send_with_id(id, data)
-        EM.next_tick {
+        EM.next_tick do
           @body.call [ "#{id}: #{data}" + EOL + EOL ]
-        }
+        end
       end
 
       def close
-        EM.next_tick {
+        EM.next_tick do
           @body.succeed
-        }
+        end
       end
 
       def trigger_on_open();          @closed = false; @app.onopen;               end
