@@ -48,7 +48,8 @@ module Riddl
       def dispatch(data,cross_site_xhr)
         headers = {
           'Content-Type' => 'text/event-stream',
-          'Cache-Control' => 'no-cache'
+          'Cache-Control' => 'no-cache',
+          'X-Accel-Buffering' => 'no'
         }
         if @env['HTTP_ORIGIN'] && cross_site_xhr
           headers['Access-Control-Allow-Origin'] = '*'
