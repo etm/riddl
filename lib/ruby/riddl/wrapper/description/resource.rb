@@ -17,32 +17,35 @@ module Riddl
 
         def add_access_methods(des,desres,index,interface)
           #{{{
-          desres.find("des:*[not(name()='resource') and not(name()='websocket') and @in and not(@in='*')]").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and not(name()='sse') and @in and not(@in='*')]").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_in_out(index,interface,des,method,m.attributes['in'],m.attributes['out'],m.find('*|text()'))
           end
-          desres.find("des:*[not(name()='resource') and not(name()='websocket') and @pass and not(@pass='*')]").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and not(name()='sse') and @pass and not(@pass='*')]").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_in_out(index,interface,des,method,m.attributes['pass'],m.attributes['pass'],m.find('*|text()'))
           end
-          desres.find("des:*[not(name()='resource') and not(name()='websocket') and @transformation]").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and not(name()='sse') and @transformation]").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_transform(index,interface,des,method,m.attributes['transformation'],m.find('*|text()'))
           end
-          desres.find("des:*[not(name()='resource') and not(name()='websocket') and @in and @in='*']").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and not(name()='sse') and @in and @in='*']").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_star_out(index,interface,des,method,m.attributes['out'],m.find('*|text()'))
           end
-          desres.find("des:*[not(name()='resource') and not(name()='websocket') and not(@in) and not(@pass)]").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and not(name()='sse') and not(@in) and not(@pass)]").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_star_out(index,interface,des,method,m.attributes['out'],m.find('*|text()'))
           end
-          desres.find("des:*[not(name()='resource') and not(name()='websocket') and @pass and @pass='*']").each do |m|
+          desres.find("des:*[not(name()='resource') and not(name()='websocket') and not(name()='sse') and @pass and @pass='*']").each do |m|
             method = m.attributes['method'] || m.qname.name
             add_request_pass(index,interface,method,m.find('*|text()'))
           end
-          desres.find("des:*[not(name()='resource') and name()='websocket']").each do |m|
+          desres.find("des:*[name()='websocket']").each do |m|
             add_websocket(index,interface,m.find('*|text()'))
+          end
+          desres.find("des:*[name()='sse']").each do |m|
+            add_sse(index,interface,m.find('*|text()'))
           end
           @role = desres.find("string(@role)")
           @role = nil if @role.strip == ''
@@ -56,6 +59,7 @@ module Riddl
         end
 
         # TODO add websockets
+        # TODO add SSE
 
         def remove_access_methods(des,filter,index)
           #{{{
@@ -246,7 +250,7 @@ module Riddl
         def description_xml_string_analyse(messages,t,k,m)
  #{{{
           result = ''
-          if %w{get post put patch delete websocket}.include?(k)
+          if %w{get post put patch delete websocket sse}.include?(k)
             result << t + "<#{k} "
           else
             result << t + "<request method=\"#{k}\" "
@@ -276,7 +280,7 @@ module Riddl
             m.custom.each do |e|
               result << e.dump + "\n"
             end
-            if %w{get post put patch delete websocket}.include?(k)
+            if %w{get post put patch delete websocket sse}.include?(k)
               result << t + "</#{k}>"
             else
               result << t + "</request>\n"
@@ -387,7 +391,14 @@ module Riddl
           @access_methods['websocket'][index] ||= []
           @access_methods['websocket'][index] << WebSocket.new(interface,custom)
         end
-        private :add_request_pass
+        private :add_websocket
+
+        def add_sse(index,interface,custom)
+          @access_methods['sse'] ||= []
+          @access_methods['sse'][index] ||= []
+          @access_methods['sse'][index] << SSE.new(interface,custom)
+        end
+        private :add_sse
         #}}}
 
         attr_reader :resources,:path,:access_methods,:composition,:recursive,:role

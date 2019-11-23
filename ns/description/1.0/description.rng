@@ -277,6 +277,9 @@
         <element name="websocket">
           <empty/>
         </element>
+        <element name="sse">
+          <empty/>
+        </element>
       </choice>
     </zeroOrMore>
   </define>

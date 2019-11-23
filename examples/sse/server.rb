@@ -8,7 +8,7 @@ class Bar < Riddl::Implementation
   end
 end
 
-class Echo < Riddl::WebSocketImplementation
+class Echo < Riddl::SSEImplementation
   def onopen
     puts "Connection established"
     Thread.new do
@@ -18,12 +18,6 @@ class Echo < Riddl::WebSocketImplementation
       end
       close
     end
-  end
-
-  def onmessage(data)
-    printf("Received: %p\n", data)
-    send data
-    printf("Sent: %p\n", data)
   end
 
   def onclose
@@ -36,6 +30,6 @@ Riddl::Server.new(File.dirname(__FILE__) + '/description.xml', :port => 9292) do
 
   on resource do
     run Bar if get '*'
-    run Echo if websocket
+    run Echo if sse
   end
 end.loop!

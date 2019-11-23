@@ -4,6 +4,7 @@ require File.expand_path(File.dirname(__FILE__) + '/protocols/http/parser')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/http/generator')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/utils')
 require File.expand_path(File.dirname(__FILE__) + '/protocols/websocket')
+require File.expand_path(File.dirname(__FILE__) + '/protocols/sse')
 require File.expand_path(File.dirname(__FILE__) + '/header')
 require File.expand_path(File.dirname(__FILE__) + '/parameter')
 require File.expand_path(File.dirname(__FILE__) + '/error')
@@ -246,11 +247,30 @@ module Riddl
           :match => []
         }
 
-        if @riddl_info[:env]["HTTP_CONNECTION"] =~ /Upgrade/ && @riddl_info[:env]["HTTP_UPGRADE"] =~ /\AWebSocket\z/i
+        if @riddl_info[:env]['HTTP_CONNECTION'] =~ /Upgrade/ && @riddl_info[:env]['HTTP_UPGRADE'] =~ /\AWebSocket\z/i
           # TODO raise error when declaration and route or (not route and non-local interface)
           # raise SpecificationError, 'RIDDL description does not conform to specification' unless @riddl.validate!
           @riddl_info[:m] = @riddl_method = 'websocket'
           @riddl_message = @riddl.io_messages(@riddl_matching_path[0],'websocket',@riddl_parameters,@riddl_headers)
+          if @riddl.description?
+            instance_exec(@riddl_info, &@riddl_interfaces[nil])
+          elsif @riddl.declaration?
+            # one ws connection, no overlay
+            unless @riddl_message.nil?
+              if @riddl_interfaces.key? @riddl_message.interface.name
+                @riddl_info[:r] = @riddl_message.interface.real_path(@riddl_pinfo).sub(/^\//,'').split('/')
+                @riddl_info[:h]['RIDDL_DECLARATION_PATH'] = @riddl_pinfo
+                @riddl_info[:h]['RIDDL_DECLARATION_RESOURCE'] = @riddl_message.interface.top
+                @riddl_info[:s] = @riddl_message.interface.sub.sub(/\//,'').split('/')
+                @riddl_info.merge!(:match => matching_path)
+                instance_exec(@riddl_info, &@riddl_interfaces[@riddl_message.interface.name])
+              end
+            end
+          end
+          throw :async
+        elsif @riddl_info[:env]['HTTP_ACCEPT'] == 'text/event-stream'
+          @riddl_info[:m] = @riddl_method = 'sse'
+          @riddl_message = @riddl.io_messages(@riddl_matching_path[0],'sse',@riddl_parameters,@riddl_headers)
           if @riddl.description?
             instance_exec(@riddl_info, &@riddl_interfaces[nil])
           elsif @riddl.declaration?
@@ -321,6 +341,20 @@ module Riddl
 
     def run(what,*args)# {{{
       return if @riddl_path == ''
+      if what.class == Class && what.superclass == Riddl::SSEImplementation
+        data = Riddl::Protocols::SSE::ParserData.new
+        data.request_path = @riddl_pinfo
+        data.request_url = @riddl_pinfo + '?' + @riddl_query_string
+        data.query_string = @riddl_query_string
+        data.http_method = @riddl_env['REQUEST_METHOD']
+        data.body = @riddl_env['rack.input'].read
+        data.headers = Hash[
+          @riddl_headers.map { |key, value|  [key.downcase.gsub('_','-'), value] }
+        ]
+        w = what.new(@riddl_info.merge!(:a => args, :match => matching_path))
+        w.io = Riddl::Protocols::SSE.new(w, @riddl_env)
+        w.io.dispatch(data, @riddl_cross_site_xhr)
+      end
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
         data = Riddl::Protocols::WebSocket::ParserData.new
         data.request_path = @riddl_pinfo
@@ -363,6 +397,7 @@ module Riddl
     def put(min='*');    return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && @riddl_message.in && min == @riddl_message.in.name && @riddl_method == 'put'       end
     def patch(min='*');  return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/') && @riddl_message.in && min == @riddl_message.in.name && @riddl_method == 'patch'     end
     def websocket;       return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/')                                                       && @riddl_method == 'websocket' end
+    def sse;             return false if @riddl_message.nil?; @riddl_path == '/' + @riddl_info[:s].join('/')                                                       && @riddl_method == 'sse'       end
     def resource(rname=nil); return rname.nil? ? '{}' : rname end
 
     def matching_path #{{{

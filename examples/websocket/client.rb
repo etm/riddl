@@ -1,30 +1,31 @@
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/client')
+#!/usr/bin/ruby
+require File.join(__dir__, '../../lib/ruby/riddl/client')
 
-ep = Riddl::Client.interface('http://localhost:9292/',File.dirname(__FILE__) + '/description.xml')
+ep = Riddl::Client.interface('http://localhost:9292/',File.join(__dir__,'/description.xml'))
 
 test = ep.resource('/')
 
 test.ws do |conn|
-  conn.callback do
+  conn.on :open do
     ### called on connection
-    conn.send_msg "Hello world"
-    conn.send_msg "done"
+    conn.send "Hello world"
+    conn.send "done"
   end
 
-  conn.errback do |e|
+  conn.on :error do |e|
     ### called on error
     puts "Got error: #{e}"
   end
 
-  conn.stream do |msg|
+  conn.on :message do |msg|
     ### called when server responds
-    puts "<#{msg}>"
+    puts "<#{msg.data}>"
     if msg.data == "done"
-      conn.close_connection
+      conn.close
     end
   end
 
-  conn.disconnect do
+  conn.on :close do
     ### called on disconnect
     puts "gone"
     EM::stop_event_loop

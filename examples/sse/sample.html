@@ -1,35 +1,25 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Sample of riddl websocket support</title>
+  <title>Sample of riddl serversent events support</title>
 
   <script type="text/javascript">
     function init() {
-      var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
-      ws = new Socket("ws://localhost:9292/");
-
-      ws.onopen = function() {
+      es = new EventSource('http://localhost:9292/');
+      es.onopen = function() {
         output("onopen");
       };
-      ws.onmessage = function(e) {
+      es.onmessage = function(e) {
         output("onmessage: " + e.data);
       };
-      ws.onclose = function() {
-        output("onclose");
+      es.onerror = function() {
+        output("onerror/onclose");
       };
-    }
-
-    function onSubmit() {
-      var input = document.getElementById("input");
-      // You can send message to the Web Socket using ws.send.
-      ws.send(input.value);
-      output("send: " + input.value);
-      input.value = "";
-      input.focus();
     }
 
     function onCloseClick() {
-      ws.close();
+      output("onclose");
+      es.close();
     }
 
     function output(str) {
@@ -41,9 +31,10 @@
   </script>
 </head>
 <body onload="init();">
+  <p>
+    Also try: curl -N -H "Accept:text/event-stream" http://localhost:9292/
+  </p>
   <form onsubmit="onSubmit(); return false;">
-    <input type="text" id="input">
-    <input type="submit" value="Send">
     <button onclick="onCloseClick(); return false;">close</button>
   </form>
   <div id="log"></div>

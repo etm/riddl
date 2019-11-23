@@ -110,6 +110,17 @@ module Riddl
         end
       end# }}}
 
+      class SSE < AccessBase# {{{
+        def initialize(interface,custom=[])
+          @custom = custom
+          @interface = interface
+        end
+        def visualize; ""; end
+        def hash
+          0
+        end
+      end# }}}
+
     end
   end
 end

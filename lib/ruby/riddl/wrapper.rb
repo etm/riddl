@@ -194,6 +194,9 @@ module Riddl
           r.select{|o|o.class==Riddl::Wrapper::Description::WebSocket}.each do |o|
             return IOMessages.new(nil,nil,nil,nil)
           end
+          r.select{|o|o.class==Riddl::Wrapper::Description::SSE}.each do |o|
+            return IOMessages.new(nil,nil,nil,nil)
+          end
         end
         if @is_declaration
           r = req[operation]
@@ -211,6 +214,9 @@ module Riddl
             return IOMessages.new(Riddl::Wrapper::Description::Star.new, Riddl::Wrapper::Description::Star.new, o.route, o.result.interface)
           end
           r.select{|o|o.result.class==Riddl::Wrapper::Description::WebSocket}.each do |o|
+            return IOMessages.new(nil,nil,nil,o.result.interface)
+          end
+          r.select{|o|o.result.class==Riddl::Wrapper::Description::SSE}.each do |o|
             return IOMessages.new(nil,nil,nil,o.result.interface)
           end
         end
