@@ -29,7 +29,9 @@ Riddl::Server.new(File.dirname(__FILE__) + '/description.xml', :port => 9292) do
   cross_site_xhr true
 
   on resource do
-    run Bar if get '*'
+    run Bar if get
+    run Bar if get 'rrrr'
+    run Bar if get 'xxxxx'
     run Echo if sse
   end
 end.loop!
