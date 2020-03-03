@@ -178,7 +178,7 @@ module Riddl
           decipher = OpenSSL::Cipher::Cipher.new 'aes-256-cbc'
           decipher.decrypt
 
-          decipher.key = Digest::SHA256.hexdigest secret
+          decipher.key = Digest::SHA256.hexdigest(secret)[0...32]
           decipher.iv = iv
 
           decipher.update(encr) + decipher.final rescue nil
