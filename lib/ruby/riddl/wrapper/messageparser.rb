@@ -195,8 +195,10 @@ module Riddl
           data = type.root.children[0]
           data.attributes['type'] = a.attributes['type']
           a.children.each do |e|
-            e.namespaces.delete_all!
-            data.add e
+            unless e.class == XML::Smart::Dom::Text
+              e.namespaces.delete_all!
+              data.add e
+            end
           end
           value.validate_against type
         end
