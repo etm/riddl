@@ -3,7 +3,7 @@
   <message name="event">
     <parameter name="key" type="string"/>
     <parameter name="topic" type="string">
-      <param name="pattern">[\w_\/]+</param>
+      <param name="pattern">[\w_/]+</param>
     </parameter>
     <parameter name="event" type="string">
       <param name="pattern">[\w_]+</param>
@@ -17,7 +17,7 @@
   <message name="vote">
     <parameter name="key" type="string"/>
     <parameter name="topic" type="string">
-      <param name="pattern">[\w_\/]+</param>
+      <param name="pattern">[\w_/]+</param>
     </parameter>
     <parameter name="vote" type="string">
       <param name="pattern">[\w_]+</param>
@@ -37,8 +37,8 @@
           <value>false</value>
           <value>callback</value>
         </choice>
-      </parameter>  
-    </optional>  
+      </parameter>
+    </optional>
     <optional>
       <parameter name="fingerprint-with-consumer-secret" type="string"/>
     </optional>
@@ -47,6 +47,6 @@
   <resource pattern="http://riddl.org/ns/common-patterns/notifications-consumer/1.0">
     <post in="event"/>
     <post in="vote" out="acknowledgment"/>
-  </resource>  
+  </resource>
 
 </description>
