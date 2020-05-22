@@ -191,12 +191,18 @@ module Riddl
         else
           value = XML::Smart::string("<check/>")
           value.root.text = b
-          type = XML::Smart::string(CHECK)
-          data = type.root.children[0]
-          data.attributes['type'] = a.attributes['type']
+          if a.find('des:choice').length > 0
+            type = XML::Smart::string(CHECK_CHOICE)
+            data = type.root
+          else
+            type = XML::Smart::string(CHECK)
+            data = type.root.children[0]
+            data.attributes['type'] = a.attributes['type']
+          end
           a.children.each do |e|
             unless e.class == XML::Smart::Dom::Text
               e.namespaces.delete_all!
+              e.find('.//*').each{ |x| x.namespaces.delete_all! }
               data.add e
             end
           end
