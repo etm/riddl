@@ -63,7 +63,8 @@ module Riddl
     RIDDL_DESCRIPTION_SHOW = "#{File.dirname(__FILE__)}/ns/common-patterns/riddl-description/show.xml"
     RIDDL_DESCRIPTION_RESOURCE_SHOW = "#{File.dirname(__FILE__)}/ns/common-patterns/riddl-description/resource-show.xml"
     COMMON = "datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"#{DESCRIPTION}\" xmlns:xi=\"http://www.w3.org/2001/XInclude\""
-    CHECK = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"><data/></element>"
+    CHECK_DATA = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"><data/></element>"
+    CHECK_CHOICE = "<element name=\"check\" datatypeLibrary=\"http://www.w3.org/2001/XMLSchema-datatypes\" xmlns=\"http://relaxng.org/ns/structure/1.0\"></element>"
     #}}}
 
     def initialize(name,get_description=false)
