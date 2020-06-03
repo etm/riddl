@@ -195,7 +195,7 @@ module Riddl
             type = XML::Smart::string(CHECK_CHOICE)
             data = type.root
           else
-            type = XML::Smart::string(CHECK)
+            type = XML::Smart::string(CHECK_DATA)
             data = type.root.children[0]
             data.attributes['type'] = a.attributes['type']
           end
