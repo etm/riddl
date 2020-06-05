@@ -201,8 +201,7 @@ module Riddl
           end
           a.children.each do |e|
             unless e.class == XML::Smart::Dom::Text
-              e.namespaces.delete_all!
-              e.find('.//*').each{ |x| x.namespaces.delete_all! }
+              e.namespaces[nil]  = 'http://relaxng.org/ns/structure/1.0'
               data.add e
             end
           end
