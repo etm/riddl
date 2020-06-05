@@ -201,7 +201,8 @@ module Riddl
           end
           a.children.each do |e|
             unless e.class == XML::Smart::Dom::Text
-              e.namespaces[nil]  = 'http://relaxng.org/ns/structure/1.0'
+              e = e.to_doc.root
+              e.namespaces[nil] = 'http://relaxng.org/ns/structure/1.0'
               data.add e
             end
           end
