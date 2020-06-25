@@ -9,9 +9,9 @@ module Riddl
         headers.each do |k,v|
           if v.nil?
             @headp[k.name.upcase.gsub(/\-/,'_')] = k.value
-          else  
+          else
             @headp[k.upcase.gsub(/\-/,'_')] = v
-          end  
+          end
         end
 
         @numparams = 0
@@ -37,7 +37,7 @@ module Riddl
         if ignore_name
           # if only one parameter, ignore the name
           @numparams = m.find("count(//des:parameter)").to_i
-        end  
+        end
 
         m.find("des:*[not(name()='header')]").each do |p|
           return false unless send p.qname.to_s, p
@@ -69,22 +69,22 @@ module Riddl
                 if success
                   @mistp += 1
                   return true
-                end  
+                end
               else
                 # handler not found leads to an error
                 return false
-              end  
+              end
             else
               @mistp += 1
               return true
-            end  
+            end
           end
-        end  
+        end
         false
         #}}}
       end
       private :parameter
-      
+
       def oneOrMore(a)
         #{{{
         tistp = @mistp
@@ -93,12 +93,12 @@ module Riddl
           counter,length = traverse_simple(a,true)
           ncounter += 1 if counter == length
         end while counter == length && @mistp < @mist.length
-        if ncounter > 0 
+        if ncounter > 0
           true
-        else  
+        else
           @mistp = tistp
           false
-        end  
+        end
         #}}}
       end
 
@@ -106,7 +106,7 @@ module Riddl
         #{{{
         begin
           counter,length = traverse_simple(a,true)
-        end while counter == length && @mistp < @mist.length 
+        end while counter == length && @mistp < @mist.length
         true
         #}}}
       end
@@ -118,8 +118,8 @@ module Riddl
         end
         false
         #}}}
-      end  
-      
+      end
+
       def group(a)
         #{{{
         tistp = @mistp
@@ -132,12 +132,12 @@ module Riddl
         end
         if success
           true
-        else  
+        else
           @mistp = tistp
           false
-        end  
+        end
         #}}}
-      end  
+      end
 
       def optional(a)
         #{{{
@@ -148,7 +148,7 @@ module Riddl
 
         if counter == 0 || counter == length
           true
-        else  
+        else
           @mistp = tistp
           false
         end
@@ -173,30 +173,41 @@ module Riddl
         counter = 0
         lastname = ''
         nodes.each do |p|
-          lastname = p.qname.to_s 
+          lastname = p.qname.to_s
           counter += 1 if send lastname, p
         end
         if single_optional_protection && lastname == 'optional' && tistp == @mistp
           [0,-1]
-        else  
+        else
           [counter,nodes.length]
-        end 
+        end
         #}}}
       end
-      
+
       def match_simple(a,b)
         #{{{
         if a.attributes['fixed']
           a.attributes['fixed'] == b
-        else  
+        else
           value = XML::Smart::string("<check/>")
           value.root.text = b
-          type = XML::Smart::string(CHECK)
-          data = type.root.children[0]
-          data.attributes['type'] = a.attributes['type']
-          data.add a.children
+          if a.find('des:choice').length > 0
+            type = XML::Smart::string(CHECK_CHOICE)
+            data = type.root
+          else
+            type = XML::Smart::string(CHECK_DATA)
+            data = type.root.children[0]
+            data.attributes['type'] = a.attributes['type']
+          end
+          a.children.each do |e|
+            unless e.class == XML::Smart::Dom::Text
+              e = e.to_doc.root
+              e.namespaces[nil] = 'http://relaxng.org/ns/structure/1.0'
+              data.add e
+            end
+          end
           value.validate_against type
-        end  
+        end
         #}}}
       end
       private :match_simple
@@ -211,11 +222,11 @@ module Riddl
             true
           else
             false
-          end  
+          end
         end
       end
       private :match_mimetype
 
-    end  
-  end    
+    end
+  end
 end

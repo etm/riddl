@@ -4,8 +4,19 @@
     <parameter name="return" mimetype="text/plain"/>
   </message>
 
+  <message name="rrrr">
+    <parameter name="age" type="integer"/>
+    <parameter name="bla" type="string"/>
+  </message>
+  <message name=xxxxx">
+    <parameter name="degree" type="integer"/>
+    <parameter name="bla" type="string"/>
+  </message>
+
   <resource>
-    <get in="*" out="hello"/>
+    <get out="hello"/>
+    <get in="rrrr" out="hello"/>
+    <get in="xxxxx" out="hello"/>
     <sse/>
   </resource>
 
