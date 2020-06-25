@@ -469,7 +469,7 @@ module Riddl
                   cpath = File.basename(child.path)
                   subele = ele.find("p:" + cpath).first
                   if subele
-                    subele.replace_by(child)
+                    subele.replace_by_copy(child)
                   else
                     ele.add(child)
                   end
