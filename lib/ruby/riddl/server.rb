@@ -134,6 +134,11 @@ module Riddl
             end
           end
 
+          if @riddl_opts[:parallel]
+            EM.defer do
+              @riddl_opts[:parallel].call
+            end
+          end
         end
 
       rescue => e
@@ -143,6 +148,10 @@ module Riddl
         puts "Server (#{@riddl_opts[:cmdl_info]}) stopped due to connection error (PID:#{Process.pid})"
       end
     end #}}}
+
+    def parallel(&blk)
+      @riddl_opts[:parallel] = blk
+    end
 
     def call(env)# {{{
       dup.__http_call(env)
