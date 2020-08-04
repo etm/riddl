@@ -99,9 +99,6 @@
   <message name="subscribe">
     <optional>
       <parameter name="url" type="string"/>
-      <optional>
-        <parameter name="onbehalf" type="string"/>
-      </optional>
     </optional>
     <oneOrMore>
       <parameter name="topic" type="string"/>
@@ -117,23 +114,6 @@
   </message>
   <message name="acknowledgment">
     <parameter name="key" type="string"/>
-  </message>
-
-  <message name="details">
-    <optional>
-      <parameter name="url" type="string"/>
-    </optional>
-    <oneOrMore>
-      <parameter name="topic" type="string"/>
-      <choice>
-        <parameter name="votes" type="string">
-           <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
-        </parameter>
-        <parameter name="events" type="string">
-           <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
-        </parameter>
-      </choice>
-    </oneOrMore>
   </message>
 
   <message name="overview">
@@ -164,7 +144,7 @@
         <post in="subscribe" out="acknowledgment"/>
         <resource>
           <get out="subscription"/>
-          <put in="details"/>
+          <put in="subscribe"/>
           <delete/>
           <resource relative="sse">
             <sse/>
