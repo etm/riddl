@@ -40,10 +40,10 @@ module Riddl
     def onerror(err);end
 
     def send(data)
-      self.io.send_with_id 'data', data
+      @ws[:io].send_with_id 'data', data
     end
     def send_with_id(id,data)
-      self.io.send_with_id id, data
+      @ws[:io].send_with_id id, data
     end
 
     def io=(connection)
@@ -77,7 +77,7 @@ module Riddl
     def onerror(err);end
 
     def send(data)
-      self.io.send data
+      @ws[:io].send data
     end
 
     def io=(connection)
