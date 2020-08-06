@@ -1,24 +1,32 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="event">
+    <parameter name="type" fixed="event"/>
     <parameter name="topic" type="string">
       <param name="pattern">[\w_/]+</param>
     </parameter>
     <parameter name="event" type="string">
       <param name="pattern">[\w_]+</param>
     </parameter>
-    <parameter name="notification" type="string"/>
+    <choice>
+      <parameter name="notification" type="string"/>
+      <parameter name="notification" mimetype="application/json"/>
+    </choice>
   </message>
 
   <message name="vote">
+    <parameter name="type" fixed="vote"/>
     <parameter name="topic" type="string">
       <param name="pattern">[\w_/]+</param>
     </parameter>
     <parameter name="vote" type="string">
       <param name="pattern">[\w_]+</param>
     </parameter>
-    <parameter name="notification" type="string"/>
     <parameter name="callback" type="string"/>
+    <choice>
+      <parameter name="notification" type="string"/>
+      <parameter name="notification" mimetype="application/json"/>
+    </choice>
   </message>
 
   <message name="acknowledgment">
