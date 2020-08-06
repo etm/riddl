@@ -1,0 +1,43 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="event">
+    <parameter name="key" type="string"/>
+    <parameter name="topic" type="string">
+      <param name="pattern">[\w_/]+</param>
+    </parameter>
+    <parameter name="event" type="string">
+      <param name="pattern">[\w_]+</param>
+    </parameter>
+    <parameter name="notification" type="string"/>
+  </message>
+
+  <message name="vote">
+    <parameter name="key" type="string"/>
+    <parameter name="topic" type="string">
+      <param name="pattern">[\w_/]+</param>
+    </parameter>
+    <parameter name="vote" type="string">
+      <param name="pattern">[\w_]+</param>
+    </parameter>
+    <parameter name="notification" type="string"/>
+    <parameter name="callback" type="string"/>
+  </message>
+
+  <message name="acknowledgment">
+    <optional>
+      <parameter name="continue" type="string">
+        <choice>
+          <value>true</value>
+          <value>false</value>
+          <value>callback</value>
+        </choice>
+      </parameter>
+    </optional>
+  </message>
+
+  <resource pattern="http://riddl.org/ns/common-patterns/notifications-consumer/1.0">
+    <post in="event"/>
+    <post in="vote" out="acknowledgment"/>
+  </resource>
+
+</description>
