@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.101.20"
+  s.version          = "0.101.21"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3.0"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
@@ -14,7 +14,6 @@ Gem::Specification.new do |s|
   s.bindir           = 'tools'
   s.executables      = ['riddlcheck','riddlprocess']
   s.test_files       = Dir['test/tc_*.rb','test/smartrunner.rb']
-
 
   s.email            = 'juergen.mangler@gmail.com'
   s.authors          = ['Juergen \'eTM\' Mangler','Florian \'Solo\' Stertz','Sonja Biedermann']

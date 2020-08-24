@@ -26,6 +26,7 @@ module Riddl
 
         # out not available
         return true if what.nil? && @mist.empty?
+        return false if what.nil?
 
         # do it
         m  = what.content.root
