@@ -466,7 +466,7 @@ module Riddl
             nodes.each do |ele|
               if value.nil?
                 newstuff.each do |child|
-                  cpath = File.basename(child.path)
+                  cpath = File.basename(child.qname.name)
                   subele = ele.find("p:" + cpath).first
                   if subele
                     subele.replace_by_copy(child)
