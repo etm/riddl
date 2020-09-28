@@ -79,7 +79,7 @@ module Riddl
           name = File.expand_path(File.dirname(__FILE__)) + $2
         end
         begin
-          fh = name.respond_to?(:read) ? name : open(name,:ssl_verify_mode => OpenSSL::SSL::VERIFY_NONE)
+          fh = name.respond_to?(:read) ? name : URI.open(name,:ssl_verify_mode => OpenSSL::SSL::VERIFY_NONE)
           @doc = XML::Smart.string(fh.read)
           fh.close
           fpath = File.dirname(fh.path) if fh.is_a?(File) || fh.is_a?(Tempfile)
