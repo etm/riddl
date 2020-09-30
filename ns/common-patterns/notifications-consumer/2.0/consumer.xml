@@ -31,13 +31,16 @@
 
   <message name="acknowledgment">
     <optional>
-      <parameter name="continue" type="string">
-        <choice>
-          <value>true</value>
-          <value>false</value>
-          <value>callback</value>
-        </choice>
-      </parameter>
+      <choice>
+        <parameter name="continue" type="string">
+          <choice>
+            <value>true</value>
+            <value>false</value>
+            <value>callback</value>
+          </choice>
+        </parameter>
+        <parameter name="continue" mimetype="text/plain"/>
+      </choice>
     </optional>
   </message>
 
