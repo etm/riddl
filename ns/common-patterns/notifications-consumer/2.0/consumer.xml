@@ -22,6 +22,7 @@
     <parameter name="vote" type="string">
       <param name="pattern">[\w_]+</param>
     </parameter>
+    <parameter name="callback" type="string"/>
     <choice>
       <parameter name="notification" type="string"/>
       <parameter name="notification" mimetype="application/json"/>
