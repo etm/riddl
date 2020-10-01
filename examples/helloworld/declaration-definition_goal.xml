@@ -2,9 +2,7 @@
 <description xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <message name="hello">
     <parameter name="return" mimetype="text/plain" handler="http://riddl.org/ns/handlers/plain-type">
-      <plain type="string">
-        <param name="pattern">hello .+</param>
-      </plain>
+      <pattern>hello .+</pattern>
     </parameter>
   </message>
   <message name="hello-form">

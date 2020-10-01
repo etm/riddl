@@ -2,7 +2,6 @@ module Riddl
   module Handlers
     class PlainType
       def self::handle(what,hinfo)
-        p hinfo
         if what.class == Riddl::Parameter::Tempfile
           w = what.read
         else

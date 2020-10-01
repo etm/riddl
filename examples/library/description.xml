@@ -4,7 +4,7 @@
     <!--header name="Library" type="positiveInteger"/-->
     <oneOrMore>
       <parameter name="author" type="string"/>
-    </oneOrMore>  
+    </oneOrMore>
     <parameter name="title" type="string"/>
   </message>
   <message name="list-of-books">
@@ -13,9 +13,9 @@
     </parameter>
   </message>
   <message name="book-description-form">
-    <oneOrMore> 
+    <oneOrMore>
       <parameter name="author" type="string"/>
-    </oneOrMore>  
+    </oneOrMore>
     <parameter name="title" type="string"/>
   </message>
   <message name="book-description">
@@ -25,7 +25,7 @@
   </message>
   <message name="book-id">
     <parameter name="book-id" mimetype="text/plain" handler="http://riddl.org/ns/handlers/plain-type">
-      <plain type="positiveInteger"/>
+      <pattern>\d+</pattern>
     </parameter>
   </message>
 
@@ -75,6 +75,6 @@
     <resource relative="about">
       <get in="*" out="main-output"/>
     </resource>
-  </resource>  
+  </resource>
 
 </description>
