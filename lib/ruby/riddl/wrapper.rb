@@ -1,5 +1,4 @@
 require 'rubygems'
-require 'open-uri'
 gem 'xml-smart', '>= 0.3.0'
 require 'xml/smart'
 
@@ -79,10 +78,18 @@ module Riddl
           name = File.expand_path(File.dirname(__FILE__)) + $2
         end
         begin
-          fh = name.respond_to?(:read) ? name : URI.open(name,:ssl_verify_mode => OpenSSL::SSL::VERIFY_NONE)
-          @doc = XML::Smart.string(fh.read)
-          fh.close
-          fpath = File.dirname(fh.path) if fh.is_a?(File) || fh.is_a?(Tempfile)
+          if name.respond_to?(:read)
+            fpath = File.dirname(name.path) if name.is_a?(File) || name.is_a?(Tempfile)
+            xml = name.read
+            name.close
+          elsif File.exist?(name)
+            fpath = File.dirname(name)
+            xml = File.read(name)
+          else
+            fpath = nil
+            xml = Typhoeus.get(name, ssl_verifypeer: false).response_body
+          end
+          @doc = XML::Smart.string(xml)
         rescue
           begin
             @doc = XML::Smart.string(name)

@@ -10,7 +10,7 @@ module Riddl
         begin
           hi = XML::Smart::string(hinfo)
           re = Regexp.new(hi.root.text)
-        rescue => e
+        rescue
           return false
         end
         w =~ re

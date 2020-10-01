@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.101.26"
+  s.version          = "0.102"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3.0"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'rack', '~>2.2'
   s.add_runtime_dependency 'thin', '~>1.6'
   s.add_runtime_dependency 'eventmachine', '>= 1.0.0', '~>1.0'
-  s.add_runtime_dependency 'em-websocket', '>= 0.4.0', '~>0'
+  s.add_runtime_dependency 'em-websocket', '>= 0.5.2', '~>0'
   s.add_runtime_dependency 'faye-websocket', '>= 0.1', '~>0'
   s.add_runtime_dependency 'mime-types', '>= 3.0', '~>3'
   s.add_runtime_dependency 'minitest', '>= 5.0.0', '~>5'
