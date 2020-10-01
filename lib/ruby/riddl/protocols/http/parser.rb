@@ -34,9 +34,16 @@ module Riddl
             body = ''
           end
 
-          if content_length == 0 && name == ''
+          if content_length == 0
+            bufsize = 16384
+            until input.eof?
+              c = input.read(bufsize)
+              raise EOFError, "bad content body"  if c.nil? || c.empty?
+              body << c
+              content_length -= c.size
+            end
             body << input.read
-          else  
+          else
             bufsize = 16384
             until content_length <= 0
               c = input.read(bufsize < content_length ? bufsize : content_length)
@@ -131,7 +138,7 @@ module Riddl
             @params << Parameter::Complex.new(name, ctype, body, filename, head)
           elsif !filename && ctype
             body.rewind
-            
+
             # Generic multipart cases, not coming from a form
             @params << Parameter::Complex.new(name, ctype, body, nil, head)
           else
@@ -170,7 +177,7 @@ module Riddl
           elsif FORM_CONTENT_TYPES.include?(media_type)
             # sub is a fix for Safari Ajax postings that always append \0
             parse_nested_query(input.read.sub(/\0\z/, ''),:body)
-          else 
+          else
             parse_content(input,content_type,content_length.to_i,content_disposition||'',content_id||'',riddl_type||'')
           end
 
@@ -187,4 +194,4 @@ module Riddl
       end
     end
   end
-end  
+end
