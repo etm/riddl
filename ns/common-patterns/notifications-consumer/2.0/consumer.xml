@@ -30,9 +30,18 @@
   </message>
 
   <message name="acknowledgment">
-    <parameter name="continue" mimetype="text/plain" handler="http://riddl.org/ns/handlers/plain-type">
-      ^true|false|callback$
-    </parameter>
+    <choice>
+      <parameter name="continue" type="string">
+        <choice>
+          <value>true</value>
+          <value>false</value>
+          <value>callback</value>
+        </choice>
+      </parameter>
+      <parameter name="continue" mimetype="text/plain" handler="http://riddl.org/ns/handlers/plain-type">
+        ^true|false|callback$
+      </parameter>
+    </choice>
   </message>
 
   <resource pattern="http://riddl.org/ns/common-patterns/notifications-consumer/2.0">
