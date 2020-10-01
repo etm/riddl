@@ -39,7 +39,7 @@
         </choice>
       </parameter>
       <parameter name="continue" mimetype="text/plain" handler="http://riddl.org/ns/handlers/plain-type">
-        ^true|false|callback$
+        <pattern>^true|false|callback$</pattern>
       </parameter>
     </choice>
   </message>
