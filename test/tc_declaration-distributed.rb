@@ -31,6 +31,7 @@ class TestDecDi <  Minitest::Test
 
     test = ep.resource('/')
     status, res = test.get
+    p status
     assert status == 200
     doc = XML::Smart.string(res[0].value.read)
     assert doc.find('/processing-instruction("xml-stylesheet")').length == 1

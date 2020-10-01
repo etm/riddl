@@ -2,7 +2,7 @@
   <interface name="main" location="http://api.flickr.com/services">
     <xi:include href="Flickr/flickr.xml"/>
   </interface>
-  <interface name="exif" location="http://localhost:9292">
+  <interface name="exif" location="http://localhost:9001">
     <xi:include href="Exif/exif.xml"/>
   </interface>
 

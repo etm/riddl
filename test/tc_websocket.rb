@@ -27,36 +27,37 @@ class TestWebsocket <  Minitest::Test
     test.ws do |conn|
       cbs = []
 
-      conn.callback do
+      conn.on :open do
         ### called on connection
-        conn.send_msg "hello world"
-        conn.send_msg "done"
+        conn.send "hello world"
+        conn.send "done"
       end
 
-      conn.errback do |e|
+      conn.on :error do |e|
         ### called on error
         cbs << "Got error: #{e}"
       end
 
-      conn.stream do |msg|
+      conn.on :message do |msg|
         ### called when server responds
-        cbs << "<#{msg}>"
+        cbs << "<#{msg.data}>"
         if msg.data == "done"
-          conn.close_connection
+          conn.close
         end
       end
 
-      conn.disconnect do
+      conn.on :close do
         ### called on disconnect
         cbs << "gone"
         EM::stop_event_loop
-        
-        assert cbs.length == 3
-        assert cbs[0] == '<hello world>'
-        assert cbs[1] == '<done>'
-        assert cbs[2] == 'gone'
+
+        assert cbs.length == 4
+        assert cbs[0] == '<oasch 1>'
+        assert cbs[1] == '<hello world>'
+        assert cbs[2] == '<done>'
+        assert cbs[3] == 'gone'
       end
     end
 
-  end  
-end    
+  end
+end

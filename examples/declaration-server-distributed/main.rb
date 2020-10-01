@@ -20,16 +20,16 @@ class Info < Riddl::Implementation
   end
 end
 
-Riddl::Server.new(File.dirname(__FILE__) + '/main.xml', :port => 9296) do
+Riddl::Server.new(File.dirname(__FILE__) + '/main.xml', :port => 9003) do
   on resource do
     run Riddl::Utils::FileServe, 'instances/instances.xml' if get '*'
     on resource do
       run Info if get
-    end  
+    end
     on resource 'xsls' do
       on resource do
         run Riddl::Utils::FileServe, "xsls"  if get
-      end  
-    end  
+      end
+    end
   end
 end.loop!

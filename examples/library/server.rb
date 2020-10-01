@@ -34,7 +34,7 @@ class BookDescription < Riddl::Implementation
   end
 end
 
-Riddl::Server.new(File.dirname(__FILE__) + '/description.xml', :port => 9292, :bind => '::') do
+Riddl::Server.new(File.dirname(__FILE__) + '/description.xml', :port => 9001, :bind => '::') do
   accessible_description true
 
   on resource do

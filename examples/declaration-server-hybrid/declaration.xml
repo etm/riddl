@@ -5,9 +5,9 @@
   <interface name="properties">
     <xi:include href="properties.xml"/>
   </interface>
-  <interface name="xsloverlay" location='http://localhost:9294'>
+  <interface name="xsloverlay" location='http://localhost:9001'>
     <xi:include href="xsloverlay.xml"/>
-  </interface>  
+  </interface>
 
   <facade>
     <tile>

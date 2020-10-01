@@ -21,25 +21,25 @@ class Info < Riddl::Implementation
   end
 end
 
-Riddl::Server.new(File.dirname(__FILE__) + '/declaration.xml', :port => 9297) do
+Riddl::Server.new(File.dirname(__FILE__) + '/declaration.xml', :port => 9002) do
   accessible_description true
 
   interface 'main' do
     run Riddl::Utils::FileServe, 'instances/instances.xml' if get '*'
     on resource do
       run Info if get
-    end  
+    end
     on resource 'xsls' do
       on resource do
         run Riddl::Utils::FileServe, "xsls"  if get
-      end  
-    end  
+      end
+    end
   end
 
   interface 'properties' do |r|
     properties = @riddl_opts[:basepath] + '/instances/' + r[:h]['RIDDL_DECLARATION_PATH'].split('/')[1] + '/properties.xml'
-    backend = Riddl::Utils::Properties::Backend.new( 
-      @riddl_opts[:basepath] + '/instances/properties.schema', 
+    backend = Riddl::Utils::Properties::Backend.new(
+      @riddl_opts[:basepath] + '/instances/properties.schema',
       properties
     )
 

@@ -5,12 +5,12 @@ require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/p
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/xsloverlay')
 require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/fileserve')
 
-Riddl::Server.new(File.dirname(__FILE__) + '/declaration.xml', :port => 9292) do
+Riddl::Server.new(File.dirname(__FILE__) + '/declaration.xml', :port => 9001) do
   accessible_description true
 
-  backend = Riddl::Utils::Properties::Backend.new( 
-    @riddl_opts[:basepath] + '/server.properties.schema', 
-    @riddl_opts[:basepath] + '/server.properties.xml' 
+  backend = Riddl::Utils::Properties::Backend.new(
+    @riddl_opts[:basepath] + '/server.properties.schema',
+    @riddl_opts[:basepath] + '/server.properties.xml'
   )
 
   interface 'main' do
@@ -20,7 +20,7 @@ Riddl::Server.new(File.dirname(__FILE__) + '/declaration.xml', :port => 9292) do
   interface 'xsls' do |r|
     on resource do
       run Riddl::Utils::FileServe, "xsls" if get
-    end  
+    end
   end
 
   interface 'xsloverlay' do
