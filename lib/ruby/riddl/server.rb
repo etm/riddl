@@ -136,6 +136,11 @@ module Riddl
               EM.stop
             end
           end
+          [:HUP].each do |signal|
+            Signal.trap(signal) do
+              EM.stop
+            end
+          end
 
           if @riddl_opts[:parallel]
             EM.defer do
