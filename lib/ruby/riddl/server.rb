@@ -130,6 +130,9 @@ module Riddl
 
           [:INT, :TERM].each do |signal|
             Signal.trap(signal) do
+              if @riddl_opts[:cleanup]
+                @riddl_opts[:cleanup].call
+              end
               EM.stop
             end
           end
@@ -140,7 +143,6 @@ module Riddl
             end
           end
         end
-
       rescue => e
         if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
           @riddl_opts[:custom_protocol].error_handling(e)
@@ -151,6 +153,9 @@ module Riddl
 
     def parallel(&blk)
       @riddl_opts[:parallel] = blk
+    end
+    def cleanup(&blk)
+      @riddl_opts[:cleanup] = blk
     end
 
     def call(env)# {{{
