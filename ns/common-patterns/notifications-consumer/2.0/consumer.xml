@@ -1,7 +1,7 @@
 <description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
   <message name="event">
-    <parameter name="type" fixed="event"/>
+    <parameter name="key" type="string"/>
     <parameter name="topic" type="string">
       <param name="pattern">[\w_/]+</param>
     </parameter>
@@ -12,6 +12,9 @@
       <parameter name="notification" type="string"/>
       <parameter name="notification" mimetype="application/json"/>
     </choice>
+    <optional>
+      <parameter name="fingerprint-with-consumer-secret" type="string"/>
+    </optional>
   </message>
 
   <message name="vote">
