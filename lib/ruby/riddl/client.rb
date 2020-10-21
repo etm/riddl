@@ -353,7 +353,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             opts = {
               :method         => riddl_method,
               :headers        => headers,
-              :body           => tmp,
+              :body           => tmp.read,
               :ssl_verifypeer => false
             }
             if url.user && url.password
