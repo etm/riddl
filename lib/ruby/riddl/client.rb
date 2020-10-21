@@ -16,6 +16,7 @@ require 'digest/md5'
 
 class StringIO #{{{
   def continue_timeout; nil; end
+  def empty?; size == 0; end
 end #}}}
 
 class SignalWait #{{{
@@ -352,7 +353,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             opts = {
               :method         => riddl_method,
               :headers        => headers,
-              :body           => tmp.read,
+              :body           => tmp,
               :ssl_verifypeer => false
             }
             if url.user && url.password
