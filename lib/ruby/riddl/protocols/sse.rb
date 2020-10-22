@@ -28,6 +28,7 @@ module Riddl
       end
 
       def close
+        trigger_on_close
         EM.next_tick do
           @body.succeed
         end
