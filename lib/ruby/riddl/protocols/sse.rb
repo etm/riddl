@@ -28,14 +28,13 @@ module Riddl
       end
 
       def close
-        trigger_on_close
         EM.next_tick do
           @body.succeed
         end
       end
 
-      def trigger_on_open();          @closed = false; @app.onopen;               end
-      def trigger_on_close;           @closed = true;  @app.onclose;              end
+      def trigger_on_open(); @closed = false; @app.onopen;  end
+      def trigger_on_close;  @closed = true;  @app.onclose; end
 
       def initialize(app, env)
         @app = app

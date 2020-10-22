@@ -8,7 +8,7 @@
     <parameter name="age" type="integer"/>
     <parameter name="bla" type="string"/>
   </message>
-  <message name=xxxxx">
+  <message name="xxxxx">
     <parameter name="degree" type="integer"/>
     <parameter name="bla" type="string"/>
   </message>
