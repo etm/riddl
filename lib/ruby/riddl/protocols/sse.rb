@@ -56,8 +56,12 @@ module Riddl
           headers['Access-Control-Max-Age'] = '0'
         end
 				EventMachine::next_tick {
-					@env['async.callback'].call [200, headers, @body]
-          trigger_on_open
+          if trigger_on_open
+            @env['async.callback'].call [200, headers, @body]
+          else
+            @body.fail
+            @env['async.callback'].call [404, headers, {}]
+          end
 				}
       end
 

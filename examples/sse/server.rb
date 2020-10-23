@@ -10,6 +10,8 @@ end
 
 class Echo < Riddl::SSEImplementation
   def onopen
+    // if true (or any object for that matter) is returned, then 200 is sent
+    // if false (or nil) is returned 404, the sse is denied
     puts "Connection established"
     Thread.new do
       1.upto 10 do |i|
