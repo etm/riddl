@@ -33,7 +33,7 @@ module Riddl
         end
       end
 
-      def trigger_on_open(); @closed = false; @app.onopen;  end
+      def trigger_on_open(); @closed = false; res = @app.onopen; res ? true : false; end
       def trigger_on_close;  @closed = true;  @app.onclose; end
 
       def initialize(app, env)
