@@ -55,9 +55,11 @@ module Riddl
 
         if b.class == Riddl::Parameter::Simple && (a.attributes['fixed'] || a.attributes['type'])
           b.name = a.attributes['name'] if @numparams == 1
-          if (b.name == a.attributes['name'] || a.attributes['name'] == '*')
+          if (b.name == a.attributes['name'] || a.attributes['name'] == '*') && match_simple(a,b.value)
             @mistp += 1
-            return match_simple(a,b.value)
+            return true
+          else
+            return false
           end
         end
         if b.class == Riddl::Parameter::Complex && a.attributes['mimetype']
