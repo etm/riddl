@@ -67,6 +67,9 @@
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-producer/2.0">
         <start>
           <element name="subscription">
+            <attribute name="id">
+              <data type="string"/>
+            </attribute>
             <optional>
               <attribute name="url">
                 <data type="string"/>
