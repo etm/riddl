@@ -75,6 +75,8 @@ module Riddl
             [RequestTransformation,Riddl::Wrapper::Description::Transformation.new(des,filter['transformation'])]
           elsif filter['pass'] && filter['pass'] == '*'
             [RequestPass]
+          elsif filter['method'] == 'sse'
+            [SSE]
           end
           raise BlockError, "blocking #{filter.inspect} not possible" if freq.nil?
 
@@ -95,9 +97,18 @@ module Riddl
                   true if freq[1] && freq[1].hash == req.trans.hash
                 elsif req.class == RequestPass
                   true
+                elsif req.class == SSE
+                  true
                 end
               end
             end
+          end
+          if @access_methods[filter['method']][index].empty?
+            @access_methods[filter['method']].delete_at(index)
+          end
+          @access_methods[filter['method']].compact!
+          if @access_methods[filter['method']].length == 0
+            @access_methods.delete(filter['method'])
           end
           #}}}
         end
