@@ -68,9 +68,10 @@ module Riddl
         def compose!(res=@base_path)
           #{{{
           # delete empty resources
-          res.resources.delete_if do |k,r|
-            r.access_methods.length == 0
-          end
+          # THIS is a stupid idea, just not show it in the resulting xml! TODO
+          # res.resources.delete_if do |k,r|
+          #   r.access_methods.length == 0
+          # end
           # compose
           res.compose!
           res.resources.each do |k,r|
