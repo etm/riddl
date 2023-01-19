@@ -181,7 +181,7 @@ module Riddl
           @riddl_res['Content-Length'] = '0'
           @riddl_status = 200
         else
-          @riddl_log.write "501: the #{@riddl_method} parameters are not matching anything in the description.\n"
+          @riddl_log.write "501: a #{@riddl_method} with the these parameters is not part in the description (xml).\n"
           @riddl_status = 501 # not implemented?!
         end
       else
@@ -256,6 +256,9 @@ module Riddl
           @riddl_env['HTTP_CONTENT_ID'],
           @riddl_env['HTTP_RIDDL_TYPE']
         ).params
+        if @riddl_opts[:http_debug]
+          pp @riddl_parameters
+        end
 
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
         @riddl_path = '/'

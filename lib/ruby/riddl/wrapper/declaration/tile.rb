@@ -57,7 +57,7 @@ module Riddl
           block.each do |bl|
             bpath = bl.to_s.gsub(/\/+/,'/').gsub(/\/$/,'')
             bpath = (bpath == "" ? "/" : bpath)
-            if path == bpath
+            if interface.sub == bpath
               res.remove_access_methods(des,bl.attributes,index)
             end
           end
@@ -67,6 +67,12 @@ module Riddl
 
         def compose!(res=@base_path)
           #{{{
+          # delete empty resources
+          # THIS is a stupid idea, just not show it in the resulting xml! TODO
+          # res.resources.delete_if do |k,r|
+          #   r.access_methods.length == 0
+          # end
+          # compose
           res.compose!
           res.resources.each do |k,r|
             compose!(r)
