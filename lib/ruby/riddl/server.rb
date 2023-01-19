@@ -109,9 +109,7 @@ module Riddl
         :server => 'thin',
         :signals => false
       )
-      p @at_startup
-      p @opts
-      @at_startup.call(@opts) if @at_startup
+      @riddl_opts[:startup].call if @riddl_opts[:startup]
       if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
         @riddl_opts[:custom_protocol] = @riddl_opts[:custom_protocol].new(@riddl_opts)
         puts @riddl_opts[:custom_protocol].support if @riddl_opts[:custom_protocol].support
@@ -161,6 +159,9 @@ module Riddl
 
     def parallel(&blk)
       @riddl_opts[:parallel] = blk
+    end
+    def startup(&blk)
+      @riddl_opts[:startup] = blk
     end
     def cleanup(&blk)
       @riddl_opts[:cleanup] = blk
