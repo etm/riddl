@@ -32,10 +32,10 @@
 
   <message name="oauth">
     <header name="Authorization" type="string"/>
-  </message>  
+  </message>
   <message name="oauth_response">
     <parameter name="return" mimetype="*" handler="http://riddl.org/ns/handlers/oauth"/>
-  </message>  
+  </message>
 
   <resource>
     <resource relative="oauth">

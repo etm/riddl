@@ -109,6 +109,9 @@ module Riddl
         :server => 'thin',
         :signals => false
       )
+      p @at_startup
+      p @opts
+      @at_startup.call(@opts) if @at_startup
       if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
         @riddl_opts[:custom_protocol] = @riddl_opts[:custom_protocol].new(@riddl_opts)
         puts @riddl_opts[:custom_protocol].support if @riddl_opts[:custom_protocol].support
