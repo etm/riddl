@@ -95,7 +95,7 @@ module Riddl
                     tmp.write '--' +  BOUNDARY + EOL
                     tmp.write 'RIDDL-TYPE: complex' + EOL
                     tmp.write "Content-Disposition: #{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\""
-                    tmp.write r.filename.nil? ? '; filename=""' : "; filename=\"#{r.filename}\"" + EOL
+                    tmp.write r.filename.nil? ? '; filename=""' + EOL : "; filename=\"#{r.filename}\"" + EOL
                     tmp.write 'Content-Transfer-Encoding: binary' + EOL
                     tmp.write 'Content-Type: ' + r.mimetype + r.mimextra + EOL
                     tmp.write EOL
