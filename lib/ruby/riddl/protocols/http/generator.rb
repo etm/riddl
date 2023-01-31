@@ -19,9 +19,13 @@ module Riddl
           elsif @params.is_a?(Array) && @params.length > 1
             multipart(mode)
           else
-            @headers['Content-Type'] = 'text/plain'
-            StringIO.new('','r+b')
-          end  
+            if mode == :output
+              @headers['Content-Type'] = 'text/plain'
+              StringIO.new('','r+b')
+            else
+              StringIO.new('','r+b')
+            end
+          end
         end
 
         def body(r,mode)
@@ -46,7 +50,7 @@ module Riddl
                 @headers['Content-ID'] = r.name
               else
                 @headers['Content-Disposition'] = "riddl-data; name=\"#{r.name}\"; filename=\"#{r.filename}\""
-              end  
+              end
           end
           tmp.flush
           tmp.rewind
@@ -63,7 +67,7 @@ module Riddl
                 scount += 1
               when Riddl::Parameter::Complex
                 ccount += 1
-            end   
+            end
           end
           if scount > 0 && ccount == 0
             @headers['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -72,7 +76,7 @@ module Riddl
               case r
                 when Riddl::Parameter::Simple
                   res << Riddl::Protocols::Utils::escape(r.name) + '=' + Riddl::Protocols::Utils::escape(r.value)
-              end   
+              end
             end
             tmp.write res.join('&')
           else
@@ -81,25 +85,25 @@ module Riddl
               @params.each do |r|
                 case r
                   when Riddl::Parameter::Simple
-                    tmp.write "--" + BOUNDARY + EOL
-                    tmp.write "RIDDL-TYPE: simple" + EOL
+                    tmp.write '--' + BOUNDARY + EOL
+                    tmp.write 'RIDDL-TYPE: simple' + EOL
                     tmp.write "Content-Disposition: #{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\"" + EOL
                     tmp.write EOL
                     tmp.write r.value
                     tmp.write EOL
                   when Riddl::Parameter::Complex
-                    tmp.write "--" +  BOUNDARY + EOL
-                    tmp.write "RIDDL-TYPE: complex" + EOL
+                    tmp.write '--' +  BOUNDARY + EOL
+                    tmp.write 'RIDDL-TYPE: complex' + EOL
                     tmp.write "Content-Disposition: #{mode == :input ? 'form-data' : 'riddl-data'}; name=\"#{r.name}\""
-                    tmp.write r.filename.nil? ? EOL : "; filename=\"#{r.filename}\"" + EOL
-                    tmp.write "Content-Transfer-Encoding: binary" + EOL
-                    tmp.write "Content-Type: " + r.mimetype + r.mimextra + EOL
+                    tmp.write r.filename.nil? ? '; filename=""' : "; filename=\"#{r.filename}\"" + EOL
+                    tmp.write 'Content-Transfer-Encoding: binary' + EOL
+                    tmp.write 'Content-Type: ' + r.mimetype + r.mimextra + EOL
                     tmp.write EOL
                     tmp.write(r.value.respond_to?(:read) ? r.value.read : r.value)
                     tmp.write EOL
-                end   
+                end
               end
-              tmp.write "--" + BOUNDARY + EOL
+              tmp.write '--' + BOUNDARY + '--' + EOL
             end
           end
           tmp.flush
@@ -107,8 +111,8 @@ module Riddl
           tmp
         end
         private :multipart
-      
+
       end
     end
   end
-end  
+end
