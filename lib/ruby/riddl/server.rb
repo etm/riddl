@@ -109,6 +109,7 @@ module Riddl
         :server => 'thin',
         :signals => false
       )
+      @riddl_opts[:startup].call if @riddl_opts[:startup]
       if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
         @riddl_opts[:custom_protocol] = @riddl_opts[:custom_protocol].new(@riddl_opts)
         puts @riddl_opts[:custom_protocol].support if @riddl_opts[:custom_protocol].support
@@ -159,6 +160,9 @@ module Riddl
     def parallel(&blk)
       @riddl_opts[:parallel] = blk
     end
+    def startup(&blk)
+      @riddl_opts[:startup] = blk
+    end
     def cleanup(&blk)
       @riddl_opts[:cleanup] = blk
     end
@@ -178,7 +182,7 @@ module Riddl
           @riddl_res['Content-Length'] = '0'
           @riddl_status = 200
         else
-          @riddl_log.write "501: the #{@riddl_method} parameters are not matching anything in the description.\n"
+          @riddl_log.write "501: a #{@riddl_method} with the these parameters is not part in the description (xml).\n"
           @riddl_status = 501 # not implemented?!
         end
       else
@@ -253,6 +257,9 @@ module Riddl
           @riddl_env['HTTP_CONTENT_ID'],
           @riddl_env['HTTP_RIDDL_TYPE']
         ).params
+        if @riddl_opts[:http_debug]
+          pp @riddl_parameters
+        end
 
         @riddl_method = @riddl_env['REQUEST_METHOD'].downcase
         @riddl_path = '/'

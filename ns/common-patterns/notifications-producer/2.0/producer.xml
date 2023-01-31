@@ -67,6 +67,9 @@
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-producer/2.0">
         <start>
           <element name="subscription">
+            <attribute name="id">
+              <data type="string"/>
+            </attribute>
             <optional>
               <attribute name="url">
                 <data type="string"/>
@@ -96,7 +99,26 @@
     </parameter>
   </message>
 
-  <message name="subscribe">
+  <message name="create_subscription">
+    <optional>
+      <parameter name="id" type="string"/>
+    </optional>
+    <optional>
+      <parameter name="url" type="string"/>
+    </optional>
+    <oneOrMore>
+      <parameter name="topic" type="string"/>
+      <choice>
+        <parameter name="votes" type="string">
+          <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
+        </parameter>
+        <parameter name="events" type="string">
+          <param name="pattern">([\w-_]+,)*([\w-_]+)</param>
+        </parameter>
+      </choice>
+    </oneOrMore>
+  </message>
+  <message name="change_subscription">
     <optional>
       <parameter name="url" type="string"/>
     </optional>
@@ -141,10 +163,10 @@
       </resource>
       <resource relative="subscriptions">
         <get in="*" out="subscriptions"/>
-        <post in="subscribe" out="acknowledgment"/>
+        <post in="create_subscription" out="acknowledgment"/>
         <resource>
           <get out="subscription"/>
-          <put in="subscribe"/>
+          <put in="change_subscription"/>
           <delete/>
           <resource relative="sse">
             <sse/>
