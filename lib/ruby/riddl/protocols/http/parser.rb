@@ -103,6 +103,7 @@ module Riddl
               c = input.read(bufsize < content_length ? bufsize : content_length)
               raise EOFError, "bad content body"  if c.nil? || c.empty?
               content_length -= c.size
+
               buf << c
             end
 
@@ -113,7 +114,7 @@ module Riddl
               content_length = -1  if $1 == "--"
             end
 
-            add_to_params(name,body,filename,ctype,head)
+            add_to_params(name,body,filename == '' ? nil : filename,ctype,head)
 
             break if buf.empty? || content_length == -1
           end

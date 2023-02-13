@@ -103,7 +103,7 @@ module Riddl
                     tmp.write EOL
                 end
               end
-              tmp.write '--' + BOUNDARY + '--' + EOL
+              tmp.write '--' + BOUNDARY + EOL
             end
           end
           tmp.flush
