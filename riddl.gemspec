@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "0.126"
+  s.version          = "0.127"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3.0"
   s.summary          = "restful interface description and declaration language: tools and client/server libs"
@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>=2.2.0'
 
-  s.add_runtime_dependency 'daemonite', '~>0.6', '>=0.6.0'
+  s.add_runtime_dependency 'daemonite', '~>0.7', '>=0.7.0'
   s.add_runtime_dependency 'typhoeus', '~>1.3'
   s.add_runtime_dependency 'xml-smart', '>=0.4.3', '~>0'
   s.add_runtime_dependency 'rdf-smart', '>=0.0.160', '~>0'
@@ -34,5 +34,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'mime-types', '>= 3.0', '~>3'
   s.add_runtime_dependency 'minitest', '>= 5.0.0', '~>5'
   s.add_runtime_dependency 'charlock_holmes', '>= 0.7', '~>0'
-  s.add_runtime_dependency 'redis', '~> 4.0'
+  s.add_runtime_dependency 'redis', '~> 5.0'
 end
