@@ -3,22 +3,22 @@ Gem::Specification.new do |s|
   s.version          = "0.128"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3.0"
-  s.summary          = "restful interface description and declaration language: tools and client/server libs"
+  s.summary          = "Restful Interface Description and Declaration Language: tools and client/server libs"
 
-  s.description      = "rest service interface definition, mixing, and evolution. supports mixed http and xmpp servers."
+  s.description      = "REST service interface definition, mixing, and evolution. Supports mixed http and xmpp servers."
 
-  s.files            = Dir['{lib/ruby/riddl/ns/**/*,tools/**/*,ns/**/*,contrib/**/*,lib/ruby/riddl/**/*,examples/**/*}'] + %w(COPYING Rakefile riddl.gemspec README.rdoc TODO AUTHORS INSTALL)
+  s.files            = Dir['{lib/ruby/riddl/ns/**/*,tools/**/*,ns/**/*,contrib/**/*,lib/ruby/riddl/**/*,examples/**/*}'] + %w(COPYING Rakefile riddl.gemspec README.md TODO AUTHORS INSTALL)
 
   s.require_path     = 'lib/ruby'
-  s.extra_rdoc_files = ['README.rdoc']
+  s.extra_rdoc_files = ['README.md']
   s.bindir           = 'tools'
   s.executables      = ['riddlcheck','riddlprocess']
   s.test_files       = Dir['test/tc_*.rb','test/smartrunner.rb']
 
   s.email            = 'juergen.mangler@gmail.com'
-  s.authors          = ['Juergen \'eTM\' Mangler','Florian \'Solo\' Stertz','Sonja Biedermann']
+  s.authors          = ['Juergen \'eTM\' Mangler','Florian \'Solo\' Stertz','Sonja Biedermann','Matthias Ehrendorfer']
   s.email            = 'juergen.mangler@gmail.com'
-  s.homepage         = 'http://www.wst.univie.ac.at/communities/riddl/'
+  s.homepage         = 'http://github.com/etm/riddl/'
 
   s.required_ruby_version = '>=2.2.0'
 
