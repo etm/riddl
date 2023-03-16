@@ -87,18 +87,18 @@ module Riddl
             def each(&block)
               keys.each do |key|
                 f = @target + '/' + key + '/subscription.xml'
-                block.call Sub.new(f), key if File.exists? f
+                block.call Sub.new(f), key if File.exist? f
               end
             end
 
             def include?(key)
               f = @target + '/' + key + '/subscription.xml'
-              File.exists?(f)
+              File.exist?(f)
             end
 
             def [](key)
               f = @target + '/' + key + '/subscription.xml'
-              File.exists?(f) ? Sub.new(f) : nil
+              File.exist?(f) ? Sub.new(f) : nil
             end
 
             def create(&block)
@@ -133,7 +133,7 @@ module Riddl
           def initialize(topics,target,init=nil)
             @target = target.gsub(/^\/+/,'/')
 
-            unless File.exists?(@target)
+            unless File.exist?(@target)
               if init
                 FileUtils::cp_r init, @target
               else
@@ -141,7 +141,7 @@ module Riddl
               end
             end
 
-            raise "topics file not found" unless File.exists?(topics)
+            raise "topics file not found" unless File.exist?(topics)
             @topics = XML::Smart.open_unprotected(topics.gsub(/^\/+/,'/'))
             @topics.register_namespace 'n', 'http://riddl.org/ns/common-patterns/notifications-producer/1.0'
 

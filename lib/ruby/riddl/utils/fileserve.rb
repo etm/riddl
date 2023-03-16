@@ -12,7 +12,7 @@ module Riddl
           @status = 404
           return []
         end
-        if File.exists?(path)
+        if File.exist?(path)
           mtime = File.mtime(path)
           @headers << Riddl::Header.new("Last-Modified",mtime.httpdate)
           @headers << Riddl::Header.new("ETag",Digest::MD5.hexdigest(mtime.httpdate))

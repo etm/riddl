@@ -4,9 +4,9 @@ class FlickrHelper
   def initialize(dir)
     @api_key = File.read(dir + '/flickr.key').strip
     @api_secret = File.read(dir + '/flickr.secret').strip
-    if File.exists?(dir + 'flickr.token')
+    if File.exist?(dir + 'flickr.token')
       @auth_token = File.read(dir + 'flickr.token').strip
-    else  
+    else
       @auth_token = "simulated"
     end
   end
@@ -19,10 +19,10 @@ class FlickrHelper
       if e.class == Riddl::Parameter::Simple
         if names.empty?
           sig += "#{e.name}#{e.value}"
-        else  
+        else
           sig += "#{e.name}#{e.value}" if names.include?(e.name)
-        end  
-      end  
+        end
+      end
     end
     Digest::MD5.hexdigest(sig)
   end

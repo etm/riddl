@@ -11,14 +11,14 @@ module Riddl
           @status = 404
           return []
         end
-        if File.exists?(path)
+        if File.exist?(path)
           __ERB_FILE__ = path
           rval = ERB.new(File.read(path), 0, "%<>")
           return Riddl::Parameter::Complex.new("data",MIME::Types.type_for(path)[0].to_s,rval.result(binding))
         end
         @status = 404
         []
-      end  
+      end
     end
-  end  
+  end
 end

@@ -12,7 +12,7 @@ file_token        = File.expand_path(File.dirname(__FILE__) + '/.twitter.token')
 file_token_secret = File.expand_path(File.dirname(__FILE__) + '/.twitter.token_secret')
 
 ### When token and secret already saved, skip this part
-if !File.exists?(file_token) && !File.exists?(file_token_secret)
+if !File.exist?(file_token) && !File.exist?(file_token_secret)
   ### go to request token resource and set necessary role options
   resource = twitter.resource("/oauth/request_token")
   params = [

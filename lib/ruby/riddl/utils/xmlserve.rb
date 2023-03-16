@@ -14,7 +14,7 @@ module Riddl
           @status = 404
           return []
         end
-        if File.exists?(path)
+        if File.exist?(path)
           mtime = File.mtime(path)
           @headers << Riddl::Header.new("Last-Modified",mtime.httpdate)
           @headers << Riddl::Header.new("Cache-Control","max-age=15552000, public")
@@ -24,17 +24,17 @@ module Riddl
             @headers << Riddl::Header.new("Connection","close")
             @status = 304 # Not modified
             return []
-          else 
-            if xpath 
+          else
+            if xpath
               res = XML::Smart.open(path).find(xpath)
               return Riddl::Parameter::Complex.new('file','text/xml',res.any? ? res.first.dump : '<empty/>')
             else
               return Riddl::Parameter::Complex.new('file','text/xml',File.open(path,'r'))
             end
-          end  
+          end
         end
         @status = 404
-      end  
+      end
     end
-  end  
-end  
+  end
+end

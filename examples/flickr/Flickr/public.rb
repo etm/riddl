@@ -4,7 +4,7 @@ require '../../../lib/ruby/riddl/client'
 require 'pp'
 
 # no ready for use
-unless File.exists?('.flickr.frob')
+unless File.exist?('.flickr.frob')
   puts "Check the README file and use authenticate.rb."
   exit
 end
@@ -29,11 +29,11 @@ key = File.read('.flickr.key').strip
 secret = File.read('.flickr.secret').strip
 frob = File.read('.flickr.frob').strip
 
-### get 
-if File.exists?('.flickr.token')
+### get
+if File.exist?('.flickr.token')
   token = File.read('.flickr.token').strip
-else 
-  puts "hmm, there is no token...." 
+else
+  puts "hmm, there is no token...."
   method = 'flickr.auth.getToken'
   sig = Digest::MD5.hexdigest("#{secret}api_key#{key}frob#{frob}method#{method}")
   status, res = rest.get [
@@ -90,7 +90,7 @@ puts "RES:" + res[0].value.read
 #  Riddl::Parameter::Simple.new("tags", tags),
 #  Riddl::Parameter::Simple.new("is_public", is_public),
 #  Riddl::Parameter::Simple.new("api_sig", sig)
-#]  
+#]
 
 #rsp = XML::Smart::string(res[0].value.read)
 #stat = rsp.find('string(/rsp/@stat)')

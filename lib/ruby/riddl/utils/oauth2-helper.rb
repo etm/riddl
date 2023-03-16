@@ -18,7 +18,7 @@ module Riddl
 
             def [](key)
               get(key)
-            end  
+            end
 
             def get(key)
               @redis.get key
@@ -30,7 +30,7 @@ module Riddl
 
             def each
               if block_given?
-                @redis.keys.each do |e| 
+                @redis.keys.each do |e|
                   yield e, get(e)
                 end
               else
@@ -63,7 +63,7 @@ module Riddl
 
             def [](key)
               get(key)
-            end  
+            end
 
             def get(key)
               read if changed != @changed
@@ -72,7 +72,7 @@ module Riddl
 
             def each
               if block_given?
-                @tokens.each do |k,v| 
+                @tokens.each do |k,v|
                   yield k,v
                 end
               else
@@ -91,7 +91,7 @@ module Riddl
             end
 
             def changed
-              if ::File.exists?(@tfile)
+              if ::File.exist?(@tfile)
                 ::File.stat(@tfile).mtime
               else
                 @tokens = {}
@@ -119,7 +119,7 @@ module Riddl
               deleted
             end
           end #}}}
-        
+
         end #}}}
 
         def self::header #{{{

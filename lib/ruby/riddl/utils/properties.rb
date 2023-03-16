@@ -75,10 +75,10 @@ module Riddl
           @schema = @schemas.first[1]
           @rng = @rngs.first[1]
 
-          FileUtils::mkdir_p(File::dirname(@target)) unless File.exists?(@target)
-          FileUtils::cp init, @target                if init and not File.exists?(@target)
+          FileUtils::mkdir_p(File::dirname(@target)) unless File.exist?(@target)
+          FileUtils::cp init, @target                if init and not File.exist?(@target)
 
-          raise "properties file not found" unless File.exists?(@target)
+          raise "properties file not found" unless File.exist?(@target)
           @data = XML::Smart.open_unprotected(@target)
           @data.register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
           @mutex = Mutex.new
@@ -95,10 +95,10 @@ module Riddl
         end
 
         def add_schema(key,name)
-          raise "schema file not found" unless File.exists?(name)
+          raise "schema file not found" unless File.exist?(name)
           @schemas[key] = XML::Smart.open_unprotected(name.gsub(/^\/+/,'/'))
           @schemas[key].register_namespace 'p', 'http://riddl.org/ns/common-patterns/properties/1.0'
-          if !File::exists?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
+          if !File::exist?(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG)
             raise "properties schema transformation file not found"
           end
           @rngs[key] = @schemas[key].transform_with(XML::Smart.open_unprotected(Riddl::Utils::Properties::PROPERTIES_SCHEMA_XSL_RNG))

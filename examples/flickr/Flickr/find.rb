@@ -4,7 +4,7 @@ require '../../../lib/ruby/riddl/client'
 require 'pp'
 
 # no ready for use
-unless File.exists?('.flickr.frob')
+unless File.exist?('.flickr.frob')
   puts "Check the README file and use authenticate.rb."
   exit
 end
@@ -24,11 +24,11 @@ key = File.read('.flickr.key').strip
 secret = File.read('.flickr.secret').strip
 frob = File.read('.flickr.frob').strip
 
-### get 
-if File.exists?('.flickr.token')
+### get
+if File.exist?('.flickr.token')
   token = File.read('.flickr.token').strip
-else 
-  puts "hmm, there is no token...." 
+else
+  puts "hmm, there is no token...."
   method = 'flickr.auth.getToken'
   sig = Digest::MD5.hexdigest("#{secret}api_key#{key}frob#{frob}method#{method}")
   status, res = rest.request :get => [
@@ -66,4 +66,4 @@ status, res, headers = rest.get [
 ]
 raise "token no longer valid, delete .flickr.token, .flickr.frob then retry authenticate.rb, flickr.rb" unless status == 200
 
-puts "STATUS: #{status} RES:" + res[0].value.read + " HEADERS: #{headers}" 
+puts "STATUS: #{status} RES:" + res[0].value.read + " HEADERS: #{headers}"

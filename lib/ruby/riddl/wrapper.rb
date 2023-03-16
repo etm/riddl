@@ -103,7 +103,7 @@ module Riddl
       @doc.find('//x:include/@href').each do |i|
         if i.value =~ /^http:\/\/(www\.)?riddl\.org(\/ns\/common-patterns\/.*)/
           t = File.expand_path(File.dirname(__FILE__)) + $2
-          i.value = t if File.exists?(t)
+          i.value = t if File.exist?(t)
         end
       end
       fpath.nil? ? @doc.xinclude! : @doc.xinclude!(fpath)
@@ -275,7 +275,7 @@ module Riddl
       #{{{
       @doc.find("//des:resource/@role").map{|h|h.to_s}.uniq.each do |h|
         h = Protocols::Utils::escape(h)
-        if File.exists?(File.dirname(__FILE__) + '/roles/' + h + '.rb')
+        if File.exist?(File.dirname(__FILE__) + '/roles/' + h + '.rb')
           require File.expand_path(File.dirname(__FILE__) + '/roles/' + h)
         end
       end

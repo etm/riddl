@@ -12,9 +12,9 @@ key = File.read('flickr.key').strip
 secret = File.read('flickr.secret').strip
 
 ### get frob
-if File.exists?('flickr.frob')
+if File.exist?('flickr.frob')
   frob = File.read('flickr.frob').strip
-else  
+else
   method = 'flickr.auth.getFrob'
   sig = Digest::MD5.hexdigest("#{secret}api_key#{key}method#{method}")
   status, res = rest.get [
@@ -25,7 +25,7 @@ else
   raise "no valid frob" unless status == 200
   frob = XML::Smart::string(res[0].value.read).find('string(/rsp/frob)')
   File.open('flickr.frob','w'){|f|f.write(frob)}
-end  
+end
 
 ### prepare auth link
 method = 'flickr.auth.getFrob'

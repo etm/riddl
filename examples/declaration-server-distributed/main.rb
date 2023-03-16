@@ -5,7 +5,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../../lib/ruby/riddl/utils/f
 
 class Info < Riddl::Implementation
   def response
-    unless File.exists?("instances/#{@r[0]}")
+    unless File.exist?("instances/#{@r[0]}")
       @status = 400
       return
     end
