@@ -39,7 +39,7 @@ log.each_line do |l|
     elsif l.strip =~ /^(\w+) mode (\d+) (.*)$/
       entry = (commits.last.files[$3] ||= Details.new)
       entry.type = $1
-    else 
+    else
     end
   end
 end
@@ -59,7 +59,7 @@ commits.each do |c|
 end
 
 ### delete files that are not on whitelist
-if File.exists? "#{home}/.whitelist"
+if File.exist? "#{home}/.whitelist"
   whitelist = []
   whitelist = File.readlines("#{home}/.whitelist").map{|l| l.strip}
   commits.each do |c|
