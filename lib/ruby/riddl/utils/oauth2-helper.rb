@@ -25,7 +25,7 @@ module Riddl
             end
 
             def key?(key)
-              @redis.exists(key)
+              @redis.exists?(key)
             end
 
             def each
@@ -40,9 +40,9 @@ module Riddl
 
             def set(key,value,dur=nil)
               value = value.is_a?(String) ? value.to_s : (JSON::generate(value) rescue '')
-              @redis.multi do
-                @redis.set key, value
-                @redis.expire key, dur unless dur.nil?
+              @redis.multi do |transaction|
+                transaction.set key, value
+                transaction.expire key, dur unless dur.nil?
               end
               nil
             end
