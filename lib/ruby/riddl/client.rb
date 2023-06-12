@@ -354,8 +354,8 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               :method         => riddl_method,
               :headers        => headers,
               :body           => tmp.read,
-              :ssl_verifypeer => false
-              #:followlocation => true
+              :ssl_verifypeer => false,
+              :followlocation => true
             }
             if url.user && url.password
               opts[:username] = Protocols::Utils::unescape(url.user)

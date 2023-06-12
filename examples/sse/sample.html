@@ -5,7 +5,7 @@
 
   <script type="text/javascript">
     function init() {
-      es = new EventSource('http://localhost:9292/');
+      es = new EventSource('https://echo.bpm.in.tum.de/ssetest/');
       es.onopen = function() {
         output("onopen");
       };
