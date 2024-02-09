@@ -151,8 +151,10 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         attr_reader :rpath
 
         def ws(&blk) #{{{
-          EM.run do
-            conn = Faye::WebSocket::Client.new((@base + @rpath).sub(/^http/,'ws'))
+          EM.run {
+            url = (@base + @rpath).sub(/^http/,'ws')
+            url = url.sub(/:\/\/localhost/,'://127.0.0.1')
+            conn = Faye::WebSocket::Client.new(url)
 
             if @options[:debug]
               conn.on :error do |e|
@@ -161,7 +163,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             end
 
             blk.call(conn)
-          end
+          }
         end #}}}
 
         def get(parameters = []) #{{{

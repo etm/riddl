@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:p="http://riddl.org/ns/common-patterns/properties/1.0">
   <xsl:output method="xml" indent="yes"/>
 
-  <xsl:template match="/p:properties">
+  <xsl:template match="/p:properties" priority="1">
     <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/properties/1.0">
 
       <start>

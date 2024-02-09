@@ -6,15 +6,16 @@ ep = Riddl::Client.interface('http://localhost:9292/',File.join(__dir__,'/descri
 test = ep.resource('/')
 
 test.ws do |conn|
-  conn.on :open do
-    ### called on connection
-    conn.send "Hello world"
-    conn.send "done"
-  end
 
   conn.on :error do |e|
     ### called on error
     puts "Got error: #{e}"
+  end
+
+  conn.on :open do
+    ### called on connection
+    conn.send "Hello world"
+    conn.send "done"
   end
 
   conn.on :message do |msg|
@@ -30,4 +31,5 @@ test.ws do |conn|
     puts "gone"
     EM::stop_event_loop
   end
+
 end

@@ -11,6 +11,6 @@
   </endpoints>
   <handlerwrapper>Test</handlerwrapper>
   <description>lala</description>
-  <state changed="2020-10-01T20:41:21+02:00">stopped</state>
+  <state changed="2024-02-09T15:08:51+01:00">running</state>
   <transformation>xxx</transformation>
 </properties>

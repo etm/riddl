@@ -203,6 +203,12 @@
   </define>
 
   <define name="riddl-resource-recursive-choice">
+  <!--
+    It was a choice when no resources inside recursive resources were allowed.
+    Beacause i doubted that worked.
+    But it works just fine.
+    Maybe its bad for facades but i cant find cases for that.
+    Please report them if you find them.
     <choice>
       <attribute name="recursive">
         <data type="boolean"/>
@@ -210,7 +216,13 @@
       <group>
         <ref name="riddl-resource-sub"/>
       </group>
-    </choice>
+    </choice-->
+    <optional>
+      <attribute name="recursive">
+        <data type="boolean"/>
+      </attribute>
+    </optional>
+    <ref name="riddl-resource-sub"/>
   </define>
 
   <define name="riddl-resource-dynamic">

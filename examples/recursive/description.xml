@@ -1,0 +1,20 @@
+<description datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns="http://riddl.org/ns/description/1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <message name="test">
+    <parameter name="test" mimetype="text/plain"/>
+  </message>
+  <message name="sub">
+    <parameter name="sub" mimetype="text/plain"/>
+  </message>
+
+  <resource>
+    <get out="test"/>
+    <resource relative="hello" recursive="true">
+      <get out="test"/>
+      <resource relative="sub">
+        <get out="test"/>
+      </resource>
+    </resource>
+  </resource>
+
+</description>
