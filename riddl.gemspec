@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "1.0.3"
+  s.version          = "1.0.4"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3.0"
   s.summary          = "Restful Interface Description and Declaration Language: tools and client/server libs"
@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'daemonite', '~>0.7', '>=0.7.0'
   s.add_runtime_dependency 'typhoeus', '~>1.3'
   s.add_runtime_dependency 'xml-smart', '>=0.4.3', '~>0'
-  s.add_runtime_dependency 'rdf-smart', '>=0.0.160', '~>0'
+  s.add_development_dependency 'rdf-smart', '>=0.0.160', '~>0'
   s.add_runtime_dependency 'rack', '~>2.2'
   s.add_runtime_dependency 'thin', '~>1.6'
   s.add_runtime_dependency 'eventmachine', '>= 1.0.0', '~>1.0'
