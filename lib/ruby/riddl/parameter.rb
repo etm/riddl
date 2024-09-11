@@ -47,7 +47,7 @@ module Riddl
           pname = @value.path
           @value.close
           @value = File.open(pname,'r')
-        end  
+        end
       end
     end
     class Tempfile < ::Tempfile
@@ -57,5 +57,5 @@ module Riddl
         @tmpfile = nil
       end
     end
-  end  
+  end
 end
