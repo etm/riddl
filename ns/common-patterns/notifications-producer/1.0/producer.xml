@@ -7,7 +7,7 @@
           <element name="topics">
             <zeroOrMore>
               <ref name="topic"/>
-            </zeroOrMore>  
+            </zeroOrMore>
           </element>
         </start>
 
@@ -15,7 +15,7 @@
           <element name="topic">
             <attribute name="id">
               <data type="string"/>
-            </attribute>  
+            </attribute>
             <zeroOrMore>
               <element>
                 <choice>
@@ -25,15 +25,15 @@
                 <data type="string">
                   <param name="pattern">[\w-_]+</param>
                 </data>
-              </element>  
+              </element>
             </zeroOrMore>
           </element>
-        </define>  
+        </define>
 
       </grammar>
     </parameter>
   </message>
-  
+
   <message name="subscriptions">
     <parameter name="subscriptions" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-producer/1.0">
@@ -43,11 +43,11 @@
               <choice>
                 <value>debug</value>
                 <value>production</value>
-              </choice>  
+              </choice>
             </attribute>
             <zeroOrMore>
               <ref name="subscription"/>
-            </zeroOrMore>  
+            </zeroOrMore>
           </element>
         </start>
 
@@ -60,14 +60,14 @@
               <attribute name="url">
                 <data type="string"/>
               </attribute>
-            </optional>  
+            </optional>
           </element>
         </define>
 
       </grammar>
     </parameter>
   </message>
-  
+
   <message name="subscription">
     <parameter name="subscription" mimetype="text/xml" handler="http://riddl.org/ns/handlers/relaxng">
       <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://riddl.org/ns/common-patterns/notifications-producer/1.0">
@@ -77,12 +77,12 @@
               <attribute name="url">
                 <data type="string"/>
               </attribute>
-            </optional>  
+            </optional>
             <oneOrMore>
               <element name="topic">
                 <attribute name="id">
                   <data type="string"/>
-                </attribute>  
+                </attribute>
                 <oneOrMore>
                   <element>
                     <choice>
@@ -92,7 +92,7 @@
                     <data type="string">
                       <param name="pattern">[\w_]+</param>
                     </data>
-                  </element>  
+                  </element>
                 </oneOrMore>
               </element>
             </oneOrMore>
@@ -103,9 +103,9 @@
     <optional>
       <parameter name="message-uid" type="string"/>
       <parameter name="fingerprint-with-producer-secret" type="string"/>
-    </optional>  
+    </optional>
   </message>
-  
+
   <message name="delete">
     <optional>
       <parameter name="message-uid" type="string"/>
@@ -116,7 +116,7 @@
     <optional>
       <parameter name="message-uid" type="string"/>
       <parameter name="fingerprint-with-producer-secret" type="string"/>
-    </optional>  
+    </optional>
   </message>
 
   <message name="subscribe">
@@ -124,8 +124,8 @@
       <parameter name="url" type="string"/>
       <optional>
         <parameter name="onbehalf" type="string"/>
-      </optional>  
-    </optional>  
+      </optional>
+    </optional>
     <oneOrMore>
       <parameter name="topic" type="string"/>
       <choice>
@@ -137,7 +137,7 @@
         </parameter>
       </choice>
     </oneOrMore>
-  </message>  
+  </message>
   <message name="acknowledgment">
     <parameter name="key" type="string"/>
     <parameter name="producer-secret" type="string"/>
@@ -147,7 +147,7 @@
   <message name="details">
     <optional>
       <parameter name="url" type="string"/>
-    </optional>  
+    </optional>
     <oneOrMore>
       <parameter name="topic" type="string"/>
       <choice>
@@ -162,7 +162,7 @@
     <optional>
       <parameter name="message-uid" type="string"/>
       <parameter name="fingerprint-with-producer-secret" type="string"/>
-    </optional>  
+    </optional>
   </message>
 
   <message name="overview">
@@ -201,6 +201,6 @@
         </resource>
       </resource>
     </resource>
-  </resource>  
+  </resource>
 
 </description>

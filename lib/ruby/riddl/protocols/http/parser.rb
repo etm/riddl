@@ -54,7 +54,14 @@ module Riddl
           end
           body.rewind if body.respond_to?(:binmode)
 
-          add_to_params(name,body,filename,ctype,nil) if body.length > 0
+          if body.length > 0
+            add_to_params(name,body,filename,ctype,nil)
+          else
+            if body.respond_to?(:binmode)
+              body.close
+              body.unlink
+            end
+          end
           #}}}
         end
         private :parse_content
