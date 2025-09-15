@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.homepage         = 'http://github.com/etm/riddl/'
 
   s.metadata         = {
-    'documentation_uri' => 'https://gemdocs.org/gems/riddl/' + s.version + '/'
+    'documentation_uri' => 'https://gemdocs.org/gems/riddl/' + s.version.to_s + '/'
   }
   s.required_ruby_version = '>=2.2.0'
 
