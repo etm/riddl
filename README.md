@@ -3,10 +3,10 @@ Please read the file COPYING.
 
 For all running services (unless they are started in production mode):
 
-* if you add ?riddl-description to the root resource you get you get the full
-service description
-* if you add ?riddl-resource-description to any resource,
-you get the methods, parameters, and sub-resources
+* if you add ***?riddl-description*** to the root resource you get you get the full
+service description: [Example](https://cpee.org/flow/engine/?riddl-description)
+* if you add ***?riddl-resource-description*** to any resource,
+you get the methods, parameters, and sub-resources: [Example](https://cpee.org/flow/engine/1/properties/?riddl-resource-description)
 
 Please read:
 
