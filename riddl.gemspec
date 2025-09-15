@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "riddl"
-  s.version          = "1.0.8"
+  s.version          = "1.0.9"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3.0-or-later"
   s.summary          = "Restful Interface Description and Declaration Language: tools and client/server libs"
@@ -20,6 +20,9 @@ Gem::Specification.new do |s|
   s.email            = 'juergen.mangler@gmail.com'
   s.homepage         = 'http://github.com/etm/riddl/'
 
+  s.metadata         = {
+    'documentation_uri' => 'https://gemdocs.org/gems/riddl/' + s.version + '/'
+  }
   s.required_ruby_version = '>=2.2.0'
 
   s.add_runtime_dependency 'daemonite', '~>0.7', '>=0.7.0'
