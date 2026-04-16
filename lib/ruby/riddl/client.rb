@@ -401,7 +401,7 @@ unless Module.constants.include?('CLIENT_INCLUDED')
               response_headers['RIDDL_TYPE']
             ).params
             bs.close
-            bs.unlink
+            bs.unlink rescue nil
 
             return res.code.to_i, response, response_headers
             #}}}
