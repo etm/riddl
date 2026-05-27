@@ -66,7 +66,9 @@ unless Module.constants.include?('CLIENT_INCLUDED')
         (?:\.(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)*
 
         # TLD identifier
-        (?:\.(?:[a-z\u00a1-\uffff]{2,}))
+        # (?:\.(?:[a-z\u00a1-\uffff]{2,}))
+        ### we have a project partner that insists on a 1 character internal TLD. Fuck me.
+        (?:\.(?:[a-z\u00a1-\uffff]{1,}))
       |
         localhost
       )
