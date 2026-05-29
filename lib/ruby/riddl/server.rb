@@ -58,7 +58,8 @@ module Riddl
             @riddl_opts[:port] = p.to_i
             @riddl_opts[:pidfile] = @riddl_opts[:pidfile].gsub(/\.pid/,'') + '-' + @riddl_opts[:port].to_s + '.pid'
           }],
-          ["--http-only", "-s", "Only http, no other protocols.", ->(){ @riddl_opts[:http_only] = true }]
+          ["--http-only", "-s", "Only http, no other protocols.", ->(){ @riddl_opts[:http_only] = true }],
+          ["--override-option [OPTION]", "-o [OPTION]", "Override option, i.e., name=value", ->(val){ k,v = val.split('=',2); @riddl_opts[k.to_sym] = v }]
         ],
         :runtime_cmds => [],
         :runtime_proc => Proc.new { |opts|
