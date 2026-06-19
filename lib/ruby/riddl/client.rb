@@ -353,12 +353,12 @@ unless Module.constants.include?('CLIENT_INCLUDED')
             path += "?#{qs}" unless qs == ''
             uri = url.scheme + '://' + url.host + ':' + url.port.to_s + path
 
-            tmp = Protocols::HTTP::Generator.new(parameters,headers).generate(:input)
+            parts = Protocols::HTTP::Generator.new(parameters,headers).generate(:input)
 
             opts = {
               :method         => riddl_method,
               :headers        => headers,
-              :body           => tmp.read,
+              :body           => Protocols::HTTP::Generator.merge(parts),
               :ssl_verifypeer => false
               # :followlocation => true
             }
@@ -428,9 +428,10 @@ unless Module.constants.include?('CLIENT_INCLUDED')
           path = (path.strip == '' ? '/' : path)
           path += "?#{qs}" unless qs == ''
           super method, true, true, path, headers
-          tmp = Protocols::HTTP::Generator.new(parameters,self).generate(:input)
-          self.content_length = tmp.size
-          self.body_stream = tmp
+          parts = Protocols::HTTP::Generator.new(parameters,self).generate(:input)
+          merged = Protocols::HTTP::Generator.merge(parts)
+          self.content_length = merged.bytesize
+          self.body_stream = StringIO.new(merged)
         end
 
         def supply_default_content_type

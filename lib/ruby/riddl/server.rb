@@ -322,13 +322,16 @@ module Riddl
         @riddl_status = 404 # client requests wrong path
       end
       if @riddl_exe
-        @riddl_res.write Protocols::HTTP::Generator.new(@riddl_exe.response,@riddl_res).generate.read
+        parts = Protocols::HTTP::Generator.new(@riddl_exe.response,@riddl_res).generate
         @riddl_exe.headers.each do |n,h|
           @riddl_res[n] = h
         end
+        @riddl_res.status = @riddl_status
+        [@riddl_status, @riddl_res.headers, Protocols::HTTP::StreamingBody.new(parts)]
+      else
+        @riddl_res.status = @riddl_status
+        @riddl_res.finish
       end
-      @riddl_res.status = @riddl_status
-      @riddl_res.finish
     end #}}}
 
     def process_out(pout)# {{{
