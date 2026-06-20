@@ -121,13 +121,13 @@ module Riddl
                              'RIDDL-TYPE: simple' + EOL +
                              "Content-Disposition: form-data; name=\"#{r.name}\"" + EOL +
                              EOL +
-                             r.value +
+                             r.value.to_s +
                              EOL
                   when Riddl::Parameter::Complex
                     parts << '--' +  BOUNDARY + EOL +
                              'RIDDL-TYPE: complex' + EOL +
                              "Content-Disposition: form-data; name=\"#{r.name}\"" +
-                                r.filename.nil? ? EOL : "; filename=\"#{r.filename}\"" + EOL +
+                                (r.filename.nil? ? EOL : "; filename=\"#{r.filename}\"" + EOL) +
                              'Content-Transfer-Encoding: binary' + EOL +
                              'Content-Type: ' + r.mimetype + r.mimextra + EOL +
                              EOL
