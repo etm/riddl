@@ -21,8 +21,6 @@ module Riddl
 
         def parse_content(input,ctype,content_length,content_disposition,content_id,riddl_type)
           #{{{
-          # fixing for chunked?
-
           ctype = nil if riddl_type == 'simple'
           filename = content_disposition[/ filename="?([^\";]*)"?/ni, 1]
           name = content_disposition[/ name="?([^\";]*)"?/ni, 1] || content_id
@@ -35,6 +33,8 @@ module Riddl
           end
 
           if content_length == 0
+            # should never happen normally, but leave it in, as sombody might
+            # decide to use parse_content independently
             bufsize = 16384
             until input.eof?
               c = input.read(bufsize)
@@ -176,6 +176,9 @@ module Riddl
             # Handles exceptions raised by input streams that cannot be rewound
             # such as when using plain CGI under Apache
           end
+
+          # fixing for chunked
+          content_length = content_length && content_length.to_i > 0 ? content_length.to_i : input.size
 
           media_type = content_type && content_type.split(/\s*[;,]\s*/, 2).first.downcase
           @params = Riddl::Parameter::Array.new
