@@ -17,7 +17,8 @@ module Riddl
           @parts.each do |part|
             if part.respond_to?(:read)
               part.rewind if part.respond_to?(:rewind)
-              yield chunk while (chunk = part.read(CHUNK_SIZE))
+              while chunk = part.read(CHUNK_SIZE)
+              yield chunk
             else
               yield part.to_s
             end
