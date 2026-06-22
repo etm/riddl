@@ -18,7 +18,8 @@ module Riddl
             if part.respond_to?(:read)
               part.rewind if part.respond_to?(:rewind)
               while chunk = part.read(CHUNK_SIZE)
-              yield chunk
+                yield chunk
+              end
             else
               yield part.to_s
             end
