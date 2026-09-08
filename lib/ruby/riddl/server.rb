@@ -53,6 +53,7 @@ module Riddl
         :secure       => false,
         :verbose      => false,
         :http_only    => false,
+        :server       => 'thin',
         :runtime_opts => [
           ["--port [PORT]", "-p [PORT]", "Specify http port.", ->(p){
             @riddl_opts[:port] = p.to_i
@@ -102,12 +103,16 @@ module Riddl
         app.use Rack::CommonLogger, @riddl_logger
       end
 
+      if @riddl_opts[:secure] && @riddl_opts[:server].to_s != 'thin'
+        raise NotImplementedError, "secure (TLS) mode is not yet supported with the '#{@riddl_opts[:server]}' backend, only 'thin'"
+      end
+
       server = Rack::Server.new(
         :app => app,
         :Host => @riddl_opts[:bind],
         :Port => @riddl_opts[:port],
         :environment => @riddl_opts[:verbose] ? 'deployment' : 'none',
-        :server => 'thin',
+        :server => @riddl_opts[:server],
         :signals => false
       )
       @riddl_opts[:startup].call if @riddl_opts[:startup]
@@ -115,46 +120,76 @@ module Riddl
         @riddl_opts[:custom_protocol] = @riddl_opts[:custom_protocol].new(@riddl_opts)
         puts @riddl_opts[:custom_protocol].support if @riddl_opts[:custom_protocol].support
       end
-      begin
-        EM.run do
-          if @riddl_opts[:secure]
-            server.start do |srv|
-              srv.ssl = true
-              srv.ssl_options = @riddl_opts[:secure_options]
-            end
-          else
-            server.start
-          end
 
-          if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
-            @riddl_opts[:custom_protocol].start
-          end
-
-          [:INT, :TERM].each do |signal|
-            Signal.trap(signal) do
-              if @riddl_opts[:cleanup]
-                @riddl_opts[:cleanup].call
+      if @riddl_opts[:server].to_s == 'thin'
+        begin
+          EM.run do
+            if @riddl_opts[:secure]
+              server.start do |srv|
+                srv.ssl = true
+                srv.ssl_options = @riddl_opts[:secure_options]
               end
-              EM.stop
+            else
+              server.start
             end
-          end
-          [:HUP].each do |signal|
-            Signal.trap(signal) do
-              EM.stop
-            end
-          end
 
-          if @riddl_opts[:parallel]
-            EM.defer do
-              @riddl_opts[:parallel].call
+            if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
+              @riddl_opts[:custom_protocol].start
+            end
+
+            [:INT, :TERM].each do |signal|
+              Signal.trap(signal) do
+                if @riddl_opts[:cleanup]
+                  @riddl_opts[:cleanup].call
+                end
+                EM.stop
+              end
+            end
+            [:HUP].each do |signal|
+              Signal.trap(signal) do
+                EM.stop
+              end
+            end
+
+            if @riddl_opts[:parallel]
+              EM.defer do
+                @riddl_opts[:parallel].call
+              end
             end
           end
+        rescue => e
+          if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
+            @riddl_opts[:custom_protocol].error_handling(e)
+          end
+          puts "Server (#{@riddl_opts[:cmdl_info]}) stopped due to connection error (PID:#{Process.pid})"
         end
-      rescue => e
+      else # other servers like PUMA
         if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
-          @riddl_opts[:custom_protocol].error_handling(e)
+          @riddl_opts[:custom_protocol].start
         end
-        puts "Server (#{@riddl_opts[:cmdl_info]}) stopped due to connection error (PID:#{Process.pid})"
+
+        [:INT, :TERM].each do |signal|
+          Signal.trap(signal) do
+            @riddl_opts[:cleanup].call if @riddl_opts[:cleanup]
+            exit
+          end
+        end
+        [:HUP].each do |signal|
+          Signal.trap(signal) do
+            exit
+          end
+        end
+
+        Thread.new { @riddl_opts[:parallel].call } if @riddl_opts[:parallel]
+
+        begin
+          server.start
+        rescue => e
+          if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
+            @riddl_opts[:custom_protocol].error_handling(e)
+          end
+          puts "Server (#{@riddl_opts[:cmdl_info]}) stopped due to connection error (PID:#{Process.pid})"
+        end
       end
     end #}}}
 
@@ -237,6 +272,7 @@ module Riddl
       @riddl_log = @riddl_logger || @riddl_env['rack.errors']
       @riddl_res = Rack::Response.new
       @riddl_status = 404
+      @riddl_async_response = nil
 
       @riddl_pinfo = Riddl::Protocols::Utils::unescape(@riddl_env["PATH_INFO"].gsub(/\/+/,'/'))
       @riddl_matching_path = @riddl_paths.find{ |e| @riddl_pinfo.match(e[1]).to_s.length == @riddl_pinfo.length }
@@ -313,7 +349,7 @@ module Riddl
               end
             end
           end
-          throw :async
+          throw :async if @riddl_opts[:server].to_s == 'thin'
         else
           __call
         end
@@ -321,6 +357,7 @@ module Riddl
         @riddl_log.write "404: this resource for sure does not exist.\n"
         @riddl_status = 404 # client requests wrong path
       end
+      return @riddl_async_response if @riddl_async_response
       if @riddl_exe
         parts = Protocols::HTTP::Generator.new(@riddl_exe.response,@riddl_res).generate
         @riddl_exe.headers.each do |n,h|
@@ -382,8 +419,9 @@ module Riddl
           @riddl_headers.map { |key, value|  [key.downcase.gsub('_','-'), value] }
         ]
         w = what.new(@riddl_info.merge!(:a => args, :match => matching_path))
-        w.io = Riddl::Protocols::SSE.new(w, @riddl_env)
-        w.io.dispatch(data, @riddl_cross_site_xhr)
+        sse = @riddl_opts[:server].to_s == 'thin' ? Riddl::Protocols::SSE::Thin : Riddl::Protocols::SSE::Generic
+        w.io = sse.new(w, @riddl_env)
+        @riddl_async_response = w.io.dispatch(data, @riddl_cross_site_xhr)
       end
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
         data = Riddl::Protocols::WebSocket::ParserData.new

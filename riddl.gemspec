@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rdf-smart', '>=0.0.160', '~>0'
   s.add_runtime_dependency 'rack', '~>2.2'
   s.add_runtime_dependency 'thin', '~>1.6'
+  s.add_runtime_dependency 'puma', '>=6.0'
   s.add_runtime_dependency 'eventmachine', '>= 1.0.0', '~>1.0'
   s.add_runtime_dependency 'em-websocket', '>= 0.5.2', '~>0'
   s.add_runtime_dependency 'faye-websocket', '>= 0.1', '~>0'
