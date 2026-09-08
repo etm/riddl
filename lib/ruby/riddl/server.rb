@@ -170,22 +170,12 @@ module Riddl
           @riddl_opts[:custom_protocol].start
         end
 
-        [:INT, :TERM].each do |signal|
-          Signal.trap(signal) do
-            @riddl_opts[:cleanup].call if @riddl_opts[:cleanup]
-            exit
-          end
-        end
-        [:HUP].each do |signal|
-          Signal.trap(signal) do
-            exit
-          end
-        end
-
         Thread.new { @riddl_opts[:parallel].call } if @riddl_opts[:parallel]
 
         begin
-          server.start
+          server.start do |launcher|
+            launcher.events.after_stopped { @riddl_opts[:cleanup].call if @riddl_opts[:cleanup] }
+          end
         rescue => e
           if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
             @riddl_opts[:custom_protocol].error_handling(e)
