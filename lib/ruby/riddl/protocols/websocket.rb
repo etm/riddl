@@ -1,109 +1,44 @@
-gem 'em-websocket', '>= 0.4.0'
-require 'em-websocket'
-require 'thin'
-
-module Thin #{{{
-  class Connection
-    attr_accessor :websocket
-    def websocket?
-      !self.websocket.nil?
-    end
-
-    def pre_process_with_websocket
-      @request.env['thin.connection'] = self
-      pre_process_without_websocket
-    end
-    alias :pre_process_without_websocket :pre_process
-    alias :pre_process :pre_process_with_websocket
-
-    def receive_data_with_websocket(data)
-      if self.websocket?
-        self.websocket.receive_data(data)
-      else
-        receive_data_without_websocket(data)
-      end
-    end
-    alias :receive_data_without_websocket :receive_data
-    alias :receive_data :receive_data_with_websocket
-
-    def unbind_with_websocket
-      if self.websocket?
-        self.websocket.unbind
-      else
-        unbind_without_websocket
-      end
-    end
-    alias :unbind_without_websocket :unbind
-    alias :unbind :unbind_with_websocket
-  end
-end   #}}}
-
-module EventMachine
-  module WebSocket
-    class Handshake
-      def receive_data(data)
-        data.request_url = Riddl::Protocols::Utils::escape(data.request_url)
-        @parser = data
-        @headers = data.headers
-        process(@headers, data.body)
-      end
-    end
-  end
-end
+require 'faye/websocket'
+Faye::WebSocket.load_adapter('thin')
 
 module Riddl
   module Protocols
-    class WebSocket < ::EventMachine::WebSocket::Connection
+    class WebSocket
       class Error < RuntimeError; end
 
-      class ParserData
-        attr_accessor :headers, :request_path, :query_string, :http_method, :body, :request_url
-        def match(what)
-          @body =~ what
-        end
-        def upgrade?
-          true
-        end
-      end
-
-      def self.new(*args)
-        instance = allocate
-        instance.__send__(:initialize, *args)
-        instance
-      end
-
-      def send_data(data)
-        EM.next_tick do
-          @socket.send_data(data) unless closed?
-        end
-      end
-
-      def close_connection(*args)
-        EM.next_tick do
-          unless closed?
-            @socket.close_connection(*args)
-            trigger_on_close
-          end
-        end
-      end
-
-      def trigger_on_message(msg);    @app.onmessage(msg);                        end
-      def trigger_on_open(handshake); @closed = false; @app.onopen;               end
-      def trigger_on_close;           @closed = true;  @app.onclose;              end
-      def trigger_on_error(error);    @closed = true;  @app.onerror(error); true; end
-
-      def initialize(app, socket)
+      def initialize(app, env)
         @app = app
-        @socket = socket
-        @ssl = socket.backend.respond_to?(:ssl?) && socket.backend.ssl?
         @closed = true
-        socket.websocket = self
-        socket.comm_inactivity_timeout = 0
+        @socket = Faye::WebSocket.new(env)
+
+        @socket.on(:open)    { trigger_on_open }
+        @socket.on(:message) { |event| trigger_on_message(event.data) }
+        @socket.on(:close)   { trigger_on_close }
+        @socket.on(:error)   { |event| trigger_on_error(event.message) }
+      end
+
+      def dispatch
+        @socket.rack_response
+      end
+
+      def send(data)
+        EM.next_tick { @socket.send(data) unless closed? }
+      end
+
+      def close_connection
+        EM.next_tick { @socket.close unless closed? }
       end
 
       def closed?
         @closed
       end
+
+      private
+
+      def trigger_on_open;       @closed = false; @app.onopen;    end
+      def trigger_on_message(m); @app.onmessage(m);                end
+      def trigger_on_close;      @closed = true;  @app.onclose;    end
+      def trigger_on_error(msg); @app.onerror(msg);                end
     end
   end
 end

@@ -164,6 +164,8 @@ module Riddl
           puts "Server (#{@riddl_opts[:cmdl_info]}) stopped due to connection error (PID:#{Process.pid})"
         end
       else # other servers like PUMA
+        Faye::WebSocket.ensure_reactor_running
+
         if @riddl_opts[:custom_protocol] && !@riddl_opts[:http_only]
           @riddl_opts[:custom_protocol].start
         end
@@ -330,7 +332,7 @@ module Riddl
               end
             end
           end
-          throw :async
+          throw :async if @riddl_opts[:server].to_s == 'thin'
         elsif @riddl_info[:env]['HTTP_ACCEPT'] == 'text/event-stream'
           @riddl_info[:m] = @riddl_method = 'sse'
           @riddl_message = @riddl.io_messages(@riddl_matching_path[0],'sse',@riddl_parameters,@riddl_headers)
@@ -424,18 +426,9 @@ module Riddl
         @riddl_async_response = w.io.dispatch(data, @riddl_cross_site_xhr)
       end
       if what.class == Class && what.superclass == Riddl::WebSocketImplementation
-        data = Riddl::Protocols::WebSocket::ParserData.new
-        data.request_path = @riddl_pinfo
-        data.request_url = @riddl_pinfo + '?' + @riddl_query_string
-        data.query_string = @riddl_query_string
-        data.http_method = @riddl_env['REQUEST_METHOD']
-        data.body = @riddl_env['rack.input'].read
-        data.headers = Hash[
-          @riddl_headers.map { |key, value|  [key.downcase.gsub('_','-'), value] }
-        ]
-        w = what.new(@riddl_info.merge!(:a => args, :version => @riddl_env['HTTP_SEC_WEBSOCKET_VERSION'], :match => matching_path))
-        w.io = Riddl::Protocols::WebSocket.new(w, @riddl_env['thin.connection'])
-        w.io.dispatch(data)
+        w = what.new(@riddl_info.merge!(:a => args, :match => matching_path))
+        w.io = Riddl::Protocols::WebSocket.new(w, @riddl_env)
+        @riddl_async_response = w.io.dispatch
       end
       if what.class == Class && what.superclass == Riddl::Implementation
         w = what.new(@riddl_info.merge!(:a => args, :match => matching_path))

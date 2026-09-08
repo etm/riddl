@@ -2,7 +2,6 @@ require File.expand_path(File.dirname(__FILE__) + '/smartrunner.rb')
 require File.expand_path(File.dirname(__FILE__) + '/../lib/ruby/riddl/client')
 require 'net/http'
 require 'timeout'
-require 'pp'
 
 module SSEScenario
   def test_sse
@@ -56,13 +55,13 @@ module SSEScenario
   end
 end
 
-class TestSSE < Minitest::Test
+class TestSSEThin < Minitest::Test
   include ServerCase
   include SSEScenario
 
   SERVER = [
     TestServerInfo.new(
-      File.expand_path(File.dirname(__FILE__) + '/../examples/sse/server.rb'),
+      File.expand_path(File.dirname(__FILE__) + '/../examples/sse/server.rb') + ' -o server=thin',
       File.expand_path(File.dirname(__FILE__) + '/../examples/sse/description.xml')
     )
   ]

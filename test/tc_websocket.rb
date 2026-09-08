@@ -1,21 +1,11 @@
 require File.expand_path(File.dirname(__FILE__) + '/smartrunner.rb')
 require File.expand_path(File.dirname(__FILE__) + '/../lib/ruby/riddl/client')
 require 'xml/smart'
-require 'pp'
 
-class TestWebsocket <  Minitest::Test
-  include ServerCase
-
-  SERVER = [
-    TestServerInfo.new(
-      File.expand_path(File.dirname(__FILE__) + '/../examples/websocket/server.rb'),
-      File.expand_path(File.dirname(__FILE__) + '/../examples/websocket/description.xml')
-    )
-  ]
-  NORUN = false
-
+module WebSocketScenario
   def test_websocket
-    ep = Riddl::Client.interface(SERVER[0].url,SERVER[0].schema)
+    info = self.class::SERVER[0]
+    ep = Riddl::Client.interface(info.url, info.schema)
 
     test = ep.resource('/')
     status, res = test.get
@@ -60,4 +50,30 @@ class TestWebsocket <  Minitest::Test
     end
 
   end
+end
+
+class TestWebsocketThin < Minitest::Test
+  include ServerCase
+  include WebSocketScenario
+
+  SERVER = [
+    TestServerInfo.new(
+      File.expand_path(File.dirname(__FILE__) + '/../examples/websocket/server.rb') + ' -o server=thin',
+      File.expand_path(File.dirname(__FILE__) + '/../examples/websocket/description.xml')
+    )
+  ]
+  NORUN = false
+end
+
+class TestWebsocketPuma < Minitest::Test
+  include ServerCase
+  include WebSocketScenario
+
+  SERVER = [
+    TestServerInfo.new(
+      File.expand_path(File.dirname(__FILE__) + '/../examples/websocket/server.rb') + ' -o server=puma',
+      File.expand_path(File.dirname(__FILE__) + '/../examples/websocket/description.xml')
+    )
+  ]
+  NORUN = false
 end
