@@ -36,6 +36,7 @@ end
 
 Riddl::Server.new(File.dirname(__FILE__) + '/description.xml', :port => 9001, :bind => '::') do
   accessible_description true
+  p @riddl_logger
 
   on resource do
     run Riddl::Utils::ERBServe, "static/info.txt"  if get

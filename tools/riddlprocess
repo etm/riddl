@@ -27,7 +27,12 @@ if ARGV.length == 0 || !File.exist?(ARGV[0]) || dowhat.nil?
 end
 fname = ARGV[0]
 
-riddl = Riddl::Wrapper.new(fname)
+riddl = begin
+  Riddl::Wrapper.new(fname)
+rescue Riddl::SpecificationError => e
+  puts e.message
+  exit 1
+end
 
 unless riddl.declaration?
   puts 'Not a RIDDL declaration.'

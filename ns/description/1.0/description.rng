@@ -14,21 +14,23 @@
       <data type="anyURI"/>
     </attribute>
     <ref name="riddl-description-other-atts"/>
-    <zeroOrMore>
-      <choice>
-        <element name="message">
-          <ref name="riddl-description-other-atts"/>
-          <ref name="riddl-message"/>
-        </element>
-        <element name="transformation">
-          <ref name="riddl-description-other-atts"/>
-          <ref name="riddl-transformation"/>
-        </element>
-      </choice>
-    </zeroOrMore>
-    <element name="resource">
-      <ref name="riddl-resource-dynamic"/>
-    </element>
+    <interleave>
+      <zeroOrMore>
+        <choice>
+          <element name="message">
+            <ref name="riddl-description-other-atts"/>
+            <ref name="riddl-message"/>
+          </element>
+          <element name="transformation">
+            <ref name="riddl-description-other-atts"/>
+            <ref name="riddl-transformation"/>
+          </element>
+        </choice>
+      </zeroOrMore>
+      <element name="resource">
+        <ref name="riddl-resource-dynamic"/>
+      </element>
+    </interleave>
   </define>
 
   <define name="riddl-message">
@@ -199,7 +201,6 @@
         <data type="anyURI"/>
       </attribute>
     </optional>
-    <ref name="riddl-description-others"/>
   </define>
 
   <define name="riddl-resource-recursive-choice">
@@ -222,21 +223,28 @@
         <data type="boolean"/>
       </attribute>
     </optional>
-    <ref name="riddl-resource-sub"/>
+  </define>
+
+  <define name="riddl-resource-body">
+    <interleave>
+      <ref name="riddl-description-others"/>
+      <ref name="riddl-resource-content"/>
+      <ref name="riddl-resource-sub"/>
+    </interleave>
   </define>
 
   <define name="riddl-resource-dynamic">
     <ref name="riddl-resource-attributes"/>
-    <ref name="riddl-resource-content"/>
     <ref name="riddl-resource-recursive-choice"/>
+    <ref name="riddl-resource-body"/>
   </define>
   <define name="riddl-resource-named">
     <ref name="riddl-resource-attributes"/>
     <attribute name="relative">
       <ref name="riddl-datatype-relpath"/>
     </attribute>
-    <ref name="riddl-resource-content"/>
     <ref name="riddl-resource-recursive-choice"/>
+    <ref name="riddl-resource-body"/>
   </define>
 
   <define name="riddl-resource-sub">

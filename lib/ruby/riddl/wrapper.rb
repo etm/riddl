@@ -90,7 +90,8 @@ module Riddl
             xml = Typhoeus.get(name, ssl_verifypeer: false).response_body
           end
           @doc = XML::Smart.string(xml)
-        rescue
+        rescue => e
+          raise SpecificationError, "#{name.inspect} is not well-formed XML: #{e.message}" if e.is_a?(Nokogiri::XML::SyntaxError) && !xml.to_s.strip.empty?
           begin
             @doc = XML::Smart.string(name)
           rescue
@@ -99,11 +100,12 @@ module Riddl
         end
       end
 
-      @doc.register_namespace 'x', XINCLUDE
-      @doc.find('//x:include/@href').each do |i|
-        if i.value =~ /^http:\/\/(www\.)?riddl\.org(\/ns\/common-patterns\/.*)/
-          t = File.expand_path(File.dirname(__FILE__)) + $2
-          i.value = t if File.exist?(t)
+      if @doc.register_namespace 'x', XINCLUDE
+        @doc.find('//x:include/@href').each do |i|
+          if i.value =~ /^http:\/\/(www\.)?riddl\.org(\/ns\/common-patterns\/.*)/
+            t = File.expand_path(File.dirname(__FILE__)) + $2
+            i.value = t if File.exist?(t)
+          end
         end
       end
       fpath.nil? ? @doc.xinclude! : @doc.xinclude!(fpath)
@@ -119,13 +121,19 @@ module Riddl
         rrds = XML::Smart::open_unprotected(RIDDL_DESCRIPTION_RESOURCE_SHOW)
         rds.register_namespace('des','http://riddl.org/ns/description/1.0')
         rrds.register_namespace('des','http://riddl.org/ns/description/1.0')
-        @doc.root.prepend rds.find('/des:description/des:message')
-        @doc.root.prepend rrds.find('/des:description/des:message')
+        prepend = lambda do |node,what,allowed|
+          first = node.find(allowed.map{ |e| "des:#{e}" }.join('|')).first
+          first ? first.add_before(what) : node.add(what)
+        end
+        des_allowed = %w{message transformation resource}
+        res_allowed = %w{post get put patch delete request websocket sse resource}
+        prepend.call @doc.root, rds.find('/des:description/des:message'), des_allowed
+        prepend.call @doc.root, rrds.find('/des:description/des:message'), des_allowed
         @doc.find("/des:description/des:resource").each do |r|
-          r.prepend rds.find('/des:description/des:resource/*')
+          prepend.call r, rds.find('/des:description/des:resource/*'), res_allowed
         end
         @doc.find("/des:description//des:resource").each do |r|
-          r.prepend rrds.find('/des:description/des:resource/*')
+          prepend.call r, rrds.find('/des:description/des:resource/*'), res_allowed
         end
       end
       if @is_declaration  && get_description
@@ -247,13 +255,13 @@ module Riddl
     def validate!
       #{{{
       if @is_description
-        xval = @doc.validate_against(XML::Smart.open_unprotected(DESCRIPTION_FILE))
+        xval = @doc.validate_against(XML::Smart.open_unprotected(DESCRIPTION_FILE)) { |err| puts err }
         xchk = ResourceChecker.new(@doc).check
         puts xchk.join("\n") unless xchk.empty?
         return xval && xchk.empty?
       end
       if @is_declaration
-        xval = @doc.validate_against(XML::Smart.open_unprotected(DECLARATION_FILE))
+        xval = @doc.validate_against(XML::Smart.open_unprotected(DECLARATION_FILE)) { |err| puts err }
         xchk = LayerChecker.new(@doc).check
         puts xchk.join("\n") unless xchk.empty?
         return xval && xchk.empty?
