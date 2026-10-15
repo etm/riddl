@@ -299,7 +299,7 @@ module Riddl
       tmp = @description.paths if @is_description
       tmp = @declaration.paths if @is_declaration
       tmp.map do |t|
-        [t[0],Regexp.new("^" + t[1].gsub(/\{\}/,"[^/]+") + (t[2] ? '\/?' : '\/?$'))]
+        [t[0],Regexp.new("^" + t[1].gsub(/\{\}/,'(?!(?:\.|%2[eE])(?:\.|%2[eE])?(?:/|$))[^/]+') + (t[2] ? '\/?' : '\/?$'))]
       end
       #}}}
     end
