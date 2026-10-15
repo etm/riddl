@@ -36,11 +36,11 @@ end
 
 unless riddl.declaration?
   puts 'Not a RIDDL declaration.'
-  exit
+  exit 1
 end
 unless riddl.validate!
   puts "Does not conform to specification."
-  exit
+  exit 1
 end
 
 d = riddl.declaration
