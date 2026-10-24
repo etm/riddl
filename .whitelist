@@ -1,7 +1,7 @@
 .gitignore
 .stats.rb
 AUTHORS
-COPYING
+LICENSE
 INSTALL
 NOTES
 README

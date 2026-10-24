@@ -1,5 +1,5 @@
 All code in this package is provided under the LGPL license.
-Please read the file COPYING.
+Please read the file LICENSE.
 
 For all running services (unless they are started in production mode):
 
